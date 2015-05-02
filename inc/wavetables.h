@@ -4,7 +4,7 @@
 
 #define WAVTABLE_LENGTH_SAMPLES 8192
 
-#define WAVTABLE_NUM_PARTIALS   4
+#define WAVTABLE_NUM_PARTIALS   8
 
 extern MMWavTab WaveTable;
 

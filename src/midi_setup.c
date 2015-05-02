@@ -7,6 +7,7 @@ int midi_setup(void *data)
     midi_hw_setup_t mhs;
     mhs.device_in = (char*)data;
     mhs.verbose = 0;
+    MIDI_Router_Standard_init(&midiRouter);
     return(midi_hw_setup(&mhs));
 }
 

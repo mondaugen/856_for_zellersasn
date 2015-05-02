@@ -1,4 +1,5 @@
 #include "audio_setup.h" 
+#include "midi_setup.h" 
 #include "signal_chain.h" 
 
 #define NCHANS 2 
@@ -25,6 +26,8 @@ int audio_setup(void *data)
 
 void audio_hw_io(audio_hw_io_t *params)
 {
+    /* Process MIDI once every audioblock */
+    midi_hw_process_input(NULL);
     MMSigProc_tick(&sigChain);
     int n, c;
     for (n = 0; n < params->length; n++) {

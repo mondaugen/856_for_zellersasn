@@ -33,10 +33,10 @@ int main (int argc, char **argv)
         THROW_ERR("Error setting up MIDI.");
     }
     signal_chain_setup();
+    poly_management_setup();
+    synth_control_setup();
     audio_start();
-    play_note(60);
     while(1) {
-        midi_hw_process_input(NULL);
     }
     return(0);
 }
