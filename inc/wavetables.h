@@ -4,7 +4,7 @@
 #include "mm_wavtab.h" 
 
 #define WAVTABLE_LENGTH_SAMPLES 8192
-#define SOUND_SAMPLE_LENGTH_SECONDS    2.
+#define SOUND_SAMPLE_LENGTH_SECONDS    10.
 
 #define WAVTABLE_NUM_PARTIALS   8
 
