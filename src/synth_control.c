@@ -23,7 +23,7 @@ void MIDI_synth_note_on_do(void *data, MIDIMsg *msg)
     params->attackTime = attackTime;
     /* this is the time a note that is stolen will take to decay */
     params->releaseTime = shortReleaseTime; 
-    params->samples = &WaveTable;
+    params->samples = theSound;
     params->loop = 1;
 /*     params->rate = playbackRate; */
     params->rateSource = MMPvtespRateSource_NOTE;
