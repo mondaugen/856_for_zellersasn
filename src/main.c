@@ -35,9 +35,9 @@ int main (int argc, char **argv)
     }
     signal_chain_setup();
     poly_management_setup();
-//    synth_control_setup();
+    synth_control_setup();
     audio_start();
-    play_note(60);
+//    play_note(60);
     while(1) {
     }
     return(0);

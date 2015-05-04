@@ -16,7 +16,7 @@ void MIDI_synth_note_on_do(void *data, MIDIMsg *msg)
     MMPvtespParams *params = MMPvtespParams_new();
     ((MMPolyVoiceParams*)params)->steal = NOTE_STEALING;
     params->paramType = MMPvtespParamType_NOTEON;
-    params->note = (MMSample)msg->data[1];
+    params->note = (MMSample)msg->data[1] + 24;
     params->amplitude = (MMSample)msg->data[2] / 127.;
     params->interpolation = MMInterpMethod_CUBIC;
     params->index = 0;
@@ -36,7 +36,7 @@ void MIDI_synth_note_off_do(void *data, MIDIMsg *msg)
     MMPvtespParams *params = MMPvtespParams_new();
     ((MMPolyVoiceParams*)params)->steal = NOTE_STEALING;
     params->paramType = MMPvtespParamType_NOTEOFF;
-    params->note = (MMSample)msg->data[1];
+    params->note = (MMSample)msg->data[1] + 24;
     params->amplitude = (MMSample)msg->data[2] / 127.;
     params->releaseTime = releaseTime;
     MMPolyManager_noteOff(pvm, (void*)params);

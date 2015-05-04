@@ -4,7 +4,7 @@
 #include "mm_trapenvedsampleplayer.h" 
 #include "mm_sigchain.h" 
 
-#define NUM_NOTES  8
+#define NUM_NOTES  4
 
 extern MMBus *inBus, *outBus;
 extern MMSigChain sigChain;
