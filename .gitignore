@@ -1,2 +1,1267 @@
 objs
 *.elf
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+ALSA_LOWLEVEL_H	../mmdsch_alsa/inc/alsa_lowlevel.h	2;"	d
+ALSA_MIDI_LOWLEVEL_H	../mmdsch_alsa/inc/alsa_midi_lowlevel.h	2;"	d
+AR	../mm_dsp/Makefile	/^AR = arm-none-eabi-ar$/;"	m
+AR	../mm_dsp/i386.mk	/^AR = ar$/;"	m
+AR	../mm_primitives/Makefile	/^AR = arm-none-eabi-ar$/;"	m
+AR	../mm_primitives/i386.mk	/^AR = ar$/;"	m
+AR	../ne_datastructures/Makefile	/^AR = arm-none-eabi-ar$/;"	m
+AR	../ne_datastructures/i386.mk	/^AR = ar$/;"	m
+ARFLAGS	../mm_dsp/Makefile	/^ARFLAGS   = rcs$/;"	m
+ARFLAGS	../mm_dsp/i386.mk	/^ARFLAGS   = rcs$/;"	m
+ARFLAGS	../mm_primitives/Makefile	/^ARFLAGS   = rcs$/;"	m
+ARFLAGS	../mm_primitives/i386.mk	/^ARFLAGS   = rcs$/;"	m
+ARFLAGS	../ne_datastructures/Makefile	/^ARFLAGS   = rcs$/;"	m
+ARFLAGS	../ne_datastructures/i386.mk	/^ARFLAGS   = rcs$/;"	m
+ATTACK_TIME	../mm_dsp/test/mm_esp-test-1.c	16;"	d	file:
+AUDIO_HW_H	../mm_dsp_schablone/inc/audio_hw.h	2;"	d
+AUDIO_HW_SAMPLE_T_MAX	../mmdsch_alsa/inc/alsa_lowlevel.h	7;"	d
+AUDIO_SETUP_H	inc/audio_setup.h	2;"	d
+BASE	../mm_dsp/test/mm_adsr-test-1.mk	/^BASE = $(HOME)\/Documents\/development$/;"	m
+BASE	../mm_dsp/test/mm_dsp-test-1.mk	/^BASE = $(HOME)\/Documents\/development$/;"	m
+BASE	../mm_dsp/test/mm_dsp-test-2.mk	/^BASE = $(HOME)\/Documents\/development$/;"	m
+BASE	../mm_dsp/test/mm_dsp-test-3.mk	/^BASE = $(HOME)\/Documents\/development$/;"	m
+BASE	../mm_primitives/test/mm_rationalfunc_test.mk	/^BASE = $(HOME)\/Documents\/development$/;"	m
+BASE	../mm_primitives/test/mm_seq_test.mk	/^BASE = $(HOME)\/Documents\/development$/;"	m
+BASE	../mm_primitives/test/mm_seq_test_2.mk	/^BASE = $(HOME)\/Documents\/development$/;"	m
+BIN	../mm_dsp/Makefile	/^BIN = $(LIBDIR)\/libmm_dsp.a$/;"	m
+BIN	../mm_dsp/i386.mk	/^BIN = $(LIBDIR)\/libmm_dsp.a$/;"	m
+BIN	../mm_dsp/test/mm_adsr-test-1.mk	/^BIN  = mm_adsr-test-1.elf$/;"	m
+BIN	../mm_dsp/test/mm_dsp-cubic-interp-test.mk	/^BIN = mm_dsp-cubic-interp-test.elf $/;"	m
+BIN	../mm_dsp/test/mm_dsp-test-1.mk	/^BIN  = mm_dsp-test-1.elf$/;"	m
+BIN	../mm_dsp/test/mm_dsp-test-2.mk	/^BIN  = mm_dsp-test-2.elf$/;"	m
+BIN	../mm_dsp/test/mm_dsp-test-3.mk	/^BIN  = mm_dsp-test-3.elf$/;"	m
+BIN	../mm_dsp/test/mm_dsp-wrap-test.mk	/^BIN = mm_dsp-wrap-test.elf $/;"	m
+BIN	../mm_dsp/test/mm_enveloper-test-1.mk	/^BIN = mm_enveloper-test-1.elf$/;"	m
+BIN	../mm_dsp/test/mm_esp-test-1.mk	/^BIN = mm_esp-test-1.elf$/;"	m
+BIN	../mm_dsp/test/mm_trapezoid_env-test-1.mk	/^BIN = mm_trapezoid_env_test-1.elf$/;"	m
+BIN	../mm_primitives/Makefile	/^BIN = $(LIBDIR)\/libmm_primitives.a$/;"	m
+BIN	../mm_primitives/i386.mk	/^BIN = $(LIBDIR)\/libmm_primitives.a$/;"	m
+BIN	../mm_primitives/test/mm_rationalfunc_test.mk	/^BIN = mm_rationalfunc_test.elf$/;"	m
+BIN	../mm_primitives/test/mm_seq_test.mk	/^BIN = mm_seq_test.elf$/;"	m
+BIN	../mm_primitives/test/mm_seq_test_2.mk	/^BIN = mm_seq_test_2.elf$/;"	m
+BIN	../ne_datastructures/Makefile	/^BIN = $(LIBDIR)\/libne_datastructures.a$/;"	m
+BIN	../ne_datastructures/i386.mk	/^BIN = $(LIBDIR)\/libne_datastructures.a$/;"	m
+BIN	Makefile	/^BIN 					 = main.elf$/;"	m
+BUS_BLOCK_SIZE	../mm_dsp/test/mm_dsp-simple-interp-test.c	15;"	d	file:
+BUS_BLOCK_SIZE	../mm_dsp/test/mm_dsp-spsp-interp-test.c	14;"	d	file:
+BUS_NUM_CHANS	../mm_dsp/test/mm_dsp-simple-interp-test.c	16;"	d	file:
+BUS_NUM_CHANS	../mm_dsp/test/mm_dsp-spsp-interp-test.c	15;"	d	file:
+BUS_SIZE	../mm_dsp/test/mm_esp-test-1.c	14;"	d	file:
+CC	../mm_dsp/Makefile	/^CC = arm-none-eabi-gcc$/;"	m
+CC	../mm_dsp/i386.mk	/^CC = gcc$/;"	m
+CC	../mm_dsp/test/mm_adsr-test-1.mk	/^CC   = gcc $/;"	m
+CC	../mm_dsp/test/mm_dsp-test-1.mk	/^CC   = clang$/;"	m
+CC	../mm_dsp/test/mm_dsp-test-2.mk	/^CC   = clang$/;"	m
+CC	../mm_dsp/test/mm_dsp-test-3.mk	/^CC   = clang$/;"	m
+CC	../mm_dsp/test/mm_enveloper-test-1.mk	/^CC = gcc$/;"	m
+CC	../mm_dsp/test/mm_esp-test-1.mk	/^CC = gcc$/;"	m
+CC	../mm_dsp/test/mm_trapezoid_env-test-1.mk	/^CC = gcc$/;"	m
+CC	../mm_primitives/Makefile	/^CC = arm-none-eabi-gcc$/;"	m
+CC	../mm_primitives/i386.mk	/^CC = gcc$/;"	m
+CC	../mm_primitives/test/mm_rationalfunc_test.mk	/^CC = clang$/;"	m
+CC	../mm_primitives/test/mm_seq_test.mk	/^CC = clang$/;"	m
+CC	../mm_primitives/test/mm_seq_test_2.mk	/^CC = clang$/;"	m
+CC	../ne_datastructures/Makefile	/^CC = arm-none-eabi-gcc$/;"	m
+CC	../ne_datastructures/i386.mk	/^CC = gcc$/;"	m
+CC	Makefile	/^CC 						 = gcc$/;"	m
+CFLAGS	../mm_dsp/Makefile	/^CFLAGS	= $(foreach inc,$(INC),-I$(inc))$/;"	m
+CFLAGS	../mm_dsp/i386.mk	/^CFLAGS	= $(foreach inc,$(INC),-I$(inc))$/;"	m
+CFLAGS	../mm_dsp/test/mm_adsr-test-1.mk	/^CFLAGS = $(addprefix -I,$(INC)) -g3$/;"	m
+CFLAGS	../mm_dsp/test/mm_dsp-test-1.mk	/^CFLAGS = $(addprefix -I,$(INC)) -g3$/;"	m
+CFLAGS	../mm_dsp/test/mm_dsp-test-2.mk	/^CFLAGS = $(addprefix -I,$(INC)) -g3$/;"	m
+CFLAGS	../mm_dsp/test/mm_dsp-test-3.mk	/^CFLAGS = $(addprefix -I,$(INC)) -g3$/;"	m
+CFLAGS	../mm_dsp/test/mm_esp-test-1.mk	/^CFLAGS = -ggdb3$/;"	m
+CFLAGS	../mm_primitives/Makefile	/^CFLAGS	= $(foreach inc,$(INC),-I$(inc))$/;"	m
+CFLAGS	../mm_primitives/i386.mk	/^CFLAGS	= $(foreach inc,$(INC),-I$(inc))$/;"	m
+CFLAGS	../mm_primitives/test/mm_rationalfunc_test.mk	/^CFLAGS = $(addprefix -I,$(INC)) -g3$/;"	m
+CFLAGS	../mm_primitives/test/mm_seq_test.mk	/^CFLAGS = $(addprefix -I,$(INC)) -g3$/;"	m
+CFLAGS	../mm_primitives/test/mm_seq_test_2.mk	/^CFLAGS = $(addprefix -I,$(INC)) -g3$/;"	m
+CFLAGS	../ne_datastructures/Makefile	/^CFLAGS	= $(foreach inc,$(INC),-I$(inc))$/;"	m
+CFLAGS	../ne_datastructures/i386.mk	/^CFLAGS	= $(foreach inc,$(INC),-I$(inc))$/;"	m
+DECAY_TIME	../mm_dsp/test/mm_esp-test-1.c	17;"	d	file:
+DEP	Makefile	/^DEP					     = $(notdir $(wildcard $(MMDSCH_ALSA_PATH)\/inc\/*.h))$/;"	m
+ERR_H	inc/err.h	2;"	d
+HeapManager	../ne_datastructures/inc/ne_maxheap.h	/^typedef struct __HeapManager HeapManager;$/;"	t	typeref:struct:__HeapManager
+HeapManager_decHeapParams	../ne_datastructures/src/ne_maxheap.c	/^void HeapManager_decHeapParams(int *h, int *w)$/;"	f
+HeapManager_findLastNode	../ne_datastructures/src/ne_maxheap.c	/^HeapNode **HeapManager_findLastNode(HeapManager *hm, MMStack **stack)$/;"	f
+HeapManager_findNextEmptyNode	../ne_datastructures/src/ne_maxheap.c	/^HeapNode **HeapManager_findNextEmptyNode(HeapManager *hm, MMStack **stack)$/;"	f
+HeapManager_freeLastNode	../ne_datastructures/src/ne_maxheap.c	/^int HeapManager_freeLastNode(HeapManager *hm, MMStack **stack)$/;"	f
+HeapManager_incHeapParams	../ne_datastructures/src/ne_maxheap.c	/^void HeapManager_incHeapParams(int *h, int *w)$/;"	f
+HeapManager_init	../ne_datastructures/src/ne_maxheap.c	/^void HeapManager_init(HeapManager *hm)$/;"	f
+HeapManager_insertHeapNode	../ne_datastructures/src/ne_maxheap.c	/^void HeapManager_insertHeapNode(HeapManager *hm, HeapNode *hn, MMStack **stack)$/;"	f
+HeapManager_insertMaxHeapNode	../ne_datastructures/src/ne_maxheap.c	/^void HeapManager_insertMaxHeapNode(HeapManager *hm, HeapNode *hn)$/;"	f
+HeapManager_print	../ne_datastructures/src/ne_maxheap.c	/^void HeapManager_print(HeapManager *hm)$/;"	f
+HeapManager_removeMax	../ne_datastructures/src/ne_maxheap.c	/^HeapNode *HeapManager_removeMax(HeapManager *hm)$/;"	f
+HeapNode	../ne_datastructures/inc/ne_maxheap.h	/^typedef struct __HeapNode       HeapNode;$/;"	t	typeref:struct:__HeapNode
+HeapNode_copy	../ne_datastructures/src/ne_maxheap.c	/^void HeapNode_copy(HeapNode *dest, HeapNode *src)$/;"	f
+HeapNode_floatUp	../ne_datastructures/src/ne_maxheap.c	/^void HeapNode_floatUp(HeapNode **hn, MMStack **stack)$/;"	f
+HeapNode_followToBottom	../ne_datastructures/src/ne_maxheap.c	/^HeapNode **HeapNode_followToBottom(HeapNode *hn, int h, int w, MMStack **stack)$/;"	f
+HeapNode_freeLastNode	../ne_datastructures/src/ne_maxheap.c	/^int HeapNode_freeLastNode(HeapNode *parent, HeapNode *node)$/;"	f
+HeapNode_init	../ne_datastructures/src/ne_maxheap.c	/^void HeapNode_init(HeapNode *hn, int key)$/;"	f
+HeapNode_maxHeapify	../ne_datastructures/src/ne_maxheap.c	/^HeapNode *HeapNode_maxHeapify(HeapNode *grandparent, HeapNode *parent)$/;"	f
+HeapNode_print	../ne_datastructures/src/ne_maxheap.c	/^void HeapNode_print(HeapNode *hn)$/;"	f
+HeapNode_removeLastNode	../ne_datastructures/src/ne_maxheap.c	/^HeapNode *HeapNode_removeLastNode(HeapNode *parent, HeapNode *node)$/;"	f
+HeapNode_swapLeft	../ne_datastructures/src/ne_maxheap.c	/^HeapNode *HeapNode_swapLeft(HeapNode *grandparent, HeapNode *parent)$/;"	f
+HeapNode_swapRight	../ne_datastructures/src/ne_maxheap.c	/^HeapNode *HeapNode_swapRight(HeapNode *grandparent, HeapNode *parent)$/;"	f
+HeapNode_swapTopBottom	../ne_datastructures/src/ne_maxheap.c	/^HeapNode *HeapNode_swapTopBottom(HeapNode *top, HeapNode *bottomParent, HeapNode **newBottomParent,$/;"	f
+INC	../mm_dsp/Makefile	/^INC		= $(MMDSP_INC_PATH) $(MMPRIMITIVES_INC_PATH)$/;"	m
+INC	../mm_dsp/i386.mk	/^INC		= $(MMDSP_INC_PATH) $(MMPRIMITIVES_INC_PATH)$/;"	m
+INC	../mm_dsp/test/mm_adsr-test-1.mk	/^INC  =  $(BASE)\/mm_primitives\/inc \\$/;"	m
+INC	../mm_dsp/test/mm_dsp-test-1.mk	/^INC  = $(BASE)\/mm_primitives\/inc \\$/;"	m
+INC	../mm_dsp/test/mm_dsp-test-2.mk	/^INC  = $(BASE)\/mm_primitives\/inc \\$/;"	m
+INC	../mm_dsp/test/mm_dsp-test-3.mk	/^INC  = $(BASE)\/mm_primitives\/inc \\$/;"	m
+INC	../mm_dsp/test/mm_dsp-wrap-test.mk	/^INC = -I..\/inc$/;"	m
+INC	../mm_dsp/test/mm_enveloper-test-1.mk	/^INC = -I..\/inc -I..\/..\/mm_primitives\/inc$/;"	m
+INC	../mm_dsp/test/mm_esp-test-1.mk	/^INC = -I..\/inc -I..\/..\/mm_primitives\/inc$/;"	m
+INC	../mm_dsp/test/mm_trapezoid_env-test-1.mk	/^INC = -I..\/inc -I..\/..\/mm_primitives\/inc$/;"	m
+INC	../mm_primitives/Makefile	/^INC		= $(NEDATASTRUCTURES_INC_PATH) $(MMPRIMITIVES_INC_PATH)$/;"	m
+INC	../mm_primitives/i386.mk	/^INC		= $(NEDATASTRUCTURES_INC_PATH) $(MMPRIMITIVES_INC_PATH)$/;"	m
+INC	../mm_primitives/test/mm_rationalfunc_test.mk	/^INC  = $(BASE)\/mm_primitives\/inc $/;"	m
+INC	../mm_primitives/test/mm_seq_test.mk	/^INC  = $(BASE)\/mm_primitives\/inc $(BASE)\/ne_datastructures\/inc$/;"	m
+INC	../mm_primitives/test/mm_seq_test_2.mk	/^INC  = $(BASE)\/mm_primitives\/inc $(BASE)\/ne_datastructures\/inc$/;"	m
+INC	../ne_datastructures/Makefile	/^INC		= $(NEDATASTRUCTURES_INC_PATH) $/;"	m
+INC	../ne_datastructures/i386.mk	/^INC		= $(NEDATASTRUCTURES_INC_PATH) $/;"	m
+INC	Makefile	/^INC 				     = $(MM_DSP_SCHABLONE_PATH)\/inc$/;"	m
+LDFLAGS	../mm_dsp/test/mm_adsr-test-1.mk	/^LDFLAGS = -L\/usr\/local\/lib $/;"	m
+LDFLAGS	../mm_dsp/test/mm_dsp-test-1.mk	/^LDFLAGS = -L\/usr\/local\/lib -lsndfile$/;"	m
+LDFLAGS	../mm_dsp/test/mm_dsp-test-2.mk	/^LDFLAGS = -L\/usr\/local\/lib -lsndfile$/;"	m
+LDFLAGS	../mm_dsp/test/mm_dsp-test-3.mk	/^LDFLAGS = -L\/usr\/local\/lib -lsndfile$/;"	m
+LDFLAGS	../mm_dsp/test/mm_enveloper-test-1.mk	/^LDFLAGS = -lm$/;"	m
+LDFLAGS	../mm_dsp/test/mm_esp-test-1.mk	/^LDFLAGS = -lm$/;"	m
+LDFLAGS	../mm_dsp/test/mm_trapezoid_env-test-1.mk	/^LDFLAGS = -lm$/;"	m
+LDFLAGS	Makefile	/^LDFLAGS					 = $(foreach lib,$(LIB),-L$(lib))$/;"	m
+LIB	Makefile	/^LIB						 = $(MM_DSP_PATH)\/lib$/;"	m
+LIBDIR	../mm_dsp/Makefile	/^LIBDIR  = lib$/;"	m
+LIBDIR	../mm_dsp/i386.mk	/^LIBDIR  = lib$/;"	m
+LIBDIR	../mm_primitives/Makefile	/^LIBDIR  = lib$/;"	m
+LIBDIR	../mm_primitives/i386.mk	/^LIBDIR  = lib$/;"	m
+LIBDIR	../ne_datastructures/Makefile	/^LIBDIR  = lib$/;"	m
+LIBDIR	../ne_datastructures/i386.mk	/^LIBDIR  = lib$/;"	m
+MAX_PLAYERS	../mm_dsp/test/mm_dsp-test-2.c	20;"	d	file:
+MAX_PLAYERS	../mm_dsp/test/mm_dsp-test-3.c	20;"	d	file:
+MIDIEvent	../mmmidi/inc/mm_midievent.h	/^} MIDIEvent;$/;"	t	typeref:struct:__MIDIEvent
+MIDIEventBuilder	../mmmidi/inc/mm_midieventbuilder.h	/^} MIDIEventBuilder;$/;"	t	typeref:struct:__MIDIEventBuilder
+MIDIEventBuilder_GetTime_CB_t	../mmmidi/inc/mm_midieventbuilder.h	/^typedef MIDIEvent_Time_t(*MIDIEventBuilder_GetTime_CB_t)(void);$/;"	t
+MIDIEventBuilder_OnComplete_CB_t	../mmmidi/inc/mm_midieventbuilder.h	/^typedef void(*MIDIEventBuilder_OnComplete_CB_t)(MIDIEventBuilder *);$/;"	t
+MIDIEventBuilder_State_COMPLETE	../mmmidi/inc/mm_midieventbuilder.h	/^    MIDIEventBuilder_State_COMPLETE    = 0x02$/;"	e	enum:__anon3
+MIDIEventBuilder_State_WAIT_DATA	../mmmidi/inc/mm_midieventbuilder.h	/^    MIDIEventBuilder_State_WAIT_DATA   = 0x01,$/;"	e	enum:__anon3
+MIDIEventBuilder_State_WAIT_STATUS	../mmmidi/inc/mm_midieventbuilder.h	/^    MIDIEventBuilder_State_WAIT_STATUS = 0x00,$/;"	e	enum:__anon3
+MIDIEventBuilder_State_t	../mmmidi/inc/mm_midieventbuilder.h	/^} MIDIEventBuilder_State_t;$/;"	t	typeref:enum:__anon3
+MIDIEventBuilder_appendByte	../mmmidi/inc/mm_midieventbuilder.h	29;"	d
+MIDIEventBuilder_assertEqual	../mmmidi/test/mm_midieventbuilder_test.c	12;"	d	file:
+MIDIEventBuilder_getMsg	../mmmidi/inc/mm_midieventbuilder.h	28;"	d
+MIDIEventBuilder_init	../mmmidi/src/mm_midieventbuilder.c	/^void MIDIEventBuilder_init(MIDIEventBuilder *meb)$/;"	f
+MIDIEventBuilder_update	../mmmidi/src/mm_midieventbuilder.c	/^void MIDIEventBuilder_update(MIDIEventBuilder *meb,$/;"	f
+MIDIEventBuilder_updateIfCOMPLETE	../mmmidi/src/mm_midieventbuilder.c	/^static void MIDIEventBuilder_updateIfCOMPLETE(MIDIEventBuilder *meb,$/;"	f	file:
+MIDIEventBuilder_updateIfSTATUS	../mmmidi/src/mm_midieventbuilder.c	/^static void MIDIEventBuilder_updateIfSTATUS(MIDIEventBuilder *meb, MIDIMsg_Byte_t byte, uint64_t time)$/;"	f	file:
+MIDIEvent_Time_t	../mmmidi/inc/mm_midievent.h	/^typedef uint32_t MIDIEvent_Time_t;$/;"	t
+MIDIEvent_new	../mmmidi/src/mm_midievent.c	/^MIDIEvent *MIDIEvent_new(size_t length, uint64_t time)$/;"	f
+MIDIEvent_newFromStatus	../mmmidi/src/mm_midievent.c	/^MIDIEvent *MIDIEvent_newFromStatus(size_t status, uint64_t time)$/;"	f
+MIDIMSG_CHN_PRS	../mmmidi/inc/mm_midimsg.h	17;"	d
+MIDIMSG_CNTRL_CHNG	../mmmidi/inc/mm_midimsg.h	15;"	d
+MIDIMSG_GET_CHANNEL	../mmmidi/inc/mm_midimsg.h	25;"	d
+MIDIMSG_GET_LENGTH	../mmmidi/inc/mm_midimsg.h	27;"	d
+MIDIMSG_GET_STATUS	../mmmidi/inc/mm_midimsg.h	24;"	d
+MIDIMSG_IS_2_BYTE_MSG	../mmmidi/inc/mm_midimsg.h	37;"	d
+MIDIMSG_IS_3_BYTE_MSG	../mmmidi/inc/mm_midimsg.h	39;"	d
+MIDIMSG_IS_CHN_PRS	../mmmidi/inc/mm_midimsg.h	34;"	d
+MIDIMSG_IS_CNTRL_CHNG	../mmmidi/inc/mm_midimsg.h	32;"	d
+MIDIMSG_IS_DATA	../mmmidi/inc/mm_midimsg.h	22;"	d
+MIDIMSG_IS_NOTE_OFF	../mmmidi/inc/mm_midimsg.h	29;"	d
+MIDIMSG_IS_NOTE_ON	../mmmidi/inc/mm_midimsg.h	30;"	d
+MIDIMSG_IS_PCH_BND	../mmmidi/inc/mm_midimsg.h	35;"	d
+MIDIMSG_IS_POLY_PRS	../mmmidi/inc/mm_midimsg.h	31;"	d
+MIDIMSG_IS_PRGRM_CHNG	../mmmidi/inc/mm_midimsg.h	33;"	d
+MIDIMSG_IS_STATUS	../mmmidi/inc/mm_midimsg.h	21;"	d
+MIDIMSG_KNOW_LENGTH	../mmmidi/inc/mm_midimsg.h	26;"	d
+MIDIMSG_NOTE_OFF	../mmmidi/inc/mm_midimsg.h	12;"	d
+MIDIMSG_NOTE_ON	../mmmidi/inc/mm_midimsg.h	13;"	d
+MIDIMSG_PCH_BND	../mmmidi/inc/mm_midimsg.h	18;"	d
+MIDIMSG_POLY_PRS	../mmmidi/inc/mm_midimsg.h	14;"	d
+MIDIMSG_PRGRM_CHNG	../mmmidi/inc/mm_midimsg.h	16;"	d
+MIDIMSG_SYS_COMMON	../mmmidi/inc/mm_midimsg.h	19;"	d
+MIDIMsg	../mmmidi/inc/mm_midimsg.h	/^} MIDIMsg;$/;"	t	typeref:struct:__MIDIMsg
+MIDIMsgBuilder	../mmmidi/inc/mm_midimsgbuilder.h	/^} MIDIMsgBuilder;$/;"	t	typeref:struct:__MIDIMsgBuilder
+MIDIMsgBuilder_OnComplete_CB_t	../mmmidi/inc/mm_midimsgbuilder.h	/^typedef void(*MIDIMsgBuilder_OnComplete_CB_t)(MIDIMsgBuilder *);$/;"	t
+MIDIMsgBuilder_State_COMPLETE	../mmmidi/inc/mm_midimsgbuilder.h	/^    MIDIMsgBuilder_State_COMPLETE    = 0x02$/;"	e	enum:__anon4
+MIDIMsgBuilder_State_WAIT_DATA	../mmmidi/inc/mm_midimsgbuilder.h	/^    MIDIMsgBuilder_State_WAIT_DATA   = 0x01,$/;"	e	enum:__anon4
+MIDIMsgBuilder_State_WAIT_STATUS	../mmmidi/inc/mm_midimsgbuilder.h	/^    MIDIMsgBuilder_State_WAIT_STATUS = 0x00,$/;"	e	enum:__anon4
+MIDIMsgBuilder_State_t	../mmmidi/inc/mm_midimsgbuilder.h	/^} MIDIMsgBuilder_State_t;$/;"	t	typeref:enum:__anon4
+MIDIMsgBuilder_appendByte	../mmmidi/inc/mm_midimsgbuilder.h	29;"	d
+MIDIMsgBuilder_getMsg	../mmmidi/inc/mm_midimsgbuilder.h	28;"	d
+MIDIMsgBuilder_init	../mmmidi/src/mm_midimsgbuilder.c	/^void MIDIMsgBuilder_init(MIDIMsgBuilder *mmb)$/;"	f
+MIDIMsgBuilder_update	../mmmidi/src/mm_midimsgbuilder.c	/^MIDIMsgBuilder_State_t MIDIMsgBuilder_update(MIDIMsgBuilder *mmb,$/;"	f
+MIDIMsgBuilder_updateIfCOMPLETE	../mmmidi/src/mm_midimsgbuilder.c	/^static void MIDIMsgBuilder_updateIfCOMPLETE(MIDIMsgBuilder *mmb)$/;"	f	file:
+MIDIMsgBuilder_updateIfSTATUS	../mmmidi/src/mm_midimsgbuilder.c	/^static void MIDIMsgBuilder_updateIfSTATUS(MIDIMsgBuilder *mmb, MIDIMsg_Byte_t byte)$/;"	f	file:
+MIDIMsg_Byte_t	../mmmidi/inc/mm_midimsg.h	/^typedef uint8_t MIDIMsg_Byte_t;$/;"	t
+MIDIMsg_checkEqual	../mmmidi/inc/mm_midimsg.h	/^static inline int MIDIMsg_checkEqual(MIDIMsg *msg, MIDIMsg_Byte_t *bytes, size_t length)$/;"	f
+MIDIMsg_free	../mmmidi/inc/mm_midimsg.h	56;"	d
+MIDIMsg_getByte	../mmmidi/inc/mm_midimsg.h	55;"	d
+MIDIMsg_init	../mmmidi/src/mm_midimsg.c	/^void MIDIMsg_init(MIDIMsg *msg, size_t n, ...)$/;"	f
+MIDIMsg_lengthFromStatus	../mmmidi/src/mm_midimsg.c	/^size_t MIDIMsg_lengthFromStatus(MIDIMsg_Byte_t status)$/;"	f
+MIDIMsg_new	../mmmidi/src/mm_midimsg.c	/^MIDIMsg *MIDIMsg_new(size_t length)$/;"	f
+MIDIMsg_newFromStatus	../mmmidi/src/mm_midimsg.c	/^MIDIMsg *MIDIMsg_newFromStatus(MIDIMsg_Byte_t status)$/;"	f
+MIDIMsg_print	../mmmidi/inc/mm_midimsg.h	/^static inline void MIDIMsg_print(MIDIMsg *msg)$/;"	f
+MIDIMsg_setByte	../mmmidi/inc/mm_midimsg.h	54;"	d
+MIDIMsg_sizeof	../mmmidi/src/mm_midimsg.c	/^size_t MIDIMsg_sizeof(size_t length)$/;"	f
+MIDI_CB_Info_call	../mmmidi/inc/mm_midirouter.h	24;"	d
+MIDI_CC_CB_Info	../mmmidi/inc/mm_midiccrouter.h	/^typedef struct __MIDI_CC_CB_Info MIDI_CC_CB_Info;$/;"	t	typeref:struct:__MIDI_CC_CB_Info
+MIDI_CC_CB_Info_call	../mmmidi/inc/mm_midiccrouter.h	44;"	d
+MIDI_CC_CB_Router	../mmmidi/inc/mm_midiccrouter.h	/^typedef struct __MIDI_CC_CB_Router MIDI_CC_CB_Router;$/;"	t	typeref:struct:__MIDI_CC_CB_Router
+MIDI_CC_CB_Router_CB	../mmmidi/inc/mm_midiccrouter.h	/^typedef void (*MIDI_CC_CB_Router_CB)(void *,MIDIMsg*);$/;"	t
+MIDI_CC_CB_Router_NUM_CBS	../mmmidi/inc/mm_midiccrouter.h	10;"	d
+MIDI_CC_CB_Router_addCB	../mmmidi/src/mm_midiccrouter.c	/^void MIDI_CC_CB_Router_addCB(MIDI_CC_CB_Router *router, MIDIMsg_Byte_t cc, MIDI_CC_CB_Router_CB cb, void *data)$/;"	f
+MIDI_CC_CB_Router_init	../mmmidi/src/mm_midiccrouter.c	/^void MIDI_CC_CB_Router_init(MIDI_CC_CB_Router *router)$/;"	f
+MIDI_CC_CB_Router_route	../mmmidi/src/mm_midiccrouter.c	/^void MIDI_CC_CB_Router_route(void *router, MIDIMsg *msg)$/;"	f
+MIDI_DATA_1	../mmmidi/test/mm_midieventbuilder_test.c	7;"	d	file:
+MIDI_DATA_2	../mmmidi/test/mm_midieventbuilder_test.c	8;"	d	file:
+MIDI_HW_H	../mm_dsp_schablone/inc/midi_hw.h	2;"	d
+MIDI_MSG_DEBUG	../mmmidi/test/mm_midimsgbuilder_test.c	7;"	d	file:
+MIDI_Router	../mmmidi/inc/mm_midirouter.h	/^typedef struct __MIDI_Router MIDI_Router;$/;"	t	typeref:struct:__MIDI_Router
+MIDI_Router_CB	../mmmidi/inc/mm_midirouter.h	/^typedef void (*MIDI_Router_CB)(void*,MIDIMsg*);$/;"	t
+MIDI_Router_CB_Info	../mmmidi/inc/mm_midirouter.h	/^typedef struct __MIDI_Router_CB_Info MIDI_Router_CB_Info;$/;"	t	typeref:struct:__MIDI_Router_CB_Info
+MIDI_Router_CB_Set	../mmmidi/inc/mm_midirouter.h	/^typedef struct __MIDI_Router_CB_Set MIDI_Router_CB_Set;$/;"	t	typeref:struct:__MIDI_Router_CB_Set
+MIDI_Router_Err	../mmmidi/inc/mm_midirouter.h	/^} MIDI_Router_Err;$/;"	t	typeref:enum:__anon5
+MIDI_Router_Err_GOOD	../mmmidi/inc/mm_midirouter.h	/^    MIDI_Router_Err_GOOD,$/;"	e	enum:__anon5
+MIDI_Router_Err_NOTIMP	../mmmidi/inc/mm_midirouter.h	/^    MIDI_Router_Err_NOTIMP, \/* Output when something is not implemented, such as the kind of message *\/$/;"	e	enum:__anon5
+MIDI_Router_Err_NULL	../mmmidi/inc/mm_midirouter.h	/^    MIDI_Router_Err_NULL    \/* Something was NULL, like perhaps the message that was passed *\/$/;"	e	enum:__anon5
+MIDI_Router_NUM_CHANS	../mmmidi/inc/mm_midirouter.h	10;"	d
+MIDI_Router_Standard	../mmmidi/inc/mm_midirouter_standard.h	/^typedef struct __MIDI_Router_Standard MIDI_Router_Standard;$/;"	t	typeref:struct:__MIDI_Router_Standard
+MIDI_Router_Standard_init	../mmmidi/src/mm_midirouter_standard.c	/^void MIDI_Router_Standard_init(MIDI_Router_Standard *mr)$/;"	f
+MIDI_Router_addCB	../mmmidi/src/mm_midirouter.c	/^MIDI_Router_Err MIDI_Router_addCB(MIDI_Router *router, MIDIMsg_Byte_t type, MIDIMsg_Byte_t chan, MIDI_Router_CB cb, void *data)$/;"	f
+MIDI_Router_handleMsg	../mmmidi/src/mm_midirouter.c	/^int MIDI_Router_handleMsg(MIDI_Router *router, MIDIMsg *msg)$/;"	f
+MIDI_Router_init	../mmmidi/src/mm_midirouter.c	/^void MIDI_Router_init(MIDI_Router *router)$/;"	f
+MIDI_SETUP_H	inc/midi_setup.h	2;"	d
+MIDI_STATUS_1	../mmmidi/test/mm_midieventbuilder_test.c	6;"	d	file:
+MIDI_STATUS_2	../mmmidi/test/mm_midieventbuilder_test.c	10;"	d	file:
+MIDI_SYSEX_STATUS	../mmmidi/test/mm_midieventbuilder_test.c	9;"	d	file:
+MIDI_synth_cc_attackTime_control	src/synth_control.c	/^void MIDI_synth_cc_attackTime_control(void *data, MIDIMsg *msg)$/;"	f
+MIDI_synth_cc_releaseTime_control	src/synth_control.c	/^void MIDI_synth_cc_releaseTime_control(void *data, MIDIMsg *msg)$/;"	f
+MIDI_synth_note_off_do	src/synth_control.c	/^void MIDI_synth_note_off_do(void *data, MIDIMsg *msg)$/;"	f
+MIDI_synth_note_on_do	src/synth_control.c	/^void MIDI_synth_note_on_do(void *data, MIDIMsg *msg)$/;"	f
+MMAdsr	../mm_dsp/inc/mm_adsr.h	/^typedef struct __MMAdsr MMAdsr;$/;"	t	typeref:struct:__MMAdsr
+MMAdsr_State	../mm_dsp/inc/mm_adsr.h	/^} MMAdsr_State;$/;"	t	typeref:enum:__anon14
+MMAdsr_State_ATTACK	../mm_dsp/inc/mm_adsr.h	/^    MMAdsr_State_ATTACK,$/;"	e	enum:__anon14
+MMAdsr_State_DECAY	../mm_dsp/inc/mm_adsr.h	/^    MMAdsr_State_DECAY,$/;"	e	enum:__anon14
+MMAdsr_State_DONE	../mm_dsp/inc/mm_adsr.h	/^    MMAdsr_State_DONE,$/;"	e	enum:__anon14
+MMAdsr_State_RELEASE	../mm_dsp/inc/mm_adsr.h	/^    MMAdsr_State_RELEASE,$/;"	e	enum:__anon14
+MMAdsr_State_SUSTAIN	../mm_dsp/inc/mm_adsr.h	/^    MMAdsr_State_SUSTAIN,$/;"	e	enum:__anon14
+MMAdsr_init	../mm_dsp/src/mm_adsr.c	/^void MMAdsr_init(MMAdsr *adsr)$/;"	f
+MMAdsr_noteOff	../mm_dsp/inc/mm_adsr.h	41;"	d
+MMAdsr_noteOn	../mm_dsp/inc/mm_adsr.h	33;"	d
+MMAdsr_tick	../mm_dsp/src/mm_adsr.c	/^static void MMAdsr_tick(MMSigProc *sp)$/;"	f	file:
+MMArray	../mm_primitives/inc/mm_array.h	/^typedef struct __MMArray MMArray;$/;"	t	typeref:struct:__MMArray
+MMArray_get	../mm_primitives/inc/mm_array.h	15;"	d
+MMArray_get_data	../mm_primitives/inc/mm_array.h	19;"	d
+MMArray_get_length	../mm_primitives/inc/mm_array.h	20;"	d
+MMArray_init	../mm_primitives/inc/mm_array.h	32;"	d
+MMArray_new	../mm_primitives/inc/mm_array.h	/^static inline MMArray *MMArray_new(size_t length, size_t typeSize)$/;"	f
+MMArray_set	../mm_primitives/inc/mm_array.h	16;"	d
+MMArray_set_data	../mm_primitives/inc/mm_array.h	17;"	d
+MMArray_set_length	../mm_primitives/inc/mm_array.h	18;"	d
+MMBool	../mm_primitives/inc/mm_bool.h	/^typedef int MMBool;$/;"	t
+MMBus	../mm_dsp/inc/mm_bus.h	/^typedef struct __MMBus MMBus;$/;"	t	typeref:struct:__MMBus
+MMBusArray	../mm_dsp/inc/mm_bus.h	/^typedef MMArray    MMBusArray;$/;"	t
+MMBusArray_get	../mm_dsp/inc/mm_bus.h	21;"	d
+MMBusArray_set	../mm_dsp/inc/mm_bus.h	22;"	d
+MMBusMerger	../mm_dsp/inc/mm_busmerger.h	/^typedef struct __MMBusMerger MMBusMerger;$/;"	t	typeref:struct:__MMBusMerger
+MMBusMerger_init	../mm_dsp/src/mm_busmerger.c	/^void MMBusMerger_init(MMBusMerger *bm, MMBus *sourceBus, MMBus *destBus)$/;"	f
+MMBusMerger_tick	../mm_dsp/src/mm_busmerger.c	/^static void MMBusMerger_tick(MMSigProc *bm)$/;"	f	file:
+MMBusMult	../mm_dsp/inc/mm_busmult.h	/^typedef struct __MMBusMult MMBusMult;$/;"	t	typeref:struct:__MMBusMult
+MMBusMult_init	../mm_dsp/src/mm_busmult.c	/^void MMBusMult_init(MMBusMult *bm, MMBus *rb, MMBus *ob)$/;"	f
+MMBusMult_tick	../mm_dsp/src/mm_busmult.c	/^static void MMBusMult_tick(MMSigProc *bm)$/;"	f	file:
+MMBus_new	../mm_dsp/src/mm_bus.c	/^MMBus *MMBus_new(size_t size, size_t channels)$/;"	f
+MMCC_MIDItoRate	../mm_dsp/inc/mm_common_calcs.h	9;"	d
+MMDLList	../mm_primitives/inc/mm_dllist.h	/^typedef struct __MMDLList MMDLList;$/;"	t	typeref:struct:__MMDLList
+MMDLList_Tester	../mm_primitives/test/mm_dllist_test.c	/^typedef struct __MMDLList_Tester MMDLList_Tester;$/;"	t	typeref:struct:__MMDLList_Tester	file:
+MMDLList_addAfterTail	../mm_primitives/inc/mm_dllist.h	/^static inline void MMDLList_addAfterTail(MMDLList *whose, MMDLList *who)$/;"	f
+MMDLList_addAfterTail_test	../mm_primitives/test/mm_dllist_test.c	/^int MMDLList_addAfterTail_test(NETester *t)$/;"	f
+MMDLList_addBeforeHead	../mm_primitives/inc/mm_dllist.h	/^static inline void MMDLList_addBeforeHead(MMDLList *whose, MMDLList *who)$/;"	f
+MMDLList_addBeforeHead_test	../mm_primitives/test/mm_dllist_test.c	/^int MMDLList_addBeforeHead_test(NETester *t)$/;"	f
+MMDLList_getLength	../mm_primitives/inc/mm_dllist.h	/^static size_t MMDLList_getLength(MMDLList *who)$/;"	f
+MMDLList_getNext	../mm_primitives/inc/mm_dllist.h	13;"	d
+MMDLList_getPrev	../mm_primitives/inc/mm_dllist.h	15;"	d
+MMDLList_getTail	../mm_primitives/inc/mm_dllist.h	/^static inline MMDLList *MMDLList_getTail(MMDLList *who)$/;"	f
+MMDLList_init	../mm_primitives/inc/mm_dllist.h	108;"	d
+MMDLList_insertAfter	../mm_primitives/inc/mm_dllist.h	/^static inline MMDLList *MMDLList_insertAfter(MMDLList *whom, MMDLList *who)$/;"	f
+MMDLList_insertAfter_test	../mm_primitives/test/mm_dllist_test.c	/^int MMDLList_insertAfter_test(NETester *t)$/;"	f
+MMDLList_insertBefore	../mm_primitives/inc/mm_dllist.h	/^static inline MMDLList *MMDLList_insertBefore(MMDLList *whom, MMDLList *who)$/;"	f
+MMDLList_insertBefore_test	../mm_primitives/test/mm_dllist_test.c	/^int MMDLList_insertBefore_test(NETester *t)$/;"	f
+MMDLList_remove	../mm_primitives/inc/mm_dllist.h	/^static inline MMDLList *MMDLList_remove(MMDLList *who)$/;"	f
+MMDLList_setNext	../mm_primitives/inc/mm_dllist.h	14;"	d
+MMDLList_setPrev	../mm_primitives/inc/mm_dllist.h	16;"	d
+MMDSCH_ALSA_PATH	Makefile	/^MMDSCH_ALSA_PATH		 = ..\/mmdsch_alsa$/;"	m
+MMDSP_CFLAGS	../mm_dsp/Makefile	/^MMDSP_CFLAGS	= -Ofast$/;"	m
+MMDSP_CFLAGS	../mm_dsp/i386.mk	/^MMDSP_CFLAGS	= -Ofast$/;"	m
+MMDSP_DEP	../mm_dsp/Makefile	/^MMDSP_DEP       = $(wildcard $(MMDSP_INC_PATH)\/*.h)$/;"	m
+MMDSP_DEP	../mm_dsp/i386.mk	/^MMDSP_DEP       = $(wildcard $(MMDSP_INC_PATH)\/*.h)$/;"	m
+MMDSP_INC_PATH	../mm_dsp/Makefile	/^MMDSP_INC_PATH  = inc$/;"	m
+MMDSP_INC_PATH	../mm_dsp/i386.mk	/^MMDSP_INC_PATH  = inc$/;"	m
+MMDSP_OBJS	../mm_dsp/Makefile	/^MMDSP_OBJS      = $(MMDSP_SRCS:$(MMDSP_SRCS_PATH)\/%.c=objs\/%.o)$/;"	m
+MMDSP_OBJS	../mm_dsp/i386.mk	/^MMDSP_OBJS      = $(MMDSP_SRCS:$(MMDSP_SRCS_PATH)\/%.c=objs\/%.o)$/;"	m
+MMDSP_SRCS	../mm_dsp/Makefile	/^MMDSP_SRCS      = $(wildcard $(MMDSP_SRCS_PATH)\/*.c)$/;"	m
+MMDSP_SRCS	../mm_dsp/i386.mk	/^MMDSP_SRCS      = $(wildcard $(MMDSP_SRCS_PATH)\/*.c)$/;"	m
+MMDSP_SRCS_PATH	../mm_dsp/Makefile	/^MMDSP_SRCS_PATH = src$/;"	m
+MMDSP_SRCS_PATH	../mm_dsp/i386.mk	/^MMDSP_SRCS_PATH = src$/;"	m
+MMEnvGen	../mm_dsp/inc/mm_envgen.h	/^typedef struct __MMEnvGen MMEnvGen;$/;"	t	typeref:struct:__MMEnvGen
+MMEnvGen_get	../mm_dsp/inc/mm_envgen.h	17;"	d
+MMEnvGen_getBus	../mm_dsp/inc/mm_envgen.h	22;"	d
+MMEnvGen_getDeltaTime	../mm_dsp/inc/mm_envgen.h	23;"	d
+MMEnvGen_init	../mm_dsp/inc/mm_envgen.h	25;"	d
+MMEnvGen_setBus	../mm_dsp/inc/mm_envgen.h	19;"	d
+MMEnvGen_setDeltaTime	../mm_dsp/inc/mm_envgen.h	20;"	d
+MMEnvedSamplePlayer	../mm_dsp/inc/mm_envedsampleplayer.h	/^typedef struct __MMEnvedSamplePlayer MMEnvedSamplePlayer;$/;"	t	typeref:struct:__MMEnvedSamplePlayer
+MMEnvedSamplePlayer_doOnDone	../mm_dsp/inc/mm_envedsampleplayer.h	37;"	d
+MMEnvedSamplePlayer_getEnvelope	../mm_dsp/inc/mm_envedsampleplayer.h	36;"	d
+MMEnvedSamplePlayer_getSamplePlayerSigProc	../mm_dsp/inc/mm_envedsampleplayer.h	35;"	d
+MMEnvedSamplePlayer_init	../mm_dsp/src/mm_envedsampleplayer.c	/^void MMEnvedSamplePlayer_init(MMEnvedSamplePlayer *esp, MMEnvelope *env, MMBus *outBus,$/;"	f
+MMEnvedSamplePlayer_insertEnvGen	../mm_dsp/inc/mm_envedsampleplayer.h	44;"	d
+MMEnvedSamplePlayer_onDone_default	../mm_dsp/src/mm_envedsampleplayer.c	/^static void MMEnvedSamplePlayer_onDone_default(MMEnvedSamplePlayer *esp)$/;"	f	file:
+MMEnvedSamplePlayer_tick	../mm_dsp/src/mm_envedsampleplayer.c	/^static void MMEnvedSamplePlayer_tick(MMSigProc *esp)$/;"	f	file:
+MMEnvelope	../mm_dsp/inc/mm_envelope.h	/^typedef struct __MMEnvelope MMEnvelope;$/;"	t	typeref:struct:__MMEnvelope
+MMEnvelopeState	../mm_dsp/inc/mm_envelope.h	/^} MMEnvelopeState;$/;"	t	typeref:enum:__anon18
+MMEnvelopeState_DONE	../mm_dsp/inc/mm_envelope.h	/^    MMEnvelopeState_DONE,$/;"	e	enum:__anon18
+MMEnvelopeState_DUMMY	../mm_dsp/inc/mm_envelope.h	/^    MMEnvelopeState_DUMMY \/* inheriting classes should start their own $/;"	e	enum:__anon18
+MMEnvelopeState_OFF	../mm_dsp/inc/mm_envelope.h	/^    MMEnvelopeState_OFF,$/;"	e	enum:__anon18
+MMEnvelope_get	../mm_dsp/inc/mm_envelope.h	29;"	d
+MMEnvelope_getCurValue	../mm_dsp/inc/mm_envelope.h	43;"	d
+MMEnvelope_getState	../mm_dsp/inc/mm_envelope.h	34;"	d
+MMEnvelope_get_time	../mm_dsp/inc/mm_envelope.h	35;"	d
+MMEnvelope_incTime	../mm_dsp/inc/mm_envelope.h	44;"	d
+MMEnvelope_init	../mm_dsp/inc/mm_envelope.h	26;"	d
+MMEnvelope_reset	../mm_dsp/inc/mm_envelope.h	47;"	d
+MMEnvelope_setState	../mm_dsp/inc/mm_envelope.h	31;"	d
+MMEnvelope_set_getCurValue	../mm_dsp/inc/mm_envelope.h	37;"	d
+MMEnvelope_set_incTime	../mm_dsp/inc/mm_envelope.h	38;"	d
+MMEnvelope_set_reset	../mm_dsp/inc/mm_envelope.h	41;"	d
+MMEnvelope_set_startAttack	../mm_dsp/inc/mm_envelope.h	39;"	d
+MMEnvelope_set_startRelease	../mm_dsp/inc/mm_envelope.h	40;"	d
+MMEnvelope_set_time	../mm_dsp/inc/mm_envelope.h	32;"	d
+MMEnvelope_startAttack	../mm_dsp/inc/mm_envelope.h	45;"	d
+MMEnvelope_startRelease	../mm_dsp/inc/mm_envelope.h	46;"	d
+MMEnveloper	../mm_dsp/inc/mm_enveloper.h	/^typedef struct __MMEnveloper MMEnveloper;$/;"	t	typeref:struct:__MMEnveloper
+MMEnveloper_get	../mm_dsp/inc/mm_enveloper.h	20;"	d
+MMEnveloper_init	../mm_dsp/src/mm_enveloper.c	/^void MMEnveloper_init(MMEnveloper *enver, MMEnvelope *env, MMBus *outBus, MMSample tickPeriod)$/;"	f
+MMEnveloper_reset	../mm_dsp/inc/mm_enveloper.h	23;"	d
+MMEnveloper_startAttack	../mm_dsp/inc/mm_enveloper.h	21;"	d
+MMEnveloper_startRelease	../mm_dsp/inc/mm_enveloper.h	22;"	d
+MMEnveloper_tick	../mm_dsp/src/mm_enveloper.c	/^static void MMEnveloper_tick(MMSigProc *enver)$/;"	f	file:
+MMEvent	../mm_primitives/inc/mm_event.h	/^typedef struct __MMEvent MMEvent;$/;"	t	typeref:struct:__MMEvent
+MMEventHandle	../mm_primitives/inc/mm_event.h	/^typedef MMEvent * MMEventHandle;$/;"	t
+MMEventList	../mm_primitives/inc/mm_eventlist.h	/^typedef struct __MMEventList MMEventList;$/;"	t	typeref:struct:__MMEventList
+MMEventList_init	../mm_primitives/src/mm_eventlist.c	/^void MMEventList_init(MMEventList *head, MMEventHandle eventHandle)$/;"	f
+MMEventList_new	../mm_primitives/src/mm_eventlist.c	/^MMEventList *MMEventList_new(void)$/;"	f
+MMEvent_CB_t	../mm_primitives/inc/mm_event.h	/^typedef void (*MMEvent_CB_t)(MMEventHandle);$/;"	t
+MMEvent_happen	../mm_primitives/inc/mm_event.h	14;"	d
+MMEvent_init	../mm_primitives/src/mm_event.c	/^void MMEvent_init(MMEvent *event, MMEvent_CB_t cb)$/;"	f
+MMEvent_new	../mm_primitives/src/mm_event.c	/^MMEvent *MMEvent_new()$/;"	f
+MMHeap_Key	../ne_datastructures/inc/mm_heap.h	/^typedef MM_HEAP_KEY_TYPE                    MMHeap_Key;$/;"	t
+MMHeap_Key	../ne_datastructures/inc/mm_heap__static.h	/^typedef MM_HEAP_KEY_TYPE                    MMHeap_Key;$/;"	t
+MMHeap_Manager	../ne_datastructures/inc/mm_heap.h	/^typedef struct __MMHeap_Manager           MMHeap_Manager;$/;"	t	typeref:struct:__MMHeap_Manager
+MMHeap_Manager	../ne_datastructures/inc/mm_heap__static.h	/^typedef struct __MMHeap_Manager           MMHeap_Manager;$/;"	t	typeref:struct:__MMHeap_Manager
+MMHeap_Manager_Size	../ne_datastructures/inc/mm_heap.h	/^typedef MM_HEAP_MANAGER_SIZE_TYPE  MMHeap_Manager_Size;$/;"	t
+MMHeap_Manager_Size	../ne_datastructures/inc/mm_heap__static.h	/^typedef MM_HEAP_MANAGER_SIZE_TYPE  MMHeap_Manager_Size;$/;"	t
+MMHeap_Manager_decHeapParams	../ne_datastructures/inc/mm_heap__static.h	/^static inline void MMHeap_Manager_decHeapParams(MMHeap_Manager_Size *h,MMHeap_Manager_Size *w)$/;"	f
+MMHeap_Manager_decHeapParams	../ne_datastructures/src/mm_heap.c	/^void MMHeap_Manager_decHeapParams(MMHeap_Manager_Size *h,MMHeap_Manager_Size *w)$/;"	f
+MMHeap_Manager_findLastNode	../ne_datastructures/inc/mm_heap__static.h	/^static inline MMHeap_Node **MMHeap_Manager_findLastNode(MMHeap_Manager *hm, MMStack **stack)$/;"	f
+MMHeap_Manager_findLastNode	../ne_datastructures/src/mm_heap.c	/^MMHeap_Node **MMHeap_Manager_findLastNode(MMHeap_Manager *hm, MMStack **stack)$/;"	f
+MMHeap_Manager_findNextEmptyNode	../ne_datastructures/inc/mm_heap__static.h	/^static inline MMHeap_Node **MMHeap_Manager_findNextEmptyNode(MMHeap_Manager *hm, MMStack **stack)$/;"	f
+MMHeap_Manager_findNextEmptyNode	../ne_datastructures/src/mm_heap.c	/^MMHeap_Node **MMHeap_Manager_findNextEmptyNode(MMHeap_Manager *hm, MMStack **stack)$/;"	f
+MMHeap_Manager_incHeapParams	../ne_datastructures/inc/mm_heap__static.h	/^static inline void MMHeap_Manager_incHeapParams(MMHeap_Manager_Size *h, MMHeap_Manager_Size *w)$/;"	f
+MMHeap_Manager_incHeapParams	../ne_datastructures/src/mm_heap.c	/^void MMHeap_Manager_incHeapParams(MMHeap_Manager_Size *h, MMHeap_Manager_Size *w)$/;"	f
+MMHeap_Manager_init	../ne_datastructures/inc/mm_heap__static.h	/^static inline void MMHeap_Manager_init(MMHeap_Manager *hm)$/;"	f
+MMHeap_Manager_init	../ne_datastructures/src/mm_heap.c	/^void MMHeap_Manager_init(MMHeap_Manager *hm)$/;"	f
+MMHeap_Manager_insertHeapNode	../ne_datastructures/inc/mm_heap__static.h	/^static inline void MMHeap_Manager_insertHeapNode(MMHeap_Manager *hm, MMHeap_Node *hn, MMStack **stack)$/;"	f
+MMHeap_Manager_insertHeapNode	../ne_datastructures/src/mm_heap.c	/^void MMHeap_Manager_insertHeapNode(MMHeap_Manager *hm, MMHeap_Node *hn, MMStack **stack)$/;"	f
+MMHeap_Manager_insertMaxHeapNode	../ne_datastructures/inc/mm_heap__static.h	/^static inline void MMHeap_Manager_insertMaxHeapNode(MMHeap_Manager *hm, MMHeap_Node *hn)$/;"	f
+MMHeap_Manager_insertMaxHeapNode	../ne_datastructures/src/mm_heap.c	/^void MMHeap_Manager_insertMaxHeapNode(MMHeap_Manager *hm, MMHeap_Node *hn)$/;"	f
+MMHeap_Manager_insertMinHeapNode	../ne_datastructures/inc/mm_heap__static.h	/^static inline void MMHeap_Manager_insertMinHeapNode(MMHeap_Manager *hm, MMHeap_Node *hn)$/;"	f
+MMHeap_Manager_insertMinHeapNode	../ne_datastructures/src/mm_heap.c	/^void MMHeap_Manager_insertMinHeapNode(MMHeap_Manager *hm, MMHeap_Node *hn)$/;"	f
+MMHeap_Manager_print	../ne_datastructures/inc/mm_heap.h	/^static inline void MMHeap_Manager_print(MMHeap_Manager *hm)$/;"	f
+MMHeap_Manager_print	../ne_datastructures/inc/mm_heap__static.h	/^static inline void MMHeap_Manager_print(MMHeap_Manager *hm)$/;"	f
+MMHeap_Manager_removeMax	../ne_datastructures/inc/mm_heap__static.h	/^static inline MMHeap_Node *MMHeap_Manager_removeMax(MMHeap_Manager *hm)$/;"	f
+MMHeap_Manager_removeMax	../ne_datastructures/src/mm_heap.c	/^MMHeap_Node *MMHeap_Manager_removeMax(MMHeap_Manager *hm)$/;"	f
+MMHeap_Manager_removeMin	../ne_datastructures/inc/mm_heap__static.h	/^static inline MMHeap_Node *MMHeap_Manager_removeMin(MMHeap_Manager *hm)$/;"	f
+MMHeap_Manager_removeMin	../ne_datastructures/src/mm_heap.c	/^MMHeap_Node *MMHeap_Manager_removeMin(MMHeap_Manager *hm)$/;"	f
+MMHeap_Node	../ne_datastructures/inc/mm_heap.h	/^typedef struct __MMHeap_Node                 MMHeap_Node;$/;"	t	typeref:struct:__MMHeap_Node
+MMHeap_Node	../ne_datastructures/inc/mm_heap__static.h	/^typedef struct __MMHeap_Node                 MMHeap_Node;$/;"	t	typeref:struct:__MMHeap_Node
+MMHeap_Node_followToBottom	../ne_datastructures/inc/mm_heap__static.h	/^static inline MMHeap_Node **MMHeap_Node_followToBottom(MMHeap_Node *hn, MMHeap_Manager_Size h,$/;"	f
+MMHeap_Node_followToBottom	../ne_datastructures/src/mm_heap.c	/^MMHeap_Node **MMHeap_Node_followToBottom(MMHeap_Node *hn, MMHeap_Manager_Size h,$/;"	f
+MMHeap_Node_print	../ne_datastructures/inc/mm_heap.h	/^static inline void MMHeap_Node_print(MMHeap_Node *hn)$/;"	f
+MMHeap_Node_print	../ne_datastructures/inc/mm_heap__static.h	/^static inline void MMHeap_Node_print(MMHeap_Node *hn)$/;"	f
+MMHeap_Node_removeLastNode	../ne_datastructures/inc/mm_heap__static.h	/^static inline MMHeap_Node *MMHeap_Node_removeLastNode(MMHeap_Node *parent, MMHeap_Node *node)$/;"	f
+MMHeap_Node_removeLastNode	../ne_datastructures/src/mm_heap.c	/^MMHeap_Node *MMHeap_Node_removeLastNode(MMHeap_Node *parent, MMHeap_Node *node)$/;"	f
+MMHeap_Node_testMaxHeap	../ne_datastructures/inc/mm_heap.h	/^static inline int MMHeap_Node_testMaxHeap(MMHeap_Node *hn)$/;"	f
+MMHeap_Node_testMaxHeap	../ne_datastructures/inc/mm_heap__static.h	/^static inline int MMHeap_Node_testMaxHeap(MMHeap_Node *hn)$/;"	f
+MMHeap_Node_testMinHeap	../ne_datastructures/inc/mm_heap.h	/^static inline int MMHeap_Node_testMinHeap(MMHeap_Node *hn)$/;"	f
+MMHeap_Node_testMinHeap	../ne_datastructures/inc/mm_heap__static.h	/^static inline int MMHeap_Node_testMinHeap(MMHeap_Node *hn)$/;"	f
+MMHeap_floatDown	../ne_datastructures/inc/mm_heap__static.h	/^static inline void MMHeap_floatDown(MMStack **stack)$/;"	f
+MMHeap_floatDown	../ne_datastructures/src/mm_heap.c	/^void MMHeap_floatDown(MMStack **stack)$/;"	f
+MMHeap_floatUp	../ne_datastructures/inc/mm_heap__static.h	/^static inline void MMHeap_floatUp(MMStack **stack)$/;"	f
+MMHeap_floatUp	../ne_datastructures/src/mm_heap.c	/^void MMHeap_floatUp(MMStack **stack)$/;"	f
+MMHeap_freeAll	../ne_datastructures/inc/mm_heap__static.h	/^static inline void MMHeap_freeAll(MMHeap_Node *top)$/;"	f
+MMHeap_freeAll	../ne_datastructures/src/mm_heap.c	/^void MMHeap_freeAll(MMHeap_Node *top)$/;"	f
+MMHeap_makeMaxHeap	../ne_datastructures/inc/mm_heap__static.h	/^static inline void MMHeap_makeMaxHeap(MMHeap_Node *hn)$/;"	f
+MMHeap_makeMaxHeap	../ne_datastructures/src/mm_heap.c	/^void MMHeap_makeMaxHeap(MMHeap_Node *hn)$/;"	f
+MMHeap_makeMinHeap	../ne_datastructures/inc/mm_heap__static.h	/^static inline void MMHeap_makeMinHeap(MMHeap_Node *hn)$/;"	f
+MMHeap_makeMinHeap	../ne_datastructures/src/mm_heap.c	/^void MMHeap_makeMinHeap(MMHeap_Node *hn)$/;"	f
+MMHeap_swap	../ne_datastructures/inc/mm_heap__static.h	/^static inline void MMHeap_swap(MMHeap_Node *a, MMHeap_Node *b)$/;"	f
+MMHeap_swap	../ne_datastructures/src/mm_heap.c	/^void MMHeap_swap(MMHeap_Node *a, MMHeap_Node *b)$/;"	f
+MMInterpMethod	../mm_dsp/inc/mm_interp.h	/^} MMInterpMethod;$/;"	t	typeref:enum:__anon6
+MMInterpMethod_CUBIC	../mm_dsp/inc/mm_interp.h	/^    MMInterpMethod_CUBIC$/;"	e	enum:__anon6
+MMInterpMethod_LINEAR	../mm_dsp/inc/mm_interp.h	/^    MMInterpMethod_LINEAR,$/;"	e	enum:__anon6
+MMInterpMethod_NONE	../mm_dsp/inc/mm_interp.h	/^    MMInterpMethod_NONE,$/;"	e	enum:__anon6
+MMLineFunc2D	../mm_primitives/inc/mm_rationalfunc.h	/^typedef struct __MMLineFunc2D MMLineFunc2D;$/;"	t	typeref:struct:__MMLineFunc2D
+MMLineFunc2DV	../mm_primitives/inc/mm_rationalfunc_v.h	/^typedef struct __MMLineFunc2DV MMLineFunc2DV;$/;"	t	typeref:struct:__MMLineFunc2DV
+MMLineFunc2DV_eval	../mm_primitives/src/mm_rationalfunc_v.c	/^void MMLineFunc2DV_eval(MMRationalFuncV *lf, MMRationalFuncV_ArgType * x, MMRationalFuncV_ArgType * result,$/;"	f
+MMLineFunc2DV_init	../mm_primitives/src/mm_rationalfunc_v.c	/^void MMLineFunc2DV_init(MMLineFunc2DV *lf)$/;"	f
+MMLineFunc2DV_set_mb	../mm_primitives/src/mm_rationalfunc_v.c	/^void MMLineFunc2DV_set_mb(MMLineFunc2DV *lf, MMRationalFuncV_ArgType m,$/;"	f
+MMLineFunc2DV_set_points	../mm_primitives/src/mm_rationalfunc_v.c	/^void MMLineFunc2DV_set_points(MMLineFunc2DV *lf,$/;"	f
+MMLineFunc2D_eval	../mm_primitives/src/mm_rationalfunc.c	/^MMRationalFunc_ArgType MMLineFunc2D_eval(MMRationalFunc *lf, MMRationalFunc_ArgType x)$/;"	f
+MMLineFunc2D_eval_FAST	../mm_primitives/inc/mm_rationalfunc.h	25;"	d
+MMLineFunc2D_init	../mm_primitives/src/mm_rationalfunc.c	/^void MMLineFunc2D_init(MMLineFunc2D *lf)$/;"	f
+MMLineFunc2D_set_mb	../mm_primitives/src/mm_rationalfunc.c	/^void MMLineFunc2D_set_mb(MMLineFunc2D *lf, MMRationalFunc_ArgType m,$/;"	f
+MMLineFunc2D_set_mb_FAST	../mm_primitives/inc/mm_rationalfunc.h	26;"	d
+MMLineFunc2D_set_points	../mm_primitives/src/mm_rationalfunc.c	/^void MMLineFunc2D_set_points(MMLineFunc2D *lf,$/;"	f
+MMList	../mm_primitives/inc/mm_list.h	/^typedef struct __MMList MMList;$/;"	t	typeref:struct:__MMList
+MMList_append	../mm_primitives/src/mm_list.c	/^void MMList_append(MMList *head, MMList *tail)$/;"	f
+MMList_free	../mm_primitives/src/mm_list.c	/^void MMList_free(MMList *head)$/;"	f
+MMList_getNext	../mm_primitives/inc/mm_list.h	4;"	d
+MMList_init	../mm_primitives/src/mm_list.c	/^void MMList_init(MMList *head)$/;"	f
+MMMIDI_PATH	Makefile	/^MMMIDI_PATH				 = ..\/mmmidi$/;"	m
+MMMsg	../mm_primitives/src/mm_msg.h	/^typedef struct __MMMsg MMMsg;$/;"	t	typeref:struct:__MMMsg
+MMPRIMITIVES_CFLAGS	../mm_primitives/Makefile	/^MMPRIMITIVES_CFLAGS	= -Ofast$/;"	m
+MMPRIMITIVES_CFLAGS	../mm_primitives/i386.mk	/^MMPRIMITIVES_CFLAGS	= -Ofast$/;"	m
+MMPRIMITIVES_DEP	../mm_primitives/Makefile	/^MMPRIMITIVES_DEP       = $(wildcard $(MMPRIMITIVES_INC_PATH)\/*.h)$/;"	m
+MMPRIMITIVES_DEP	../mm_primitives/i386.mk	/^MMPRIMITIVES_DEP       = $(wildcard $(MMPRIMITIVES_INC_PATH)\/*.h)$/;"	m
+MMPRIMITIVES_INC_PATH	../mm_dsp/Makefile	/^MMPRIMITIVES_INC_PATH = $(MMPRIMITIVES_PATH)\/inc$/;"	m
+MMPRIMITIVES_INC_PATH	../mm_dsp/i386.mk	/^MMPRIMITIVES_INC_PATH = $(MMPRIMITIVES_PATH)\/inc$/;"	m
+MMPRIMITIVES_INC_PATH	../mm_primitives/Makefile	/^MMPRIMITIVES_INC_PATH  = inc$/;"	m
+MMPRIMITIVES_INC_PATH	../mm_primitives/i386.mk	/^MMPRIMITIVES_INC_PATH  = inc$/;"	m
+MMPRIMITIVES_OBJS	../mm_primitives/Makefile	/^MMPRIMITIVES_OBJS      = $(MMPRIMITIVES_SRCS:$(MMPRIMITIVES_SRCS_PATH)\/%.c=objs\/%.o)$/;"	m
+MMPRIMITIVES_OBJS	../mm_primitives/i386.mk	/^MMPRIMITIVES_OBJS      = $(MMPRIMITIVES_SRCS:$(MMPRIMITIVES_SRCS_PATH)\/%.c=objs\/%.o)$/;"	m
+MMPRIMITIVES_PATH	../mm_dsp/Makefile	/^MMPRIMITIVES_PATH = ..\/mm_primitives$/;"	m
+MMPRIMITIVES_PATH	../mm_dsp/i386.mk	/^MMPRIMITIVES_PATH = ..\/mm_primitives$/;"	m
+MMPRIMITIVES_SRCS	../mm_primitives/Makefile	/^MMPRIMITIVES_SRCS      = $(wildcard $(MMPRIMITIVES_SRCS_PATH)\/*.c)$/;"	m
+MMPRIMITIVES_SRCS	../mm_primitives/i386.mk	/^MMPRIMITIVES_SRCS      = $(wildcard $(MMPRIMITIVES_SRCS_PATH)\/*.c)$/;"	m
+MMPRIMITIVES_SRCS_PATH	../mm_primitives/Makefile	/^MMPRIMITIVES_SRCS_PATH = src$/;"	m
+MMPRIMITIVES_SRCS_PATH	../mm_primitives/i386.mk	/^MMPRIMITIVES_SRCS_PATH = src$/;"	m
+MMPV_TESP_H	../mm_dsp/inc/mmpv_tesp.h	2;"	d
+MMPolyManager	../mm_dsp/inc/mm_poly_voice_manage.h	/^typedef struct __MMPolyManager MMPolyManager;$/;"	t	typeref:struct:__MMPolyManager
+MMPolyManagerSteal	../mm_dsp/inc/mm_poly_voice_manage.h	/^} MMPolyManagerSteal;$/;"	t	typeref:enum:__anon15
+MMPolyManagerSteal_FALSE	../mm_dsp/inc/mm_poly_voice_manage.h	/^    MMPolyManagerSteal_FALSE,$/;"	e	enum:__anon15
+MMPolyManagerSteal_TRUE	../mm_dsp/inc/mm_poly_voice_manage.h	/^    MMPolyManagerSteal_TRUE,$/;"	e	enum:__anon15
+MMPolyManager_addVoice	../mm_dsp/src/mm_poly_voice_manage.c	/^int MMPolyManager_addVoice(MMPolyManager *pm, size_t index, MMPolyVoice *voice)$/;"	f
+MMPolyManager_free	../mm_dsp/src/mm_poly_voice_manage.c	/^void MMPolyManager_free(MMPolyManager *pm)$/;"	f
+MMPolyManager_getVoice	../mm_dsp/src/mm_poly_voice_manage.c	/^MMPolyVoice *MMPolyManager_getVoice(MMPolyManager *pm, size_t index)$/;"	f
+MMPolyManager_new	../mm_dsp/src/mm_poly_voice_manage.c	/^MMPolyManager *MMPolyManager_new(size_t numVoices)$/;"	f
+MMPolyManager_noteOff	../mm_dsp/src/mm_poly_voice_manage.c	/^void MMPolyManager_noteOff(MMPolyManager *pm, MMPolyVoiceParams *params)$/;"	f
+MMPolyManager_noteOn	../mm_dsp/src/mm_poly_voice_manage.c	/^void MMPolyManager_noteOn(MMPolyManager *pm, $/;"	f
+MMPolyManager_removeVoice	../mm_dsp/src/mm_poly_voice_manage.c	/^MMPolyVoice *MMPolyManager_removeVoice(MMPolyManager *pm, size_t index)$/;"	f
+MMPolyVoice	../mm_dsp/inc/mm_poly_voice_manage.h	/^typedef struct __MMPolyVoice MMPolyVoice;$/;"	t	typeref:struct:__MMPolyVoice
+MMPolyVoiceParams	../mm_dsp/inc/mm_poly_voice_manage.h	/^typedef struct __MMPolyVoiceParams MMPolyVoiceParams;$/;"	t	typeref:struct:__MMPolyVoiceParams
+MMPolyVoiceParams_init	../mm_dsp/inc/mm_poly_voice_manage.h	51;"	d
+MMPolyVoiceUsed	../mm_dsp/inc/mm_poly_voice_manage.h	/^} MMPolyVoiceUsed;$/;"	t	typeref:enum:__anon16
+MMPolyVoiceUsed_FALSE	../mm_dsp/inc/mm_poly_voice_manage.h	/^    MMPolyVoiceUsed_FALSE,$/;"	e	enum:__anon16
+MMPolyVoiceUsed_TRUE	../mm_dsp/inc/mm_poly_voice_manage.h	/^    MMPolyVoiceUsed_TRUE,$/;"	e	enum:__anon16
+MMPolyVoice_attachOnTurnOff	../mm_dsp/inc/mm_poly_voice_manage.h	64;"	d
+MMPolyVoice_compare	../mm_dsp/inc/mm_poly_voice_manage.h	63;"	d
+MMPolyVoice_init	../mm_dsp/inc/mm_poly_voice_manage.h	66;"	d
+MMPolyVoice_set_attachOnTurnOff	../mm_dsp/inc/mm_poly_voice_manage.h	60;"	d
+MMPolyVoice_set_compare	../mm_dsp/inc/mm_poly_voice_manage.h	59;"	d
+MMPolyVoice_set_turnOff	../mm_dsp/inc/mm_poly_voice_manage.h	58;"	d
+MMPolyVoice_set_turnOn	../mm_dsp/inc/mm_poly_voice_manage.h	57;"	d
+MMPolyVoice_set_used	../mm_dsp/inc/mm_poly_voice_manage.h	56;"	d
+MMPolyVoice_turnOff	../mm_dsp/inc/mm_poly_voice_manage.h	62;"	d
+MMPolyVoice_turnOn	../mm_dsp/inc/mm_poly_voice_manage.h	61;"	d
+MMPvtesp	../mm_dsp/inc/mmpv_tesp.h	/^typedef struct __MMPvtesp MMPvtesp;$/;"	t	typeref:struct:__MMPvtesp
+MMPvtespParamType	../mm_dsp/inc/mmpv_tesp.h	/^} MMPvtespParamType;$/;"	t	typeref:enum:__anon7
+MMPvtespParamType_NOTEOFF	../mm_dsp/inc/mmpv_tesp.h	/^    MMPvtespParamType_NOTEOFF,  \/* parameters for a note off *\/$/;"	e	enum:__anon7
+MMPvtespParamType_NOTEON	../mm_dsp/inc/mmpv_tesp.h	/^    MMPvtespParamType_NOTEON,   \/* parameters for a note on *\/$/;"	e	enum:__anon7
+MMPvtespParamType_ONDONE	../mm_dsp/inc/mmpv_tesp.h	/^    MMPvtespParamType_ONDONE    \/* parameters for when called as a callback when$/;"	e	enum:__anon7
+MMPvtespParams	../mm_dsp/inc/mmpv_tesp.h	/^typedef struct __MMPvtespParams MMPvtespParams;$/;"	t	typeref:struct:__MMPvtespParams
+MMPvtespParams_new	../mm_dsp/src/mmpv_tesp.c	/^MMPvtespParams *MMPvtespParams_new()$/;"	f
+MMPvtespRateSource	../mm_dsp/inc/mmpv_tesp.h	/^} MMPvtespRateSource;$/;"	t	typeref:enum:__anon8
+MMPvtespRateSource_NOTE	../mm_dsp/inc/mmpv_tesp.h	/^    MMPvtespRateSource_NOTE,    \/* Note will be used to set the rate of the$/;"	e	enum:__anon8
+MMPvtespRateSource_RATE	../mm_dsp/inc/mmpv_tesp.h	/^    MMPvtespRateSource_RATE     \/* Rate will be used to set the rate of playback$/;"	e	enum:__anon8
+MMPvtesp_attachOnTurnOff	../mm_dsp/src/mmpv_tesp.c	/^static void MMPvtesp_attachOnTurnOff(MMPolyVoice *pv, MMPolyVoiceParams *params)$/;"	f	file:
+MMPvtesp_compare	../mm_dsp/src/mmpv_tesp.c	/^static int MMPvtesp_compare(MMPolyVoice *pv, MMPolyVoiceParams *params)$/;"	f	file:
+MMPvtesp_init	../mm_dsp/src/mmpv_tesp.c	/^static void MMPvtesp_init(MMPvtesp *pvtesp, MMTrapEnvedSamplePlayer *tesp)$/;"	f	file:
+MMPvtesp_new	../mm_dsp/src/mmpv_tesp.c	/^MMPvtesp *MMPvtesp_new(MMTrapEnvedSamplePlayer *tesp)$/;"	f
+MMPvtesp_onDone	../mm_dsp/src/mmpv_tesp.c	/^static void MMPvtesp_onDone(MMEnvedSamplePlayer *esp)$/;"	f	file:
+MMPvtesp_turnOff	../mm_dsp/src/mmpv_tesp.c	/^static void MMPvtesp_turnOff(MMPolyVoice *pv, MMPolyVoiceParams *params)$/;"	f	file:
+MMPvtesp_turnOn	../mm_dsp/src/mmpv_tesp.c	/^static void MMPvtesp_turnOn(MMPolyVoice *pv, MMPolyVoiceParams *params)$/;"	f	file:
+MMQueueController	../ne_datastructures/inc/mm_queue.h	/^typedef struct __MMQueueController MMQueueController;$/;"	t	typeref:struct:__MMQueueController
+MMQueueController	../ne_datastructures/inc/mm_queuecontroller.h	/^typedef struct __MMQueueController MMQueueController;$/;"	t	typeref:struct:__MMQueueController
+MMQueueController_init	../ne_datastructures/inc/mm_queuecontroller.h	/^static inline void MMQueueController_init(MMQueueController *qc, void **items, size_t size)$/;"	f
+MMQueueController_pop	../ne_datastructures/inc/mm_queue.h	/^static inline void *MMQueueController_pop(MMQueueController *q)$/;"	f
+MMQueueController_pop	../ne_datastructures/inc/mm_queuecontroller.h	/^static inline void *MMQueueController_pop(MMQueueController *q)$/;"	f
+MMQueueController_push	../ne_datastructures/inc/mm_queue.h	/^static inline int MMQueueController_push(MMQueueController *q, void *item)$/;"	f
+MMQueueController_push	../ne_datastructures/inc/mm_queuecontroller.h	/^static inline int MMQueueController_push(MMQueueController *q, void *item)$/;"	f
+MMRationalFunc	../mm_primitives/inc/mm_rationalfunc.h	/^typedef struct __MMRationalFunc MMRationalFunc;$/;"	t	typeref:struct:__MMRationalFunc
+MMRationalFuncV	../mm_primitives/inc/mm_rationalfunc_v.h	/^typedef struct __MMRationalFuncV MMRationalFuncV;$/;"	t	typeref:struct:__MMRationalFuncV
+MMRationalFuncV_ArgType	../mm_primitives/inc/mm_rationalfunc_v.h	7;"	d
+MMRationalFuncV_eval	../mm_primitives/inc/mm_rationalfunc_v.h	16;"	d
+MMRationalFunc_ArgType	../mm_primitives/inc/mm_rationalfunc.h	5;"	d
+MMRationalFunc_ArgType	../mm_primitives/test/mm_rationalfunc_test.c	4;"	d	file:
+MMRationalFunc_eval	../mm_primitives/inc/mm_rationalfunc.h	14;"	d
+MMSample	../mm_dsp/inc/mm_sample.h	/^typedef float MMSample;$/;"	t
+MMSamplePlayer	../mm_dsp/inc/mm_sampleplayer.h	/^typedef struct __MMSamplePlayer MMSamplePlayer;$/;"	t	typeref:struct:__MMSamplePlayer
+MMSamplePlayerSigProc	../mm_dsp/inc/mm_sampleplayer.h	/^typedef struct __MMSamplePlayerSigProc MMSamplePlayerSigProc;$/;"	t	typeref:struct:__MMSamplePlayerSigProc
+MMSamplePlayerSigProc_free	../mm_dsp/inc/mm_sampleplayer.h	43;"	d
+MMSamplePlayerSigProc_getSampleInterpCubicMu_	../mm_dsp/inc/mm_sampleplayer.h	129;"	d
+MMSamplePlayerSigProc_getSampleInterpCubicMu_sum_	../mm_dsp/inc/mm_sampleplayer.h	148;"	d
+MMSamplePlayerSigProc_getSampleInterpCubicNorm_	../mm_dsp/inc/mm_sampleplayer.h	110;"	d
+MMSamplePlayerSigProc_getSampleInterpCubic_	../mm_dsp/inc/mm_sampleplayer.h	89;"	d
+MMSamplePlayerSigProc_getSampleInterpLinear_	../mm_dsp/inc/mm_sampleplayer.h	64;"	d
+MMSamplePlayerSigProc_getSampleInterpLinear_sum_	../mm_dsp/inc/mm_sampleplayer.h	76;"	d
+MMSamplePlayerSigProc_getSampleInterpNone_	../mm_dsp/inc/mm_sampleplayer.h	54;"	d
+MMSamplePlayerSigProc_getSampleInterpNone_sum_	../mm_dsp/inc/mm_sampleplayer.h	59;"	d
+MMSamplePlayerSigProc_init	../mm_dsp/src/mm_sampleplayer.c	/^void MMSamplePlayerSigProc_init(MMSamplePlayerSigProc *spsp, MMSamplePlayerTickType tt)$/;"	f
+MMSamplePlayerSigProc_new	../mm_dsp/src/mm_sampleplayer.c	/^MMSamplePlayerSigProc *MMSamplePlayerSigProc_new(void)$/;"	f
+MMSamplePlayerSigProc_tick_no_sum	../mm_dsp/src/mm_sampleplayer.c	/^static void MMSamplePlayerSigProc_tick_no_sum(MMSigProc *sp)$/;"	f	file:
+MMSamplePlayerSigProc_tick_sum	../mm_dsp/src/mm_sampleplayer.c	/^static void MMSamplePlayerSigProc_tick_sum(MMSigProc *sp)$/;"	f	file:
+MMSamplePlayerTickType	../mm_dsp/inc/mm_sampleplayer.h	/^} MMSamplePlayerTickType;$/;"	t	typeref:enum:__anon17
+MMSamplePlayerTickType_NOSUM	../mm_dsp/inc/mm_sampleplayer.h	/^    MMSamplePlayerTickType_NOSUM,$/;"	e	enum:__anon17
+MMSamplePlayerTickType_SUM	../mm_dsp/inc/mm_sampleplayer.h	/^    MMSamplePlayerTickType_SUM$/;"	e	enum:__anon17
+MMSamplePlayer_init	../mm_dsp/src/mm_sampleplayer.c	/^void MMSamplePlayer_init(MMSamplePlayer *sp)$/;"	f
+MMSamplePlayer_new	../mm_dsp/src/mm_sampleplayer.c	/^MMSamplePlayer *MMSamplePlayer_new(void)$/;"	f
+MMSeq	../mm_primitives/inc/mm_seq.h	/^typedef struct __MMSeq MMSeq;$/;"	t	typeref:struct:__MMSeq
+MMSeq_checkIfEmpty	../mm_primitives/src/mm_seq.c	/^int MMSeq_checkIfEmpty(MMSeq *seq)$/;"	f
+MMSeq_doAllCurrentEvents	../mm_primitives/src/mm_seq.c	/^void MMSeq_doAllCurrentEvents(MMSeq *seq)$/;"	f
+MMSeq_free	../mm_primitives/src/mm_seq.c	/^void MMSeq_free(MMSeq *seq)$/;"	f
+MMSeq_getCurrentEvent	../mm_primitives/src/mm_seq.c	/^MMEvent *MMSeq_getCurrentEvent(MMSeq *seq)$/;"	f
+MMSeq_getCurrentTime	../mm_primitives/src/mm_seq.c	/^MMTime MMSeq_getCurrentTime(MMSeq *seq)$/;"	f
+MMSeq_init	../mm_primitives/src/mm_seq.c	/^void MMSeq_init(MMSeq *seq, size_t maxPendingItems)$/;"	f
+MMSeq_loadCurrentEvents	../mm_primitives/src/mm_seq.c	/^void MMSeq_loadCurrentEvents(MMSeq *seq)$/;"	f
+MMSeq_new	../mm_primitives/src/mm_seq.c	/^MMSeq *MMSeq_new(void)$/;"	f
+MMSeq_scheduleEvent	../mm_primitives/src/mm_seq.c	/^void MMSeq_scheduleEvent(MMSeq *seq, MMEvent *ev, MMTime time)$/;"	f
+MMSeq_tick	../mm_primitives/src/mm_seq.c	/^void MMSeq_tick(MMSeq *seq)$/;"	f
+MMSigChain	../mm_dsp/inc/mm_sigchain.h	/^typedef struct __MMSigChain MMSigChain;$/;"	t	typeref:struct:__MMSigChain
+MMSigChain_init	../mm_dsp/src/mm_sigchain.c	/^void MMSigChain_init(MMSigChain *sc)$/;"	f
+MMSigChain_tick	../mm_dsp/src/mm_sigchain.c	/^static void MMSigChain_tick(MMSigProc *sp)$/;"	f	file:
+MMSigConst	../mm_dsp/inc/mm_sigconst.h	/^typedef struct __MMSigConst MMSigConst;$/;"	t	typeref:struct:__MMSigConst
+MMSigConst_doSum	../mm_dsp/inc/mm_sigconst.h	/^} MMSigConst_doSum;$/;"	t	typeref:enum:__anon13
+MMSigConst_doSum_FALSE	../mm_dsp/inc/mm_sigconst.h	/^    MMSigConst_doSum_FALSE,$/;"	e	enum:__anon13
+MMSigConst_doSum_TRUE	../mm_dsp/inc/mm_sigconst.h	/^    MMSigConst_doSum_TRUE,$/;"	e	enum:__anon13
+MMSigConst_getConstant	../mm_dsp/inc/mm_sigconst.h	25;"	d
+MMSigConst_getDoSum	../mm_dsp/inc/mm_sigconst.h	27;"	d
+MMSigConst_getOutBus	../mm_dsp/inc/mm_sigconst.h	23;"	d
+MMSigConst_init	../mm_dsp/src/mm_sigconst.c	/^void MMSigConst_init(MMSigConst *sc, MMBus *outBus, MMSample constant, MMSigConst_doSum doSum)$/;"	f
+MMSigConst_setConstant	../mm_dsp/inc/mm_sigconst.h	26;"	d
+MMSigConst_setDoSum	../mm_dsp/inc/mm_sigconst.h	28;"	d
+MMSigConst_setOutBus	../mm_dsp/inc/mm_sigconst.h	24;"	d
+MMSigConst_tick	../mm_dsp/src/mm_sigconst.c	/^static void MMSigConst_tick(MMSigProc *sp)$/;"	f	file:
+MMSigProc	../mm_dsp/inc/mm_sigproc.h	/^typedef struct __MMSigProc MMSigProc;$/;"	t	typeref:struct:__MMSigProc
+MMSigProc_DoneAction	../mm_dsp/inc/mm_sigproc.h	/^} MMSigProc_DoneAction;$/;"	t	typeref:enum:__anon12
+MMSigProc_DoneAction_FREE	../mm_dsp/inc/mm_sigproc.h	/^    MMSigProc_DoneAction_FREE$/;"	e	enum:__anon12
+MMSigProc_DoneAction_NONE	../mm_dsp/inc/mm_sigproc.h	/^    MMSigProc_DoneAction_NONE,$/;"	e	enum:__anon12
+MMSigProc_Err	../mm_dsp/inc/mm_sigproc.h	/^} MMSigProc_Err;$/;"	t	typeref:enum:__anon10
+MMSigProc_Err_GOOD	../mm_dsp/inc/mm_sigproc.h	/^    MMSigProc_Err_GOOD,$/;"	e	enum:__anon10
+MMSigProc_Err_IDLE	../mm_dsp/inc/mm_sigproc.h	/^    MMSigProc_Err_IDLE, \/* Not really an error, output when the sigproc is not do anything (perhaps because it is in "done" state) *\/$/;"	e	enum:__anon10
+MMSigProc_Err_JUST_FREED	../mm_dsp/inc/mm_sigproc.h	/^    MMSigProc_Err_JUST_FREED \/* Also not an error, just freed the node so we're done *\/$/;"	e	enum:__anon10
+MMSigProc_Err_NOTINIT	../mm_dsp/inc/mm_sigproc.h	/^    MMSigProc_Err_NOTINIT, \/* set when something has not been initialized properly or fully *\/$/;"	e	enum:__anon10
+MMSigProc_Err_UNKNOWN	../mm_dsp/inc/mm_sigproc.h	/^    MMSigProc_Err_UNKNOWN,$/;"	e	enum:__anon10
+MMSigProc_FreeFunc	../mm_dsp/inc/mm_sigproc.h	/^typedef void          (*MMSigProc_FreeFunc)(MMSigProc *);$/;"	t
+MMSigProc_HandleStateFunc	../mm_dsp/inc/mm_sigproc.h	/^typedef MMSigProc_Err (*MMSigProc_HandleStateFunc)(MMSigProc *);$/;"	t
+MMSigProc_State	../mm_dsp/inc/mm_sigproc.h	/^} MMSigProc_State;$/;"	t	typeref:enum:__anon11
+MMSigProc_State_DONE	../mm_dsp/inc/mm_sigproc.h	/^    MMSigProc_State_DONE,$/;"	e	enum:__anon11
+MMSigProc_State_FREED	../mm_dsp/inc/mm_sigproc.h	/^    MMSigProc_State_FREED \/* Has been freed *\/$/;"	e	enum:__anon11
+MMSigProc_State_PAUSED	../mm_dsp/inc/mm_sigproc.h	/^    MMSigProc_State_PAUSED,$/;"	e	enum:__anon11
+MMSigProc_State_PLAYING	../mm_dsp/inc/mm_sigproc.h	/^    MMSigProc_State_PLAYING,$/;"	e	enum:__anon11
+MMSigProc_State_UNKNOWN	../mm_dsp/inc/mm_sigproc.h	/^    MMSigProc_State_UNKNOWN,$/;"	e	enum:__anon11
+MMSigProc_State_WAIT_FREE	../mm_dsp/inc/mm_sigproc.h	/^    MMSigProc_State_WAIT_FREE, \/* Waiting to be freed *\/$/;"	e	enum:__anon11
+MMSigProc_TickFunc	../mm_dsp/inc/mm_sigproc.h	/^typedef void (*MMSigProc_TickFunc)(MMSigProc *);$/;"	t
+MMSigProc_addAfterTail	../mm_dsp/inc/mm_sigproc.h	58;"	d
+MMSigProc_addBeforeHead	../mm_dsp/inc/mm_sigproc.h	59;"	d
+MMSigProc_defaultTick	../mm_dsp/src/mm_sigproc.c	/^void MMSigProc_defaultTick(MMSigProc *sp)$/;"	f
+MMSigProc_free	../mm_dsp/src/mm_sigproc.c	/^void MMSigProc_free(void *sp)$/;"	f
+MMSigProc_getDoneAction	../mm_dsp/inc/mm_sigproc.h	54;"	d
+MMSigProc_getState	../mm_dsp/inc/mm_sigproc.h	52;"	d
+MMSigProc_init	../mm_dsp/src/mm_sigproc.c	/^void MMSigProc_init(MMSigProc *sp)$/;"	f
+MMSigProc_insertAfter	../mm_dsp/inc/mm_sigproc.h	56;"	d
+MMSigProc_insertBefore	../mm_dsp/inc/mm_sigproc.h	57;"	d
+MMSigProc_new	../mm_dsp/src/mm_sigproc.c	/^MMSigProc *MMSigProc_new(void)$/;"	f
+MMSigProc_remove	../mm_dsp/inc/mm_sigproc.h	60;"	d
+MMSigProc_setDoneAction	../mm_dsp/inc/mm_sigproc.h	55;"	d
+MMSigProc_setState	../mm_dsp/inc/mm_sigproc.h	53;"	d
+MMSigProc_setTick	../mm_dsp/inc/mm_sigproc.h	51;"	d
+MMSigProc_tick	../mm_dsp/inc/mm_sigproc.h	49;"	d
+MMStack	../ne_datastructures/inc/mm_stack.h	/^typedef struct __MMStack MMStack;$/;"	t	typeref:struct:__MMStack
+MMStack_free	../ne_datastructures/inc/mm_stack.h	/^static inline MMStack *MMStack_free(MMStack *stack)$/;"	f
+MMStack_freeDeep	../ne_datastructures/inc/mm_stack.h	/^static inline MMStack *MMStack_freeDeep(MMStack *stack)$/;"	f
+MMStack_new	../ne_datastructures/inc/mm_stack.h	/^static inline MMStack *MMStack_new(void *item)$/;"	f
+MMStack_pop	../ne_datastructures/inc/mm_stack.h	/^static inline MMStack *MMStack_pop(MMStack *stack, void **item)$/;"	f
+MMStack_push	../ne_datastructures/inc/mm_stack.h	/^static inline MMStack *MMStack_push(MMStack *stack, void *item)$/;"	f
+MMStaticQueue	../ne_datastructures/inc/mm_staticqueue.h	/^typedef struct __MMStaticQueue MMStaticQueue;$/;"	t	typeref:struct:__MMStaticQueue
+MMStaticQueue_init	../ne_datastructures/inc/mm_queue.h	/^void MMStaticQueue_init(MMQueueController *qc, void **items, size_t size)$/;"	f
+MMStaticQueue_new	../ne_datastructures/inc/mm_staticqueue.h	/^static inline MMStaticQueue *MMStaticQueue_new(size_t size)$/;"	f
+MMStaticQueue_pop	../ne_datastructures/inc/mm_staticqueue.h	/^static inline void *MMStaticQueue_pop(MMStaticQueue *q)$/;"	f
+MMStaticQueue_push	../ne_datastructures/inc/mm_staticqueue.h	/^static inline int MMStaticQueue_push(MMStaticQueue *q, void *item)$/;"	f
+MMTestEvent	../mm_primitives/test/mm_seq_test.c	/^typedef struct __MMTestEvent MMTestEvent;$/;"	t	typeref:struct:__MMTestEvent	file:
+MMTestEvent	../mm_primitives/test/mm_seq_test_2.c	/^typedef struct __MMTestEvent MMTestEvent;$/;"	t	typeref:struct:__MMTestEvent	file:
+MMTestEvent_happen	../mm_primitives/test/mm_seq_test.c	/^void MMTestEvent_happen(MMEvent *event)$/;"	f
+MMTestEvent_happen	../mm_primitives/test/mm_seq_test_2.c	/^void MMTestEvent_happen(MMEvent *event)$/;"	f
+MMTestEvent_init	../mm_primitives/test/mm_seq_test.c	/^void MMTestEvent_init(MMTestEvent *event, char *str)$/;"	f
+MMTestEvent_init	../mm_primitives/test/mm_seq_test_2.c	/^void MMTestEvent_init(MMTestEvent *event, char *str)$/;"	f
+MMTestEvent_new	../mm_primitives/test/mm_seq_test.c	/^MMTestEvent *MMTestEvent_new(void)$/;"	f
+MMTestEvent_new	../mm_primitives/test/mm_seq_test_2.c	/^MMTestEvent *MMTestEvent_new(void)$/;"	f
+MMTest_eventCB	../mm_primitives/test/mm_eventlist_test.c	/^void MMTest_eventCB(MMEventHandle event)$/;"	f
+MMTime	../mm_primitives/inc/mm_time.h	/^typedef uint64_t MMTime; \/* the smallest unit of time *\/$/;"	t
+MMTime_Tick	../mm_primitives/inc/mm_time.h	/^typedef uint64_t MMTime_Tick; \/* the smallest unit of time (deprecated) *\/$/;"	t
+MMTrapEnvGen	../mm_dsp/inc/mm_trapenvgen.h	/^typedef struct __MMTrapEnvGen MMTrapEnvGen;$/;"	t	typeref:struct:__MMTrapEnvGen
+MMTrapEnvGen_get	../mm_dsp/inc/mm_trapenvgen.h	24;"	d
+MMTrapEnvGen_init	../mm_dsp/src/mm_trapenvgen.c	/^void MMTrapEnvGen_init(  MMTrapEnvGen *teg,$/;"	f
+MMTrapEnvGen_tick	../mm_dsp/src/mm_trapenvgen.c	/^void MMTrapEnvGen_tick(MMSigProc *teg)$/;"	f
+MMTrapEnvedSamplePlayer	../mm_dsp/inc/mm_trapenvedsampleplayer.h	/^typedef struct __MMTrapEnvedSamplePlayer MMTrapEnvedSamplePlayer;$/;"	t	typeref:struct:__MMTrapEnvedSamplePlayer
+MMTrapEnvedSamplePlayer_getTrapezoidEnv	../mm_dsp/inc/mm_trapenvedsampleplayer.h	44;"	d
+MMTrapEnvedSamplePlayer_init	../mm_dsp/src/mm_trapenvedsampleplayer.c	/^void MMTrapEnvedSamplePlayer_init(MMTrapEnvedSamplePlayer *tesp, MMBus *outBus,$/;"	f
+MMTrapEnvedSamplePlayer_noteOn	../mm_dsp/src/mm_trapenvedsampleplayer.c	/^void MMTrapEnvedSamplePlayer_noteOn($/;"	f
+MMTrapEnvedSamplePlayer_noteOn_CHECK_RATE_SOURCE	../mm_dsp/src/mmpv_tesp.c	8;"	d	file:
+MMTrapEnvedSamplePlayer_noteOn_Rate	../mm_dsp/src/mm_trapenvedsampleplayer.c	/^void MMTrapEnvedSamplePlayer_noteOn_Rate($/;"	f
+MMTrapezoidEnv	../mm_dsp/inc/mm_trapezoid_env.h	/^} MMTrapezoidEnv;$/;"	t	typeref:struct:__MMTrapezoidEnv
+MMTrapezoidEnvState	../mm_dsp/inc/mm_trapezoid_env.h	/^} MMTrapezoidEnvState;$/;"	t	typeref:enum:__anon19
+MMTrapezoidEnvState_ATTACK	../mm_dsp/inc/mm_trapezoid_env.h	/^    MMTrapezoidEnvState_ATTACK = MMEnvelopeState_DUMMY,$/;"	e	enum:__anon19
+MMTrapezoidEnvState_RELEASE	../mm_dsp/inc/mm_trapezoid_env.h	/^    MMTrapezoidEnvState_RELEASE$/;"	e	enum:__anon19
+MMTrapezoidEnvState_SUSTAIN	../mm_dsp/inc/mm_trapezoid_env.h	/^    MMTrapezoidEnvState_SUSTAIN,$/;"	e	enum:__anon19
+MMTrapezoidEnv_get	../mm_dsp/inc/mm_trapezoid_env.h	39;"	d
+MMTrapezoidEnv_getCurValue	../mm_dsp/src/mm_trapezoid_env.c	/^static MMSample MMTrapezoidEnv_getCurValue(MMEnvelope *te)$/;"	f	file:
+MMTrapezoidEnv_getCurValue_FAST	../mm_dsp/inc/mm_trapezoid_env.h	41;"	d
+MMTrapezoidEnv_incTime	../mm_dsp/src/mm_trapezoid_env.c	/^static void MMTrapezoidEnv_incTime(MMEnvelope *te, MMSample deltaTime)$/;"	f	file:
+MMTrapezoidEnv_incTime_FAST	../mm_dsp/inc/mm_trapezoid_env.h	46;"	d
+MMTrapezoidEnv_init	../mm_dsp/src/mm_trapezoid_env.c	/^void MMTrapezoidEnv_init(MMTrapezoidEnv *te,$/;"	f
+MMTrapezoidEnv_reset	../mm_dsp/src/mm_trapezoid_env.c	/^static void MMTrapezoidEnv_reset(MMEnvelope *te)$/;"	f	file:
+MMTrapezoidEnv_setEnvParams	../mm_dsp/inc/mm_trapezoid_env.h	32;"	d
+MMTrapezoidEnv_startAttack	../mm_dsp/src/mm_trapezoid_env.c	/^static void MMTrapezoidEnv_startAttack(MMEnvelope *te)$/;"	f	file:
+MMTrapezoidEnv_startRelease	../mm_dsp/src/mm_trapezoid_env.c	/^void MMTrapezoidEnv_startRelease(MMEnvelope *te)$/;"	f
+MMTuning_getA4Hz	../mm_dsp/inc/mm_tuning.h	6;"	d
+MMWavTab	../mm_dsp/inc/mm_wavtab.h	/^typedef struct __MMWavTab MMWavTab;$/;"	t	typeref:struct:__MMWavTab
+MMWavTabRecorder	../mm_dsp/inc/mm_wavtab_recorder.h	/^typedef struct __MMWavTabRecorder MMWavTabRecorder;$/;"	t	typeref:struct:__MMWavTabRecorder
+MMWavTabRecorderState	../mm_dsp/inc/mm_wavtab_recorder.h	/^} MMWavTabRecorderState;$/;"	t	typeref:enum:__anon9
+MMWavTabRecorderState_RECORDING	../mm_dsp/inc/mm_wavtab_recorder.h	/^    MMWavTabRecorderState_RECORDING$/;"	e	enum:__anon9
+MMWavTabRecorderState_STOPPED	../mm_dsp/inc/mm_wavtab_recorder.h	/^    MMWavTabRecorderState_STOPPED,$/;"	e	enum:__anon9
+MMWavTabRecorder_init	../mm_dsp/src/mm_wavtab_recorder.c	/^void MMWavTabRecorder_init(MMWavTabRecorder *wtr)$/;"	f
+MMWavTabRecorder_startRecording	../mm_dsp/inc/mm_wavtab_recorder.h	27;"	d
+MMWavTabRecorder_stopRecording	../mm_dsp/inc/mm_wavtab_recorder.h	29;"	d
+MMWavTabRecorder_tick	../mm_dsp/src/mm_wavtab_recorder.c	/^static void MMWavTabRecorder_tick(MMSigProc *sp)$/;"	f	file:
+MMWavTab_get	../mm_dsp/inc/mm_wavtab.h	17;"	d
+MMWavTab_get_freq	../mm_dsp/inc/mm_wavtab.h	20;"	d
+MM_ADSR_H	../mm_dsp/inc/mm_adsr.h	2;"	d
+MM_ARRAY_H	../mm_primitives/inc/mm_array.h	2;"	d
+MM_BOOL_H	../mm_primitives/inc/mm_bool.h	2;"	d
+MM_BUSMERGER_H	../mm_dsp/inc/mm_busmerger.h	2;"	d
+MM_BUSMULT_H	../mm_dsp/inc/mm_busmult.h	2;"	d
+MM_BUS_H	../mm_dsp/inc/mm_bus.h	2;"	d
+MM_COMMON_CALCS_H	../mm_dsp/inc/mm_common_calcs.h	2;"	d
+MM_DLLIST_H	../mm_primitives/inc/mm_dllist.h	2;"	d
+MM_DSP_PATH	Makefile	/^MM_DSP_PATH				 = ..\/mm_dsp$/;"	m
+MM_DSP_SCHABLONE_PATH	Makefile	/^MM_DSP_SCHABLONE_PATH	 = ..\/mm_dsp_schablone$/;"	m
+MM_ENVEDSAMPLEPLAYER_H	../mm_dsp/inc/mm_envedsampleplayer.h	2;"	d
+MM_ENVELOPER_H	../mm_dsp/inc/mm_enveloper.h	2;"	d
+MM_ENVELOPE_H	../mm_dsp/inc/mm_envelope.h	2;"	d
+MM_ENVGEN_H	../mm_dsp/inc/mm_envgen.h	2;"	d
+MM_EVENTLIST_H	../mm_primitives/inc/mm_eventlist.h	2;"	d
+MM_EVENT_H	../mm_primitives/inc/mm_event.h	2;"	d
+MM_HEAP_CONF_H	../ne_datastructures/inc/mm_heap_conf.h	2;"	d
+MM_HEAP_DEBUG	../ne_datastructures/test/mm_heap_test.c	5;"	d	file:
+MM_HEAP_H	../ne_datastructures/inc/mm_heap.h	2;"	d
+MM_HEAP_H	../ne_datastructures/inc/mm_heap__static.h	2;"	d
+MM_HEAP_KEY_GT	../ne_datastructures/inc/mm_heap.h	16;"	d
+MM_HEAP_KEY_GT	../ne_datastructures/inc/mm_heap__static.h	16;"	d
+MM_HEAP_KEY_GTE	../ne_datastructures/inc/mm_heap.h	20;"	d
+MM_HEAP_KEY_GTE	../ne_datastructures/inc/mm_heap__static.h	20;"	d
+MM_HEAP_KEY_LT	../ne_datastructures/inc/mm_heap.h	24;"	d
+MM_HEAP_KEY_LT	../ne_datastructures/inc/mm_heap__static.h	24;"	d
+MM_HEAP_KEY_LTE	../ne_datastructures/inc/mm_heap.h	28;"	d
+MM_HEAP_KEY_LTE	../ne_datastructures/inc/mm_heap__static.h	28;"	d
+MM_HEAP_KEY_TYPE	../mm_primitives/src/mm_seq.c	4;"	d	file:
+MM_HEAP_KEY_TYPE	../ne_datastructures/inc/mm_heap.h	8;"	d
+MM_HEAP_KEY_TYPE	../ne_datastructures/inc/mm_heap__static.h	8;"	d
+MM_HEAP_MANAGER_SIZE_BITAND	../ne_datastructures/inc/mm_heap.h	60;"	d
+MM_HEAP_MANAGER_SIZE_BITAND	../ne_datastructures/inc/mm_heap__static.h	60;"	d
+MM_HEAP_MANAGER_SIZE_EQ	../ne_datastructures/inc/mm_heap.h	56;"	d
+MM_HEAP_MANAGER_SIZE_EQ	../ne_datastructures/inc/mm_heap__static.h	56;"	d
+MM_HEAP_MANAGER_SIZE_GTE	../ne_datastructures/inc/mm_heap.h	52;"	d
+MM_HEAP_MANAGER_SIZE_GTE	../ne_datastructures/inc/mm_heap__static.h	52;"	d
+MM_HEAP_MANAGER_SIZE_LSHIFT	../ne_datastructures/inc/mm_heap.h	48;"	d
+MM_HEAP_MANAGER_SIZE_LSHIFT	../ne_datastructures/inc/mm_heap__static.h	48;"	d
+MM_HEAP_MANAGER_SIZE_POST_DEC	../ne_datastructures/inc/mm_heap.h	36;"	d
+MM_HEAP_MANAGER_SIZE_POST_DEC	../ne_datastructures/inc/mm_heap__static.h	36;"	d
+MM_HEAP_MANAGER_SIZE_POST_INC	../ne_datastructures/inc/mm_heap.h	44;"	d
+MM_HEAP_MANAGER_SIZE_POST_INC	../ne_datastructures/inc/mm_heap__static.h	44;"	d
+MM_HEAP_MANAGER_SIZE_PRE_DEC	../ne_datastructures/inc/mm_heap.h	32;"	d
+MM_HEAP_MANAGER_SIZE_PRE_DEC	../ne_datastructures/inc/mm_heap__static.h	32;"	d
+MM_HEAP_MANAGER_SIZE_PRE_INC	../ne_datastructures/inc/mm_heap.h	40;"	d
+MM_HEAP_MANAGER_SIZE_PRE_INC	../ne_datastructures/inc/mm_heap__static.h	40;"	d
+MM_HEAP_MANAGER_SIZE_TYPE	../ne_datastructures/inc/mm_heap.h	12;"	d
+MM_HEAP_MANAGER_SIZE_TYPE	../ne_datastructures/inc/mm_heap__static.h	12;"	d
+MM_INTERP_H	../mm_dsp/inc/mm_interp.h	2;"	d
+MM_LIST_H	../mm_primitives/inc/mm_list.h	2;"	d
+MM_MIDICCROUTER_H	../mmmidi/inc/mm_midiccrouter.h	2;"	d
+MM_MIDIEVENTBUILDER_H	../mmmidi/inc/mm_midieventbuilder.h	2;"	d
+MM_MIDIEVENTBUILDER_H	../mmmidi/inc/mm_midimsgbuilder.h	2;"	d
+MM_MIDIEVENT_H	../mmmidi/inc/mm_midievent.h	2;"	d
+MM_MIDIMSG_H	../mmmidi/inc/mm_midimsg.h	2;"	d
+MM_MIDIROUTER_H	../mmmidi/inc/mm_midirouter.h	2;"	d
+MM_MIDIROUTER_STANDARD_H	../mmmidi/inc/mm_midirouter_standard.h	2;"	d
+MM_MSG_H	../mm_primitives/src/mm_msg.h	2;"	d
+MM_POLY_VOICE_MANAGE_H	../mm_dsp/inc/mm_poly_voice_manage.h	2;"	d
+MM_PRIMITIVES_PATH	Makefile	/^MM_PRIMITIVES_PATH		 = ..\/mm_primitives$/;"	m
+MM_QUEUE_CONTROLLER_H	../ne_datastructures/inc/mm_queuecontroller.h	2;"	d
+MM_QUEUE_H	../ne_datastructures/inc/mm_queue.h	2;"	d
+MM_RATIONALFUNC_H	../mm_primitives/inc/mm_rationalfunc.h	2;"	d
+MM_RATIONALFUNC_V_H	../mm_primitives/inc/mm_rationalfunc_v.h	2;"	d
+MM_SAMPLEPLAYER_H	../mm_dsp/inc/mm_sampleplayer.h	2;"	d
+MM_SAMPLE_H	../mm_dsp/inc/mm_sample.h	2;"	d
+MM_SEQ_H	../mm_primitives/inc/mm_seq.h	2;"	d
+MM_SIGCHAIN_H	../mm_dsp/inc/mm_sigchain.h	2;"	d
+MM_SIGCONST_H	../mm_dsp/inc/mm_sigconst.h	2;"	d
+MM_SIGPROC_H	../mm_dsp/inc/mm_sigproc.h	2;"	d
+MM_STACK_H	../ne_datastructures/inc/mm_stack.h	2;"	d
+MM_STATICQUEUE_H	../ne_datastructures/inc/mm_staticqueue.h	2;"	d
+MM_STDLIB_H	../mm_dsp/inc/mm_stdlib.h	2;"	d
+MM_SWAP	../ne_datastructures/inc/mm_heap.h	64;"	d
+MM_SWAP	../ne_datastructures/inc/mm_heap__static.h	64;"	d
+MM_TIME_H	../mm_primitives/inc/mm_time.h	2;"	d
+MM_TRAPENVEDSAMPLEPLAYER_H	../mm_dsp/inc/mm_trapenvedsampleplayer.h	2;"	d
+MM_TRAPENVGEN_H	../mm_dsp/inc/mm_trapenvgen.h	2;"	d
+MM_TRAPEZOID_ENV_H	../mm_dsp/inc/mm_trapezoid_env.h	2;"	d
+MM_TUNING_A4_HZ	../mm_dsp/inc/mm_tuning.h	4;"	d
+MM_TUNING_H	../mm_dsp/inc/mm_tuning.h	2;"	d
+MM_WAVTAB_H	../mm_dsp/inc/mm_wavtab.h	2;"	d
+MM_WAVTAB_RECORDER_H	../mm_dsp/inc/mm_wavtab_recorder.h	2;"	d
+MM_WRAP_H	../mm_dsp/inc/mm_wrap.h	2;"	d
+MM_f_interp_cubic_	../mm_dsp/inc/mm_interp.h	24;"	d
+MM_f_interp_cubic_mu_	../mm_dsp/inc/mm_interp.h	40;"	d
+MM_f_interp_cubic_norm_	../mm_dsp/inc/mm_interp.h	32;"	d
+MM_f_interp_linear_	../mm_dsp/inc/mm_interp.h	15;"	d
+MM_f_interp_linear_norm_	../mm_dsp/inc/mm_interp.h	20;"	d
+MM_fwrap	../mm_dsp/src/mm_wrap.c	/^MMSample MM_fwrap(MMSample x, MMSample a, MMSample b)$/;"	f
+MM_wrap	../mm_dsp/src/mm_wrap.c	/^int MM_wrap(int x, int a, int b)$/;"	f
+MsgTimePair	../mmmidi/test/mm_midimsgbuilder_test.c	/^} MsgTimePair;$/;"	t	typeref:struct:__MsgTimePair	file:
+MyMidiCCMsg	../mmmidi/test/mm_midirouter_test.cpp	/^struct MyMidiCCMsg {$/;"	s	file:
+MyMidiCCMsg_do	../mmmidi/test/mm_midirouter_test.cpp	/^void MyMidiCCMsg_do(void *data, MIDIMsg *msg)$/;"	f
+MyMidiNoteOn_do	../mmmidi/test/mm_midirouter_test.cpp	/^void MyMidiNoteOn_do(void *data, MIDIMsg *msg)$/;"	f
+MyTimer	../mm_dsp/test/mm_dsp-test-3.c	/^typedef struct __MyTimer MyTimer;$/;"	t	typeref:struct:__MyTimer	file:
+MyTimer_tick	../mm_dsp/test/mm_dsp-test-3.c	/^void MyTimer_tick(MyTimer *t)$/;"	f
+NCHANS	src/audio_setup.c	5;"	d	file:
+NEDATASTRUCTURES_CFLAGS	../ne_datastructures/Makefile	/^NEDATASTRUCTURES_CFLAGS	= -Ofast$/;"	m
+NEDATASTRUCTURES_CFLAGS	../ne_datastructures/i386.mk	/^NEDATASTRUCTURES_CFLAGS	= -Ofast$/;"	m
+NEDATASTRUCTURES_DEP	../ne_datastructures/Makefile	/^NEDATASTRUCTURES_DEP       = $(wildcard $(NEDATASTRUCTURES_INC_PATH)\/*.h)$/;"	m
+NEDATASTRUCTURES_DEP	../ne_datastructures/i386.mk	/^NEDATASTRUCTURES_DEP       = $(wildcard $(NEDATASTRUCTURES_INC_PATH)\/*.h)$/;"	m
+NEDATASTRUCTURES_INC_PATH	../mm_primitives/Makefile	/^NEDATASTRUCTURES_INC_PATH = $(NEDATASTRUCTURES_PATH)\/inc$/;"	m
+NEDATASTRUCTURES_INC_PATH	../mm_primitives/i386.mk	/^NEDATASTRUCTURES_INC_PATH = $(NEDATASTRUCTURES_PATH)\/inc$/;"	m
+NEDATASTRUCTURES_INC_PATH	../ne_datastructures/Makefile	/^NEDATASTRUCTURES_INC_PATH  = inc$/;"	m
+NEDATASTRUCTURES_INC_PATH	../ne_datastructures/i386.mk	/^NEDATASTRUCTURES_INC_PATH  = inc$/;"	m
+NEDATASTRUCTURES_OBJS	../ne_datastructures/Makefile	/^NEDATASTRUCTURES_OBJS      = $(NEDATASTRUCTURES_SRCS:$(NEDATASTRUCTURES_SRCS_PATH)\/%.c=objs\/%.o)$/;"	m
+NEDATASTRUCTURES_OBJS	../ne_datastructures/i386.mk	/^NEDATASTRUCTURES_OBJS      = $(NEDATASTRUCTURES_SRCS:$(NEDATASTRUCTURES_SRCS_PATH)\/%.c=objs\/%.o)$/;"	m
+NEDATASTRUCTURES_PATH	../mm_primitives/Makefile	/^NEDATASTRUCTURES_PATH = ..\/ne_datastructures$/;"	m
+NEDATASTRUCTURES_PATH	../mm_primitives/i386.mk	/^NEDATASTRUCTURES_PATH = ..\/ne_datastructures$/;"	m
+NEDATASTRUCTURES_SRCS	../ne_datastructures/Makefile	/^NEDATASTRUCTURES_SRCS      = $(wildcard $(NEDATASTRUCTURES_SRCS_PATH)\/*.c)$/;"	m
+NEDATASTRUCTURES_SRCS	../ne_datastructures/i386.mk	/^NEDATASTRUCTURES_SRCS      = $(wildcard $(NEDATASTRUCTURES_SRCS_PATH)\/*.c)$/;"	m
+NEDATASTRUCTURES_SRCS_PATH	../ne_datastructures/Makefile	/^NEDATASTRUCTURES_SRCS_PATH = src$/;"	m
+NEDATASTRUCTURES_SRCS_PATH	../ne_datastructures/i386.mk	/^NEDATASTRUCTURES_SRCS_PATH = src$/;"	m
+NE_DATASTRUCTURES_PATH	Makefile	/^NE_DATASTRUCTURES_PATH   = ..\/ne_datastructures$/;"	m
+NE_MAXHEAP_H	../ne_datastructures/inc/ne_maxheap.h	2;"	d
+NOTE_STEALING	src/synth_control.c	11;"	d	file:
+NUM_ARGS	../ne_datastructures/test/ne_findlastnode_test.c	5;"	d	file:
+NUM_ARGS	../ne_datastructures/test/ne_freelastnode_test.c	6;"	d	file:
+NUM_ARGS	../ne_datastructures/test/ne_swaptopbottom_test.c	5;"	d	file:
+NUM_EVENTS	../mm_primitives/test/mm_eventlist_test.c	6;"	d	file:
+NUM_NODES	../ne_datastructures/test/ne_maxheap_test.c	4;"	d	file:
+NUM_NOTES	inc/signal_chain.h	7;"	d
+OBJS	Makefile	/^OBJS					 = $(addprefix $(OBJSDIR)\/,\\$/;"	m
+OBJSDIR	../mm_dsp/Makefile	/^OBJSDIR = objs$/;"	m
+OBJSDIR	../mm_dsp/i386.mk	/^OBJSDIR = objs$/;"	m
+OBJSDIR	../mm_primitives/Makefile	/^OBJSDIR = objs$/;"	m
+OBJSDIR	../mm_primitives/i386.mk	/^OBJSDIR = objs$/;"	m
+OBJSDIR	../ne_datastructures/Makefile	/^OBJSDIR = objs$/;"	m
+OBJSDIR	../ne_datastructures/i386.mk	/^OBJSDIR = objs$/;"	m
+OBJSDIR	Makefile	/^OBJSDIR					 = objs$/;"	m
+OUTPUT_LENGTH	../mm_dsp/test/mm_dsp-simple-interp-test.c	14;"	d	file:
+OUTPUT_LENGTH	../mm_dsp/test/mm_dsp-spsp-interp-test.c	13;"	d	file:
+POLY_MANAGEMENT_H	inc/poly_management.h	2;"	d
+SAMPLE_RATE	../mm_dsp/test/mm_esp-test-1.c	9;"	d	file:
+SAMPLE_RATE	src/audio_setup.c	6;"	d	file:
+SIGNAL_CHAIN_H	inc/signal_chain.h	2;"	d
+SILENT_TIME	../mm_dsp/test/mm_esp-test-1.c	15;"	d	file:
+SLEEP	../mmmidi/test/mm_midirouter_test.cpp	23;"	d	file:
+SLEEP	../mmmidi/test/mm_midirouter_test.cpp	26;"	d	file:
+SRC	Makefile	/^SRC						 = $(notdir $(wildcard $(MMDSCH_ALSA_PATH)\/src\/*.c))$/;"	m
+SRCS	../mm_dsp/test/mm_adsr-test-1.mk	/^SRCS = $(BASE)\/mm_dsp\/test\/mm_adsr-test-1.c \\$/;"	m
+SRCS	../mm_dsp/test/mm_dsp-test-1.mk	/^SRCS = $(BASE)\/mm_dsp\/test\/mm_dsp-test-1.c \\$/;"	m
+SRCS	../mm_dsp/test/mm_dsp-test-2.mk	/^SRCS = $(BASE)\/mm_dsp\/test\/mm_dsp-test-2.c \\$/;"	m
+SRCS	../mm_dsp/test/mm_dsp-test-3.mk	/^SRCS = $(BASE)\/mm_dsp\/test\/mm_dsp-test-3.c \\$/;"	m
+SRCS	../mm_dsp/test/mm_dsp-wrap-test.mk	/^SRCS = mm_dsp-wrap-test.c ..\/src\/mm_wrap.c$/;"	m
+SRCS	../mm_dsp/test/mm_enveloper-test-1.mk	/^SRCS = mm_enveloper-test-1.c ..\/src\/mm_trapezoid_env.c ..\/..\/mm_primitives\/src\/mm_rationalfunc.c \\$/;"	m
+SRCS	../mm_dsp/test/mm_esp-test-1.mk	/^SRCS = mm_esp-test-1.c ..\/src\/mm_trapezoid_env.c \\$/;"	m
+SRCS	../mm_dsp/test/mm_trapezoid_env-test-1.mk	/^SRCS = mm_trapezoid_env-test-1.c ..\/src\/mm_trapezoid_env.c ..\/..\/mm_primitives\/src\/mm_rationalfunc.c$/;"	m
+SRCS	../mm_primitives/test/mm_rationalfunc_test.mk	/^SRCS = $(BASE)\/mm_primitives\/test\/mm_rationalfunc_test.c$/;"	m
+SRCS	../mm_primitives/test/mm_seq_test.mk	/^SRCS = $(BASE)\/mm_primitives\/test\/mm_seq_test.c $(BASE)\/mm_primitives\/src\/mm_seq.c $(BASE)\/mm_primitives\/src\/mm_event.c$/;"	m
+SRCS	../mm_primitives/test/mm_seq_test_2.mk	/^SRCS = $(BASE)\/mm_primitives\/test\/mm_seq_test_2.c $(BASE)\/mm_primitives\/src\/mm_seq.c $(BASE)\/mm_primitives\/src\/mm_event.c$/;"	m
+SUSTAIN_TIME	../mm_dsp/test/mm_esp-test-1.c	18;"	d	file:
+SYNTH_CONTROL_H	inc/synth_control.h	2;"	d
+SampleInfo	../mm_dsp/test/mm_dsp-test-2.c	/^struct SampleInfo {$/;"	s	file:
+SampleInfo	../mm_dsp/test/mm_dsp-test-2_temp.c	/^struct SampleInfo {$/;"	s	file:
+SampleInfo	../mm_dsp/test/mm_dsp-test-3.c	/^struct SampleInfo {$/;"	s	file:
+THROW_ERR	inc/err.h	4;"	d
+TICK_PERIOD	../mm_dsp/test/mm_enveloper-test-1.c	8;"	d	file:
+TS	../mm_dsp/test/mm_adsr-test-1.c	5;"	d	file:
+ThreadInfo	../mm_primitives/test/mm_seq_test.c	/^typedef struct __ThreadInfo ThreadInfo;$/;"	t	typeref:struct:__ThreadInfo	file:
+ThreadInfo	../mm_primitives/test/mm_seq_test_2.c	/^typedef struct __ThreadInfo ThreadInfo;$/;"	t	typeref:struct:__ThreadInfo	file:
+VPATH	Makefile	/^VPATH				     = $(MMDSCH_ALSA_PATH)\/src:$(MMMIDI_PATH)\/src:src$/;"	m
+WAVETABLES_H	inc/wavetables.h	2;"	d
+WAVTABLE_FREQ	../mm_dsp/test/mm_esp-test-1.c	12;"	d	file:
+WAVTABLE_LENGTH	../mm_dsp/test/mm_esp-test-1.c	10;"	d	file:
+WAVTABLE_LENGTH_SAMPLES	inc/wavetables.h	5;"	d
+WAVTABLE_NUM_PARTIALS	inc/wavetables.h	7;"	d
+WAVTABLE_PERIODS	../mm_dsp/test/mm_esp-test-1.c	11;"	d	file:
+WAVTAB_SIZE	../mm_dsp/test/mm_dsp-simple-interp-test.c	18;"	d	file:
+WAVTAB_SIZE	../mm_dsp/test/mm_dsp-spsp-interp-test.c	17;"	d	file:
+WaveTable	src/wavetables.c	/^MMWavTab WaveTable;$/;"	v
+WaveTable_init	src/wavetables.c	/^void WaveTable_init(void)$/;"	f
+__HeapManager	../ne_datastructures/inc/ne_maxheap.h	/^struct __HeapManager {$/;"	s
+__HeapNode	../ne_datastructures/inc/ne_maxheap.h	/^struct __HeapNode {$/;"	s
+__MIDIEvent	../mmmidi/inc/mm_midievent.h	/^typedef struct __MIDIEvent {$/;"	s
+__MIDIEventBuilder	../mmmidi/inc/mm_midieventbuilder.h	/^typedef struct __MIDIEventBuilder {$/;"	s
+__MIDIMsg	../mmmidi/inc/mm_midimsg.h	/^typedef struct __MIDIMsg {$/;"	s
+__MIDIMsgBuilder	../mmmidi/inc/mm_midimsgbuilder.h	/^typedef struct __MIDIMsgBuilder {$/;"	s
+__MIDI_CC_CB_Info	../mmmidi/inc/mm_midiccrouter.h	/^struct __MIDI_CC_CB_Info {$/;"	s
+__MIDI_CC_CB_Router	../mmmidi/inc/mm_midiccrouter.h	/^struct __MIDI_CC_CB_Router {$/;"	s
+__MIDI_Router	../mmmidi/inc/mm_midirouter.h	/^struct __MIDI_Router {$/;"	s
+__MIDI_Router_CB_Info	../mmmidi/inc/mm_midirouter.h	/^struct __MIDI_Router_CB_Info {$/;"	s
+__MIDI_Router_CB_Set	../mmmidi/inc/mm_midirouter.h	/^struct __MIDI_Router_CB_Set {$/;"	s
+__MIDI_Router_Standard	../mmmidi/inc/mm_midirouter_standard.h	/^struct __MIDI_Router_Standard {$/;"	s
+__MMAdsr	../mm_dsp/inc/mm_adsr.h	/^struct __MMAdsr {$/;"	s
+__MMArray	../mm_primitives/inc/mm_array.h	/^struct __MMArray {$/;"	s
+__MMBus	../mm_dsp/inc/mm_bus.h	/^struct __MMBus {$/;"	s
+__MMBusMerger	../mm_dsp/inc/mm_busmerger.h	/^struct __MMBusMerger {$/;"	s
+__MMBusMult	../mm_dsp/inc/mm_busmult.h	/^struct __MMBusMult {$/;"	s
+__MMDLList	../mm_primitives/inc/mm_dllist.h	/^struct __MMDLList {$/;"	s
+__MMDLList_Tester	../mm_primitives/test/mm_dllist_test.c	/^struct __MMDLList_Tester {$/;"	s	file:
+__MMEnvGen	../mm_dsp/inc/mm_envgen.h	/^struct __MMEnvGen {$/;"	s
+__MMEnvedSamplePlayer	../mm_dsp/inc/mm_envedsampleplayer.h	/^struct __MMEnvedSamplePlayer {$/;"	s
+__MMEnvelope	../mm_dsp/inc/mm_envelope.h	/^struct __MMEnvelope {$/;"	s
+__MMEnveloper	../mm_dsp/inc/mm_enveloper.h	/^struct __MMEnveloper {$/;"	s
+__MMEvent	../mm_primitives/inc/mm_event.h	/^struct __MMEvent {$/;"	s
+__MMEventList	../mm_primitives/inc/mm_eventlist.h	/^struct __MMEventList {$/;"	s
+__MMHeap_Manager	../ne_datastructures/inc/mm_heap.h	/^struct __MMHeap_Manager {$/;"	s
+__MMHeap_Manager	../ne_datastructures/inc/mm_heap__static.h	/^struct __MMHeap_Manager {$/;"	s
+__MMHeap_Node	../ne_datastructures/inc/mm_heap.h	/^struct __MMHeap_Node {$/;"	s
+__MMHeap_Node	../ne_datastructures/inc/mm_heap__static.h	/^struct __MMHeap_Node {$/;"	s
+__MMLineFunc2D	../mm_primitives/inc/mm_rationalfunc.h	/^struct __MMLineFunc2D {$/;"	s
+__MMLineFunc2DV	../mm_primitives/inc/mm_rationalfunc_v.h	/^struct __MMLineFunc2DV {$/;"	s
+__MMList	../mm_primitives/inc/mm_list.h	/^struct __MMList {$/;"	s
+__MMMsg	../mm_primitives/src/mm_msg.h	/^struct __MMMsg {$/;"	s
+__MMPolyManager	../mm_dsp/src/mm_poly_voice_manage.c	/^struct __MMPolyManager {$/;"	s	file:
+__MMPolyVoice	../mm_dsp/inc/mm_poly_voice_manage.h	/^struct __MMPolyVoice {$/;"	s
+__MMPolyVoiceParams	../mm_dsp/inc/mm_poly_voice_manage.h	/^struct __MMPolyVoiceParams {$/;"	s
+__MMPvtesp	../mm_dsp/src/mmpv_tesp.c	/^struct __MMPvtesp {$/;"	s	file:
+__MMPvtespParams	../mm_dsp/inc/mmpv_tesp.h	/^struct __MMPvtespParams {$/;"	s
+__MMQueueController	../ne_datastructures/inc/mm_queue.h	/^struct __MMQueueController {$/;"	s
+__MMQueueController	../ne_datastructures/inc/mm_queuecontroller.h	/^struct __MMQueueController {$/;"	s
+__MMRationalFunc	../mm_primitives/inc/mm_rationalfunc.h	/^struct __MMRationalFunc {$/;"	s
+__MMRationalFuncV	../mm_primitives/inc/mm_rationalfunc_v.h	/^struct __MMRationalFuncV {$/;"	s
+__MMSamplePlayer	../mm_dsp/inc/mm_sampleplayer.h	/^struct __MMSamplePlayer {$/;"	s
+__MMSamplePlayerSigProc	../mm_dsp/inc/mm_sampleplayer.h	/^struct __MMSamplePlayerSigProc {$/;"	s
+__MMSeq	../mm_primitives/src/mm_seq.c	/^struct __MMSeq {$/;"	s	file:
+__MMSigChain	../mm_dsp/inc/mm_sigchain.h	/^struct __MMSigChain {$/;"	s
+__MMSigConst	../mm_dsp/inc/mm_sigconst.h	/^struct __MMSigConst {$/;"	s
+__MMSigProc	../mm_dsp/inc/mm_sigproc.h	/^struct __MMSigProc {$/;"	s
+__MMStack	../ne_datastructures/inc/mm_stack.h	/^struct __MMStack {$/;"	s
+__MMStaticQueue	../ne_datastructures/inc/mm_staticqueue.h	/^struct __MMStaticQueue {$/;"	s
+__MMTestEvent	../mm_primitives/test/mm_seq_test.c	/^struct __MMTestEvent {$/;"	s	file:
+__MMTestEvent	../mm_primitives/test/mm_seq_test_2.c	/^struct __MMTestEvent {$/;"	s	file:
+__MMTrapEnvGen	../mm_dsp/inc/mm_trapenvgen.h	/^struct __MMTrapEnvGen {$/;"	s
+__MMTrapEnvedSamplePlayer	../mm_dsp/inc/mm_trapenvedsampleplayer.h	/^struct __MMTrapEnvedSamplePlayer {$/;"	s
+__MMTrapezoidEnv	../mm_dsp/inc/mm_trapezoid_env.h	/^typedef struct __MMTrapezoidEnv {$/;"	s
+__MMWavTab	../mm_dsp/inc/mm_wavtab.h	/^struct __MMWavTab {$/;"	s
+__MMWavTabRecorder	../mm_dsp/inc/mm_wavtab_recorder.h	/^struct __MMWavTabRecorder {$/;"	s
+__MsgTimePair	../mmmidi/test/mm_midimsgbuilder_test.c	/^typedef struct __MsgTimePair {$/;"	s	file:
+__MyTimer	../mm_dsp/test/mm_dsp-test-3.c	/^struct __MyTimer {$/;"	s	file:
+__ThreadInfo	../mm_primitives/test/mm_seq_test.c	/^struct __ThreadInfo {$/;"	s	file:
+__ThreadInfo	../mm_primitives/test/mm_seq_test_2.c	/^struct __ThreadInfo {$/;"	s	file:
+__audio_hw_io_t	../mm_dsp_schablone/inc/audio_hw.h	/^typedef struct __audio_hw_io_t {$/;"	s
+__swap	../ne_datastructures/src/ne_maxheap.c	323;"	d	file:
+access	../mmdsch_alsa/src/alsa_lowlevel.c	/^	snd_pcm_access_t access;$/;"	m	struct:transfer_method	file:
+addPlayer	../mm_dsp/test/mm_dsp-test-2.c	/^void *addPlayer(void *sampleInfo)$/;"	f
+addPlayer	../mm_dsp/test/mm_dsp-test-2_temp.c	/^void *addPlayer(void *sampleInfo)$/;"	f
+addPlayer	../mm_dsp/test/mm_dsp-test-3.c	/^void addPlayer(void *sampleInfo)$/;"	f
+aftertouch	../mmmidi/inc/mm_midirouter.h	/^    MIDI_Router_CB_Info aftertouch;$/;"	m	struct:__MIDI_Router_CB_Set
+allocator	../mm_dsp/inc/mm_poly_voice_manage.h	/^    void *allocator; $/;"	m	struct:__MMPolyVoiceParams
+amplitude	../mm_dsp/inc/mmpv_tesp.h	/^    MMSample            amplitude;$/;"	m	struct:__MMPvtespParams
+appendSomeEvent	../mm_primitives/test/mm_eventlist_test.c	/^void appendSomeEvent(MMEventList *el)$/;"	f
+areas	../mmdsch_alsa/src/alsa_lowlevel.c	/^	snd_pcm_channel_area_t *areas;$/;"	m	struct:async_private_data	file:
+areas	../mmdsch_alsa/src/alsa_lowlevel.c	/^static snd_pcm_channel_area_t *areas;$/;"	v	file:
+async_ahandler	../mmdsch_alsa/src/alsa_lowlevel.c	/^static snd_async_handler_t *async_ahandler;$/;"	v	file:
+async_callback	../mmdsch_alsa/src/alsa_lowlevel.c	/^static void async_callback(snd_async_handler_t *ahandler)$/;"	f	file:
+async_data	../mmdsch_alsa/src/alsa_lowlevel.c	/^static struct async_private_data async_data;$/;"	v	typeref:struct:async_private_data	file:
+async_loop	../mmdsch_alsa/src/alsa_lowlevel.c	/^static int async_loop(snd_pcm_t *handle,$/;"	f	file:
+async_private_data	../mmdsch_alsa/src/alsa_lowlevel.c	/^struct async_private_data {$/;"	s	file:
+attachOnTurnOff	../mm_dsp/inc/mm_poly_voice_manage.h	/^    void (*attachOnTurnOff)(MMPolyVoice *pv, MMPolyVoiceParams *params);$/;"	m	struct:__MMPolyVoice
+attack	../mm_dsp/inc/mm_adsr.h	/^    MMSample attack;        \/* time in seconds *\/$/;"	m	struct:__MMAdsr
+attackTime	../mm_dsp/inc/mm_trapezoid_env.h	/^    MMSample       attackTime;$/;"	m	struct:__MMTrapezoidEnv
+attackTime	../mm_dsp/inc/mmpv_tesp.h	/^    MMSample            attackTime;$/;"	m	struct:__MMPvtespParams
+attackTime	src/synth_control.c	/^static MMSample attackTime      = 0.01;$/;"	v	file:
+audio_hw_err_t	../mmdsch_alsa/inc/alsa_lowlevel.h	/^typedef int     audio_hw_err_t;$/;"	t
+audio_hw_get_block_size	../mmdsch_alsa/src/alsa_lowlevel.c	/^unsigned int audio_hw_get_block_size(void *data) {$/;"	f
+audio_hw_get_num_input_channels	../mmdsch_alsa/src/alsa_lowlevel.c	/^unsigned int audio_hw_get_num_input_channels(void *data) {$/;"	f
+audio_hw_get_num_output_channels	../mmdsch_alsa/src/alsa_lowlevel.c	/^unsigned int audio_hw_get_num_output_channels(void *data) {$/;"	f
+audio_hw_get_sample_rate	../mmdsch_alsa/src/alsa_lowlevel.c	/^unsigned int audio_hw_get_sample_rate(void *data) {$/;"	f
+audio_hw_io	src/audio_setup.c	/^void audio_hw_io(audio_hw_io_t *params)$/;"	f
+audio_hw_io_t	../mm_dsp_schablone/inc/audio_hw.h	/^} audio_hw_io_t;$/;"	t	typeref:struct:__audio_hw_io_t
+audio_hw_sample_t	../mmdsch_alsa/inc/alsa_lowlevel.h	/^typedef int16_t audio_hw_sample_t;$/;"	t
+audio_hw_setup	../mmdsch_alsa/src/alsa_lowlevel.c	/^audio_hw_err_t audio_hw_setup(audio_hw_setup_t *params)$/;"	f
+audio_hw_setup_t	../mmdsch_alsa/inc/alsa_lowlevel.h	/^} audio_hw_setup_t;$/;"	t	typeref:struct:__anon2
+audio_hw_start	../mmdsch_alsa/src/alsa_lowlevel.c	/^audio_hw_err_t audio_hw_start(audio_hw_setup_t *params)$/;"	f
+audio_ready	src/audio_setup.c	/^int audio_ready = 0;$/;"	v
+audio_setup	src/audio_setup.c	/^int audio_setup(void *data)$/;"	f
+audio_start	inc/audio_setup.h	6;"	d
+audiohwio	../mmdsch_alsa/src/alsa_lowlevel.c	/^audio_hw_io_t audiohwio;$/;"	v
+b	../mm_primitives/inc/mm_rationalfunc.h	/^    MMRationalFunc_ArgType b;$/;"	m	struct:__MMLineFunc2D
+b	../mm_primitives/inc/mm_rationalfunc_v.h	/^    MMRationalFuncV_ArgType b;$/;"	m	struct:__MMLineFunc2DV
+base	../mm_primitives/inc/mm_eventlist.h	/^    MMList base;$/;"	m	struct:__MMEventList
+bm	../mm_dsp/inc/mm_envedsampleplayer.h	/^    MMBusMerger             bm;$/;"	m	struct:__MMEnvedSamplePlayer
+buffer	../mm_dsp/inc/mm_wavtab_recorder.h	/^    MMWavTab *buffer;$/;"	m	struct:__MMWavTabRecorder
+buffer_size	../mmdsch_alsa/src/alsa_lowlevel.c	/^static snd_pcm_sframes_t buffer_size;$/;"	v	file:
+buffer_time	../mmdsch_alsa/inc/alsa_lowlevel.h	/^    unsigned int buffer_time;	\/* ring buffer length in us *\/$/;"	m	struct:__anon2
+buffer_time	../mmdsch_alsa/src/alsa_lowlevel.c	/^static unsigned int buffer_time = 500000;	\/* ring buffer length in us *\/$/;"	v	file:
+buildHeapManager	../ne_datastructures/test/ne_findlastnode_test.c	/^static void buildHeapManager(HeapManager *hm, int *keys, size_t size)$/;"	f	file:
+buildHeapManager	../ne_datastructures/test/ne_freelastnode_test.c	/^static void buildHeapManager(HeapManager *hm, int *keys, size_t size)$/;"	f	file:
+buildHeapManager	../ne_datastructures/test/ne_removemax_test.c	/^static void buildHeapManager(HeapManager *hm, int *keys, size_t size)$/;"	f	file:
+buildHeapManager	../ne_datastructures/test/ne_swaptopbottom_test.c	/^static void buildHeapManager(HeapManager *hm, int *keys, size_t size)$/;"	f	file:
+bus	../mm_dsp/inc/mm_adsr.h	/^    MMBus *bus;              \/* bus enveloped by this ADSR *\/$/;"	m	struct:__MMAdsr
+busMult	../mm_dsp/inc/mm_envedsampleplayer.h	/^    MMBusMult               busMult;$/;"	m	struct:__MMEnvedSamplePlayer
+call	../mm_primitives/src/mm_msg.h	/^    void (*call)(MMMsg *,void *);$/;"	m	struct:__MMMsg
+callback	../mmmidi/inc/mm_midiccrouter.h	/^    MIDI_CC_CB_Router_CB callback;$/;"	m	struct:__MIDI_CC_CB_Info
+callback	../mmmidi/inc/mm_midirouter.h	/^    MIDI_Router_CB callback;$/;"	m	struct:__MIDI_Router_CB_Info
+cbInfos	../mmmidi/inc/mm_midiccrouter.h	/^    MIDI_CC_CB_Info cbInfos[MIDI_CC_CB_Router_NUM_CBS];$/;"	m	struct:__MIDI_CC_CB_Router
+cbRouters	../mmmidi/inc/mm_midirouter_standard.h	/^    MIDI_CC_CB_Router cbRouters[MIDI_Router_NUM_CHANS];$/;"	m	struct:__MIDI_Router_Standard
+cbSets	../mmmidi/inc/mm_midirouter.h	/^    MIDI_Router_CB_Set cbSets[MIDI_Router_NUM_CHANS];$/;"	m	struct:__MIDI_Router
+channelPressure	../mmmidi/inc/mm_midirouter.h	/^    MIDI_Router_CB_Info channelPressure;$/;"	m	struct:__MIDI_Router_CB_Set
+channels	../mm_dsp/inc/mm_bus.h	/^    size_t channels; \/* how many channels *\/$/;"	m	struct:__MMBus
+channels	../mmdsch_alsa/inc/alsa_lowlevel.h	/^    unsigned int channels;		\/* count of channels *\/$/;"	m	struct:__anon2
+channels	../mmdsch_alsa/src/alsa_lowlevel.c	/^static unsigned int channels = 1;			\/* count of channels *\/$/;"	v	file:
+compare	../mm_dsp/inc/mm_poly_voice_manage.h	/^    int (*compare)(MMPolyVoice *pv, MMPolyVoiceParams *params);$/;"	m	struct:__MMPolyVoice
+constant	../mm_dsp/inc/mm_sigconst.h	/^    MMSample constant;$/;"	m	struct:__MMSigConst
+controlChange	../mmmidi/inc/mm_midirouter.h	/^    MIDI_Router_CB_Info controlChange;$/;"	m	struct:__MIDI_Router_CB_Set
+currentIndex	../mm_dsp/inc/mm_wavtab_recorder.h	/^    size_t currentIndex;$/;"	m	struct:__MMWavTabRecorder
+currentTime	../mm_dsp/test/mm_dsp-test-3.c	/^    size_t currentTime;$/;"	m	struct:__MyTimer	file:
+currentTime	../mm_primitives/src/mm_seq.c	/^    MMTime      currentTime;$/;"	m	struct:__MMSeq	file:
+data	../mm_dsp/inc/mm_bus.h	/^    MMSample data[];  $/;"	m	struct:__MMBus
+data	../mm_dsp/test/mm_dsp-test-3.c	/^    void *data;$/;"	m	struct:__MyTimer	file:
+data	../mm_primitives/inc/mm_array.h	/^    void    *data;$/;"	m	struct:__MMArray
+data	../mmmidi/inc/mm_midiccrouter.h	/^    void *data;$/;"	m	struct:__MIDI_CC_CB_Info
+data	../mmmidi/inc/mm_midimsg.h	/^    MIDIMsg_Byte_t data[0];$/;"	m	struct:__MIDIMsg
+data	../mmmidi/inc/mm_midirouter.h	/^    void *data;$/;"	m	struct:__MIDI_Router_CB_Info
+data	../ne_datastructures/inc/mm_heap.h	/^    void       *data;$/;"	m	struct:__MMHeap_Node
+data	../ne_datastructures/inc/mm_heap__static.h	/^    void       *data;$/;"	m	struct:__MMHeap_Node
+decay	../mm_dsp/inc/mm_adsr.h	/^    MMSample decay;$/;"	m	struct:__MMAdsr
+deltaTime	../mm_dsp/inc/mm_envgen.h	/^    MMSample      deltaTime;$/;"	m	struct:__MMEnvGen
+destBus	../mm_dsp/inc/mm_busmerger.h	/^    MMBus *destBus;$/;"	m	struct:__MMBusMerger
+device	../mmdsch_alsa/inc/alsa_lowlevel.h	/^    char *device;			    \/* playback device *\/$/;"	m	struct:__anon2
+device	../mmdsch_alsa/src/alsa_lowlevel.c	/^static char *device = "plughw:0,0";			\/* playback device *\/$/;"	v	file:
+device_in	../mmdsch_alsa/inc/alsa_midi_lowlevel.h	/^    char *device_in;$/;"	m	struct:__anon1
+doSum	../mm_dsp/inc/mm_sigconst.h	/^    MMSigConst_doSum doSum;$/;"	m	struct:__MMSigConst
+do_stuff_with_msg	../mmmidi/test/mm_midimsgbuilder_test.c	/^void do_stuff_with_msg(MIDIMsg *msg, time_t time)$/;"	f
+done	../mmmidi/test/mm_midirouter_test.cpp	/^bool done;$/;"	v
+doneAction	../mm_dsp/inc/mm_sigproc.h	/^    MMSigProc_DoneAction       doneAction;$/;"	m	struct:__MMSigProc
+dumb_get_time	../mmmidi/test/mm_midieventbuilder_test.c	/^MIDIEvent_Time_t dumb_get_time(void)$/;"	f
+dumb_on_complete	../mmmidi/test/mm_midieventbuilder_test.c	/^void dumb_on_complete(MIDIEventBuilder *meb)$/;"	f
+env	../mm_dsp/inc/mm_enveloper.h	/^    MMEnvelope *env;$/;"	m	struct:__MMEnveloper
+envBus	../mm_dsp/inc/mm_envedsampleplayer.h	/^    MMBus                   *envBus;$/;"	m	struct:__MMEnvedSamplePlayer
+envelope	../mm_dsp/inc/mm_envedsampleplayer.h	/^    MMEnvelope              *envelope;$/;"	m	struct:__MMEnvedSamplePlayer
+eval	../mm_primitives/inc/mm_rationalfunc.h	/^    MMRationalFunc_ArgType (*eval)(MMRationalFunc *, MMRationalFunc_ArgType);$/;"	m	struct:__MMRationalFunc
+eval	../mm_primitives/inc/mm_rationalfunc_v.h	/^    void (*eval)(MMRationalFuncV *, MMRationalFuncV_ArgType *, MMRationalFuncV_ArgType *, size_t length);$/;"	m	struct:__MMRationalFuncV
+event	../mmmidi/inc/mm_midieventbuilder.h	/^    MIDIEvent *event;$/;"	m	struct:__MIDIEventBuilder
+eventHandle	../mm_primitives/inc/mm_eventlist.h	/^    MMEventHandle eventHandle;$/;"	m	struct:__MMEventList
+eventHead	../mm_primitives/test/mm_seq_test.c	/^    MMEvent eventHead;$/;"	m	struct:__MMTestEvent	file:
+eventHead	../mm_primitives/test/mm_seq_test_2.c	/^    MMEvent eventHead;$/;"	m	struct:__MMTestEvent	file:
+exit	../mm_primitives/test/mm_seq_test.c	/^    int exit;$/;"	m	struct:__ThreadInfo	file:
+exit	../mm_primitives/test/mm_seq_test_2.c	/^    int exit;$/;"	m	struct:__ThreadInfo	file:
+fd_in	../mmdsch_alsa/src/alsa_midi_lowlevel.c	/^static int fd_in, fd_out;$/;"	v	file:
+fd_out	../mmdsch_alsa/src/alsa_midi_lowlevel.c	/^static int fd_in, fd_out;$/;"	v	file:
+finish	../mmmidi/test/mm_midirouter_test.cpp	/^static void finish( int \/*ignore*\/ ){ done = true; }$/;"	f	file:
+format	../mmdsch_alsa/inc/alsa_lowlevel.h	/^    snd_pcm_format_t format;	\/* sample format *\/$/;"	m	struct:__anon2
+format	../mmdsch_alsa/src/alsa_lowlevel.c	/^static snd_pcm_format_t format = SND_PCM_FORMAT_S16;	\/* sample format *\/$/;"	v	file:
+freq	../mmdsch_alsa/src/alsa_lowlevel.c	/^static double freq = 440;				    \/* sinusoidal wave frequency in Hz *\/$/;"	v	file:
+generate_sine	../mmdsch_alsa/src/alsa_lowlevel.c	/^static void generate_sine(const snd_pcm_channel_area_t *areas, $/;"	f	file:
+getCurValue	../mm_dsp/inc/mm_envelope.h	/^    MMSample (*getCurValue)(MMEnvelope *);$/;"	m	struct:__MMEnvelope
+get_time	../mmmidi/test/mm_midimsgbuilder_test.c	/^time_t get_time()$/;"	f
+handle	../mmdsch_alsa/src/alsa_lowlevel.c	/^static snd_pcm_t *handle;$/;"	v	file:
+handle_in	../mmdsch_alsa/src/alsa_midi_lowlevel.c	/^static snd_rawmidi_t *handle_in, *handle_out;$/;"	v	file:
+handle_out	../mmdsch_alsa/src/alsa_midi_lowlevel.c	/^static snd_rawmidi_t *handle_in, *handle_out;$/;"	v	file:
+happen	../mm_primitives/inc/mm_event.h	/^    MMEvent_CB_t   happen;$/;"	m	struct:__MMEvent
+head	../mm_dsp/inc/mm_adsr.h	/^    MMSigProc head;$/;"	m	struct:__MMAdsr
+head	../mm_dsp/inc/mm_busmerger.h	/^    MMSigProc head;$/;"	m	struct:__MMBusMerger
+head	../mm_dsp/inc/mm_busmult.h	/^    MMSigProc head;$/;"	m	struct:__MMBusMult
+head	../mm_dsp/inc/mm_envedsampleplayer.h	/^    MMSigProc               head;$/;"	m	struct:__MMEnvedSamplePlayer
+head	../mm_dsp/inc/mm_enveloper.h	/^    MMSigProc head;$/;"	m	struct:__MMEnveloper
+head	../mm_dsp/inc/mm_envgen.h	/^    MMSigProc     head;$/;"	m	struct:__MMEnvGen
+head	../mm_dsp/inc/mm_poly_voice_manage.h	/^    MMDLList head;$/;"	m	struct:__MMPolyVoice
+head	../mm_dsp/inc/mm_sampleplayer.h	/^    MMSigProc         head; \/* subclasses MMSigProc *\/$/;"	m	struct:__MMSamplePlayerSigProc
+head	../mm_dsp/inc/mm_sigchain.h	/^    MMSigProc head; \/* sub class of MMSigProc *\/$/;"	m	struct:__MMSigChain
+head	../mm_dsp/inc/mm_sigconst.h	/^    MMSigProc head;$/;"	m	struct:__MMSigConst
+head	../mm_dsp/inc/mm_trapenvedsampleplayer.h	/^    MMEnvedSamplePlayer head;$/;"	m	struct:__MMTrapEnvedSamplePlayer
+head	../mm_dsp/inc/mm_trapenvgen.h	/^    MMEnvGen             head;$/;"	m	struct:__MMTrapEnvGen
+head	../mm_dsp/inc/mm_trapezoid_env.h	/^    MMEnvelope           head; \/* superclass *\/$/;"	m	struct:__MMTrapezoidEnv
+head	../mm_dsp/inc/mm_wavtab.h	/^    MMArray head;$/;"	m	struct:__MMWavTab
+head	../mm_dsp/inc/mm_wavtab_recorder.h	/^    MMSigProc head;$/;"	m	struct:__MMWavTabRecorder
+head	../mm_dsp/inc/mmpv_tesp.h	/^    MMPolyVoiceParams   head;$/;"	m	struct:__MMPvtespParams
+head	../mm_dsp/src/mmpv_tesp.c	/^    MMPolyVoice head;$/;"	m	struct:__MMPvtesp	file:
+head	../mm_primitives/inc/mm_rationalfunc.h	/^    MMRationalFunc head;$/;"	m	struct:__MMLineFunc2D
+head	../mm_primitives/inc/mm_rationalfunc_v.h	/^    MMRationalFuncV head;$/;"	m	struct:__MMLineFunc2DV
+heapManager	../mm_primitives/src/mm_seq.c	/^    MMHeap_Manager   heapManager;$/;"	m	struct:__MMSeq	file:
+height	../ne_datastructures/inc/mm_heap.h	/^    MMHeap_Manager_Size height;$/;"	m	struct:__MMHeap_Manager
+height	../ne_datastructures/inc/mm_heap__static.h	/^    MMHeap_Manager_Size height;$/;"	m	struct:__MMHeap_Manager
+height	../ne_datastructures/inc/ne_maxheap.h	/^    int     height;$/;"	m	struct:__HeapManager
+in	../mm_dsp_schablone/inc/audio_hw.h	/^    audio_hw_sample_t *in;$/;"	m	struct:__audio_hw_io_t
+inBus	src/signal_chain.c	/^MMBus *inBus, *outBus;$/;"	v
+incTime	../mm_dsp/inc/mm_envelope.h	/^    void     (*incTime)(MMEnvelope *, MMSample); \/* Increment time by some delta t *\/$/;"	m	struct:__MMEnvelope
+index	../mm_dsp/inc/mm_sampleplayer.h	/^    MMSample         index;$/;"	m	struct:__MMSamplePlayerSigProc
+index	../mm_dsp/inc/mmpv_tesp.h	/^    MMSample            index;$/;"	m	struct:__MMPvtespParams
+initWithEvent	../mm_primitives/test/mm_eventlist_test.c	/^void initWithEvent(MMEventList *el)$/;"	f
+inputBus	../mm_dsp/inc/mm_wavtab_recorder.h	/^    MMBus *inputBus;$/;"	m	struct:__MMWavTabRecorder
+internalBus	../mm_dsp/inc/mm_envedsampleplayer.h	/^    MMBus                   *internalBus;$/;"	m	struct:__MMEnvedSamplePlayer
+interp	../mm_dsp/inc/mm_sampleplayer.h	/^    MMInterpMethod  interp;$/;"	m	struct:__MMSamplePlayerSigProc
+interpolation	../mm_dsp/inc/mmpv_tesp.h	/^    MMInterpMethod      interpolation;$/;"	m	struct:__MMPvtespParams
+item	../ne_datastructures/inc/mm_stack.h	/^    void    *item;$/;"	m	struct:__MMStack
+items	../ne_datastructures/inc/mm_queue.h	/^    void **items;$/;"	m	struct:__MMQueueController
+items	../ne_datastructures/inc/mm_queuecontroller.h	/^    void **items;$/;"	m	struct:__MMQueueController
+items	../ne_datastructures/inc/mm_staticqueue.h	/^    void * items[];$/;"	m	struct:__MMStaticQueue
+key	../ne_datastructures/inc/mm_heap.h	/^    MMHeap_Key key;$/;"	m	struct:__MMHeap_Node
+key	../ne_datastructures/inc/mm_heap__static.h	/^    MMHeap_Key key;$/;"	m	struct:__MMHeap_Node
+key	../ne_datastructures/inc/ne_maxheap.h	/^    int         key;$/;"	m	struct:__HeapNode
+lastState	../mmmidi/test/mm_midimsgbuilder_test.c	/^static MIDIMsgBuilder_State_t lastState; $/;"	v	file:
+left	../ne_datastructures/inc/mm_heap.h	/^    MMHeap_Node   *left;$/;"	m	struct:__MMHeap_Node
+left	../ne_datastructures/inc/mm_heap__static.h	/^    MMHeap_Node   *left;$/;"	m	struct:__MMHeap_Node
+left	../ne_datastructures/inc/ne_maxheap.h	/^    HeapNode  *left;$/;"	m	struct:__HeapNode
+length	../mm_dsp_schablone/inc/audio_hw.h	/^    int                length;$/;"	m	struct:__audio_hw_io_t
+length	../mm_primitives/inc/mm_array.h	/^    size_t length;$/;"	m	struct:__MMArray
+lf	../mm_dsp/inc/mm_trapezoid_env.h	/^    MMLineFunc2D           lf;$/;"	m	struct:__MMTrapezoidEnv
+list	../mm_primitives/test/mm_dllist_test.c	/^    MMDLList list;$/;"	m	struct:__MMDLList_Tester	file:
+listHead	../mm_dsp/inc/mm_sigproc.h	/^    MMDLList                     listHead;$/;"	m	struct:__MMSigProc
+loop	../mm_dsp/inc/mm_sampleplayer.h	/^    MMBool            loop;$/;"	m	struct:__MMSamplePlayerSigProc
+loop	../mm_dsp/inc/mmpv_tesp.h	/^    MMBool              loop;$/;"	m	struct:__MMPvtespParams
+m	../mm_primitives/inc/mm_rationalfunc.h	/^    MMRationalFunc_ArgType m;$/;"	m	struct:__MMLineFunc2D
+m	../mm_primitives/inc/mm_rationalfunc_v.h	/^    MMRationalFuncV_ArgType m;$/;"	m	struct:__MMLineFunc2DV
+main	../mm_dsp/test/mm_adsr-test-1.c	/^int main (void)$/;"	f
+main	../mm_dsp/test/mm_dsp-cubic-interp-test.c	/^int main (int argc, char **argv)$/;"	f
+main	../mm_dsp/test/mm_dsp-simple-interp-test.c	/^int main(void)$/;"	f
+main	../mm_dsp/test/mm_dsp-spsp-interp-test.c	/^int main(void)$/;"	f
+main	../mm_dsp/test/mm_dsp-test-1.c	/^int main (int argc, char **argv)$/;"	f
+main	../mm_dsp/test/mm_dsp-test-2.c	/^int main (int argc, char **argv)$/;"	f
+main	../mm_dsp/test/mm_dsp-test-2_temp.c	/^int main (int argc, char **argv)$/;"	f
+main	../mm_dsp/test/mm_dsp-test-3.c	/^int main (int argc, char **argv)$/;"	f
+main	../mm_dsp/test/mm_dsp-wrap-test.c	/^int main (int argc, char **argv)$/;"	f
+main	../mm_dsp/test/mm_enveloper-test-1.c	/^int main (void)$/;"	f
+main	../mm_dsp/test/mm_esp-test-1.c	/^int main (void)$/;"	f
+main	../mm_dsp/test/mm_trapezoid_env-test-1.c	/^int main(int argc, char **argv)$/;"	f
+main	../mm_primitives/test/mm_dllist_test.c	/^int main(void)$/;"	f
+main	../mm_primitives/test/mm_eventlist_test.c	/^int main (void)$/;"	f
+main	../mm_primitives/test/mm_rationalfunc_test.c	/^int main (int argc, char **argv)$/;"	f
+main	../mm_primitives/test/mm_seq_test.c	/^int main (void) $/;"	f
+main	../mm_primitives/test/mm_seq_test_2.c	/^int main (void) $/;"	f
+main	../mmmidi/test/mm_midieventbuilder_test.c	/^int main(void)$/;"	f
+main	../mmmidi/test/mm_midimsg_test.c	/^int main(void)$/;"	f
+main	../mmmidi/test/mm_midimsgbuilder_test.c	/^int main (void)$/;"	f
+main	../mmmidi/test/mm_midirouter_test.cpp	/^int main( int argc, char *argv[] )$/;"	f
+main	../ne_datastructures/test/mm_heap_test.c	/^int main(int argc, char **argv)$/;"	f
+main	../ne_datastructures/test/mm_queuecontroller_test.c	/^int main (void)$/;"	f
+main	../ne_datastructures/test/mm_stack_test.c	/^int main (void)$/;"	f
+main	../ne_datastructures/test/mm_staticqueue_test.c	/^int main (void)$/;"	f
+main	../ne_datastructures/test/ne_findlastnode_test.c	/^int main (int argc, char **argv)$/;"	f
+main	../ne_datastructures/test/ne_freelastnode_test.c	/^int main (int argc, char **argv)$/;"	f
+main	../ne_datastructures/test/ne_maxheap_test.c	/^int main(void)$/;"	f
+main	../ne_datastructures/test/ne_removemax_test.c	/^int main (int argc, char **argv)$/;"	f
+main	../ne_datastructures/test/ne_swaptopbottom_test.c	/^int main (int argc, char **argv)$/;"	f
+main	src/main.c	/^int main (int argc, char **argv)$/;"	f
+max	../mm_dsp/inc/mm_trapezoid_env.h	/^    MMSample              max;$/;"	m	struct:__MMTrapezoidEnv
+method	../mmdsch_alsa/inc/alsa_lowlevel.h	/^    char  *method;              \/* the transfer method. Can only be "async" for now. *\/$/;"	m	struct:__anon2
+method	../mmdsch_alsa/src/alsa_lowlevel.c	/^static int method = 0;$/;"	v	file:
+midiMsgBuilder	../mm_dsp_schablone/src/midi_hw.c	/^static MIDIMsgBuilder midiMsgBuilder;$/;"	v	file:
+midiMsgBuilder	../mmmidi/test/mm_midimsgbuilder_test.c	/^static MIDIMsgBuilder midiMsgBuilder;$/;"	v	file:
+midiRouter	src/midi_setup.c	/^MIDI_Router_Standard midiRouter;$/;"	v
+midi_hw_cleanup	../mmdsch_alsa/src/alsa_midi_lowlevel.c	/^midi_hw_err_t midi_hw_cleanup(midi_hw_cleanup_t *params)$/;"	f
+midi_hw_cleanup_t	../mmdsch_alsa/inc/alsa_midi_lowlevel.h	/^typedef midi_hw_setup_t midi_hw_cleanup_t;$/;"	t
+midi_hw_err_t	../mmdsch_alsa/inc/alsa_midi_lowlevel.h	/^typedef int midi_hw_err_t;$/;"	t
+midi_hw_init	../mm_dsp_schablone/src/midi_hw.c	/^void midi_hw_init(void)$/;"	f
+midi_hw_process_byte	../mm_dsp_schablone/src/midi_hw.c	/^void midi_hw_process_byte(char byte)$/;"	f
+midi_hw_process_input	../mmdsch_alsa/src/alsa_midi_lowlevel.c	/^void midi_hw_process_input(midi_hw_process_t *params)$/;"	f
+midi_hw_process_msg	src/midi_setup.c	/^void midi_hw_process_msg(MIDIMsg *msg)$/;"	f
+midi_hw_process_t	../mmdsch_alsa/inc/alsa_midi_lowlevel.h	/^typedef int midi_hw_process_t;$/;"	t
+midi_hw_setup	../mmdsch_alsa/src/alsa_midi_lowlevel.c	/^midi_hw_err_t midi_hw_setup(midi_hw_setup_t *params)$/;"	f
+midi_hw_setup_t	../mmdsch_alsa/inc/alsa_midi_lowlevel.h	/^} midi_hw_setup_t;$/;"	t	typeref:struct:__anon1
+midi_setup	src/midi_setup.c	/^int midi_setup(void *data)$/;"	f
+min	../mm_dsp/inc/mm_trapezoid_env.h	/^    MMSample              min;$/;"	m	struct:__MMTrapezoidEnv
+mm_fwrap	../mm_dsp/inc/mm_stdlib.h	/^static inline MMSample mm_fwrap(MMSample x, MMSample max)$/;"	f
+msg	../mm_primitives/test/mm_seq_test.c	/^    char *msg;$/;"	m	struct:__MMTestEvent	file:
+msg	../mm_primitives/test/mm_seq_test_2.c	/^    char *msg;$/;"	m	struct:__MMTestEvent	file:
+msg	../mmmidi/inc/mm_midievent.h	/^    MIDIMsg msg;$/;"	m	struct:__MIDIEvent
+msg	../mmmidi/inc/mm_midimsgbuilder.h	/^    MIDIMsg *msg;$/;"	m	struct:__MIDIMsgBuilder
+msg	../mmmidi/test/mm_midimsgbuilder_test.c	/^    MIDIMsg *msg;$/;"	m	struct:__MsgTimePair	file:
+mtps	../mmmidi/test/mm_midimsgbuilder_test.c	/^MsgTimePair mtps[100];$/;"	v
+mtpsIdx	../mmmidi/test/mm_midimsgbuilder_test.c	/^size_t mtpsIdx = 0;$/;"	v
+name	../mmdsch_alsa/src/alsa_lowlevel.c	/^	const char *name;$/;"	m	struct:transfer_method	file:
+nchans_in	../mm_dsp_schablone/inc/audio_hw.h	/^    int                nchans_in;$/;"	m	struct:__audio_hw_io_t
+nchans_out	../mm_dsp_schablone/inc/audio_hw.h	/^    int                nchans_out;$/;"	m	struct:__audio_hw_io_t
+next	../mm_primitives/inc/mm_dllist.h	/^    MMDLList *next;$/;"	m	struct:__MMDLList
+next	../mm_primitives/inc/mm_list.h	/^    MMList *next;$/;"	m	struct:__MMList
+next	../ne_datastructures/inc/mm_stack.h	/^    MMStack *next;$/;"	m	struct:__MMStack
+note	../mm_dsp/inc/mm_sampleplayer.h	/^    MMSample          note; \/* the midi note of this instance, because rate may$/;"	m	struct:__MMSamplePlayerSigProc
+note	../mm_dsp/inc/mmpv_tesp.h	/^    MMSample            note;$/;"	m	struct:__MMPvtespParams
+noteOff	../mmmidi/inc/mm_midirouter.h	/^    MIDI_Router_CB_Info noteOff;$/;"	m	struct:__MIDI_Router_CB_Set
+noteOn	../mmmidi/inc/mm_midirouter.h	/^    MIDI_Router_CB_Info noteOn;$/;"	m	struct:__MIDI_Router_CB_Set
+numVoices	../mm_dsp/src/mm_poly_voice_manage.c	/^    size_t numVoices;$/;"	m	struct:__MMPolyManager	file:
+onDone	../mm_dsp/inc/mm_envedsampleplayer.h	/^    void                    (*onDone)(MMEnvedSamplePlayer*);$/;"	m	struct:__MMEnvedSamplePlayer
+onDoneParams	../mm_dsp/inc/mm_envedsampleplayer.h	/^    void                    *onDoneParams;$/;"	m	struct:__MMEnvedSamplePlayer
+otherBus	../mm_dsp/inc/mm_busmult.h	/^    MMBus *otherBus;  \/* The other argument in the multiplication *\/$/;"	m	struct:__MMBusMult
+out	../mm_dsp_schablone/inc/audio_hw.h	/^    audio_hw_sample_t *out;$/;"	m	struct:__audio_hw_io_t
+outBus	../mm_dsp/inc/mm_enveloper.h	/^    MMBus *outBus;$/;"	m	struct:__MMEnveloper
+outBus	../mm_dsp/inc/mm_envgen.h	/^    MMBus         *outBus;$/;"	m	struct:__MMEnvGen
+outBus	../mm_dsp/inc/mm_sampleplayer.h	/^    MMBus         *outBus;$/;"	m	struct:__MMSamplePlayer
+outBus	../mm_dsp/inc/mm_sigconst.h	/^    MMBus *outBus;$/;"	m	struct:__MMSigConst
+outBus	src/signal_chain.c	/^MMBus *inBus, *outBus;$/;"	v
+output	../mm_dsp/test/mm_dsp-simple-interp-test.c	/^MMSample output[OUTPUT_LENGTH];$/;"	v
+output	../mmdsch_alsa/src/alsa_lowlevel.c	/^static snd_output_t *output = NULL;$/;"	v	file:
+overflow	../mm_dsp/test/mm_dsp-test-3.c	/^    size_t overflow;$/;"	m	struct:__MyTimer	file:
+paramType	../mm_dsp/inc/mmpv_tesp.h	/^    MMPvtespParamType   paramType;$/;"	m	struct:__MMPvtespParams
+parent	../mm_dsp/inc/mm_poly_voice_manage.h	/^    MMPolyVoice *parent;$/;"	m	struct:__MMPolyVoiceParams
+parent	../mm_dsp/inc/mm_sampleplayer.h	/^    MMSamplePlayer *parent; \/* where it gets its placeHolder and outBusses from *\/$/;"	m	struct:__MMSamplePlayerSigProc
+parseCommand	../mm_primitives/test/mm_seq_test_2.c	/^char *parseCommand(char *str,MMTime_Tick *time)$/;"	f
+pendingEvents	../mm_primitives/src/mm_seq.c	/^    MMStaticQueue *pendingEvents;$/;"	m	struct:__MMSeq	file:
+period_event	../mmdsch_alsa/inc/alsa_lowlevel.h	/^    int period_event;			\/* produce poll event after each period *\/$/;"	m	struct:__anon2
+period_event	../mmdsch_alsa/src/alsa_lowlevel.c	/^static int period_event = 0;				\/* produce poll event after each period *\/$/;"	v	file:
+period_size	../mmdsch_alsa/src/alsa_lowlevel.c	/^static snd_pcm_sframes_t period_size;$/;"	v	file:
+period_time	../mmdsch_alsa/inc/alsa_lowlevel.h	/^    unsigned int period_time;	\/* period time in us *\/$/;"	m	struct:__anon2
+period_time	../mmdsch_alsa/src/alsa_lowlevel.c	/^static unsigned int period_time = 100000;	\/* period time in us *\/$/;"	v	file:
+phase	../mmdsch_alsa/src/alsa_lowlevel.c	/^	double phase;$/;"	m	struct:async_private_data	file:
+pitchBendChange	../mmmidi/inc/mm_midirouter.h	/^    MIDI_Router_CB_Info pitchBendChange;$/;"	m	struct:__MIDI_Router_CB_Set
+placeHolder	../mm_dsp/inc/mm_sampleplayer.h	/^    MMSigProc placeHolder;$/;"	m	struct:__MMSamplePlayer
+play_note	src/main.c	/^void play_note(int midinote)$/;"	f
+playingVoices	../mm_dsp/src/mm_poly_voice_manage.c	/^    MMPolyVoice playingVoices;$/;"	m	struct:__MMPolyManager	file:
+poly_management_setup	src/poly_management.c	/^void poly_management_setup(void)$/;"	f
+popAddr	../ne_datastructures/inc/mm_queue.h	/^    size_t popAddr;$/;"	m	struct:__MMQueueController
+popAddr	../ne_datastructures/inc/mm_queuecontroller.h	/^    size_t popAddr;$/;"	m	struct:__MMQueueController
+popAddr	../ne_datastructures/inc/mm_staticqueue.h	/^    size_t popAddr;$/;"	m	struct:__MMStaticQueue
+prev	../mm_primitives/inc/mm_dllist.h	/^    MMDLList *prev;$/;"	m	struct:__MMDLList
+programChange	../mmmidi/inc/mm_midirouter.h	/^    MIDI_Router_CB_Info programChange;$/;"	m	struct:__MIDI_Router_CB_Set
+pushAddr	../ne_datastructures/inc/mm_queue.h	/^    size_t pushAddr;$/;"	m	struct:__MMQueueController
+pushAddr	../ne_datastructures/inc/mm_queuecontroller.h	/^    size_t pushAddr;$/;"	m	struct:__MMQueueController
+pushAddr	../ne_datastructures/inc/mm_staticqueue.h	/^    size_t pushAddr;$/;"	m	struct:__MMStaticQueue
+pvm	src/poly_management.c	/^MMPolyManager *pvm;$/;"	v
+rate	../mm_dsp/inc/mm_sampleplayer.h	/^    MMSample          rate;$/;"	m	struct:__MMSamplePlayerSigProc
+rate	../mm_dsp/inc/mmpv_tesp.h	/^    MMSample            rate;$/;"	m	struct:__MMPvtespParams
+rate	../mmdsch_alsa/inc/alsa_lowlevel.h	/^    unsigned int rate;			\/* stream rate *\/$/;"	m	struct:__anon2
+rate	../mmdsch_alsa/src/alsa_lowlevel.c	/^static unsigned int rate = 44100;			\/* stream rate *\/$/;"	v	file:
+rateSource	../mm_dsp/inc/mmpv_tesp.h	/^    MMPvtespRateSource  rateSource;$/;"	m	struct:__MMPvtespParams
+recentEventsTime	../mmmidi/test/mm_midimsgbuilder_test.c	/^static time_t recentEventsTime;$/;"	v	file:
+release	../mm_dsp/inc/mm_adsr.h	/^    MMSample release;       \/* time in seconds *\/$/;"	m	struct:__MMAdsr
+releaseTime	../mm_dsp/inc/mm_trapezoid_env.h	/^    MMSample      releaseTime;$/;"	m	struct:__MMTrapezoidEnv
+releaseTime	../mm_dsp/inc/mmpv_tesp.h	/^    MMSample            releaseTime;$/;"	m	struct:__MMPvtespParams
+releaseTime	src/synth_control.c	/^static MMSample releaseTime      = 1.;$/;"	v	file:
+resample	../mmdsch_alsa/inc/alsa_lowlevel.h	/^    int resample;				\/* enable alsa-lib resampling *\/$/;"	m	struct:__anon2
+resample	../mmdsch_alsa/src/alsa_lowlevel.c	/^static int resample = 1;				    \/* enable alsa-lib resampling *\/$/;"	v	file:
+reset	../mm_dsp/inc/mm_envelope.h	/^    void     (*reset)(MMEnvelope *);             \/* Reset envelope *\/$/;"	m	struct:__MMEnvelope
+resultBus	../mm_dsp/inc/mm_busmult.h	/^    MMBus *resultBus; \/* The bus the result goes into *\/$/;"	m	struct:__MMBusMult
+right	../ne_datastructures/inc/mm_heap.h	/^    MMHeap_Node  *right;$/;"	m	struct:__MMHeap_Node
+right	../ne_datastructures/inc/mm_heap__static.h	/^    MMHeap_Node  *right;$/;"	m	struct:__MMHeap_Node
+right	../ne_datastructures/inc/ne_maxheap.h	/^    HeapNode *right;$/;"	m	struct:__HeapNode
+router	../mmmidi/inc/mm_midirouter_standard.h	/^    MIDI_Router router;$/;"	m	struct:__MIDI_Router_Standard
+samplePeriod	../mm_dsp/inc/mm_adsr.h	/^    MMSample samplePeriod;  \/* the length of one sample period in seconds (1\/Fs) *\/ $/;"	m	struct:__MMAdsr
+samplePlayer	../mm_dsp/test/mm_dsp-test-2.c	/^    MMSamplePlayer *samplePlayer;$/;"	m	struct:SampleInfo	file:
+samplePlayer	../mm_dsp/test/mm_dsp-test-2_temp.c	/^    MMSamplePlayer *samplePlayer;$/;"	m	struct:SampleInfo	file:
+samplePlayer	../mm_dsp/test/mm_dsp-test-3.c	/^    MMSamplePlayer *samplePlayer;$/;"	m	struct:SampleInfo	file:
+samplerate	../mm_dsp/inc/mm_wavtab.h	/^    uint32_t samplerate; \/* The sample rate that the sound in the wavetable was$/;"	m	struct:__MMWavTab
+samples	../mm_dsp/inc/mm_sampleplayer.h	/^    MMWavTab      *samples;$/;"	m	struct:__MMSamplePlayerSigProc
+samples	../mm_dsp/inc/mmpv_tesp.h	/^    MMWavTab            *samples;$/;"	m	struct:__MMPvtespParams
+samples	../mm_dsp/test/mm_dsp-test-2.c	/^    MMWavTab *samples;$/;"	m	struct:SampleInfo	file:
+samples	../mm_dsp/test/mm_dsp-test-2_temp.c	/^    MMWavTab *samples;$/;"	m	struct:SampleInfo	file:
+samples	../mm_dsp/test/mm_dsp-test-3.c	/^    MMWavTab *samples;$/;"	m	struct:SampleInfo	file:
+samples	../mmdsch_alsa/src/alsa_lowlevel.c	/^	signed short *samples;$/;"	m	struct:async_private_data	file:
+samples	../mmdsch_alsa/src/alsa_lowlevel.c	/^static signed short *samples;$/;"	v	file:
+sequence	../mm_primitives/test/mm_seq_test.c	/^    MMSeq *sequence;$/;"	m	struct:__ThreadInfo	file:
+sequence	../mm_primitives/test/mm_seq_test_2.c	/^    MMSeq *sequence;$/;"	m	struct:__ThreadInfo	file:
+set_hwparams	../mmdsch_alsa/src/alsa_lowlevel.c	/^static int set_hwparams(snd_pcm_t *handle,$/;"	f	file:
+set_swparams	../mmdsch_alsa/src/alsa_lowlevel.c	/^static int set_swparams(snd_pcm_t *handle, snd_pcm_sw_params_t *swparams)$/;"	f	file:
+shortReleaseTime	src/synth_control.c	/^static MMSample shortReleaseTime = 0.025;$/;"	v	file:
+sigChain	../mm_dsp/inc/mm_envedsampleplayer.h	/^    MMSigChain              sigChain;$/;"	m	struct:__MMEnvedSamplePlayer
+sigChain	src/signal_chain.c	/^MMSigChain sigChain;$/;"	v
+sigConst	../mm_dsp/inc/mm_envedsampleplayer.h	/^    MMSigConst              sigConst;$/;"	m	struct:__MMEnvedSamplePlayer
+sigConst	src/signal_chain.c	/^static MMSigConst sigConst;$/;"	v	file:
+sigProcs	../mm_dsp/inc/mm_sigchain.h	/^    MMSigProc sigProcs; \/* The head of the chain of signal processors *\/$/;"	m	struct:__MMSigChain
+signal_chain_setup	src/signal_chain.c	/^void signal_chain_setup(void)$/;"	f
+size	../mm_dsp/inc/mm_bus.h	/^    size_t size; \/* size of one channel in samples *\/$/;"	m	struct:__MMBus
+size	../ne_datastructures/inc/mm_queue.h	/^    size_t size;$/;"	m	struct:__MMQueueController
+size	../ne_datastructures/inc/mm_queuecontroller.h	/^    size_t size;$/;"	m	struct:__MMQueueController
+size	../ne_datastructures/inc/mm_staticqueue.h	/^    size_t size;$/;"	m	struct:__MMStaticQueue
+some_callback_supplying_byte	../mmmidi/test/mm_midimsgbuilder_test.c	/^void some_callback_supplying_byte(int8_t byte)$/;"	f
+sourceBus	../mm_dsp/inc/mm_busmerger.h	/^    MMBus *sourceBus;$/;"	m	struct:__MMBusMerger
+sp	../mm_dsp/inc/mm_envedsampleplayer.h	/^    MMSamplePlayer          sp;$/;"	m	struct:__MMEnvedSamplePlayer
+spsp	../mm_dsp/inc/mm_envedsampleplayer.h	/^    MMSamplePlayerSigProc   spsp;$/;"	m	struct:__MMEnvedSamplePlayer
+spsps	src/signal_chain.c	/^MMTrapEnvedSamplePlayer spsps[NUM_NOTES];$/;"	v
+startAttack	../mm_dsp/inc/mm_envelope.h	/^    void     (*startAttack)(MMEnvelope *);       \/* Start the attack portion, could just turn envelope on *\/$/;"	m	struct:__MMEnvelope
+startRelease	../mm_dsp/inc/mm_envelope.h	/^    void     (*startRelease)(MMEnvelope *);      \/* Start the release portion, could just turn it off *\/$/;"	m	struct:__MMEnvelope
+state	../mm_dsp/inc/mm_adsr.h	/^    MMAdsr_State state;$/;"	m	struct:__MMAdsr
+state	../mm_dsp/inc/mm_envelope.h	/^    MMEnvelopeState state;$/;"	m	struct:__MMEnvelope
+state	../mm_dsp/inc/mm_sigproc.h	/^    MMSigProc_State                 state;$/;"	m	struct:__MMSigProc
+state	../mm_dsp/inc/mm_wavtab_recorder.h	/^    MMWavTabRecorderState state;$/;"	m	struct:__MMWavTabRecorder
+state	../mmmidi/inc/mm_midieventbuilder.h	/^    MIDIEventBuilder_State_t state;$/;"	m	struct:__MIDIEventBuilder
+state	../mmmidi/inc/mm_midimsgbuilder.h	/^    MIDIMsgBuilder_State_t state;$/;"	m	struct:__MIDIMsgBuilder
+steal	../mm_dsp/inc/mm_poly_voice_manage.h	/^    MMPolyManagerSteal steal; \/* Whether or not we steal a note *\/$/;"	m	struct:__MMPolyVoiceParams
+str	../mmmidi/test/mm_midirouter_test.cpp	/^    char *str;$/;"	m	struct:MyMidiCCMsg	file:
+sustain	../mm_dsp/inc/mm_adsr.h	/^    MMSample sustain;       \/* value between 0 and 1 *\/$/;"	m	struct:__MMAdsr
+sustainTime	../mm_dsp/inc/mm_trapezoid_env.h	/^    MMSample      sustainTime; \/* when >= 0, envelope triggers its own release,$/;"	m	struct:__MMTrapezoidEnv
+synth_control_setup	src/synth_control.c	/^void synth_control_setup(void)$/;"	f
+systemCommon	../mmmidi/inc/mm_midirouter.h	/^    MIDI_Router_CB_Info systemCommon;$/;"	m	struct:__MIDI_Router_CB_Set
+te	../mm_dsp/inc/mm_trapenvgen.h	/^    MMTrapezoidEnv       te;$/;"	m	struct:__MMTrapEnvGen
+teg	../mm_dsp/inc/mm_trapenvedsampleplayer.h	/^    MMTrapEnvGen        teg;$/;"	m	struct:__MMTrapEnvedSamplePlayer
+tesp	../mm_dsp/src/mmpv_tesp.c	/^    MMTrapEnvedSamplePlayer *tesp;$/;"	m	struct:__MMPvtesp	file:
+testHead	../mm_primitives/test/mm_dllist_test.c	/^    NETester testHead;$/;"	m	struct:__MMDLList_Tester	file:
+tick	../mm_dsp/inc/mm_sigproc.h	/^    MMSigProc_TickFunc               tick;$/;"	m	struct:__MMSigProc
+tick	../mm_primitives/test/mm_seq_test.c	/^void *tick(void *threadinfo)$/;"	f
+tick	../mm_primitives/test/mm_seq_test_2.c	/^void *tick(void *threadinfo)$/;"	f
+tickPeriod	../mm_dsp/inc/mm_enveloper.h	/^    MMSample tickPeriod;$/;"	m	struct:__MMEnveloper
+time	../mm_dsp/inc/mm_envelope.h	/^    MMSample time;$/;"	m	struct:__MMEnvelope
+time	../mmmidi/inc/mm_midievent.h	/^    uint64_t time;$/;"	m	struct:__MIDIEvent
+time	../mmmidi/test/mm_midimsgbuilder_test.c	/^    time_t  time;$/;"	m	struct:__MsgTimePair	file:
+top	../ne_datastructures/inc/mm_heap.h	/^    MMHeap_Node           *top;$/;"	m	struct:__MMHeap_Manager
+top	../ne_datastructures/inc/mm_heap__static.h	/^    MMHeap_Node           *top;$/;"	m	struct:__MMHeap_Manager
+top	../ne_datastructures/inc/ne_maxheap.h	/^    HeapNode  *top;$/;"	m	struct:__HeapManager
+transfer_loop	../mmdsch_alsa/src/alsa_lowlevel.c	/^	int (*transfer_loop)(snd_pcm_t *handle,$/;"	m	struct:transfer_method	file:
+transfer_method	../mmdsch_alsa/src/alsa_lowlevel.c	/^struct transfer_method {$/;"	s	file:
+transfer_methods	../mmdsch_alsa/src/alsa_lowlevel.c	/^static struct transfer_method transfer_methods[] = {$/;"	v	typeref:struct:transfer_method	file:
+turnOff	../mm_dsp/inc/mm_poly_voice_manage.h	/^    void (*turnOff)(MMPolyVoice *pv, MMPolyVoiceParams *params);$/;"	m	struct:__MMPolyVoice
+turnOn	../mm_dsp/inc/mm_poly_voice_manage.h	/^    void (*turnOn)(MMPolyVoice *pv, MMPolyVoiceParams *params);$/;"	m	struct:__MMPolyVoice
+usage	../mmmidi/test/mm_midirouter_test.cpp	/^void usage( void ) {$/;"	f
+used	../mm_dsp/inc/mm_poly_voice_manage.h	/^    MMPolyVoiceUsed used;$/;"	m	struct:__MMPolyVoice
+value	../mm_dsp/inc/mm_adsr.h	/^    MMSample value;         \/* the current value of the ADSR *\/$/;"	m	struct:__MMAdsr
+verbose	../mmdsch_alsa/inc/alsa_lowlevel.h	/^    int verbose;				\/* verbose flag *\/$/;"	m	struct:__anon2
+verbose	../mmdsch_alsa/inc/alsa_midi_lowlevel.h	/^    int verbose;$/;"	m	struct:__anon1
+verbose	../mmdsch_alsa/src/alsa_lowlevel.c	/^static int verbose = 0;					    \/* verbose flag *\/$/;"	v	file:
+voices	../mm_dsp/src/mm_poly_voice_manage.c	/^    MMPolyVoice **voices;$/;"	m	struct:__MMPolyManager	file:
+waitByte	../mmmidi/inc/mm_midieventbuilder.h	/^    size_t waitByte;$/;"	m	struct:__MIDIEventBuilder
+waitByte	../mmmidi/inc/mm_midimsgbuilder.h	/^    size_t waitByte;$/;"	m	struct:__MIDIMsgBuilder
+waveTable	../mm_dsp/test/mm_dsp-simple-interp-test.c	/^MMSample waveTable[WAVTAB_SIZE];$/;"	v
+waveTable	../mm_dsp/test/mm_dsp-spsp-interp-test.c	/^MMSample waveTable[WAVTAB_SIZE];$/;"	v
+waveTable	../mm_dsp/test/mm_esp-test-1.c	/^MMSample waveTable[WAVTABLE_LENGTH];$/;"	v
+waveTableData	src/wavetables.c	/^static MMSample waveTableData[WAVTABLE_LENGTH_SAMPLES];$/;"	v	file:
+waveTable_init	../mm_dsp/test/mm_dsp-simple-interp-test.c	/^void waveTable_init(void)$/;"	f
+waveTable_init	../mm_dsp/test/mm_dsp-spsp-interp-test.c	/^void waveTable_init(void)$/;"	f
+waveTable_init	../mm_dsp/test/mm_esp-test-1.c	/^void waveTable_init(void)$/;"	f
+whatToDo	../mm_dsp/test/mm_dsp-test-3.c	/^    void (*whatToDo)(void*);$/;"	m	struct:__MyTimer	file:
+width	../ne_datastructures/inc/mm_heap.h	/^    MMHeap_Manager_Size  width;$/;"	m	struct:__MMHeap_Manager
+width	../ne_datastructures/inc/mm_heap__static.h	/^    MMHeap_Manager_Size  width;$/;"	m	struct:__MMHeap_Manager
+width	../ne_datastructures/inc/ne_maxheap.h	/^    int      width;$/;"	m	struct:__HeapManager
+wt	../mm_dsp/test/mm_esp-test-1.c	/^MMWavTab wt;$/;"	v
+xrun_recovery	../mmdsch_alsa/src/alsa_lowlevel.c	/^static int xrun_recovery(snd_pcm_t *handle, int err)$/;"	f	file:
+yield_params_to_allocator	../mm_dsp/inc/mm_poly_voice_manage.h	/^    void (*yield_params_to_allocator)(void *allocator, void *params);$/;"	m	struct:__MMPolyVoiceParams
+tags

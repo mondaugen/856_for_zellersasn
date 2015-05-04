@@ -48,3 +48,12 @@ $(BIN) : $(OBJS)
 
 clean:
 	rm objs/*.o
+
+tags:
+	ctags -R . \
+		$(MM_DSP_SCHABLONE_PATH)\
+		$(MMDSCH_ALSA_PATH)\
+		$(MMMIDI_PATH)\
+		$(MM_DSP_PATH)\
+		$(MM_PRIMITIVES_PATH)\
+		$(NE_DATASTRUCTURES_PATH)
