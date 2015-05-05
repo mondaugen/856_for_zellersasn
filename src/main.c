@@ -3,6 +3,7 @@
 #include "midi_setup.h" 
 #include "wavetables.h" 
 #include "signal_chain.h" 
+#include <unistd.h> 
 
 void play_note(int midinote)
 {
@@ -26,17 +27,18 @@ int main (int argc, char **argv)
                 "Arguments are %s audio-device midi-input-port\n",argv[0]);
         return(-1);
     }
-    WaveTable_init();
     if (audio_setup(argv[1])) {
         THROW_ERR("Error setting up audio.");
     }
     if (midi_setup(argv[2])) {
         THROW_ERR("Error setting up MIDI.");
     }
+    SampleTable_init();
     signal_chain_setup();
     poly_management_setup();
     synth_control_setup();
     audio_start();
+//    sleep(2);
 //    play_note(60);
     while(1) {
     }
