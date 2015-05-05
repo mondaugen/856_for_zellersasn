@@ -4,9 +4,10 @@
 #include "signal_chain.h" 
 #include <math.h> 
 
-static MMSample attackTime      = 0.01;
+static MMSample attackTime       = 0.01;
 static MMSample shortReleaseTime = 0.025;
 static MMSample releaseTime      = 0.01;
+static MMSample sustainTime      = 1.;
 
 #define NOTE_STEALING MMPolyManagerSteal_TRUE
 
@@ -36,15 +37,47 @@ void MIDI_synth_note_on_do(void *data, MIDIMsg *msg)
         params->attackTime = attackTime;
         /* this is the time a note that is stolen will take to decay */
         params->releaseTime = shortReleaseTime; 
-        params->samples = &WaveTable;
+        params->samples = theSound;
         params->loop = 1;
-        /*     params->rate = playbackRate; */
-        params->rateSource = MMPvtespRateSource_NOTE;
+        params->rate = pow(2.,((MMSample)msg->data[1]-60)/12.);
+        params->rateSource = MMPvtespRateSource_RATE;
         MMPolyManager_noteOn(pvm, (void*)params);
         MIDIMsg_free(msg);
     } else {
         MIDI_synth_note_off_do(data,msg);
     }
+}
+
+static void autorelease_on_done(MMEnvedSamplePlayer * esp)
+{
+    pm_yield_params_to_allocator((void*)&voiceAllocator,
+            (void *)&(MMEnvedSamplePlayer_getSamplePlayerSigProc(esp).note));
+}
+
+void MIDI_note_on_autorelease_do(void *data, MIDIMsg *msg)
+{
+    int voiceNum = pm_get_next_free_voice_number();
+    if ((voiceNum == -1) || (msg->data[2] <= 0)) { 
+        /* No more voices free or actually received a cheap note off (note on
+         * with velocity 0). */
+        MIDIMsg_free(msg);
+        return;
+    }
+    pm_claim_params_from_allocator((void*)&voiceAllocator,(void*)&voiceNum);
+    ((MMEnvedSamplePlayer*)&spsps[voiceNum])->onDone = autorelease_on_done;
+    MMTrapEnvedSamplePlayer_noteOn_Rate(
+            &spsps[voiceNum],
+            voiceNum,
+            msg->data[2]/127.,
+            MMInterpMethod_CUBIC,
+            0,
+            attackTime,
+            releaseTime,
+            sustainTime,
+            theSound, 
+            1,
+            pow(2.,(msg->data[1]-60)/12.));
+
 }
 
 void MIDI_synth_cc_attackTime_control(void *data, MIDIMsg *msg)
@@ -60,9 +93,7 @@ void MIDI_synth_cc_releaseTime_control(void *data, MIDIMsg *msg)
 void synth_control_setup(void)
 {
     MIDI_Router_addCB(&midiRouter.router, MIDIMSG_NOTE_ON, 1, 
-            MIDI_synth_note_on_do, spsps);
-    MIDI_Router_addCB(&midiRouter.router, MIDIMSG_NOTE_OFF, 1,
-            MIDI_synth_note_off_do, spsps);
+            MIDI_note_on_autorelease_do, spsps);
     MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[1],0x0e,
             MIDI_synth_cc_attackTime_control,&attackTime);
     MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[1],0x0f,
