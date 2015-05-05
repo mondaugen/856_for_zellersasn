@@ -9,11 +9,9 @@ SRC						 = $(notdir $(wildcard $(MMDSCH_ALSA_PATH)/src/*.c))
 SRC					    += $(notdir $(wildcard $(MM_DSP_SCHABLONE_PATH)/src/*.c))
 SRC					    += $(notdir $(wildcard $(MMMIDI_PATH)/src/*.c))
 SRC					    += $(notdir $(wildcard src/*.c))
-DEP					     = $(notdir $(wildcard $(MMDSCH_ALSA_PATH)/inc/*.h))
-DEP					    += $(notdir $(wildcard $(MM_DSP_SCHABLONE_PATH)/inc/*.h))
-DEP					    += $(notdir $(wildcard $(MMMIDI_PATH)/inc/*.h))
-VPATH				     = $(MMDSCH_ALSA_PATH)/src:$(MMMIDI_PATH)/src:src
-VPATH				    += :$(MM_DSP_SCHABLONE_PATH)/src
+LIB						 = $(MM_DSP_PATH)/lib
+LIB						+= $(MM_PRIMITIVES_PATH)/lib
+LIB						+= $(NE_DATASTRUCTURES_PATH)/lib
 INC 				     = $(MM_DSP_SCHABLONE_PATH)/inc
 INC					    += $(MMDSCH_ALSA_PATH)/inc
 INC					    += $(MMMIDI_PATH)/inc
@@ -21,9 +19,12 @@ INC					    += $(MM_DSP_PATH)/inc
 INC					    += $(MM_PRIMITIVES_PATH)/inc
 INC					    += $(NE_DATASTRUCTURES_PATH)/inc
 INC						+= inc
-LIB						 = $(MM_DSP_PATH)/lib
-LIB						+= $(MM_PRIMITIVES_PATH)/lib
-LIB						+= $(NE_DATASTRUCTURES_PATH)/lib
+VPATH				     = $(MMDSCH_ALSA_PATH)/src:$(MMMIDI_PATH)/src:src
+VPATH				    += :$(MM_DSP_SCHABLONE_PATH)/src
+VPATH					+= :$(foreach path, $(INC), :$(path))
+VPATH					+= :$(foreach path, $(LIB), :$(path))
+DEP						 = $(foreach inc, $(INC), $(notdir $(wildcard $(inc)/*.h)))
+LIBDEP					 = $(foreach lib, $(LIB), $(notdir $(wildcard $(lib)/*.a)))
 CFLAGS					+= $(foreach inc,$(INC),-I$(inc))
 CFLAGS					+= -ggdb3
 
@@ -40,11 +41,11 @@ all: $(OBJSDIR) $(OBJS) $(BIN)
 $(OBJSDIR):
 	if [ ! -d "$(OBJSDIR)" ]; then mkdir $(OBJSDIR); fi
 
-$(OBJS) : $(OBJSDIR)/%.o: %.c
+$(OBJS) : $(OBJSDIR)/%.o: %.c $(DEP)
 	$(CC) -c $(CFLAGS) $< -o $@
 
-$(BIN) : $(OBJS)
-	$(CC) $^ -o $@ $(LDFLAGS)
+$(BIN) : $(OBJS) $(LIBDEP)
+	$(CC) $(filter %.o, $^) -o $@ $(LDFLAGS)
 
 clean:
 	rm objs/*.o
