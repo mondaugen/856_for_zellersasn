@@ -22,7 +22,7 @@ void poly_management_setup(void)
 
 void pm_yield_params_to_allocator(void *allocator, void *params)
 {
-    /* mmpv_tesp will give a value of type (MMSample*)
+    /* caller will give a value of type (MMSample*)
      * to yield to the allocator */
     set_voice_free(*((uint32_t*)allocator),(uint32_t)*((MMSample*)params));
 }

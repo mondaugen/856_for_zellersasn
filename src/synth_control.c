@@ -56,7 +56,7 @@ static void autorelease_on_done(MMEnvedSamplePlayer * esp)
 
 void MIDI_note_on_autorelease_do(void *data, MIDIMsg *msg)
 {
-    int voiceNum = pm_get_next_free_voice_number();
+    MMSample voiceNum = pm_get_next_free_voice_number();
     if ((voiceNum == -1) || (msg->data[2] <= 0)) { 
         /* No more voices free or actually received a cheap note off (note on
          * with velocity 0). */
@@ -64,9 +64,9 @@ void MIDI_note_on_autorelease_do(void *data, MIDIMsg *msg)
         return;
     }
     pm_claim_params_from_allocator((void*)&voiceAllocator,(void*)&voiceNum);
-    ((MMEnvedSamplePlayer*)&spsps[voiceNum])->onDone = autorelease_on_done;
+    ((MMEnvedSamplePlayer*)&spsps[(int)voiceNum])->onDone = autorelease_on_done;
     MMTrapEnvedSamplePlayer_noteOn_Rate(
-            &spsps[voiceNum],
+            &spsps[(int)voiceNum],
             voiceNum,
             msg->data[2]/127.,
             MMInterpMethod_CUBIC,
