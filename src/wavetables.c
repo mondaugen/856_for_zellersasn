@@ -16,7 +16,8 @@ void WaveTable_init(void)
     memset(waveTableData,0,sizeof(MMSample) * WAVTABLE_LENGTH_SAMPLES);
     for (i = 0; i < WAVTABLE_LENGTH_SAMPLES; i++) {
         for (j = 0; j < WAVTABLE_NUM_PARTIALS; j++) {
-            waveTableData[i] += sin((MMSample)i / (MMSample)WAVTABLE_LENGTH_SAMPLES 
+            waveTableData[i] += sin(WAVTABLE_NUM_PERIODS
+                    * (MMSample)i / (MMSample)WAVTABLE_LENGTH_SAMPLES 
                     * (j + 1) * M_PI * 2.) / (MMSample)(j + 1);
         }
     }

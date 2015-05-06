@@ -34,7 +34,7 @@ void audio_hw_io(audio_hw_io_t *params)
         for (c = 0; c < params->nchans_out; c++) {
             /* We put the data from the bus into both output channels */
             params->out[n*params->nchans_out + c] =
-                outBus->data[n] * 0.1 * AUDIO_HW_SAMPLE_T_MAX;
+                outBus->data[n] *  AUDIO_HW_SAMPLE_T_MAX;
         }
         /* Only one channel in the in bus, so we fill it with first channel */
         inBus->data[n] = params->in[n*params->nchans_out];

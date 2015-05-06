@@ -15,7 +15,7 @@ void MIDI_synth_note_off_do(void *data, MIDIMsg *msg)
     MMPvtespParams *params = MMPvtespParams_new();
     ((MMPolyVoiceParams*)params)->steal = NOTE_STEALING;
     params->paramType = MMPvtespParamType_NOTEOFF;
-    params->note = (MMSample)msg->data[1] + 24;
+    params->note = (MMSample)msg->data[1];
     params->amplitude = (MMSample)msg->data[2] / 127.;
     params->releaseTime = releaseTime;
     MMPolyManager_noteOff(pvm, (void*)params);
@@ -29,17 +29,17 @@ void MIDI_synth_note_on_do(void *data, MIDIMsg *msg)
         MMPvtespParams *params = MMPvtespParams_new();
         ((MMPolyVoiceParams*)params)->steal = NOTE_STEALING;
         params->paramType = MMPvtespParamType_NOTEON;
-        params->note = (MMSample)msg->data[1] + 24;
+        params->note = (MMSample)msg->data[1];
         params->amplitude = (MMSample)msg->data[2] / 127.;
-        params->interpolation = MMInterpMethod_CUBIC;
+        params->interpolation = MMInterpMethod_NONE;
         params->index = 0;
         params->attackTime = attackTime;
         /* this is the time a note that is stolen will take to decay */
         params->releaseTime = shortReleaseTime; 
         params->samples = &WaveTable;
         params->loop = 1;
-        /*     params->rate = playbackRate; */
-        params->rateSource = MMPvtespRateSource_NOTE;
+        params->rate = pow(2.,(msg->data[1]-60.)/12.);
+        params->rateSource = MMPvtespRateSource_RATE;
         MMPolyManager_noteOn(pvm, (void*)params);
         MIDIMsg_free(msg);
     } else {
