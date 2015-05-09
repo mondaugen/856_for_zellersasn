@@ -30,8 +30,8 @@ void MIDI_synth_note_on_do(void *data, MIDIMsg *msg)
         ((MMPolyVoiceParams*)params)->steal = NOTE_STEALING;
         params->paramType = MMPvtespParamType_NOTEON;
         params->note = (MMSample)msg->data[1];
-        params->amplitude = (MMSample)msg->data[2] / 127;
-        params->interpolation = MMInterpMethod_LINEAR;
+        params->amplitude = (MMSample)msg->data[2] / 127 * 0.1;
+        params->interpolation = MMInterpMethod_CUBIC;
         params->index = 0;
         params->attackTime = attackTime;
         /* this is the time a note that is stolen will take to decay */
