@@ -7,7 +7,8 @@
 #define WAVTABLE_NUM_PARTIALS  1
 
 /* number of periods in the wavetable of the fundamental */
-#define WAVTABLE_NUM_PERIODS (400*40)
+#define WAVTABLE_NUM_PERIODS (400)
+#define WAVTABLE_NUM_REPS    (40)
 
 extern MMWavTab WaveTable;
 

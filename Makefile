@@ -1,3 +1,4 @@
+OPTIMIZE=-O0
 BIN 					 = main.elf
 MM_DSP_SCHABLONE_PATH	 = ../mm_dsp_schablone
 MMDSCH_ALSA_PATH		 = ../mmdsch_alsa
@@ -26,7 +27,7 @@ VPATH					+= :$(foreach path, $(LIB), :$(path))
 DEP						 = $(foreach inc, $(INC), $(notdir $(wildcard $(inc)/*.h)))
 LIBDEP					 = $(foreach lib, $(LIB), $(notdir $(wildcard $(lib)/*.a)))
 CFLAGS					+= $(foreach inc,$(INC),-I$(inc))
-CFLAGS					+= -ggdb3
+CFLAGS					+= -ggdb3 $(OPTIMIZE)
 
 LDFLAGS					 = $(foreach lib,$(LIB),-L$(lib))
 LDFLAGS				     += -lasound -lm -lmm_dsp -lmm_primitives \
