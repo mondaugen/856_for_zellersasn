@@ -4,9 +4,10 @@
 #include "signal_chain.h" 
 #include <math.h> 
 
-static MMSample attackTime      = 0.01;
-static MMSample shortReleaseTime = 0.025;
-static MMSample releaseTime      = 0.01;
+MMSample attackTime         = 0.01;
+MMSample shortReleaseTime   = 0.025;
+MMSample releaseTime        = 0.01;
+MMTime   eventDelta         = 1000;
 
 #define NOTE_STEALING MMPolyManagerSteal_TRUE
 
