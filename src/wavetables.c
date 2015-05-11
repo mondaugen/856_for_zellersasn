@@ -53,7 +53,7 @@ void SoundSample_init(char *path)
             exit(-1);
         }
         /* Didn't fill the memory, fill with 0s. */
-        memset(((MMArray*)&soundSample)->data,0,
+        memset(&((MMSample*)((MMArray*)&soundSample)->data)[rem],0,
                 sizeof(MMSample)*(((MMArray*)&soundSample)->length - rem));
     }
     fclose(f);

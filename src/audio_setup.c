@@ -28,6 +28,9 @@ void audio_hw_io(audio_hw_io_t *params)
 {
     /* Process MIDI once every audioblock */
     midi_hw_process_input(NULL);
+    /* Increment scheduler and do pending events */
+    scheduler_incTimeAndDoEvents();
+    /* Process audio */
     MMSigProc_tick(&sigChain);
     int n, c;
     for (n = 0; n < params->length; n++) {

@@ -56,6 +56,9 @@ int main (int argc, char **argv)
     signal_chain_setup();
 //    poly_management_setup();
     synth_control_setup();
+    scheduler_setup();
+    /* schedule 1st event */
+    schedule_event(0);
     audio_start();
 //    play_note_rate(70,-0.8);
     while(1) {
