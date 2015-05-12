@@ -104,7 +104,7 @@ void MIDI_synth_cc_sustainTime_control(void *data, MIDIMsg *msg)
 
 void MIDI_synth_cc_schedulerInc_control(void *data, MIDIMsg *msg)
 {
-    *((MMTime*)data) = msg->data[2]+1;
+    *((MMTime*)data) = msg->data[2]*10+1;
 }
 
 void MIDI_synth_cc_pitch_control(void *data, MIDIMsg *msg)

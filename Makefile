@@ -12,6 +12,7 @@ SRC					    += $(notdir $(wildcard src/*.c))
 DEP					     = $(notdir $(wildcard $(MMDSCH_ALSA_PATH)/inc/*.h))
 DEP					    += $(notdir $(wildcard $(MM_DSP_SCHABLONE_PATH)/inc/*.h))
 DEP					    += $(notdir $(wildcard $(MMMIDI_PATH)/inc/*.h))
+DEP					    += $(notdir $(wildcard inc/*.h))
 VPATH				     = $(MMDSCH_ALSA_PATH)/src:$(MMMIDI_PATH)/src:src
 VPATH				    += :$(MM_DSP_SCHABLONE_PATH)/src
 INC 				     = $(MM_DSP_SCHABLONE_PATH)/inc

@@ -54,6 +54,7 @@ static void NoteOnEvent_happen(MMEvent *event)
             theSound, 
             1,
             pow(2.,(pitch-60)/12.));
+    free(event);
 }
 
 void scheduler_incTimeAndDoEvents(void)
