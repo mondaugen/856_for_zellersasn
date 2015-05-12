@@ -1,6 +1,7 @@
 #include "audio_setup.h" 
 #include "midi_setup.h" 
 #include "signal_chain.h" 
+#include <math.h> 
 
 #define NCHANS 2 
 #define SAMPLE_RATE 44100 
@@ -37,7 +38,7 @@ void audio_hw_io(audio_hw_io_t *params)
         for (c = 0; c < params->nchans_out; c++) {
             /* We put the data from the bus into both output channels */
             params->out[n*params->nchans_out + c] =
-                outBus->data[n] * AUDIO_HW_SAMPLE_T_MAX;
+                atan(outBus->data[n])*2./M_PI * AUDIO_HW_SAMPLE_T_MAX;
         }
         /* Only one channel in the in bus, so we fill it with first channel */
         inBus->data[n] = params->in[n*params->nchans_out];

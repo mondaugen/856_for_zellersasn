@@ -69,8 +69,7 @@ void MIDI_note_on_autorelease_do(void *data, MIDIMsg *msg)
         MIDIMsg_free(msg);
         return;
     }
-    pm_claim_params_from_allocator((void*)&voiceAllocator,
-            (void*)&voiceNum);
+    pm_claim_params_from_allocator((void*)&voiceAllocator,(void*)&voiceNum);
     ((MMEnvedSamplePlayer*)&spsps[(int)voiceNum])->onDone = autorelease_on_done;
     MMTrapEnvedSamplePlayer_noteOn_Rate(
             &spsps[(int)voiceNum],
