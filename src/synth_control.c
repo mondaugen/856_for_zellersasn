@@ -43,9 +43,9 @@ void MIDI_synth_note_on_do(void *data, MIDIMsg *msg)
         params->attackTime = attackTime;
         /* this is the time a note that is stolen will take to decay */
         params->releaseTime = shortReleaseTime; 
-        params->samples = theSound;
+        params->samples = &sampleTable;
         params->loop = 1;
-        params->rate = pow(2.,((MMSample)msg->data[1]-60)/12.);
+        params->rate = pow(2.,(msg->data[1]-60)/12.);
         params->rateSource = MMPvtespRateSource_RATE;
         MMPolyManager_noteOn(pvm, (void*)params);
         MIDIMsg_free(msg);
@@ -121,6 +121,18 @@ void MIDI_synth_cc_startPoint_control(void *data, MIDIMsg *msg)
     *((MMSample*)data) = msg->data[2]/127.;
 }
 
+/* Trigger recording with note on, (will be attached channel 3) */
+void MIDI_note_on_record_trig(void *data, MIDIMsg *msg)
+{
+    if (msg->data[2] > 0) {
+        ((MMWavTabRecorder*)data)->currentIndex = 0;
+        ((MMWavTabRecorder*)data)->state = MMWavTabRecorderState_RECORDING;
+    } else {
+        ((MMWavTabRecorder*)data)->state = MMWavTabRecorderState_STOPPED;
+    }
+    MIDIMsg_free(msg);
+}
+
 void synth_control_setup(void)
 {
     MIDI_Router_addCB(&midiRouter.router, MIDIMSG_NOTE_ON, 1, 
@@ -139,4 +151,6 @@ void synth_control_setup(void)
             MIDI_synth_cc_amplitude_control,&amplitude);
     MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x14,
             MIDI_synth_cc_amplitude_control,&startPoint);
+    MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x17,
+            MIDI_note_on_record_trig, &wtr);
 }

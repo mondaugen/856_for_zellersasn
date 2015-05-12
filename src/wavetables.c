@@ -3,6 +3,7 @@
 #include <math.h> 
 #include "audio_setup.h" 
 #include "wavetables.h"
+#include <stdlib.h> 
 
 #include <stdlib.h> 
 #include <stdio.h> 
@@ -10,6 +11,7 @@
 
 MMWavTab WaveTable;
 static MMSample waveTableData[WAVTABLE_LENGTH_SAMPLES];
+MMWavTab sampleTable;
 
 MMWavTab soundSample;
 MMWavTab   *theSound;
@@ -58,4 +60,15 @@ void SoundSample_init(char *path)
     }
     fclose(f);
     theSound = &soundSample;
+}
+
+void SampleTable_init(void)
+{
+    sampleTable.samplerate = audio_hw_get_sample_rate(NULL);
+    ((MMArray*)&sampleTable)->length = 22050; // SAMPLE_TABLE_LENGTH_SEC 
+//                                        * sampleTable.samplerate;
+    ((MMArray*)&sampleTable)->data = 
+        (MMSample*)malloc(((MMArray*)&sampleTable)->length*sizeof(MMSample));
+    memset(((MMArray*)&sampleTable)->data,0,
+            sizeof(MMSample) * ((MMArray*)&sampleTable)->length);
 }

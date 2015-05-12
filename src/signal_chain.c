@@ -1,8 +1,10 @@
 #include "signal_chain.h" 
+#include "wavetables.h" 
 
 MMBus *inBus, *outBus;
 MMSigChain sigChain;
 MMTrapEnvedSamplePlayer spsps[NUM_NOTES];
+MMWavTabRecorder wtr;
 
 static MMSigConst sigConst;
 
@@ -30,6 +32,14 @@ void signal_chain_setup(void)
         /* insert in signal chain after sig const*/
         MMSigProc_insertAfter(&sigConst, &spsps[i]);
     }
+    /* Make a recorder */
+    MMWavTabRecorder_init(&wtr);
+    wtr.buffer = &sampleTable;
+    wtr.inputBus = inBus;
+    wtr.currentIndex = 0;
+    wtr.state = MMWavTabRecorderState_STOPPED;
+    /* Insert at the top of the signal chain */
+    MMSigProc_insertAfter(&sigChain.sigProcs,&wtr);
 }
 
 
