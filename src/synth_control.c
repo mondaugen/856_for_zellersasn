@@ -151,6 +151,19 @@ void MIDI_synth_cc_record_trig(void *data, MIDIMsg *msg)
     MIDIMsg_free(msg);
 }
 
+void MIDI_synth_cc_feedback_control(void *data, MIDIMsg *msg)
+{
+    if (msg->data[2] > 0) {
+        /* Move fbBusBusSplitter to onNode */
+        MMSigProc_remove(data);
+        MMSigProc_insertAfter(fbOnNode,data);
+    } else {
+        /* Move fbBusBusSplitter to offNode */
+        MMSigProc_remove(&fbBusSplitter);
+        MMSigProc_insertAfter(fbOffNode,data);
+    }
+}
+
 void synth_control_setup(void)
 {
     MIDI_Router_addCB(&midiRouter.router, MIDIMSG_NOTE_ON, 1, 
@@ -173,4 +186,6 @@ void synth_control_setup(void)
             MIDI_synth_cc_eventDelta_control,&eventDelta);
     MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x17,
             MIDI_synth_cc_record_trig, &wtr);
+    MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x18,
+            MIDI_synth_cc_feedback_control, &fbBusSplitter);
 }
