@@ -4,17 +4,17 @@
 #include "audio_setup.h" 
 #include "wavetables.h"
 #include <stdlib.h> 
-
-#include <stdlib.h> 
 #include <stdio.h> 
 #include <error.h> 
 
 MMWavTab WaveTable;
-static MMSample waveTableData[WAVTABLE_LENGTH_SAMPLES];
-MMWavTab sampleTable;
-
 MMWavTab soundSample;
+static MMSample waveTableData[WAVTABLE_LENGTH_SAMPLES];
+
+MMWavTab    sampleTable[NUM_SAMPLE_TABLES];
+size_t      soundSampleMaxLength;
 MMWavTab   *theSound;
+MMWavTab   *recordingSound;
 
 void WaveTable_init(void)
 {
@@ -64,11 +64,18 @@ void SoundSample_init(char *path)
 
 void SampleTable_init(void)
 {
-    sampleTable.samplerate = audio_hw_get_sample_rate(NULL);
-    ((MMArray*)&sampleTable)->length = 22050; // SAMPLE_TABLE_LENGTH_SEC 
-//                                        * sampleTable.samplerate;
-    ((MMArray*)&sampleTable)->data = 
-        (MMSample*)malloc(((MMArray*)&sampleTable)->length*sizeof(MMSample));
-    memset(((MMArray*)&sampleTable)->data,0,
-            sizeof(MMSample) * ((MMArray*)&sampleTable)->length);
+    int n;
+    for (n = 0; n < NUM_SAMPLE_TABLES; n++) {
+        sampleTable[n].samplerate = audio_hw_get_sample_rate(NULL);
+        ((MMArray*)&sampleTable[n])->length = SAMPLE_TABLE_LENGTH_SEC 
+            * sampleTable[n].samplerate;
+        ((MMArray*)&sampleTable[n])->data = 
+            (MMSample*)malloc(((MMArray*)&sampleTable[n])->length*sizeof(MMSample));
+        memset(((MMArray*)&sampleTable[n])->data,0,
+                sizeof(MMSample) * ((MMArray*)&sampleTable[n])->length);
+    }
+    theSound = &sampleTable[0];
+    recordingSound = &sampleTable[1];
+    soundSampleMaxLength = SAMPLE_TABLE_LENGTH_SEC 
+        * audio_hw_get_sample_rate(NULL);
 }

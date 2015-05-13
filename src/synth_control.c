@@ -10,7 +10,9 @@ MMSample shortReleaseTime   = 0.025;
 MMSample releaseTime        = 0.01;
 MMSample sustainTime        = 0.5;
 /* The amount the scheduler is incremented each block */
-MMTime   schedulerInc       = 100; 
+MMTime   schedulerInc       = 1; 
+/* The time between two scheduled events */
+MMTime   eventDelta         = 100; 
 MMSample pitch              = 100;
 MMSample amplitude          = .1;
 MMSample startPoint         = 0; /* between 0 and 1 */
@@ -43,7 +45,7 @@ void MIDI_synth_note_on_do(void *data, MIDIMsg *msg)
         params->attackTime = attackTime;
         /* this is the time a note that is stolen will take to decay */
         params->releaseTime = shortReleaseTime; 
-        params->samples = &sampleTable;
+        params->samples = theSound;
         params->loop = 1;
         params->rate = pow(2.,(msg->data[1]-60)/12.);
         params->rateSource = MMPvtespRateSource_RATE;
@@ -103,7 +105,7 @@ void MIDI_synth_cc_sustainTime_control(void *data, MIDIMsg *msg)
 
 void MIDI_synth_cc_schedulerInc_control(void *data, MIDIMsg *msg)
 {
-    *((MMTime*)data) = msg->data[2]*10+1;
+    *((MMTime*)data) = msg->data[2]+1;
 }
 
 void MIDI_synth_cc_pitch_control(void *data, MIDIMsg *msg)
@@ -121,14 +123,30 @@ void MIDI_synth_cc_startPoint_control(void *data, MIDIMsg *msg)
     *((MMSample*)data) = msg->data[2]/127.;
 }
 
-/* Trigger recording with note on, (will be attached channel 3) */
-void MIDI_note_on_record_trig(void *data, MIDIMsg *msg)
+void MIDI_synth_cc_eventDelta_control(void *data, MIDIMsg *msg)
+{
+    *((MMTime*)data) = msg->data[2]*10+1;
+}
+
+/* Start recording with non-zero control change value. Stop with value of 0. */
+void MIDI_synth_cc_record_trig(void *data, MIDIMsg *msg)
 {
     if (msg->data[2] > 0) {
+        /* Set to max length so it would be possible to record all the way to
+         * the end of allocated space */
+        ((MMArray*)recordingSound)->length = soundSampleMaxLength;
+        ((MMWavTabRecorder*)data)->buffer = recordingSound;
         ((MMWavTabRecorder*)data)->currentIndex = 0;
         ((MMWavTabRecorder*)data)->state = MMWavTabRecorderState_RECORDING;
     } else {
         ((MMWavTabRecorder*)data)->state = MMWavTabRecorderState_STOPPED;
+        /* Set the length to the index the recorder got to */
+        ((MMArray*)recordingSound)->length =
+            ((MMWavTabRecorder*)data)->currentIndex;
+        /* Swap the playing and the recording sounds */
+        MMWavTab *tmp = recordingSound;
+        recordingSound = theSound;
+        theSound = tmp;
     }
     MIDIMsg_free(msg);
 }
@@ -150,7 +168,9 @@ void synth_control_setup(void)
     MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x13,
             MIDI_synth_cc_amplitude_control,&amplitude);
     MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x14,
-            MIDI_synth_cc_amplitude_control,&startPoint);
+            MIDI_synth_cc_startPoint_control,&startPoint);
+    MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x15,
+            MIDI_synth_cc_eventDelta_control,&eventDelta);
     MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x17,
-            MIDI_note_on_record_trig, &wtr);
+            MIDI_synth_cc_record_trig, &wtr);
 }

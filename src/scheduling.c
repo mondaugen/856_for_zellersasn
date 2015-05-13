@@ -33,7 +33,7 @@ void schedule_event(uint64_t timeFromNow)
 static void NoteOnEvent_happen(MMEvent *event)
 {
     /* schedule next event */
-    schedule_event(EVENT_DELTA);
+    schedule_event(eventDelta);
     MMSample voiceNum = pm_get_next_free_voice_number();
     if (voiceNum == -1) { 
         /* No more voices free */

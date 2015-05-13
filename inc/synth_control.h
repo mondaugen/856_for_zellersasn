@@ -8,6 +8,7 @@ extern MMSample shortReleaseTime;
 extern MMSample sustainTime;
 extern MMSample releaseTime;
 extern MMTime   schedulerInc;
+extern MMTime   eventDelta; 
 extern MMSample pitch;
 extern MMSample amplitude;
 extern MMSample startPoint; /* between 0 and 1 */
