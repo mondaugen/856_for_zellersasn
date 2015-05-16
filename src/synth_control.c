@@ -159,7 +159,7 @@ void MIDI_synth_cc_feedback_control(void *data, MIDIMsg *msg)
         MMSigProc_insertAfter(fbOnNode,data);
     } else {
         /* Move fbBusBusSplitter to offNode */
-        MMSigProc_remove(&fbBusSplitter);
+        MMSigProc_remove(data);
         MMSigProc_insertAfter(fbOffNode,data);
     }
 }

@@ -1,0 +1,3 @@
+# Send a sine at 440 hz to the program
+sox -n -t s16 -c 2 -r 44.1k - synth sine 440 gain -6| \
+    ./main.elf hw:CARD=Pro,DEV=0 hw:2,0,0
