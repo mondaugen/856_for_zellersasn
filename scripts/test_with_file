@@ -1,0 +1,20 @@
+#!/bin/bash
+if [[ -z "$1" ]]
+then
+    echo "specify filename."
+    exit 65
+else
+    SOUNDFILE=$1
+fi
+if [[ $# == 3 ]]
+then
+    ADEV=$2
+    MDEV=$3
+else
+    ADEV=hw:CARD=Pro,DEV=0
+    MDEV=hw:2,0,0
+fi
+echo "$AUDIODEV"
+# Send a sine at 440 hz to the program
+sox $SOUNDFILE -t s16 -c 2 -r 44.1k - | \
+    ./main.elf ${ADEV} ${MDEV}
