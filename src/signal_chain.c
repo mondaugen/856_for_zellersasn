@@ -1,5 +1,6 @@
 #include "signal_chain.h" 
 #include "wavetables.h" 
+#include "audio_setup.h" 
 
 MMBus *inBus, *outBus, *fbBus;
 MMSigChain sigChain;

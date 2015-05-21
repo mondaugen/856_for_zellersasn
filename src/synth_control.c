@@ -4,6 +4,7 @@
 #include "wavetables.h" 
 #include "mm_time.h" 
 #include <math.h> 
+#include "audio_setup.h" 
 
 MMSample attackTime         = 0.01;
 MMSample shortReleaseTime   = 0.025;
@@ -140,9 +141,32 @@ void MIDI_synth_cc_record_trig(void *data, MIDIMsg *msg)
         ((MMWavTabRecorder*)data)->state = MMWavTabRecorderState_RECORDING;
     } else {
         ((MMWavTabRecorder*)data)->state = MMWavTabRecorderState_STOPPED;
-        /* Set the length to the index the recorder got to */
-        ((MMArray*)recordingSound)->length =
-            ((MMWavTabRecorder*)data)->currentIndex;
+        /* If the index the recorder got to is greater than 2 times the fade
+         * time in samples, do the fade by adding the fade time's worth of
+         * samples to the beginning where the end and the beginning are weighted
+         * by a window */
+        if (((MMWavTabRecorder*)data)->currentIndex >= hannWindowTableLength) {
+            int _n;
+            for (_n = 0; _n < hannWindowTableLength/2; _n++) {
+                MMWavTab_get(((MMWavTabRecorder*)data)->buffer,_n) =
+                    MMWavTab_get(((MMWavTabRecorder*)data)->buffer,_n)
+                        * hannWindowTable[_n]
+                    + MMWavTab_get(((MMWavTabRecorder*)data)->buffer,
+                           ((MMWavTabRecorder*)data)->currentIndex 
+                            - hannWindowTableLength/2 + _n)
+                        * hannWindowTable[hannWindowTableLength/2 + _n];
+            }
+            /* Set the length to the index the recorder got to minus half the
+             * hannWindowTableLength */
+            ((MMArray*)recordingSound)->length =
+                ((MMWavTabRecorder*)data)->currentIndex
+                    - hannWindowTableLength/2;
+        } else {
+            /* Set the length to the index the recorder got to and don't do any
+             * windowing of the end points */
+            ((MMArray*)recordingSound)->length =
+                ((MMWavTabRecorder*)data)->currentIndex;
+        }
         /* Swap the playing and the recording sounds */
         MMWavTab *tmp = recordingSound;
         recordingSound = theSound;
@@ -184,6 +208,9 @@ void synth_control_setup(void)
             MIDI_synth_cc_startPoint_control,&startPoint);
     MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x15,
             MIDI_synth_cc_eventDelta_control,&eventDelta);
+    /* The recorder trigger requires the Hann window wavetable, initialize it
+     * first. */
+    HannWindowTable_init(REC_LOOP_FADE_TIME_S * 2.);
     MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x17,
             MIDI_synth_cc_record_trig, &wtr);
     MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x18,

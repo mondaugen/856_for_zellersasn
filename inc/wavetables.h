@@ -16,9 +16,12 @@ extern MMWavTab     sampleTable[];
 extern size_t       soundSampleMaxLength;
 extern MMWavTab     *theSound;
 extern MMWavTab     *recordingSound;
+extern MMSample     *hannWindowTable;
+extern size_t       hannWindowTableLength;
 
 void WaveTable_init(void);
 void SoundSample_init(char *path);
 void SampleTable_init(void);
+void HannWindowTable_init(MMSample len_sec);
 
 #endif /* WAVETABLES_H */

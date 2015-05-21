@@ -6,6 +6,7 @@
 #include <stdlib.h> 
 #include <stdio.h> 
 #include <error.h> 
+#include "mm_windows.h" 
 
 MMWavTab WaveTable;
 MMWavTab soundSample;
@@ -15,6 +16,8 @@ MMWavTab    sampleTable[NUM_SAMPLE_TABLES];
 size_t      soundSampleMaxLength;
 MMWavTab   *theSound;
 MMWavTab   *recordingSound;
+MMSample     *hannWindowTable;
+size_t       hannWindowTableLength;
 
 void WaveTable_init(void)
 {
@@ -78,4 +81,12 @@ void SampleTable_init(void)
     recordingSound = &sampleTable[1];
     soundSampleMaxLength = SAMPLE_TABLE_LENGTH_SEC 
         * audio_hw_get_sample_rate(NULL);
+}
+
+void HannWindowTable_init(MMSample len_sec)
+{
+    size_t N = audio_hw_get_sample_rate(NULL);
+    hannWindowTable = (MMSample*)malloc(sizeof(MMSample) * N);
+    MM_hann_fill(hannWindowTable,N);
+    hannWindowTableLength = N;
 }

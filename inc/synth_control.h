@@ -3,6 +3,9 @@
 #include "mm_time.h" 
 #include "signal_chain.h" 
 
+/* The amount of fade at the end of the recording in seconds */
+#define REC_LOOP_FADE_TIME_S 0.1 
+
 extern MMSample attackTime;
 extern MMSample shortReleaseTime;
 extern MMSample sustainTime;
