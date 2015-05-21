@@ -11,10 +11,10 @@ MMSample shortReleaseTime   = 0.025;
 MMSample releaseTime        = 0.01;
 MMSample sustainTime        = 0.5;
 /* The amount the scheduler is incremented each block */
-MMTime   schedulerInc       = 1; 
+MMSample tempoBPM           = 120; 
 /* The time between two scheduled events */
-MMTime   eventDelta         = 100; 
-MMSample pitch              = 100;
+MMSample eventDeltaBeats    = 1; 
+MMSample pitch              = 60;
 MMSample amplitude          = .1;
 MMSample startPoint         = 0; /* between 0 and 1 */
 
@@ -104,14 +104,14 @@ void MIDI_synth_cc_sustainTime_control(void *data, MIDIMsg *msg)
     *((MMSample*)data) = (msg->data[2]+1)/128.*2.;
 }
 
-void MIDI_synth_cc_schedulerInc_control(void *data, MIDIMsg *msg)
+void MIDI_synth_cc_tempoBPM_control(void *data, MIDIMsg *msg)
 {
-    *((MMTime*)data) = msg->data[2]+1;
+    *((MMSample*)data) = 40. + (240. - 40.)*msg->data[2] / 127.;
 }
 
 void MIDI_synth_cc_pitch_control(void *data, MIDIMsg *msg)
 {
-    *((MMSample*)data) = msg->data[2];
+    *((MMSample*)data) = 48. + (72. - 48.) * msg->data[2]/127.;
 }
 
 void MIDI_synth_cc_amplitude_control(void *data, MIDIMsg *msg)
@@ -124,9 +124,9 @@ void MIDI_synth_cc_startPoint_control(void *data, MIDIMsg *msg)
     *((MMSample*)data) = msg->data[2]/127.;
 }
 
-void MIDI_synth_cc_eventDelta_control(void *data, MIDIMsg *msg)
+void MIDI_synth_cc_eventDeltaBeats_control(void *data, MIDIMsg *msg)
 {
-    *((MMTime*)data) = msg->data[2]*10+1;
+    *((MMSample*)data) = (msg->data[2]+1.)/128.;
 }
 
 /* Start recording with non-zero control change value. Stop with value of 0. */
@@ -199,7 +199,7 @@ void synth_control_setup(void)
     MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x10,
             MIDI_synth_cc_sustainTime_control,&sustainTime);
     MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x11,
-            MIDI_synth_cc_schedulerInc_control,&schedulerInc);
+            MIDI_synth_cc_tempoBPM_control,&tempoBPM);
     MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x12,
             MIDI_synth_cc_pitch_control,&pitch);
     MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x13,
@@ -207,7 +207,7 @@ void synth_control_setup(void)
     MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x14,
             MIDI_synth_cc_startPoint_control,&startPoint);
     MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x15,
-            MIDI_synth_cc_eventDelta_control,&eventDelta);
+            MIDI_synth_cc_eventDeltaBeats_control,&eventDeltaBeats);
     /* The recorder trigger requires the Hann window wavetable, initialize it
      * first. */
     HannWindowTable_init(REC_LOOP_FADE_TIME_S * 2.);

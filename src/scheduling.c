@@ -7,6 +7,11 @@
 #include "signal_chain.h" 
 #include <math.h> 
 
+/* The scheduler is set up so that the 32 LSB of the time are fractional part 
+ * and the 32 MSB are the integer part of a beat index. So that this works, the
+ * scheduler time is incremented 0xffffffff*tempoBPM beats per minute and events
+ * are scheduled eventDeltaBeats*0xffffffff ticks apart. */
+
 struct __NoteOnEvent {
     MMEvent head;
     /* More stuff later */
@@ -33,7 +38,7 @@ void schedule_event(uint64_t timeFromNow)
 static void NoteOnEvent_happen(MMEvent *event)
 {
     /* schedule next event */
-    schedule_event(eventDelta);
+    schedule_event(eventDeltaBeats * 0xffffffff);
     MMSample voiceNum = pm_get_next_free_voice_number();
     if (voiceNum == -1) { 
         /* No more voices free */
@@ -59,6 +64,8 @@ static void NoteOnEvent_happen(MMEvent *event)
 
 void scheduler_incTimeAndDoEvents(void)
 {
-    MMSeq_incTime(sequence,schedulerInc);
+    MMSeq_incTime(sequence,(tempoBPM / 60.) 
+            / ((MMSample)audio_hw_get_sample_rate(NULL) 
+                / (MMSample)audio_hw_get_block_size(NULL)) * 0xffffffff);
     MMSeq_doAllCurrentEvents(sequence);
 }
