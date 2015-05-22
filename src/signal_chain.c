@@ -65,9 +65,3 @@ void signal_chain_setup(void)
     MMBusMerger_init(&fbBusMerger, fbBus, inBus);
     MMSigProc_insertBefore(&wtr, &fbBusMerger);
 }
-
-
-
-
-
-

@@ -17,6 +17,8 @@ MMSample eventDeltaBeats    = 1;
 MMSample pitch              = 60;
 MMSample amplitude          = .1;
 MMSample startPoint         = 0; /* between 0 and 1 */
+int noteDeltaFromBuffer     = 0;
+int16_t  dryGain            = 0;
 
 #define NOTE_STEALING MMPolyManagerSteal_TRUE
 
@@ -129,6 +131,14 @@ void MIDI_synth_cc_eventDeltaBeats_control(void *data, MIDIMsg *msg)
     *((MMSample*)data) = (msg->data[2]+1.)/128.;
 }
 
+void MIDI_synth_cc_noteDeltaFromBuffer_control(void *data, MIDIMsg *msg)
+{
+    if (msg->data[2] > 0) {
+        *((int*)data) = 1;
+    } else 
+        *((int*)data) = 0;
+}
+
 /* Start recording with non-zero control change value. Stop with value of 0. */
 void MIDI_synth_cc_record_trig(void *data, MIDIMsg *msg)
 {
@@ -167,6 +177,13 @@ void MIDI_synth_cc_record_trig(void *data, MIDIMsg *msg)
             ((MMArray*)recordingSound)->length =
                 ((MMWavTabRecorder*)data)->currentIndex;
         }
+        /* If the noteDeltaFromBuffer flag is set, compute the eventDelta from
+         * the buffer length and set the playback rate to 1 */
+        if (noteDeltaFromBuffer == 1) {
+            eventDeltaBeats = ((MMArray*)recordingSound)->length 
+                / (MMSample)audio_hw_get_sample_rate(NULL) * tempoBPM / 60.;
+            pitch = 60.;
+        }
         /* Swap the playing and the recording sounds */
         MMWavTab *tmp = recordingSound;
         recordingSound = theSound;
@@ -186,6 +203,11 @@ void MIDI_synth_cc_feedback_control(void *data, MIDIMsg *msg)
         MMSigProc_remove(data);
         MMSigProc_insertAfter(fbOffNode,data);
     }
+}
+
+void MIDI_synth_cc_dryGain_control(void *data, MIDIMsg *msg)
+{
+    *((int16_t*)data) = msg->data[2];
 }
 
 void synth_control_setup(void)
@@ -215,4 +237,8 @@ void synth_control_setup(void)
             MIDI_synth_cc_record_trig, &wtr);
     MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x18,
             MIDI_synth_cc_feedback_control, &fbBusSplitter);
+    MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x19,
+            MIDI_synth_cc_noteDeltaFromBuffer_control,&noteDeltaFromBuffer);
+    MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x0D,
+            MIDI_synth_cc_dryGain_control,&dryGain);
 }

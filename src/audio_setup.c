@@ -5,6 +5,7 @@
 #include <stdio.h> 
 #include <stdlib.h> 
 #include <stdint.h> 
+#include "synth_control.h" 
 
 #define NCHANS 2 
 #define SAMPLE_RATE 44100 
@@ -42,12 +43,6 @@ void audio_hw_io(audio_hw_io_t *params)
             /* We put the data from the bus into both output channels */
             params->out[n*params->nchans_out + c] =
                 outBus->data[outBus->channels*n] *  AUDIO_HW_SAMPLE_T_MAX;
-            /* Pass through test */
-            /*
-            params->out[n*params->nchans_out + c] += 
-                inBus->data[n*params->nchans_out + c]
-                    * AUDIO_HW_SAMPLE_T_MAX;
-            */
         }
     }
      /* Because ALSA is not yet set up for audio input, we read from stdin.
@@ -61,6 +56,9 @@ void audio_hw_io(audio_hw_io_t *params)
             inBus->data[n*params->nchans_out + c] = 
                 ((MMSample)fixedPointData[n*params->nchans_out + c])
                     /AUDIO_HW_SAMPLE_T_MAX;
+            /* Pass through */
+            params->out[n*params->nchans_out + c] 
+                += fixedPointData[n*params->nchans_out + c] * dryGain / 127;
         }
     }
 }

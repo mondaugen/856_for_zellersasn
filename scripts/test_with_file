@@ -15,6 +15,12 @@ else
     MDEV=hw:2,0,0
 fi
 echo "$AUDIODEV"
+if [[ -z "$4" ]]
+then
+    REPS=0
+else
+    REPS=$4
+fi
 # Send a sine at 440 hz to the program
-sox $SOUNDFILE -t s16 -c 2 -r 44.1k - | \
+sox $SOUNDFILE -t s16 -c 2 -r 44.1k - repeat $REPS | \
     ./main.elf ${ADEV} ${MDEV}
