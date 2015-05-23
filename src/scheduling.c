@@ -37,28 +37,31 @@ void schedule_event(uint64_t timeFromNow)
 
 static void NoteOnEvent_happen(MMEvent *event)
 {
-    /* schedule next event */
-    schedule_event(eventDeltaBeats * 0xffffffff);
-    MMSample voiceNum = pm_get_next_free_voice_number();
-    if (voiceNum == -1) { 
-        /* No more voices free */
-        return;
+    /* only play if scheduler state allows it */
+    if (schedulerState == 1) {
+        schedule_event(eventDeltaBeats * 0xffffffff);
+        MMSample voiceNum = pm_get_next_free_voice_number();
+        if (voiceNum == -1) { 
+            /* No more voices free */
+            free(event);
+            return;
+        }
+        pm_claim_params_from_allocator((void*)&voiceAllocator,
+                (void*)&voiceNum);
+        ((MMEnvedSamplePlayer*)&spsps[(int)voiceNum])->onDone = autorelease_on_done;
+        MMTrapEnvedSamplePlayer_noteOn_Rate(
+                &spsps[(int)voiceNum],
+                voiceNum,
+                amplitude,
+                MMInterpMethod_CUBIC,
+                startPoint * MMArray_get_length(theSound),
+                attackTime,
+                releaseTime,
+                sustainTime,
+                theSound, 
+                1,
+                pow(2.,(pitch-60)/12.));
     }
-    pm_claim_params_from_allocator((void*)&voiceAllocator,
-            (void*)&voiceNum);
-    ((MMEnvedSamplePlayer*)&spsps[(int)voiceNum])->onDone = autorelease_on_done;
-    MMTrapEnvedSamplePlayer_noteOn_Rate(
-            &spsps[(int)voiceNum],
-            voiceNum,
-            amplitude,
-            MMInterpMethod_CUBIC,
-            startPoint * MMArray_get_length(theSound),
-            attackTime,
-            releaseTime,
-            sustainTime,
-            theSound, 
-            1,
-            pow(2.,(pitch-60)/12.));
     free(event);
 }
 

@@ -6,15 +6,20 @@ then
 else
     SOUNDFILE=$1
 fi
-if [[ $# == 3 ]]
+if [[ -z "$2" ]]
 then
-    ADEV=$2
-    MDEV=$3
-else
     ADEV=hw:CARD=Pro,DEV=0
-    MDEV=hw:2,0,0
+else
+    ADEV=$2
 fi
-echo "$AUDIODEV"
+if [[ -z "$3" ]]
+then
+    MDEV=hw:2,0,0
+else
+    MDEV=$3
+fi
+echo "audio device: $AUDIODEV"
+echo "midi device: $AUDIODEV"
 if [[ -z "$4" ]]
 then
     REPS=0

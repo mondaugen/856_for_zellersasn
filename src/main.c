@@ -54,8 +54,6 @@ int main (int argc, char **argv)
 //    poly_management_setup();
     synth_control_setup();
     scheduler_setup();
-    /* schedule 1st event */
-    schedule_event(0);
     audio_start();
     while(1) {
     }

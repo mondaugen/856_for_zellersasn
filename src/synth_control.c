@@ -5,6 +5,7 @@
 #include "mm_time.h" 
 #include <math.h> 
 #include "audio_setup.h" 
+#include "scheduling.h" 
 
 MMSample attackTime         = 0.01;
 MMSample shortReleaseTime   = 0.025;
@@ -19,6 +20,7 @@ MMSample amplitude          = .1;
 MMSample startPoint         = 0; /* between 0 and 1 */
 int noteDeltaFromBuffer     = 0;
 int16_t  dryGain            = 0;
+int      schedulerState     = 0;
 
 #define NOTE_STEALING MMPolyManagerSteal_TRUE
 
@@ -88,55 +90,66 @@ void MIDI_note_on_autorelease_do(void *data, MIDIMsg *msg)
             theSound, 
             1,
             pow(2.,(msg->data[1]-60)/12.));
-
+    MIDIMsg_free(msg);
 }
 
 void MIDI_synth_cc_attackTime_control(void *data, MIDIMsg *msg)
 {
     *((MMSample*)data) = (exp(pow(msg->data[2]/127.,2.))-1)/(M_E - 1.)*5.;
+
+    MIDIMsg_free(msg);
 }
 
 void MIDI_synth_cc_releaseTime_control(void *data, MIDIMsg *msg)
 {
     *((MMSample*)data) = (exp(pow(msg->data[2]/127.,2.))-1)/(M_E - 1.)*10.;
+    MIDIMsg_free(msg);
 }
 
 void MIDI_synth_cc_sustainTime_control(void *data, MIDIMsg *msg)
 {
     *((MMSample*)data) = (msg->data[2]+1)/128.*2.;
+    MIDIMsg_free(msg);
 }
 
 void MIDI_synth_cc_tempoBPM_control(void *data, MIDIMsg *msg)
 {
     *((MMSample*)data) = 40. + (240. - 40.)*msg->data[2] / 127.;
+    MIDIMsg_free(msg);
 }
 
 void MIDI_synth_cc_pitch_control(void *data, MIDIMsg *msg)
 {
     *((MMSample*)data) = 48. + (72. - 48.) * msg->data[2]/127.;
+    MIDIMsg_free(msg);
 }
 
 void MIDI_synth_cc_amplitude_control(void *data, MIDIMsg *msg)
 {
     *((MMSample*)data) = msg->data[2]/127.;
+    MIDIMsg_free(msg);
 }
 
 void MIDI_synth_cc_startPoint_control(void *data, MIDIMsg *msg)
 {
     *((MMSample*)data) = msg->data[2]/127.;
+    MIDIMsg_free(msg);
 }
 
 void MIDI_synth_cc_eventDeltaBeats_control(void *data, MIDIMsg *msg)
 {
     *((MMSample*)data) = (msg->data[2]+1.)/128.;
+    MIDIMsg_free(msg);
 }
 
 void MIDI_synth_cc_noteDeltaFromBuffer_control(void *data, MIDIMsg *msg)
 {
     if (msg->data[2] > 0) {
         *((int*)data) = 1;
-    } else 
+    } else  {
         *((int*)data) = 0;
+    }
+    MIDIMsg_free(msg);
 }
 
 /* Start recording with non-zero control change value. Stop with value of 0. */
@@ -203,11 +216,25 @@ void MIDI_synth_cc_feedback_control(void *data, MIDIMsg *msg)
         MMSigProc_remove(data);
         MMSigProc_insertAfter(fbOffNode,data);
     }
+    MIDIMsg_free(msg);
 }
 
 void MIDI_synth_cc_dryGain_control(void *data, MIDIMsg *msg)
 {
     *((int16_t*)data) = msg->data[2];
+    MIDIMsg_free(msg);
+}
+
+void MIDI_synth_cc_schedulerState_control(void *data, MIDIMsg *msg)
+{
+    if (msg->data[2] > 0) {
+        *((int*)data) = 1;
+        /* schedule 1st event */
+        schedule_event(0);
+    } else {
+        *((int*)data) = 0;
+    }
+    MIDIMsg_free(msg);
 }
 
 void synth_control_setup(void)
@@ -241,4 +268,6 @@ void synth_control_setup(void)
             MIDI_synth_cc_noteDeltaFromBuffer_control,&noteDeltaFromBuffer);
     MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x0D,
             MIDI_synth_cc_dryGain_control,&dryGain);
+    MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x21,
+            MIDI_synth_cc_schedulerState_control,&schedulerState);
 }

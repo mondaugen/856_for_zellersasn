@@ -19,6 +19,7 @@ extern MMSample pitch;
 extern MMSample amplitude;
 extern MMSample startPoint; /* between 0 and 1 */
 extern int16_t  dryGain;
+extern int      schedulerState;
 
 void autorelease_on_done(MMEnvedSamplePlayer * esp);
 
