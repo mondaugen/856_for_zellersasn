@@ -1,6 +1,11 @@
 #include "audio_setup.h" 
 #include "midi_setup.h" 
 #include "signal_chain.h" 
+#include <math.h> 
+#include <stdio.h> 
+#include <stdlib.h> 
+#include <stdint.h> 
+#include "synth_control.h" 
 
 #define NCHANS 2 
 #define SAMPLE_RATE 44100 
@@ -16,7 +21,7 @@ int audio_setup(void *data)
     ahs.rate   = SAMPLE_RATE;	    /* stream rate */
     ahs.channels = NCHANS;		    /* count of channels */
     ahs.buffer_time = 50000;	    /* ring buffer length in us */
-    ahs.period_time = 10000;	    /* period time in us */
+    ahs.period_time = 5000;	    /* period time in us */
     ahs.verbose = 1;				/* verbose flag */
     ahs.resample = 1;				/* enable alsa-lib resampling */
     ahs.period_event = 0;	        /* produce poll event after each period */
@@ -28,15 +33,32 @@ void audio_hw_io(audio_hw_io_t *params)
 {
     /* Process MIDI once every audioblock */
     midi_hw_process_input(NULL);
+    /* Increment scheduler and do pending events */
+    scheduler_incTimeAndDoEvents();
+    /* Process audio */
     MMSigProc_tick(&sigChain);
     int n, c;
     for (n = 0; n < params->length; n++) {
         for (c = 0; c < params->nchans_out; c++) {
             /* We put the data from the bus into both output channels */
             params->out[n*params->nchans_out + c] =
-                outBus->data[n] * 0.1 * AUDIO_HW_SAMPLE_T_MAX;
+                outBus->data[outBus->channels*n] *  AUDIO_HW_SAMPLE_T_MAX;
         }
-        /* Only one channel in the in bus, so we fill it with first channel */
-        inBus->data[n] = params->in[n*params->nchans_out];
+    }
+     /* Because ALSA is not yet set up for audio input, we read from stdin.
+     * */
+    int16_t fixedPointData[params->length*params->nchans_in];
+    fread(fixedPointData,sizeof(int16_t),
+            params->length*params->nchans_in,stdin);
+    /* convert to type MMSample */
+    for (n = 0; n < params->length; n++) {
+        for (c = 0; c < params->nchans_out; c++) {
+            inBus->data[n*params->nchans_out + c] = 
+                ((MMSample)fixedPointData[n*params->nchans_out + c])
+                    /AUDIO_HW_SAMPLE_T_MAX;
+            /* Pass through */
+            params->out[n*params->nchans_out + c] 
+                += fixedPointData[n*params->nchans_out + c] * dryGain / 127;
+        }
     }
 }
