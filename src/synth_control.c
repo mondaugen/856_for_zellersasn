@@ -168,7 +168,8 @@ void MIDI_synth_cc_record_trig(void *data, MIDIMsg *msg)
          * time in samples, do the fade by adding the fade time's worth of
          * samples to the beginning where the end and the beginning are weighted
          * by a window */
-        if (((MMWavTabRecorder*)data)->currentIndex >= hannWindowTableLength) {
+        if ((((MMWavTabRecorder*)data)->currentIndex >= hannWindowTableLength)
+                && (noteDeltaFromBuffer == 0)) {
             int _n;
             for (_n = 0; _n < hannWindowTableLength/2; _n++) {
                 MMWavTab_get(((MMWavTabRecorder*)data)->buffer,_n) =

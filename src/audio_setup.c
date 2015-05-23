@@ -40,9 +40,14 @@ void audio_hw_io(audio_hw_io_t *params)
     int n, c;
     for (n = 0; n < params->length; n++) {
         for (c = 0; c < params->nchans_out; c++) {
-            /* We put the data from the bus into both output channels */
-            params->out[n*params->nchans_out + c] =
-                outBus->data[outBus->channels*n] *  AUDIO_HW_SAMPLE_T_MAX;
+//            if (c == 0) {
+                params->out[n*params->nchans_out + c] =
+                    outBus->data[outBus->channels*n] *  AUDIO_HW_SAMPLE_T_MAX;
+                /*
+            } else {
+                params->out[n*params->nchans_out + c] = 0;
+            }
+            */
         }
     }
      /* Because ALSA is not yet set up for audio input, we read from stdin.
@@ -57,8 +62,14 @@ void audio_hw_io(audio_hw_io_t *params)
                 ((MMSample)fixedPointData[n*params->nchans_out + c])
                     /AUDIO_HW_SAMPLE_T_MAX;
             /* Pass through */
+            /*
             params->out[n*params->nchans_out + c] 
                 += fixedPointData[n*params->nchans_out + c] * dryGain / 127;
+                */
+            params->out[n*params->nchans_out + c] 
+                += ((int16_t)((((MMSample)fixedPointData[n*params->nchans_out + c])
+                        /AUDIO_HW_SAMPLE_T_MAX) * AUDIO_HW_SAMPLE_T_MAX))
+                            * dryGain / 127;
         }
     }
 }

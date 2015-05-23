@@ -38,7 +38,7 @@ void play_note(int midinote)
 
 int main (int argc, char **argv)
 {
-    if (argc != 3) {
+    if ((argc != 3) && (argc != 4)) {
         fprintf(stderr,
                 "Arguments are %s audio-device midi-input-port\n",argv[0]);
         return(-1);
@@ -49,7 +49,12 @@ int main (int argc, char **argv)
     if (midi_setup(argv[2])) {
         THROW_ERR("Error setting up MIDI.");
     }
-    SampleTable_init();
+    if (argc == 3) {
+        SampleTable_init();
+    }
+    if (argc == 4) {
+        SoundSample_init(argv[3]);
+    }
     signal_chain_setup();
 //    poly_management_setup();
     synth_control_setup();
