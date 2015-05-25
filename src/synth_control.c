@@ -108,7 +108,9 @@ void MIDI_synth_cc_releaseTime_control(void *data, MIDIMsg *msg)
 
 void MIDI_synth_cc_sustainTime_control(void *data, MIDIMsg *msg)
 {
-    *((MMSample*)data) = (msg->data[2]+1)/128.*2.;
+//    *((MMSample*)data) = (msg->data[2]+1)/128.*2.;
+    /* Sustain time is relative to length of recording, so here just 0-1 */
+    *((MMSample*)data) = msg->data[2]/127.;
     MIDIMsg_free(msg);
 }
 
@@ -232,11 +234,10 @@ void MIDI_synth_cc_dryGain_control(void *data, MIDIMsg *msg)
 void MIDI_synth_cc_schedulerState_control(void *data, MIDIMsg *msg)
 {
     if (msg->data[2] > 0) {
-        *((int*)data) = 1;
         /* schedule 1st event */
         schedule_event(0);
     } else {
-        *((int*)data) = 0;
+        set_noteOnEvents_inactive((NoteOnEventListNode*)((MMDLList*)data)->next);
     }
     MIDIMsg_free(msg);
 }
@@ -273,5 +274,5 @@ void synth_control_setup(void)
     MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x0D,
             MIDI_synth_cc_dryGain_control,&dryGain);
     MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x21,
-            MIDI_synth_cc_schedulerState_control,&schedulerState);
+            MIDI_synth_cc_schedulerState_control,&noteOnEventListHead);
 }
