@@ -191,11 +191,14 @@ void MIDI_synth_cc_record_trig(void *data, MIDIMsg *msg)
             ((MMArray*)recordingSound)->length =
                 ((MMWavTabRecorder*)data)->currentIndex;
         }
-        /* If the noteDeltaFromBuffer flag is set, compute the eventDelta from
-         * the buffer length and set the playback rate to 1 */
+        /* If the noteDeltaFromBuffer flag is set, compute the tempo from
+         * the buffer length, set the playback rate to 1 and set the eventDelta
+         * to 1 beat so that the recording plays once per beat and the tempo is
+         * one beat per length of recording */
         if (noteDeltaFromBuffer == 1) {
-            eventDeltaBeats = ((MMArray*)recordingSound)->length 
-                / (MMSample)audio_hw_get_sample_rate(NULL) * tempoBPM / 60.;
+            eventDeltaBeats = 1;
+            tempoBPM = 60. * (MMSample)audio_hw_get_sample_rate(NULL) 
+                / (MMSample)((MMArray*)recordingSound)->length;
             pitch = 60.;
         }
         /* Swap the playing and the recording sounds */
