@@ -16,6 +16,7 @@ struct __NoteOnEvent {
     MMEvent head;
     NoteOnEventListNode *parent;
     int active; /* 1 if active, 0 if not */
+    int parameterSet; /* Which set of parameters to use */
 };
 
 MMSeq *sequence;
@@ -29,13 +30,23 @@ void scheduler_setup(void)
     MMSeq_init(sequence, 0);
 }
 
-void schedule_event(uint64_t timeFromNow)
+NoteOnEvent *NoteOnEvent_new(int active, int parameterSet)
 {
     NoteOnEvent *ev = (NoteOnEvent*)malloc(sizeof(NoteOnEvent));
     if (!ev) {
-        return;
+        return NULL;
     }
     ((MMEvent*)ev)->happen = NoteOnEvent_happen;
+    ev->active = active;
+    ev->parameterSet;
+    return ev;
+}
+
+void schedule_event(uint64_t timeFromNow, NoteOnEvent *ev)
+{
+    if (!ev) {
+        return;
+    }
     ev->parent = (NoteOnEventListNode*)malloc(sizeof(NoteOnEventListNode));
     if (!ev->parent) {
         free(ev);
@@ -43,8 +54,6 @@ void schedule_event(uint64_t timeFromNow)
     }
     ev->parent->child = ev;
     MMDLList_insertAfter((MMDLList*)&noteOnEventListHead,(MMDLList*)ev->parent);
-    /* Event is initially active */
-    ev->active = 1;
     MMSeq_scheduleEvent(sequence, (MMEvent*)ev,
             MMSeq_getCurrentTime(sequence) + timeFromNow);
 }
@@ -54,7 +63,10 @@ static void NoteOnEvent_happen(MMEvent *event)
     /* only play if event is active */
     if (((NoteOnEvent*)event)->active == 1) {
         /* schedule next event */
-        schedule_event(eventDeltaBeats * 0xffffffff);
+        schedule_event(
+            noteParamSets[((NoteOnEvent*)event)->parameterSet].eventDeltaBeats
+                * 0xffffffff,
+                NoteOnEvent_new(1,((NoteOnEvent*)event)->parameterSet));
         MMSample voiceNum = pm_get_next_free_voice_number();
         if (voiceNum != -1) { 
             /* there is a voice free */
@@ -65,22 +77,27 @@ static void NoteOnEvent_happen(MMEvent *event)
             MMTrapEnvedSamplePlayer_noteOn_Rate(
                     &spsps[(int)voiceNum],
                     voiceNum,
-                    amplitude,
+                    noteParamSets[((NoteOnEvent*)event)->parameterSet].amplitude,
                     MMInterpMethod_CUBIC,
-                    startPoint * MMArray_get_length(theSound),
-                    attackTime,
-                    releaseTime,
-                    ((sustainTime * (MMSample)MMArray_get_length(theSound) 
-                        / (MMSample)audio_hw_get_sample_rate(NULL) - attackTime 
-                        - releaseTime) < 0) ? 
-                            0 :
-                            (sustainTime *
-                            (MMSample)MMArray_get_length(theSound) /
-                            (MMSample)audio_hw_get_sample_rate(NULL)
-                            - attackTime - releaseTime),
+                    noteParamSets[((NoteOnEvent*)event)->parameterSet].startPoint
+                        * MMArray_get_length(theSound),
+                    noteParamSets[((NoteOnEvent*)event)->parameterSet].attackTime,
+                    noteParamSets[((NoteOnEvent*)event)->parameterSet].releaseTime,
+                    ((noteParamSets[((NoteOnEvent*)event)->parameterSet].sustainTime *
+                          (MMSample)MMArray_get_length(theSound) /
+                          (MMSample)audio_hw_get_sample_rate(NULL) -
+                          noteParamSets[((NoteOnEvent*)event)->parameterSet].attackTime -
+                          noteParamSets[((NoteOnEvent*)event)->parameterSet].releaseTime) < 0) ?  
+                        0 :
+                        (noteParamSets[((NoteOnEvent*)event)->parameterSet].sustainTime *
+                         (MMSample)MMArray_get_length(theSound) /
+                         (MMSample)audio_hw_get_sample_rate(NULL) -
+                         noteParamSets[((NoteOnEvent*)event)->parameterSet].attackTime -
+                         noteParamSets[((NoteOnEvent*)event)->parameterSet].releaseTime),
                     theSound, 
                     1,
-                    pow(2.,(pitch-60)/12.));
+                    pow(2.,
+                        (noteParamSets[((NoteOnEvent*)event)->parameterSet].pitch-60)/12.));
         }
     }
     MMDLList_remove((MMDLList*)((NoteOnEvent*)event)->parent);

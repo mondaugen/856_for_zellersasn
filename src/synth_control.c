@@ -7,59 +7,13 @@
 #include "audio_setup.h" 
 #include "scheduling.h" 
 
-MMSample attackTime         = 0.01;
-MMSample shortReleaseTime   = 0.025;
-MMSample releaseTime        = 0.01;
-MMSample sustainTime        = 0.5;
+NoteParamSet noteParamSets[NUM_NOTE_PARAM_SETS];
+
 /* The amount the scheduler is incremented each block */
-MMSample tempoBPM           = 120; 
-/* The time between two scheduled events */
-MMSample eventDeltaBeats    = 1; 
-MMSample pitch              = 60;
-MMSample amplitude          = .1;
-MMSample startPoint         = 0; /* between 0 and 1 */
-int noteDeltaFromBuffer     = 0;
-int16_t  dryGain            = 0;
-int      schedulerState     = 0;
-
-#define NOTE_STEALING MMPolyManagerSteal_TRUE
-
-void MIDI_synth_note_off_do(void *data, MIDIMsg *msg)
-{
-    MMPvtespParams *params = MMPvtespParams_new();
-    ((MMPolyVoiceParams*)params)->steal = NOTE_STEALING;
-    params->paramType = MMPvtespParamType_NOTEOFF;
-    params->note = (MMSample)msg->data[1];
-    params->amplitude = (MMSample)msg->data[2] / 127.;
-    params->releaseTime = releaseTime;
-    MMPolyManager_noteOff(pvm, (void*)params);
-    MIDIMsg_free(msg);
-}
-
-/* Callback to trigger synth with note on */
-void MIDI_synth_note_on_do(void *data, MIDIMsg *msg)
-{
-    if (msg->data[2] > 0) {
-        MMPvtespParams *params = MMPvtespParams_new();
-        ((MMPolyVoiceParams*)params)->steal = NOTE_STEALING;
-        params->paramType = MMPvtespParamType_NOTEON;
-        params->note = (MMSample)msg->data[1];
-        params->amplitude = (MMSample)msg->data[2] / 127.;
-        params->interpolation = MMInterpMethod_CUBIC;
-        params->index = 0;
-        params->attackTime = attackTime;
-        /* this is the time a note that is stolen will take to decay */
-        params->releaseTime = shortReleaseTime; 
-        params->samples = theSound;
-        params->loop = 1;
-        params->rate = pow(2.,(msg->data[1]-60)/12.);
-        params->rateSource = MMPvtespRateSource_RATE;
-        MMPolyManager_noteOn(pvm, (void*)params);
-        MIDIMsg_free(msg);
-    } else {
-        MIDI_synth_note_off_do(data,msg);
-    }
-}
+MMSample tempoBPM; 
+int noteDeltaFromBuffer;
+int16_t  dryGain;
+int editingWhichParams;
 
 void autorelease_on_done(MMEnvedSamplePlayer * esp)
 {
@@ -83,10 +37,18 @@ void MIDI_note_on_autorelease_do(void *data, MIDIMsg *msg)
             voiceNum,
             msg->data[2]/127.,
             MMInterpMethod_CUBIC,
-            0,
-            attackTime,
-            releaseTime,
-            sustainTime,
+            noteParamSets[0].startPoint * MMArray_get_length(theSound),
+            noteParamSets[0].attackTime,
+            noteParamSets[0].releaseTime,
+            ((noteParamSets[0].sustainTime * (MMSample)MMArray_get_length(theSound) 
+                / (MMSample)audio_hw_get_sample_rate(NULL) 
+                - noteParamSets[0].attackTime 
+                - noteParamSets[0].releaseTime) < 0) ? 
+                0 :
+                (noteParamSets[0].sustainTime *
+                (MMSample)MMArray_get_length(theSound) /
+                (MMSample)audio_hw_get_sample_rate(NULL)
+                    - noteParamSets[0].attackTime - noteParamSets[0].releaseTime),
             theSound, 
             1,
             pow(2.,(msg->data[1]-60)/12.));
@@ -95,22 +57,23 @@ void MIDI_note_on_autorelease_do(void *data, MIDIMsg *msg)
 
 void MIDI_synth_cc_attackTime_control(void *data, MIDIMsg *msg)
 {
-    *((MMSample*)data) = (exp(pow(msg->data[2]/127.,2.))-1)/(M_E - 1.)*5.;
-
+    ((NoteParamSet*)data)[editingWhichParams].attackTime =
+        (exp(pow(msg->data[2]/127.,2.))-1)/(M_E - 1.)*5.;
     MIDIMsg_free(msg);
 }
 
 void MIDI_synth_cc_releaseTime_control(void *data, MIDIMsg *msg)
 {
-    *((MMSample*)data) = (exp(pow(msg->data[2]/127.,2.))-1)/(M_E - 1.)*10.;
+    ((NoteParamSet*)data)[editingWhichParams].releaseTime =
+        (exp(pow(msg->data[2]/127.,2.))-1)/(M_E - 1.)*10.;
     MIDIMsg_free(msg);
 }
 
 void MIDI_synth_cc_sustainTime_control(void *data, MIDIMsg *msg)
 {
-//    *((MMSample*)data) = (msg->data[2]+1)/128.*2.;
     /* Sustain time is relative to length of recording, so here just 0-1 */
-    *((MMSample*)data) = msg->data[2]/127.;
+    ((NoteParamSet*)data)[editingWhichParams].sustainTime
+        = msg->data[2]/127.;
     MIDIMsg_free(msg);
 }
 
@@ -122,25 +85,29 @@ void MIDI_synth_cc_tempoBPM_control(void *data, MIDIMsg *msg)
 
 void MIDI_synth_cc_pitch_control(void *data, MIDIMsg *msg)
 {
-    *((MMSample*)data) = 48. + (72. - 48.) * msg->data[2]/127.;
+    ((NoteParamSet*)data)[editingWhichParams].pitch
+        = 48. + (72. - 48.) * msg->data[2]/127.;
     MIDIMsg_free(msg);
 }
 
 void MIDI_synth_cc_amplitude_control(void *data, MIDIMsg *msg)
 {
-    *((MMSample*)data) = msg->data[2]/127.;
+    ((NoteParamSet*)data)[editingWhichParams].amplitude
+        = msg->data[2]/127.;
     MIDIMsg_free(msg);
 }
 
 void MIDI_synth_cc_startPoint_control(void *data, MIDIMsg *msg)
 {
-    *((MMSample*)data) = msg->data[2]/127.;
+    ((NoteParamSet*)data)[editingWhichParams].startPoint =
+        *((MMSample*)data) = msg->data[2]/127.;
     MIDIMsg_free(msg);
 }
 
 void MIDI_synth_cc_eventDeltaBeats_control(void *data, MIDIMsg *msg)
 {
-    *((MMSample*)data) = (msg->data[2]+1.)/128.;
+    ((NoteParamSet*)data)[editingWhichParams].eventDeltaBeats =
+        (msg->data[2]+1.)/128.;
     MIDIMsg_free(msg);
 }
 
@@ -170,8 +137,7 @@ void MIDI_synth_cc_record_trig(void *data, MIDIMsg *msg)
          * time in samples, do the fade by adding the fade time's worth of
          * samples to the beginning where the end and the beginning are weighted
          * by a window */
-        if ((((MMWavTabRecorder*)data)->currentIndex >= hannWindowTableLength)
-                && (noteDeltaFromBuffer == 0)) {
+        if (((MMWavTabRecorder*)data)->currentIndex >= hannWindowTableLength) {
             int _n;
             for (_n = 0; _n < hannWindowTableLength/2; _n++) {
                 MMWavTab_get(((MMWavTabRecorder*)data)->buffer,_n) =
@@ -182,26 +148,31 @@ void MIDI_synth_cc_record_trig(void *data, MIDIMsg *msg)
                             - hannWindowTableLength/2 + _n)
                         * hannWindowTable[hannWindowTableLength/2 + _n];
             }
-            /* Set the length to the index the recorder got to minus half the
-             * hannWindowTableLength */
-            ((MMArray*)recordingSound)->length =
-                ((MMWavTabRecorder*)data)->currentIndex
+            if (noteDeltaFromBuffer == 0) {
+                /* Set the length to the index the recorder got to minus half the
+                 * hannWindowTableLength */
+                ((MMArray*)recordingSound)->length =
+                    ((MMWavTabRecorder*)data)->currentIndex
                     - hannWindowTableLength/2;
-        } else {
-            /* Set the length to the index the recorder got to and don't do any
-             * windowing of the end points */
-            ((MMArray*)recordingSound)->length =
-                ((MMWavTabRecorder*)data)->currentIndex;
+            } else {
+                /* Set the length to the index the recorder got to so the loop
+                 * is more precise */
+                ((MMArray*)recordingSound)->length =
+                    ((MMWavTabRecorder*)data)->currentIndex;
+            }
         }
         /* If the noteDeltaFromBuffer flag is set, compute the tempo from
          * the buffer length, set the playback rate to 1 and set the eventDelta
          * to 1 beat so that the recording plays once per beat and the tempo is
          * one beat per length of recording */
         if (noteDeltaFromBuffer == 1) {
-            eventDeltaBeats = 1;
+            /* Only the 0th noteParamSet's parameters are set as this is the
+             * master and the other notes are slaves to its timing, buffer, etc.
+             * */
+            noteParamSets[0].eventDeltaBeats = 1;
             tempoBPM = 60. * (MMSample)audio_hw_get_sample_rate(NULL) 
                 / (MMSample)((MMArray*)recordingSound)->length;
-            pitch = 60.;
+            noteParamSets[0].pitch = 60.;
         }
         /* Swap the playing and the recording sounds */
         MMWavTab *tmp = recordingSound;
@@ -234,34 +205,60 @@ void MIDI_synth_cc_dryGain_control(void *data, MIDIMsg *msg)
 void MIDI_synth_cc_schedulerState_control(void *data, MIDIMsg *msg)
 {
     if (msg->data[2] > 0) {
-        /* schedule 1st event */
-        schedule_event(0);
+        /* schedule 1st event which is active and uses the 0th parameter set */
+        schedule_event(0, NoteOnEvent_new(1,0));
     } else {
         set_noteOnEvents_inactive((NoteOnEventListNode*)((MMDLList*)data)->next);
     }
     MIDIMsg_free(msg);
 }
 
+void MIDI_synth_cc_editingWhichParams_control(void *data, MIDIMsg *msg)
+{
+    if (msg->data[2]) {
+        *((int*)data) = 1;
+    } else {
+        *((int*)data) = 0;
+    }
+    MIDIMsg_free(msg);
+}
+
 void synth_control_setup(void)
 {
+    int n;
+    for (n = 0; n < NUM_NOTE_PARAM_SETS; n++) {
+        noteParamSets[n] = (NoteParamSet) {
+            .attackTime = 0.01,     /* attackTime */
+            .sustainTime  = 1,      /* sustainTime */
+            .releaseTime = 0.01,    /* releaseTime */
+            .eventDeltaBeats = 1,   /* eventDeltaBeats */
+            .pitch = 60,            /* pitch */
+            .amplitude = .1,        /* amplitude */
+            .startPoint = 0         /* startPoint */
+        };
+    }
+    noteDeltaFromBuffer = 0;
+    dryGain             = 0;
+    editingWhichParams  = 0;
+    tempoBPM            = 120;
     MIDI_Router_addCB(&midiRouter.router, MIDIMSG_NOTE_ON, 1, 
             MIDI_note_on_autorelease_do, spsps);
     MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x0e,
-            MIDI_synth_cc_attackTime_control,&attackTime);
+            MIDI_synth_cc_attackTime_control,noteParamSets);
     MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x0f,
-            MIDI_synth_cc_releaseTime_control,&releaseTime);
+            MIDI_synth_cc_releaseTime_control,noteParamSets);
     MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x10,
-            MIDI_synth_cc_sustainTime_control,&sustainTime);
+            MIDI_synth_cc_sustainTime_control,noteParamSets);
     MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x11,
             MIDI_synth_cc_tempoBPM_control,&tempoBPM);
     MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x12,
-            MIDI_synth_cc_pitch_control,&pitch);
+            MIDI_synth_cc_pitch_control,noteParamSets);
     MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x13,
-            MIDI_synth_cc_amplitude_control,&amplitude);
+            MIDI_synth_cc_amplitude_control,noteParamSets);
     MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x14,
-            MIDI_synth_cc_startPoint_control,&startPoint);
+            MIDI_synth_cc_startPoint_control,noteParamSets);
     MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x15,
-            MIDI_synth_cc_eventDeltaBeats_control,&eventDeltaBeats);
+            MIDI_synth_cc_eventDeltaBeats_control,noteParamSets);
     /* The recorder trigger requires the Hann window wavetable, initialize it
      * first. */
     HannWindowTable_init(REC_LOOP_FADE_TIME_S * 2.);
@@ -275,4 +272,6 @@ void synth_control_setup(void)
             MIDI_synth_cc_dryGain_control,&dryGain);
     MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x21,
             MIDI_synth_cc_schedulerState_control,&noteOnEventListHead);
+    MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x03,
+            MIDI_synth_cc_editingWhichParams_control,&editingWhichParams);
 }

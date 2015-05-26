@@ -85,7 +85,7 @@ void SampleTable_init(void)
 
 void HannWindowTable_init(MMSample len_sec)
 {
-    size_t N = audio_hw_get_sample_rate(NULL);
+    size_t N = (MMSample)audio_hw_get_sample_rate(NULL) * len_sec;
     hannWindowTable = (MMSample*)malloc(sizeof(MMSample) * N);
     MM_hann_fill(hannWindowTable,N);
     hannWindowTableLength = N;
