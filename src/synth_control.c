@@ -79,7 +79,16 @@ void MIDI_synth_cc_sustainTime_control(void *data, MIDIMsg *msg)
 
 void MIDI_synth_cc_tempoBPM_control(void *data, MIDIMsg *msg)
 {
-    *((MMSample*)data) = 40. + (240. - 40.)*msg->data[2] / 127.;
+    if (noteDeltaFromBuffer == 1) {
+        /* the tempo is calculated so that 1 buffer * K is played per 1 beat
+         * where K is some scalar. So if K > 1, the tempo is slower and K < 1
+         * the tempo is faster */
+        MMSample K = (msg->data[2] / 127.) * 0.1 + 0.95;
+        *((MMSample*)data) = 60. * (MMSample)audio_hw_get_sample_rate(NULL) 
+            / ((MMSample)((MMArray*)theSound)->length * K);
+    } else {
+        *((MMSample*)data) = 40. + (240. - 40.)*msg->data[2] / 127.;
+    }
     MIDIMsg_free(msg);
 }
 
