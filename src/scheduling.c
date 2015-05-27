@@ -20,7 +20,7 @@ struct __NoteOnEvent {
 };
 
 MMSeq *sequence;
-NoteOnEventListNode noteOnEventListHead;
+NoteOnEventListNode noteOnEventListHead[NUM_NOTE_PARAM_SETS];
 
 static void NoteOnEvent_happen(MMEvent *event);
 
@@ -53,7 +53,8 @@ void schedule_event(uint64_t timeFromNow, NoteOnEvent *ev)
         return;
     }
     ev->parent->child = ev;
-    MMDLList_insertAfter((MMDLList*)&noteOnEventListHead,(MMDLList*)ev->parent);
+    MMDLList_insertAfter((MMDLList*)&noteOnEventListHead[ev->parameterSet],
+            (MMDLList*)ev->parent);
     MMSeq_scheduleEvent(sequence, (MMEvent*)ev,
             MMSeq_getCurrentTime(sequence) + timeFromNow);
 }

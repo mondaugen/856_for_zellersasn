@@ -235,7 +235,13 @@ void MIDI_synth_cc_schedulerState_control(void *data, MIDIMsg *msg)
         /* schedule 1st event which is active and uses the 0th parameter set */
         schedule_event(0, NoteOnEvent_new(1,0));
     } else {
-        set_noteOnEvents_inactive((NoteOnEventListNode*)((MMDLList*)data)->next);
+        int n;
+        for (n = 0; n < NUM_NOTE_PARAM_SETS; n++) {
+            /* Disactivate all events of all parameter sets */
+            set_noteOnEvents_inactive(
+                (NoteOnEventListNode*)MMDLList_getNext(
+                    &(((NoteOnEventListNode*)data)[n])));
+        }
     }
     MIDIMsg_free(msg);
 }
@@ -320,7 +326,7 @@ void synth_control_setup(void)
     MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x0D,
             MIDI_synth_cc_dryGain_control,&dryGain);
     MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x21,
-            MIDI_synth_cc_schedulerState_control,&noteOnEventListHead);
+            MIDI_synth_cc_schedulerState_control,noteOnEventListHead);
     MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x22,
             MIDI_synth_cc_editingWhichParams_control,&editingWhichParams);
     MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x23,
