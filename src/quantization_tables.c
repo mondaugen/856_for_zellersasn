@@ -9,6 +9,7 @@ MMSample eventDeltaQuantTable[] = {
     6./4.,
     7./4.,
     8./4.,
+    /*
     9./4.,
     10./4.,
     11./4.,
@@ -17,6 +18,7 @@ MMSample eventDeltaQuantTable[] = {
     14./4.,
     15./4.,
     16./4.
+    */
 };
 
 int get_eventDeltaQuantTable_length(void)
