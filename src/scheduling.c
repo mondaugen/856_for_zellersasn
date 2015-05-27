@@ -17,6 +17,9 @@ struct __NoteOnEvent {
     NoteOnEventListNode *parent;
     int active; /* 1 if active, 0 if not */
     int parameterSet; /* Which set of parameters to use */
+    int numRepeats;   /* The number of times to repeat (reschedule) after playing this event */
+    int repeatIndex;  /* 0 means the first time this has been played, 1 means the first repeat, etc. */
+    int intermittency;/* The intermittency scheme, see synth_control.h */
 };
 
 MMSeq *sequence;
@@ -30,7 +33,11 @@ void scheduler_setup(void)
     MMSeq_init(sequence, 0);
 }
 
-NoteOnEvent *NoteOnEvent_new(int active, int parameterSet)
+NoteOnEvent *NoteOnEvent_new(int active,
+        int parameterSet,
+        int numRepeats,
+        int repeatIndex,
+        int intermittency)
 {
     NoteOnEvent *ev = (NoteOnEvent*)malloc(sizeof(NoteOnEvent));
     if (!ev) {
@@ -39,6 +46,9 @@ NoteOnEvent *NoteOnEvent_new(int active, int parameterSet)
     ((MMEvent*)ev)->happen = NoteOnEvent_happen;
     ev->active = active;
     ev->parameterSet = parameterSet;
+    ev->numRepeats = numRepeats;
+    ev->repeatIndex = repeatIndex;
+    ev->intermittency = intermittency;
     return ev;
 }
 
@@ -68,36 +78,54 @@ static void NoteOnEvent_happen(MMEvent *event)
             schedule_event(
                     noteParamSets[((NoteOnEvent*)event)->parameterSet].eventDeltaBeats
                     * 0xffffffff,
-                    NoteOnEvent_new(1,((NoteOnEvent*)event)->parameterSet));
+                    NoteOnEvent_new(1,((NoteOnEvent*)event)->parameterSet,0,0,1));
             /* If multiple parameter sets are allowed, schedule the other ones,
              * too */
             if (multiParamSetsAllowed) {
                 int n;
                 for (n = 1; n < NUM_NOTE_PARAM_SETS; n++) {
                     schedule_event(
-                            noteParamSets[n].eventDeltaBeats
+                            noteParamSets[n].offsetBeats
                             * 0xffffffff,
-                            NoteOnEvent_new(1,n));
+                            NoteOnEvent_new(1,
+                                n,
+                                noteParamSets[n].numRepeats,
+                                0,
+                                noteParamSets[n].intermittency));
                 }
             }
+        } else {
+            /* This is a repeating event of parameterSet other than 0 */
+            if (((NoteOnEvent*)event)->numRepeats > 0) {
+                schedule_event(
+                        noteParamSets[((NoteOnEvent*)event)->parameterSet].eventDeltaBeats
+                        * 0xffffffff,
+                        NoteOnEvent_new(1,
+                            ((NoteOnEvent*)event)->parameterSet,
+                            ((NoteOnEvent*)event)->numRepeats - 1,
+                            ((NoteOnEvent*)event)->repeatIndex + 1,
+                            ((NoteOnEvent*)event)->intermittency));
+            }
         }
-        MMSample voiceNum = pm_get_next_free_voice_number();
-        if (voiceNum != -1) { 
-            /* there is a voice free */
-            pm_claim_params_from_allocator((void*)&voiceAllocator,
-                    (void*)&voiceNum);
-            ((MMEnvedSamplePlayer*)&spsps[(int)voiceNum])->onDone =
-                autorelease_on_done;
-            MMTrapEnvedSamplePlayer_noteOn_Rate(
-                    &spsps[(int)voiceNum],
-                    voiceNum,
-                    noteParamSets[((NoteOnEvent*)event)->parameterSet].amplitude,
-                    MMInterpMethod_CUBIC,
-                    noteParamSets[((NoteOnEvent*)event)->parameterSet].startPoint
+        if ((((NoteOnEvent*)event)->repeatIndex 
+                % ((NoteOnEvent*)event)->intermittency) == 0) {
+            MMSample voiceNum = pm_get_next_free_voice_number();
+            if (voiceNum != -1) { 
+                /* there is a voice free */
+                pm_claim_params_from_allocator((void*)&voiceAllocator,
+                        (void*)&voiceNum);
+                ((MMEnvedSamplePlayer*)&spsps[(int)voiceNum])->onDone =
+                    autorelease_on_done;
+                MMTrapEnvedSamplePlayer_noteOn_Rate(
+                        &spsps[(int)voiceNum],
+                        voiceNum,
+                        noteParamSets[((NoteOnEvent*)event)->parameterSet].amplitude,
+                        MMInterpMethod_CUBIC,
+                        noteParamSets[((NoteOnEvent*)event)->parameterSet].startPoint
                         * MMArray_get_length(theSound),
-                    noteParamSets[((NoteOnEvent*)event)->parameterSet].attackTime,
-                    noteParamSets[((NoteOnEvent*)event)->parameterSet].releaseTime,
-                    ((noteParamSets[((NoteOnEvent*)event)->parameterSet].sustainTime *
+                        noteParamSets[((NoteOnEvent*)event)->parameterSet].attackTime,
+                        noteParamSets[((NoteOnEvent*)event)->parameterSet].releaseTime,
+                        ((noteParamSets[((NoteOnEvent*)event)->parameterSet].sustainTime *
                           (MMSample)MMArray_get_length(theSound) /
                           (MMSample)audio_hw_get_sample_rate(NULL) -
                           noteParamSets[((NoteOnEvent*)event)->parameterSet].attackTime -
@@ -108,10 +136,11 @@ static void NoteOnEvent_happen(MMEvent *event)
                          (MMSample)audio_hw_get_sample_rate(NULL) -
                          noteParamSets[((NoteOnEvent*)event)->parameterSet].attackTime -
                          noteParamSets[((NoteOnEvent*)event)->parameterSet].releaseTime),
-                    theSound, 
-                    1,
-                    pow(2.,
-                        (noteParamSets[((NoteOnEvent*)event)->parameterSet].pitch-60)/12.));
+                        theSound, 
+                        1,
+                        pow(2.,
+                            (noteParamSets[((NoteOnEvent*)event)->parameterSet].pitch-60)/12.));
+            }
         }
     }
     MMDLList_remove((MMDLList*)((NoteOnEvent*)event)->parent);

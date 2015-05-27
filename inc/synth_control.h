@@ -30,10 +30,22 @@ typedef struct __NoteParamSet {
     MMSample sustainTime;
     MMSample releaseTime;
     /* The time between two scheduled events */
-    MMSample eventDeltaBeats; 
+    MMSample eventDeltaBeats; /* The amount of time between repeats */
     MMSample pitch;
     MMSample amplitude;
     MMSample startPoint; /* between 0 and 1 */
+    int numRepeats;      /* The number of times repeated */
+    MMSample offsetBeats;/* The amount of beats offset from the beginning of the bar */
+    int intermittency;   /* Canonically the number of repeats that are ignored
+                            so that you obtain some patern of played/unplayed.
+                            For example, if intermittency = 1, you get
+                            played, played, played ... for the number of repeats
+                            if intermittency = 2, you get
+                            played, unplayed, played ... for the number of
+                            repeats (it will be played numRepeats/2 times).
+                            Of course this number could later stand for some
+                            more complicated pattern. */
+
 } NoteParamSet;
 
 extern NoteParamSet noteParamSets[];

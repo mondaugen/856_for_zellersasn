@@ -18,6 +18,10 @@ void schedule_event(MMTime timeFromNow, NoteOnEvent *ev);
 void scheduler_incTimeAndDoEvents(void);
 void set_noteOnEvents_active(NoteOnEventListNode *head);
 void set_noteOnEvents_inactive(NoteOnEventListNode *head);
-NoteOnEvent *NoteOnEvent_new(int active, int parameterSet);
+NoteOnEvent *NoteOnEvent_new(int active,
+        int parameterSet,
+        int numRepeats,
+        int repeatIndex,
+        int intermittency);
 
 #endif /* SCHEDULING_H */

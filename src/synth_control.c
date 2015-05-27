@@ -88,15 +88,20 @@ void MIDI_synth_cc_sustainTime_control(void *data, MIDIMsg *msg)
 
 void MIDI_synth_cc_tempoBPM_control(void *data, MIDIMsg *msg)
 {
-    if (noteDeltaFromBuffer == 1) {
-        /* the tempo is calculated so that 1 buffer * K is played per 1 beat
-         * where K is some scalar. So if K > 1, the tempo is slower and K < 1
-         * the tempo is faster */
-        MMSample K = (msg->data[2] / 127.) * 0.1 + 0.95;
-        *((MMSample*)data) = 60. * (MMSample)audio_hw_get_sample_rate(NULL) 
-            / ((MMSample)((MMArray*)theSound)->length * K);
+    if (editingWhichParams == 0) {
+        if (noteDeltaFromBuffer == 1) {
+            /* the tempo is calculated so that 1 buffer * K is played per 1 beat
+             * where K is some scalar. So if K > 1, the tempo is slower and K < 1
+             * the tempo is faster */
+            MMSample K = (msg->data[2] / 127.) * 0.1 + 0.95;
+            *((MMSample*)data) = 60. * (MMSample)audio_hw_get_sample_rate(NULL) 
+                / ((MMSample)((MMArray*)theSound)->length * K);
+        } else {
+            *((MMSample*)data) = 40. + (240. - 40.)*msg->data[2] / 127.;
+        }
     } else {
-        *((MMSample*)data) = 40. + (240. - 40.)*msg->data[2] / 127.;
+        noteParamSets[editingWhichParams].numRepeats = 
+            (int)(8. * msg->data[2] / 128.);        
     }
     MIDIMsg_free(msg);
 }
@@ -135,6 +140,13 @@ void MIDI_synth_cc_eventDeltaBeats_control(void *data, MIDIMsg *msg)
                         * (float)get_eventDeltaQuantTable_length())];
             break;
     }
+    MIDIMsg_free(msg);
+}
+
+void MIDI_synth_cc_offsetBeats_control(void *data, MIDIMsg *msg)
+{
+    ((NoteParamSet*)data)[editingWhichParams].offsetBeats
+        = (msg->data[2] + 1.)/128.;
     MIDIMsg_free(msg);
 }
 
@@ -233,7 +245,7 @@ void MIDI_synth_cc_schedulerState_control(void *data, MIDIMsg *msg)
 {
     if (msg->data[2] > 0) {
         /* schedule 1st event which is active and uses the 0th parameter set */
-        schedule_event(0, NoteOnEvent_new(1,0));
+        schedule_event(0, NoteOnEvent_new(1,0,0,0,1));
     } else {
         int n;
         for (n = 0; n < NUM_NOTE_PARAM_SETS; n++) {
@@ -287,7 +299,10 @@ void synth_control_setup(void)
             .eventDeltaBeats = 1,   /* eventDeltaBeats */
             .pitch = 60,            /* pitch */
             .amplitude = .5,        /* amplitude */
-            .startPoint = 0         /* startPoint */
+            .startPoint = 0,        /* startPoint */
+            .numRepeats = 0,        /* The number of times repeated */
+            .offsetBeats = 0,       /* The amount of beats offset from the beginning of the bar */
+            .intermittency = 1      /* Canonically the number of repeats that are ignored plus 1 */
         };
     }
     noteDeltaFromBuffer = 0;
@@ -314,6 +329,8 @@ void synth_control_setup(void)
             MIDI_synth_cc_startPoint_control,noteParamSets);
     MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x15,
             MIDI_synth_cc_eventDeltaBeats_control,noteParamSets);
+    MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x16,
+            MIDI_synth_cc_offsetBeats_control,noteParamSets);
     /* The recorder trigger requires the Hann window wavetable, initialize it
      * first. */
     HannWindowTable_init(REC_LOOP_FADE_TIME_S * 2.);
