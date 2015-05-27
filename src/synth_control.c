@@ -6,14 +6,23 @@
 #include <math.h> 
 #include "audio_setup.h" 
 #include "scheduling.h" 
+#include "quantization_tables.h" 
 
-NoteParamSet noteParamSets[NUM_NOTE_PARAM_SETS];
+/* Stuff that could be saved */
+NoteParamSet                noteParamSets[NUM_NOTE_PARAM_SETS];
+MMSample                    tempoBPM; 
+SynthControlPosMode         posMode;
+SynthControlEventDeltaMode  eventDeltaMode;
+SynthControlPitchMode       pitchMode;
 
-/* The amount the scheduler is incremented each block */
-MMSample tempoBPM; 
-int noteDeltaFromBuffer;
-int16_t  dryGain;
-int editingWhichParams;
+/* Stuff that shouldn't really be saved */
+int                         noteDeltaFromBuffer;
+int                         editingWhichParams;
+int                         currentPreset;
+
+/* Stuff that might not make it into the final application */
+int16_t                     dryGain;
+int                         multiParamSetsAllowed;
 
 void autorelease_on_done(MMEnvedSamplePlayer * esp)
 {
@@ -108,15 +117,24 @@ void MIDI_synth_cc_amplitude_control(void *data, MIDIMsg *msg)
 
 void MIDI_synth_cc_startPoint_control(void *data, MIDIMsg *msg)
 {
-    ((NoteParamSet*)data)[editingWhichParams].startPoint =
-        *((MMSample*)data) = msg->data[2]/127.;
+    ((NoteParamSet*)data)[editingWhichParams].startPoint
+        = msg->data[2]/127.;
     MIDIMsg_free(msg);
 }
 
 void MIDI_synth_cc_eventDeltaBeats_control(void *data, MIDIMsg *msg)
 {
-    ((NoteParamSet*)data)[editingWhichParams].eventDeltaBeats =
-        (msg->data[2]+1.)/128.;
+    switch (eventDeltaMode) {
+        case SynthControlEventDeltaMode_FREE : 
+            ((NoteParamSet*)data)[editingWhichParams].eventDeltaBeats
+                = 2. * (msg->data[2]+1.)/128.;
+            break;
+        case SynthControlEventDeltaMode_QUANT:
+            ((NoteParamSet*)data)[editingWhichParams].eventDeltaBeats
+                = eventDeltaQuantTable[(int)(msg->data[2] / 128. 
+                        * (float)get_eventDeltaQuantTable_length())];
+            break;
+    }
     MIDIMsg_free(msg);
 }
 
@@ -232,6 +250,26 @@ void MIDI_synth_cc_editingWhichParams_control(void *data, MIDIMsg *msg)
     MIDIMsg_free(msg);
 }
 
+void MIDI_synth_cc_multiParamSetsAllowed_control(void *data, MIDIMsg *msg)
+{
+    if (msg->data[2]) {
+        *((int*)data) = 1;
+    } else {
+        *((int*)data) = 0;
+    }
+    MIDIMsg_free(msg);
+}
+
+void MIDI_synth_cc_eventDeltaMode_control(void *data, MIDIMsg *msg)
+{
+    if (msg->data[2]) {
+        *((SynthControlEventDeltaMode*)data) = SynthControlEventDeltaMode_QUANT;
+    } else {
+        *((SynthControlEventDeltaMode*)data) = SynthControlEventDeltaMode_FREE;
+    }
+    MIDIMsg_free(msg);
+}
+
 void synth_control_setup(void)
 {
     int n;
@@ -242,7 +280,7 @@ void synth_control_setup(void)
             .releaseTime = 0.01,    /* releaseTime */
             .eventDeltaBeats = 1,   /* eventDeltaBeats */
             .pitch = 60,            /* pitch */
-            .amplitude = .1,        /* amplitude */
+            .amplitude = .5,        /* amplitude */
             .startPoint = 0         /* startPoint */
         };
     }
@@ -250,6 +288,8 @@ void synth_control_setup(void)
     dryGain             = 0;
     editingWhichParams  = 0;
     tempoBPM            = 120;
+    multiParamSetsAllowed = 0;
+    eventDeltaMode = SynthControlEventDeltaMode_FREE;
     MIDI_Router_addCB(&midiRouter.router, MIDIMSG_NOTE_ON, 1, 
             MIDI_note_on_autorelease_do, spsps);
     MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x0e,
@@ -281,6 +321,10 @@ void synth_control_setup(void)
             MIDI_synth_cc_dryGain_control,&dryGain);
     MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x21,
             MIDI_synth_cc_schedulerState_control,&noteOnEventListHead);
-    MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x03,
+    MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x22,
             MIDI_synth_cc_editingWhichParams_control,&editingWhichParams);
+    MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x23,
+            MIDI_synth_cc_multiParamSetsAllowed_control,&multiParamSetsAllowed);
+    MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x1c,
+            MIDI_synth_cc_eventDeltaMode_control,&eventDeltaMode);
 }

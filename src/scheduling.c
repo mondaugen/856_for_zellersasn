@@ -38,7 +38,7 @@ NoteOnEvent *NoteOnEvent_new(int active, int parameterSet)
     }
     ((MMEvent*)ev)->happen = NoteOnEvent_happen;
     ev->active = active;
-    ev->parameterSet;
+    ev->parameterSet = parameterSet;
     return ev;
 }
 
@@ -62,11 +62,24 @@ static void NoteOnEvent_happen(MMEvent *event)
 {
     /* only play if event is active */
     if (((NoteOnEvent*)event)->active == 1) {
-        /* schedule next event */
-        schedule_event(
-            noteParamSets[((NoteOnEvent*)event)->parameterSet].eventDeltaBeats
-                * 0xffffffff,
-                NoteOnEvent_new(1,((NoteOnEvent*)event)->parameterSet));
+        /* schedule next event if this event is of parameterSet 0 */
+        if (((NoteOnEvent*)event)->parameterSet == 0) {
+            schedule_event(
+                    noteParamSets[((NoteOnEvent*)event)->parameterSet].eventDeltaBeats
+                    * 0xffffffff,
+                    NoteOnEvent_new(1,((NoteOnEvent*)event)->parameterSet));
+            /* If multiple parameter sets are allowed, schedule the other ones,
+             * too */
+            if (multiParamSetsAllowed) {
+                int n;
+                for (n = 1; n < NUM_NOTE_PARAM_SETS; n++) {
+                    schedule_event(
+                            noteParamSets[n].eventDeltaBeats
+                            * 0xffffffff,
+                            NoteOnEvent_new(1,n));
+                }
+            }
+        }
         MMSample voiceNum = pm_get_next_free_voice_number();
         if (voiceNum != -1) { 
             /* there is a voice free */

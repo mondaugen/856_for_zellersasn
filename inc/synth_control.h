@@ -9,6 +9,22 @@
 /* The number of sets of note parameters */
 #define NUM_NOTE_PARAM_SETS 2 
 
+typedef enum {
+    SynthControlPosMode_ABSOLUTE,
+    SynthControlPosMode_STRIDE
+} SynthControlPosMode;
+
+typedef enum {
+    SynthControlEventDeltaMode_FREE,
+    SynthControlEventDeltaMode_QUANT
+} SynthControlEventDeltaMode;
+
+typedef enum {
+    SynthControlPitchMode_CHROM,
+    SynthControlPitchMode_4TH5TH,
+    SynthControlPitchMode_LINKTEMPO
+} SynthControlPitchMode;
+
 typedef struct __NoteParamSet {
     MMSample attackTime;
     MMSample sustainTime;
@@ -22,9 +38,14 @@ typedef struct __NoteParamSet {
 
 extern NoteParamSet noteParamSets[];
 
+extern SynthControlPosMode         posMode;
+extern SynthControlEventDeltaMode  eventDeltaMode;
+extern SynthControlPitchMode       pitchMode;
+
 extern int16_t  dryGain;
 /* The amount the scheduler is incremented each block */
 extern MMSample tempoBPM; 
+extern int multiParamSetsAllowed;
 
 void autorelease_on_done(MMEnvedSamplePlayer * esp);
 
