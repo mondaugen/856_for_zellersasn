@@ -7,17 +7,24 @@
 /* The amount of fade at the end of the recording in seconds */
 #define REC_LOOP_FADE_TIME_S 0.025 
 /* The number of sets of note parameters */
-#define NUM_NOTE_PARAM_SETS 2 
+#define NUM_NOTE_PARAM_SETS 3 
 
 typedef enum {
     SynthControlPosMode_ABSOLUTE,
     SynthControlPosMode_STRIDE
 } SynthControlPosMode;
 
+/*
 typedef enum {
     SynthControlEventDeltaMode_FREE,
     SynthControlEventDeltaMode_QUANT
 } SynthControlEventDeltaMode;
+*/
+
+typedef enum {
+    SynthControlDeltaButtonMode_EVENT_DELTA,
+    SynthControlDeltaButtonMode_INTERMITTENCY
+} SynthControlDeltaButtonMode;
 
 typedef enum {
     SynthControlPitchMode_CHROM,
@@ -51,13 +58,13 @@ typedef struct __NoteParamSet {
 extern NoteParamSet noteParamSets[];
 
 extern SynthControlPosMode         posMode;
-extern SynthControlEventDeltaMode  eventDeltaMode;
+//extern SynthControlEventDeltaMode  eventDeltaMode;
+extern SynthControlDeltaButtonMode  deltaButtonMode;
 extern SynthControlPitchMode       pitchMode;
 
 extern int16_t  dryGain;
 /* The amount the scheduler is incremented each block */
 extern MMSample tempoBPM; 
-extern int multiParamSetsAllowed;
 
 void autorelease_on_done(MMEnvedSamplePlayer * esp);
 

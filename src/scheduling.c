@@ -79,20 +79,17 @@ static void NoteOnEvent_happen(MMEvent *event)
                     noteParamSets[((NoteOnEvent*)event)->parameterSet].eventDeltaBeats
                     * 0xffffffff,
                     NoteOnEvent_new(1,((NoteOnEvent*)event)->parameterSet,0,0,1));
-            /* If multiple parameter sets are allowed, schedule the other ones,
-             * too */
-            if (multiParamSetsAllowed) {
-                int n;
-                for (n = 1; n < NUM_NOTE_PARAM_SETS; n++) {
-                    schedule_event(
-                            noteParamSets[n].offsetBeats
-                            * 0xffffffff,
-                            NoteOnEvent_new(1,
-                                n,
-                                noteParamSets[n].numRepeats,
-                                0,
-                                noteParamSets[n].intermittency));
-                }
+            /* Schedule the other notes, too */
+            int n;
+            for (n = 1; n < NUM_NOTE_PARAM_SETS; n++) {
+                schedule_event(
+                        noteParamSets[n].offsetBeats
+                        * 0xffffffff,
+                        NoteOnEvent_new(1,
+                            n,
+                            noteParamSets[n].numRepeats,
+                            0,
+                            noteParamSets[n].intermittency));
             }
         } else {
             /* This is a repeating event of parameterSet other than 0 */
@@ -110,7 +107,7 @@ static void NoteOnEvent_happen(MMEvent *event)
         if ((((NoteOnEvent*)event)->repeatIndex 
                 % ((NoteOnEvent*)event)->intermittency) == 0) {
             MMSample voiceNum = pm_get_next_free_voice_number();
-            if (voiceNum != -1) { 
+            if (voiceNum != -1 && (noteParamSets[((NoteOnEvent*)event)->parameterSet].amplitude > 0.001)) { 
                 /* there is a voice free */
                 pm_claim_params_from_allocator((void*)&voiceAllocator,
                         (void*)&voiceNum);

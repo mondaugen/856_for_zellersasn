@@ -12,7 +12,8 @@
 NoteParamSet                noteParamSets[NUM_NOTE_PARAM_SETS];
 MMSample                    tempoBPM; 
 SynthControlPosMode         posMode;
-SynthControlEventDeltaMode  eventDeltaMode;
+//SynthControlEventDeltaMode  eventDeltaMode;
+SynthControlDeltaButtonMode deltaButtonMode;
 SynthControlPitchMode       pitchMode;
 
 /* Stuff that shouldn't really be saved */
@@ -22,7 +23,6 @@ int                         currentPreset;
 
 /* Stuff that might not make it into the final application */
 int16_t                     dryGain;
-int                         multiParamSetsAllowed;
 
 void autorelease_on_done(MMEnvedSamplePlayer * esp)
 {
@@ -129,15 +129,22 @@ void MIDI_synth_cc_startPoint_control(void *data, MIDIMsg *msg)
 
 void MIDI_synth_cc_eventDeltaBeats_control(void *data, MIDIMsg *msg)
 {
-    switch (eventDeltaMode) {
-        case SynthControlEventDeltaMode_FREE : 
-            ((NoteParamSet*)data)[editingWhichParams].eventDeltaBeats
-                = 2. * (msg->data[2]+1.)/128.;
+    switch (deltaButtonMode) {
+        case SynthControlDeltaButtonMode_EVENT_DELTA:
+            if (editingWhichParams == 0) {
+                ((NoteParamSet*)data)[editingWhichParams].eventDeltaBeats
+                    = (MMSample)(1 + (int)(3. * (MMSample)msg->data[2]/127.));
+            } else {
+                ((NoteParamSet*)data)[editingWhichParams].eventDeltaBeats
+                    = 2. * (msg->data[2]+1.)/128.;
+            }
             break;
-        case SynthControlEventDeltaMode_QUANT:
-            ((NoteParamSet*)data)[editingWhichParams].eventDeltaBeats
-                = eventDeltaQuantTable[(int)(msg->data[2] / 128. 
-                        * (float)get_eventDeltaQuantTable_length())];
+        case SynthControlDeltaButtonMode_INTERMITTENCY:
+            /* For now 0th parameter set not supported */
+            if (editingWhichParams > 0) {
+                ((NoteParamSet*)data)[editingWhichParams].intermittency =
+                    1 + (int)(3. * msg->data[2] / 127.);
+            }
             break;
     }
     MIDIMsg_free(msg);
@@ -145,8 +152,15 @@ void MIDI_synth_cc_eventDeltaBeats_control(void *data, MIDIMsg *msg)
 
 void MIDI_synth_cc_offsetBeats_control(void *data, MIDIMsg *msg)
 {
-    ((NoteParamSet*)data)[editingWhichParams].offsetBeats
-        = (msg->data[2] + 1.)/128.;
+    if (editingWhichParams == 0) {
+        ((NoteParamSet*)data)[editingWhichParams].offsetBeats
+            = (msg->data[2] + 1.)/128.;
+    } else {
+        /* The offset is relative to the total event delta of the note event
+         * with parameterSet 0 */
+        ((NoteParamSet*)data)[editingWhichParams].offsetBeats
+            = ((NoteParamSet*)data)[0].eventDeltaBeats * msg->data[2]/127.;
+    }
     MIDIMsg_free(msg);
 }
 
@@ -260,24 +274,12 @@ void MIDI_synth_cc_schedulerState_control(void *data, MIDIMsg *msg)
 
 void MIDI_synth_cc_editingWhichParams_control(void *data, MIDIMsg *msg)
 {
-    if (msg->data[2]) {
-        *((int*)data) = 1;
-    } else {
-        *((int*)data) = 0;
-    }
+    *((int*)data) = (int)(((MMSample)(NUM_NOTE_PARAM_SETS - 1))
+                        * msg->data[2] / 127.);
     MIDIMsg_free(msg);
 }
 
-void MIDI_synth_cc_multiParamSetsAllowed_control(void *data, MIDIMsg *msg)
-{
-    if (msg->data[2]) {
-        *((int*)data) = 1;
-    } else {
-        *((int*)data) = 0;
-    }
-    MIDIMsg_free(msg);
-}
-
+/*
 void MIDI_synth_cc_eventDeltaMode_control(void *data, MIDIMsg *msg)
 {
     if (msg->data[2]) {
@@ -287,18 +289,42 @@ void MIDI_synth_cc_eventDeltaMode_control(void *data, MIDIMsg *msg)
     }
     MIDIMsg_free(msg);
 }
+*/
+
+void MIDI_synth_cc_deltaButtonMode_control(void *data, MIDIMsg *msg)
+{
+    if (msg->data[2]) {
+        *((SynthControlDeltaButtonMode*)data) = 
+            SynthControlDeltaButtonMode_INTERMITTENCY;
+    } else {
+        *((SynthControlDeltaButtonMode*)data) =
+            SynthControlDeltaButtonMode_EVENT_DELTA;
+    }
+}
 
 void synth_control_setup(void)
 {
+    noteParamSets[0] = (NoteParamSet) {
+        .attackTime = 0.01,     /* attackTime */
+        .sustainTime  = 1,      /* sustainTime */
+        .releaseTime = 0.01,    /* releaseTime */
+        .eventDeltaBeats = 1,   /* eventDeltaBeats */
+        .pitch = 60,            /* pitch */
+        .amplitude = .5,        /* amplitude */
+        .startPoint = 0,        /* startPoint */
+        .numRepeats = 0,        /* The number of times repeated */
+        .offsetBeats = 0,       /* The amount of beats offset from the beginning of the bar */
+        .intermittency = 1      /* Canonically the number of repeats that are ignored plus 1 */
+    };
     int n;
-    for (n = 0; n < NUM_NOTE_PARAM_SETS; n++) {
+    for (n = 1; n < NUM_NOTE_PARAM_SETS; n++) {
         noteParamSets[n] = (NoteParamSet) {
             .attackTime = 0.01,     /* attackTime */
             .sustainTime  = 1,      /* sustainTime */
             .releaseTime = 0.01,    /* releaseTime */
             .eventDeltaBeats = 1,   /* eventDeltaBeats */
             .pitch = 60,            /* pitch */
-            .amplitude = .5,        /* amplitude */
+            .amplitude = 0,        /* amplitude */
             .startPoint = 0,        /* startPoint */
             .numRepeats = 0,        /* The number of times repeated */
             .offsetBeats = 0,       /* The amount of beats offset from the beginning of the bar */
@@ -309,8 +335,7 @@ void synth_control_setup(void)
     dryGain             = 0;
     editingWhichParams  = 0;
     tempoBPM            = 120;
-    multiParamSetsAllowed = 0;
-    eventDeltaMode = SynthControlEventDeltaMode_FREE;
+    deltaButtonMode = SynthControlDeltaButtonMode_EVENT_DELTA;
     MIDI_Router_addCB(&midiRouter.router, MIDIMSG_NOTE_ON, 1, 
             MIDI_note_on_autorelease_do, spsps);
     MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x0e,
@@ -344,10 +369,8 @@ void synth_control_setup(void)
             MIDI_synth_cc_dryGain_control,&dryGain);
     MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x21,
             MIDI_synth_cc_schedulerState_control,noteOnEventListHead);
-    MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x22,
+    MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x03,
             MIDI_synth_cc_editingWhichParams_control,&editingWhichParams);
-    MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x23,
-            MIDI_synth_cc_multiParamSetsAllowed_control,&multiParamSetsAllowed);
     MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x1c,
-            MIDI_synth_cc_eventDeltaMode_control,&eventDeltaMode);
+            MIDI_synth_cc_deltaButtonMode_control,&deltaButtonMode);
 }
