@@ -8,6 +8,11 @@
 #define REC_LOOP_FADE_TIME_S 0.025 
 /* The number of sets of note parameters */
 #define NUM_NOTE_PARAM_SETS 3 
+/* Envelope parameters */
+#define SYNTH_CONTROL_MIN_ATTACK_TIME 0.001 
+#define SYNTH_CONTROL_MAX_ATTACK_TIME 0.5
+#define SYNTH_CONTROL_MIN_RELEASE_TIME 0.001
+#define SYNTH_CONTROL_MAX_RELEASE_TIME 0.5
 
 typedef enum {
     SynthControlPosMode_ABSOLUTE,

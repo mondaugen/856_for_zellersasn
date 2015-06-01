@@ -7,6 +7,7 @@
 #include "audio_setup.h" 
 #include "scheduling.h" 
 #include "quantization_tables.h" 
+#include "env_map.h" 
 
 /* Stuff that could be saved */
 NoteParamSet                noteParamSets[NUM_NOTE_PARAM_SETS];
@@ -20,6 +21,7 @@ SynthControlPitchMode       pitchMode;
 int                         noteDeltaFromBuffer;
 int                         editingWhichParams;
 int                         currentPreset;
+int                         feedbackState;
 
 /* Stuff that might not make it into the final application */
 int16_t                     dryGain;
@@ -64,25 +66,26 @@ void MIDI_note_on_autorelease_do(void *data, MIDIMsg *msg)
     MIDIMsg_free(msg);
 }
 
-void MIDI_synth_cc_attackTime_control(void *data, MIDIMsg *msg)
+void MIDI_synth_cc_envelopeTime_control(void *data, MIDIMsg *msg)
 {
-    ((NoteParamSet*)data)[editingWhichParams].attackTime =
-        (exp(pow(msg->data[2]/127.,2.))-1)/(M_E - 1.)*5.;
-    MIDIMsg_free(msg);
-}
-
-void MIDI_synth_cc_releaseTime_control(void *data, MIDIMsg *msg)
-{
-    ((NoteParamSet*)data)[editingWhichParams].releaseTime =
-        (exp(pow(msg->data[2]/127.,2.))-1)/(M_E - 1.)*10.;
+    env_map_attack_release_f(
+            &((NoteParamSet*)data)[editingWhichParams].attackTime,
+            &((NoteParamSet*)data)[editingWhichParams].releaseTime,
+            msg->data[2]/127.,
+            SYNTH_CONTROL_MIN_ATTACK_TIME,
+            SYNTH_CONTROL_MAX_ATTACK_TIME,
+            SYNTH_CONTROL_MIN_RELEASE_TIME,
+            SYNTH_CONTROL_MAX_RELEASE_TIME);
     MIDIMsg_free(msg);
 }
 
 void MIDI_synth_cc_sustainTime_control(void *data, MIDIMsg *msg)
 {
-    /* Sustain time is relative to length of recording, so here just 0-1 */
+    /* Sustain time is relative to length of recording, so here just 0-1.
+     * It is scaled this way so that the length selection is more precise for
+     * short lengths and less precise for longer ones */
     ((NoteParamSet*)data)[editingWhichParams].sustainTime
-        = msg->data[2]/127.;
+        = powf(2.,-7.*(1 - msg->data[2]/127.));
     MIDIMsg_free(msg);
 }
 
@@ -132,11 +135,17 @@ void MIDI_synth_cc_eventDeltaBeats_control(void *data, MIDIMsg *msg)
     switch (deltaButtonMode) {
         case SynthControlDeltaButtonMode_EVENT_DELTA:
             if (editingWhichParams == 0) {
+                /* The first set is quantized */
                 ((NoteParamSet*)data)[editingWhichParams].eventDeltaBeats
                     = (MMSample)(1 + (int)(3. * (MMSample)msg->data[2]/127.));
             } else {
+                /* Other sets are free */
+                ((NoteParamSet*)data)[editingWhichParams].eventDeltaBeats
+                    = powf(2.,-6.*(1 - msg->data[2]/127.));
+                /*
                 ((NoteParamSet*)data)[editingWhichParams].eventDeltaBeats
                     = 2. * (msg->data[2]+1.)/128.;
+                */
             }
             break;
         case SynthControlDeltaButtonMode_INTERMITTENCY:
@@ -219,13 +228,28 @@ void MIDI_synth_cc_record_trig(void *data, MIDIMsg *msg)
          * to 1 beat so that the recording plays once per beat and the tempo is
          * one beat per length of recording */
         if (noteDeltaFromBuffer == 1) {
-            /* Only the 0th noteParamSet's parameters are set as this is the
-             * master and the other notes are slaves to its timing, buffer, etc.
-             * */
-            noteParamSets[0].eventDeltaBeats = 1;
+            /* When noteDeltaFromBuffer flag set
+             *  - the tempo is adjusted so the recording plays in the time of one
+             *    beat.
+             *
+             * If noteDeltaFromBuffer flag is set and the feedback is enabled,
+             * then:
+             *  - the sustain time is made to be 1
+             *  - the the amplitudes of notes that aren't the 0th are set to 0
+             *  - the pitch of note 0 is set to unison (60 so that rate is 1)
+             *  - the delta time of note 0 is set to 1 beat
+             */
             tempoBPM = 60. * (MMSample)audio_hw_get_sample_rate(NULL) 
                 / (MMSample)((MMArray*)recordingSound)->length;
-            noteParamSets[0].pitch = 60.;
+            if (feedbackState == 1) {
+                int n;
+                noteParamSets[0].eventDeltaBeats = 1;
+                noteParamSets[0].pitch = 60.;
+                for (n = 1; n < NUM_NOTE_PARAM_SETS; n++) {
+                    noteParamSets[n].amplitude = 0;
+                }
+                noteParamSets[0].sustainTime = 1.;
+            }
         }
         /* Swap the playing and the recording sounds */
         MMWavTab *tmp = recordingSound;
@@ -241,10 +265,12 @@ void MIDI_synth_cc_feedback_control(void *data, MIDIMsg *msg)
         /* Move fbBusBusSplitter to onNode */
         MMSigProc_remove(data);
         MMSigProc_insertAfter(fbOnNode,data);
+        feedbackState = 1;
     } else {
         /* Move fbBusBusSplitter to offNode */
         MMSigProc_remove(data);
         MMSigProc_insertAfter(fbOffNode,data);
+        feedbackState = 0;
     }
     MIDIMsg_free(msg);
 }
@@ -335,13 +361,12 @@ void synth_control_setup(void)
     dryGain             = 0;
     editingWhichParams  = 0;
     tempoBPM            = 120;
-    deltaButtonMode = SynthControlDeltaButtonMode_EVENT_DELTA;
+    deltaButtonMode     = SynthControlDeltaButtonMode_EVENT_DELTA;
+    feedbackState       = 0;
     MIDI_Router_addCB(&midiRouter.router, MIDIMSG_NOTE_ON, 1, 
             MIDI_note_on_autorelease_do, spsps);
     MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x0e,
-            MIDI_synth_cc_attackTime_control,noteParamSets);
-    MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x0f,
-            MIDI_synth_cc_releaseTime_control,noteParamSets);
+            MIDI_synth_cc_envelopeTime_control,noteParamSets);
     MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x10,
             MIDI_synth_cc_sustainTime_control,noteParamSets);
     MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x11,

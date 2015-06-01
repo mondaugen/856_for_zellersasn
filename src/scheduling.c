@@ -113,6 +113,29 @@ static void NoteOnEvent_happen(MMEvent *event)
                         (void*)&voiceNum);
                 ((MMEnvedSamplePlayer*)&spsps[(int)voiceNum])->onDone =
                     autorelease_on_done;
+                MMSample sustainTime, attackTime, releaseTime;
+                /* sustainTime is the length of the audio, times
+                 * noteParamSets[parameterSet].sustainTime *
+                 * length_of_sound_seconds * (1 -
+                 * noteParamSets[parameterSet].attackTime -
+                 * noteParamSets[parametersSet].releaseTime) */
+                sustainTime =
+                    noteParamSets[((NoteOnEvent*)event)->parameterSet].sustainTime
+                        * (MMSample)MMArray_get_length(theSound)
+                        / (MMSample)audio_hw_get_sample_rate(NULL)
+                        * (1.
+                            - noteParamSets[((NoteOnEvent*)event)->parameterSet].attackTime
+                            - noteParamSets[((NoteOnEvent*)event)->parameterSet].releaseTime);
+                attackTime = 
+                    noteParamSets[((NoteOnEvent*)event)->parameterSet].sustainTime
+                        * (MMSample)MMArray_get_length(theSound)
+                        / (MMSample)audio_hw_get_sample_rate(NULL)
+                        * noteParamSets[((NoteOnEvent*)event)->parameterSet].attackTime;
+                releaseTime = 
+                    noteParamSets[((NoteOnEvent*)event)->parameterSet].sustainTime
+                        * (MMSample)MMArray_get_length(theSound)
+                        / (MMSample)audio_hw_get_sample_rate(NULL)
+                        * noteParamSets[((NoteOnEvent*)event)->parameterSet].releaseTime;
                 MMTrapEnvedSamplePlayer_noteOn_Rate(
                         &spsps[(int)voiceNum],
                         voiceNum,
@@ -120,19 +143,9 @@ static void NoteOnEvent_happen(MMEvent *event)
                         MMInterpMethod_CUBIC,
                         noteParamSets[((NoteOnEvent*)event)->parameterSet].startPoint
                         * MMArray_get_length(theSound),
-                        noteParamSets[((NoteOnEvent*)event)->parameterSet].attackTime,
-                        noteParamSets[((NoteOnEvent*)event)->parameterSet].releaseTime,
-                        ((noteParamSets[((NoteOnEvent*)event)->parameterSet].sustainTime *
-                          (MMSample)MMArray_get_length(theSound) /
-                          (MMSample)audio_hw_get_sample_rate(NULL) -
-                          noteParamSets[((NoteOnEvent*)event)->parameterSet].attackTime -
-                          noteParamSets[((NoteOnEvent*)event)->parameterSet].releaseTime) < 0) ?  
-                        0 :
-                        (noteParamSets[((NoteOnEvent*)event)->parameterSet].sustainTime *
-                         (MMSample)MMArray_get_length(theSound) /
-                         (MMSample)audio_hw_get_sample_rate(NULL) -
-                         noteParamSets[((NoteOnEvent*)event)->parameterSet].attackTime -
-                         noteParamSets[((NoteOnEvent*)event)->parameterSet].releaseTime),
+                        attackTime,
+                        releaseTime,
+                        sustainTime,
                         theSound, 
                         1,
                         pow(2.,
