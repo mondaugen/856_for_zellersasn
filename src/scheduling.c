@@ -24,6 +24,10 @@ struct __NoteOnEvent {
 
 MMSeq *sequence;
 NoteOnEventListNode noteOnEventListHead[NUM_NOTE_PARAM_SETS];
+/* Keeps track of how many times a note has been played. If the number of times
+ * is divisible by the note-parameter set's intermittency value, this count gets
+ * reset */
+int noteOnEventCount[NUM_NOTE_PARAM_SETS];
 
 static void NoteOnEvent_happen(MMEvent *event);
 
@@ -31,6 +35,10 @@ void scheduler_setup(void)
 {
     sequence = MMSeq_new();
     MMSeq_init(sequence, 0);
+    int n;
+    for (n = 0; n < NUM_NOTE_PARAM_SETS; n++) {
+        noteOnEventCount[n] = 0;
+    }
 }
 
 NoteOnEvent *NoteOnEvent_new(int active,
@@ -78,7 +86,7 @@ static void NoteOnEvent_happen(MMEvent *event)
             schedule_event(
                     noteParamSets[((NoteOnEvent*)event)->parameterSet].eventDeltaBeats
                     * 0xffffffff,
-                    NoteOnEvent_new(1,((NoteOnEvent*)event)->parameterSet,0,0,1));
+                    NoteOnEvent_new(1,((NoteOnEvent*)event)->parameterSet,0,0,0));
             /* Schedule the other notes, too */
             int n;
             for (n = 1; n < NUM_NOTE_PARAM_SETS; n++) {
@@ -104,9 +112,10 @@ static void NoteOnEvent_happen(MMEvent *event)
                             ((NoteOnEvent*)event)->intermittency));
             }
         }
-        if ((((NoteOnEvent*)event)->repeatIndex 
-                % ((NoteOnEvent*)event)->intermittency) == 0) {
+        if (noteOnEventCount[((NoteOnEvent*)event)->parameterSet]
+                >= ((NoteOnEvent*)event)->intermittency) {
             MMSample voiceNum = pm_get_next_free_voice_number();
+            noteOnEventCount[((NoteOnEvent*)event)->parameterSet] = 0;
             if (voiceNum != -1 && (noteParamSets[((NoteOnEvent*)event)->parameterSet].amplitude > 0.001)) { 
                 /* there is a voice free */
                 pm_claim_params_from_allocator((void*)&voiceAllocator,
@@ -151,6 +160,8 @@ static void NoteOnEvent_happen(MMEvent *event)
                         pow(2.,
                             (noteParamSets[((NoteOnEvent*)event)->parameterSet].pitch-60)/12.));
             }
+        } else {
+            noteOnEventCount[((NoteOnEvent*)event)->parameterSet] += 1;
         }
     }
     MMDLList_remove((MMDLList*)((NoteOnEvent*)event)->parent);

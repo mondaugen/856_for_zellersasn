@@ -13,6 +13,7 @@ struct __NoteOnEventListNode {
 
 extern MMSeq *sequence;
 extern NoteOnEventListNode noteOnEventListHead[];
+extern int noteOnEventCount[];
 void scheduler_setup(void);
 void schedule_event(MMTime timeFromNow, NoteOnEvent *ev);
 void scheduler_incTimeAndDoEvents(void);

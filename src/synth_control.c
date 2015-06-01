@@ -104,7 +104,7 @@ void MIDI_synth_cc_tempoBPM_control(void *data, MIDIMsg *msg)
         }
     } else {
         noteParamSets[editingWhichParams].numRepeats = 
-            (int)(8. * msg->data[2] / 128.);        
+            (int)(16. * msg->data[2] / 128.);        
     }
     MIDIMsg_free(msg);
 }
@@ -152,7 +152,7 @@ void MIDI_synth_cc_eventDeltaBeats_control(void *data, MIDIMsg *msg)
             /* For now 0th parameter set not supported */
             if (editingWhichParams > 0) {
                 ((NoteParamSet*)data)[editingWhichParams].intermittency =
-                    1 + (int)(3. * msg->data[2] / 127.);
+                    0 + (int)(3. * msg->data[2] / 127.);
             }
             break;
     }
@@ -293,6 +293,8 @@ void MIDI_synth_cc_schedulerState_control(void *data, MIDIMsg *msg)
             set_noteOnEvents_inactive(
                 (NoteOnEventListNode*)MMDLList_getNext(
                     &(((NoteOnEventListNode*)data)[n])));
+            /* Reset the note on event counts */
+            noteOnEventCount[n] = 0;
         }
     }
     MIDIMsg_free(msg);
@@ -340,7 +342,7 @@ void synth_control_setup(void)
         .startPoint = 0,        /* startPoint */
         .numRepeats = 0,        /* The number of times repeated */
         .offsetBeats = 0,       /* The amount of beats offset from the beginning of the bar */
-        .intermittency = 1      /* Canonically the number of repeats that are ignored plus 1 */
+        .intermittency = 0      /* Canonically the number of repeats that are ignored */
     };
     int n;
     for (n = 1; n < NUM_NOTE_PARAM_SETS; n++) {
@@ -354,7 +356,7 @@ void synth_control_setup(void)
             .startPoint = 0,        /* startPoint */
             .numRepeats = 0,        /* The number of times repeated */
             .offsetBeats = 0,       /* The amount of beats offset from the beginning of the bar */
-            .intermittency = 1      /* Canonically the number of repeats that are ignored plus 1 */
+            .intermittency = 0      /* Canonically the number of repeats that are ignored */
         };
     }
     noteDeltaFromBuffer = 0;
