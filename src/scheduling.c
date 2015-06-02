@@ -90,14 +90,20 @@ static void NoteOnEvent_happen(MMEvent *event)
             /* Schedule the other notes, too */
             int n;
             for (n = 1; n < NUM_NOTE_PARAM_SETS; n++) {
-                schedule_event(
-                        noteParamSets[n].offsetBeats
-                        * 0xffffffff,
-                        NoteOnEvent_new(1,
-                            n,
-                            noteParamSets[n].numRepeats,
-                            0,
-                            noteParamSets[n].intermittency));
+                if (noteOnEventCount[n]
+                        >= noteParamSets[n].intermittency) {
+                    noteOnEventCount[n] = 0;
+                    schedule_event(
+                            noteParamSets[n].offsetBeats
+                            * 0xffffffff,
+                            NoteOnEvent_new(1,
+                                n,
+                                noteParamSets[n].numRepeats,
+                                0,
+                                noteParamSets[n].intermittency));
+                } else {
+                    noteOnEventCount[n] += 1;
+                }
             }
         } else {
             /* This is a repeating event of parameterSet other than 0 */
@@ -112,61 +118,56 @@ static void NoteOnEvent_happen(MMEvent *event)
                             ((NoteOnEvent*)event)->intermittency));
             }
         }
-        if (noteOnEventCount[((NoteOnEvent*)event)->parameterSet]
-                >= ((NoteOnEvent*)event)->intermittency) {
-            MMSample voiceNum = pm_get_next_free_voice_number();
-            noteOnEventCount[((NoteOnEvent*)event)->parameterSet] = 0;
-            if (voiceNum != -1 && (noteParamSets[((NoteOnEvent*)event)->parameterSet].amplitude > 0.001)) { 
-                /* there is a voice free */
-                pm_claim_params_from_allocator((void*)&voiceAllocator,
-                        (void*)&voiceNum);
-                ((MMEnvedSamplePlayer*)&spsps[(int)voiceNum])->onDone =
-                    autorelease_on_done;
-                MMSample sustainTime, attackTime, releaseTime;
-                /* sustainTime is the length of the audio, times
-                 * noteParamSets[parameterSet].sustainTime *
-                 * length_of_sound_seconds * (1 -
-                 * noteParamSets[parameterSet].attackTime -
-                 * noteParamSets[parametersSet].releaseTime) */
-                sustainTime =
-                    noteParamSets[((NoteOnEvent*)event)->parameterSet].sustainTime
-                        * (MMSample)MMArray_get_length(theSound)
-                        / (MMSample)audio_hw_get_sample_rate(NULL)
-                        * (1.
-                            - noteParamSets[((NoteOnEvent*)event)->parameterSet].attackTime
-                            - noteParamSets[((NoteOnEvent*)event)->parameterSet].releaseTime);
-                attackTime = 
-                    noteParamSets[((NoteOnEvent*)event)->parameterSet].sustainTime
-                        * (MMSample)MMArray_get_length(theSound)
-                        / (MMSample)audio_hw_get_sample_rate(NULL)
-                        * noteParamSets[((NoteOnEvent*)event)->parameterSet].attackTime;
-                releaseTime = 
-                    noteParamSets[((NoteOnEvent*)event)->parameterSet].sustainTime
-                        * (MMSample)MMArray_get_length(theSound)
-                        / (MMSample)audio_hw_get_sample_rate(NULL)
-                        * noteParamSets[((NoteOnEvent*)event)->parameterSet].releaseTime;
-                MMTrapEnvedSamplePlayer_noteOn_Rate(
-                        &spsps[(int)voiceNum],
-                        voiceNum,
-                        noteParamSets[((NoteOnEvent*)event)->parameterSet].amplitude,
-                        MMInterpMethod_CUBIC,
-                        noteParamSets[((NoteOnEvent*)event)->parameterSet].startPoint
-                        * MMArray_get_length(theSound),
-                        attackTime,
-                        releaseTime,
-                        sustainTime,
-                        theSound, 
-                        1,
-                        pow(2.,
-                            (noteParamSets[((NoteOnEvent*)event)->parameterSet].pitch-60)/12.));
-            }
-        } else {
-            noteOnEventCount[((NoteOnEvent*)event)->parameterSet] += 1;
+        MMSample voiceNum = pm_get_next_free_voice_number();
+        noteOnEventCount[((NoteOnEvent*)event)->parameterSet] = 0;
+        if (voiceNum != -1 && (noteParamSets[((NoteOnEvent*)event)->parameterSet].amplitude > 0.001)) { 
+            /* there is a voice free */
+            pm_claim_params_from_allocator((void*)&voiceAllocator,
+                    (void*)&voiceNum);
+            ((MMEnvedSamplePlayer*)&spsps[(int)voiceNum])->onDone =
+                autorelease_on_done;
+            MMSample sustainTime, attackTime, releaseTime;
+            /* sustainTime is the length of the audio, times
+             * noteParamSets[parameterSet].sustainTime *
+             * length_of_sound_seconds * (1 -
+             * noteParamSets[parameterSet].attackTime -
+             * noteParamSets[parametersSet].releaseTime) */
+            sustainTime =
+                noteParamSets[((NoteOnEvent*)event)->parameterSet].sustainTime
+                * (MMSample)MMArray_get_length(theSound)
+                / (MMSample)audio_hw_get_sample_rate(NULL)
+                * (1.
+                        - noteParamSets[((NoteOnEvent*)event)->parameterSet].attackTime
+                        - noteParamSets[((NoteOnEvent*)event)->parameterSet].releaseTime);
+            attackTime = 
+                noteParamSets[((NoteOnEvent*)event)->parameterSet].sustainTime
+                * (MMSample)MMArray_get_length(theSound)
+                / (MMSample)audio_hw_get_sample_rate(NULL)
+                * noteParamSets[((NoteOnEvent*)event)->parameterSet].attackTime;
+            releaseTime = 
+                noteParamSets[((NoteOnEvent*)event)->parameterSet].sustainTime
+                * (MMSample)MMArray_get_length(theSound)
+                / (MMSample)audio_hw_get_sample_rate(NULL)
+                * noteParamSets[((NoteOnEvent*)event)->parameterSet].releaseTime;
+            MMTrapEnvedSamplePlayer_noteOn_Rate(
+                    &spsps[(int)voiceNum],
+                    voiceNum,
+                    noteParamSets[((NoteOnEvent*)event)->parameterSet].amplitude,
+                    MMInterpMethod_CUBIC,
+                    noteParamSets[((NoteOnEvent*)event)->parameterSet].startPoint
+                    * MMArray_get_length(theSound),
+                    attackTime,
+                    releaseTime,
+                    sustainTime,
+                    theSound, 
+                    1,
+                    pow(2.,
+                        (noteParamSets[((NoteOnEvent*)event)->parameterSet].pitch-60)/12.));
         }
+        MMDLList_remove((MMDLList*)((NoteOnEvent*)event)->parent);
+        free(((NoteOnEvent*)event)->parent);
+        free(event);
     }
-    MMDLList_remove((MMDLList*)((NoteOnEvent*)event)->parent);
-    free(((NoteOnEvent*)event)->parent);
-    free(event);
 }
 
 void scheduler_incTimeAndDoEvents(void)
