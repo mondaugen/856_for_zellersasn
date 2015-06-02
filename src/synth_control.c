@@ -149,11 +149,8 @@ void MIDI_synth_cc_eventDeltaBeats_control(void *data, MIDIMsg *msg)
             }
             break;
         case SynthControlDeltaButtonMode_INTERMITTENCY:
-            /* For now 0th parameter set not supported */
-            if (editingWhichParams > 0) {
-                ((NoteParamSet*)data)[editingWhichParams].intermittency =
-                    0 + (int)(3. * msg->data[2] / 127.);
-            }
+            ((NoteParamSet*)data)[editingWhichParams].intermittency =
+                0 + (int)(3. * msg->data[2] / 127.);
             break;
     }
     MIDIMsg_free(msg);
@@ -284,8 +281,8 @@ void MIDI_synth_cc_dryGain_control(void *data, MIDIMsg *msg)
 void MIDI_synth_cc_schedulerState_control(void *data, MIDIMsg *msg)
 {
     if (msg->data[2] > 0) {
-        /* schedule 1st event which is active and uses the 0th parameter set */
-        schedule_event(0, NoteOnEvent_new(1,0,0,0,1));
+        /* schedule 1st event which is initially active */
+        schedule_noteSched_event(0, NoteSchedEvent_new(1));
     } else {
         int n;
         for (n = 0; n < NUM_NOTE_PARAM_SETS; n++) {
@@ -296,6 +293,9 @@ void MIDI_synth_cc_schedulerState_control(void *data, MIDIMsg *msg)
             /* Reset the note on event counts */
             noteOnEventCount[n] = 0;
         }
+        /* Disactivate the noteSchedEvents */
+        set_noteSchedEvents_inactive(
+                (NoteSchedEventListNode*)MMDLList_getNext(&noteSchedEventListHead));
     }
     MIDIMsg_free(msg);
 }

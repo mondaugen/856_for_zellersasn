@@ -19,17 +19,26 @@ struct __NoteOnEvent {
     int parameterSet; /* Which set of parameters to use */
     int numRepeats;   /* The number of times to repeat (reschedule) after playing this event */
     int repeatIndex;  /* 0 means the first time this has been played, 1 means the first repeat, etc. */
-    int intermittency;/* The intermittency scheme, see synth_control.h */
+};
+
+/* Event that schedules other notes to play. */
+struct __NoteSchedEvent {
+    MMEvent head;
+    NoteSchedEventListNode *parent;
+    int active;
 };
 
 MMSeq *sequence;
 NoteOnEventListNode noteOnEventListHead[NUM_NOTE_PARAM_SETS];
+NoteSchedEventListNode noteSchedEventListHead;
+
 /* Keeps track of how many times a note has been played. If the number of times
  * is divisible by the note-parameter set's intermittency value, this count gets
  * reset */
 int noteOnEventCount[NUM_NOTE_PARAM_SETS];
 
 static void NoteOnEvent_happen(MMEvent *event);
+static void NoteSchedEvent_happen(MMEvent *event);
 
 void scheduler_setup(void)
 {
@@ -44,8 +53,7 @@ void scheduler_setup(void)
 NoteOnEvent *NoteOnEvent_new(int active,
         int parameterSet,
         int numRepeats,
-        int repeatIndex,
-        int intermittency)
+        int repeatIndex)
 {
     NoteOnEvent *ev = (NoteOnEvent*)malloc(sizeof(NoteOnEvent));
     if (!ev) {
@@ -56,11 +64,21 @@ NoteOnEvent *NoteOnEvent_new(int active,
     ev->parameterSet = parameterSet;
     ev->numRepeats = numRepeats;
     ev->repeatIndex = repeatIndex;
-    ev->intermittency = intermittency;
     return ev;
 }
 
-void schedule_event(uint64_t timeFromNow, NoteOnEvent *ev)
+NoteSchedEvent *NoteSchedEvent_new(int active)
+{
+    NoteSchedEvent *ev = (NoteSchedEvent*)malloc(sizeof(NoteSchedEvent));
+    if (!ev) {
+        return NULL;
+    }
+    ((MMEvent*)ev)->happen = NoteSchedEvent_happen;
+    ev->active = active;
+    return ev;
+}
+
+void schedule_noteOn_event(uint64_t timeFromNow, NoteOnEvent *ev)
 {
     if (!ev) {
         return;
@@ -77,46 +95,37 @@ void schedule_event(uint64_t timeFromNow, NoteOnEvent *ev)
             MMSeq_getCurrentTime(sequence) + timeFromNow);
 }
 
+void schedule_noteSched_event(uint64_t timeFromNow, NoteSchedEvent *ev)
+{
+    if (!ev) {
+        return;
+    }
+    ev->parent = (NoteSchedEventListNode*)malloc(sizeof(NoteSchedEventListNode));
+    if (!ev->parent) {
+        free(ev);
+        return;
+    }
+    ev->parent->child = ev;
+    MMDLList_insertAfter((MMDLList*)&noteSchedEventListHead,(MMDLList*)ev->parent);
+    MMSeq_scheduleEvent(sequence, (MMEvent*)ev,
+            MMSeq_getCurrentTime(sequence) + timeFromNow);
+}
+
 static void NoteOnEvent_happen(MMEvent *event)
 {
     /* only play if event is active */
     if (((NoteOnEvent*)event)->active == 1) {
-        /* schedule next event if this event is of parameterSet 0 */
-        if (((NoteOnEvent*)event)->parameterSet == 0) {
-            schedule_event(
+        /* If numRepeats greater than 0, schedule the note to occur again. The
+         * number of repeats should never be greater than 0 for an event of note
+         * 0 */
+        if (((NoteOnEvent*)event)->numRepeats > 0) {
+            schedule_noteOn_event(
                     noteParamSets[((NoteOnEvent*)event)->parameterSet].eventDeltaBeats
                     * 0xffffffff,
-                    NoteOnEvent_new(1,((NoteOnEvent*)event)->parameterSet,0,0,0));
-            /* Schedule the other notes, too */
-            int n;
-            for (n = 1; n < NUM_NOTE_PARAM_SETS; n++) {
-                if (noteOnEventCount[n]
-                        >= noteParamSets[n].intermittency) {
-                    noteOnEventCount[n] = 0;
-                    schedule_event(
-                            noteParamSets[n].offsetBeats
-                            * 0xffffffff,
-                            NoteOnEvent_new(1,
-                                n,
-                                noteParamSets[n].numRepeats,
-                                0,
-                                noteParamSets[n].intermittency));
-                } else {
-                    noteOnEventCount[n] += 1;
-                }
-            }
-        } else {
-            /* This is a repeating event of parameterSet other than 0 */
-            if (((NoteOnEvent*)event)->numRepeats > 0) {
-                schedule_event(
-                        noteParamSets[((NoteOnEvent*)event)->parameterSet].eventDeltaBeats
-                        * 0xffffffff,
-                        NoteOnEvent_new(1,
-                            ((NoteOnEvent*)event)->parameterSet,
-                            ((NoteOnEvent*)event)->numRepeats - 1,
-                            ((NoteOnEvent*)event)->repeatIndex + 1,
-                            ((NoteOnEvent*)event)->intermittency));
-            }
+                    NoteOnEvent_new(1,
+                        ((NoteOnEvent*)event)->parameterSet,
+                        ((NoteOnEvent*)event)->numRepeats - 1,
+                        ((NoteOnEvent*)event)->repeatIndex + 1));
         }
         MMSample voiceNum = pm_get_next_free_voice_number();
         noteOnEventCount[((NoteOnEvent*)event)->parameterSet] = 0;
@@ -164,10 +173,40 @@ static void NoteOnEvent_happen(MMEvent *event)
                     pow(2.,
                         (noteParamSets[((NoteOnEvent*)event)->parameterSet].pitch-60)/12.));
         }
-        MMDLList_remove((MMDLList*)((NoteOnEvent*)event)->parent);
-        free(((NoteOnEvent*)event)->parent);
-        free(event);
     }
+    MMDLList_remove((MMDLList*)((NoteOnEvent*)event)->parent);
+    free(((NoteOnEvent*)event)->parent);
+    free(event);
+}
+
+static void NoteSchedEvent_happen(MMEvent *event)
+{
+    if (((NoteSchedEvent*)event)->active == 1) {
+        /* Schedule notes */
+        int n;
+        for (n = 0; n < NUM_NOTE_PARAM_SETS; n++) {
+            if (noteOnEventCount[n]
+                    >= noteParamSets[n].intermittency) {
+                noteOnEventCount[n] = 0;
+                schedule_noteOn_event(
+                        noteParamSets[n].offsetBeats
+                        * 0xffffffff,
+                        NoteOnEvent_new(1,
+                            n,
+                            noteParamSets[n].numRepeats,
+                            0));
+            } else {
+                noteOnEventCount[n] += 1;
+            }
+        }
+        /* Schedule next noteSchedEvent using note 0's eventDeltaBeats */
+        schedule_noteSched_event(noteParamSets[0].eventDeltaBeats
+                * 0xffffffff,
+                NoteSchedEvent_new(1));
+    }
+    MMDLList_remove((MMDLList*)((NoteSchedEvent*)event)->parent);
+    free(((NoteSchedEvent*)event)->parent);
+    free(event);
 }
 
 void scheduler_incTimeAndDoEvents(void)
@@ -195,5 +234,25 @@ void set_noteOnEvents_inactive(NoteOnEventListNode *head)
     while (head) {
         head->child->active = 0;
         head = (NoteOnEventListNode*)((MMDLList*)head)->next;
+    }
+}
+
+/* It could be that head is a sentinel and contains no child (as is the case
+ * with noteSchedEventListHead). In that case, be sure to pass the next in the
+ * list, e.g., set_noteSchedEvents_active(noteSchedEventListHead.next) */
+void set_noteSchedEvents_active(NoteSchedEventListNode *head)
+{
+    while (head) {
+        head->child->active = 1;
+        head = (NoteSchedEventListNode*)((MMDLList*)head)->next;
+    }
+}
+
+/* See set_noteSchedEvents_active for tips. */
+void set_noteSchedEvents_inactive(NoteSchedEventListNode *head)
+{
+    while (head) {
+        head->child->active = 0;
+        head = (NoteSchedEventListNode*)((MMDLList*)head)->next;
     }
 }
