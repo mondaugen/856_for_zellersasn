@@ -22,6 +22,8 @@ int                         noteDeltaFromBuffer;
 int                         editingWhichParams;
 int                         currentPreset;
 int                         feedbackState;
+int                         scheduleRecording;
+int                         firstScheduledRecording;
 
 /* Stuff that might not make it into the final application */
 int16_t                     dryGain;
@@ -180,78 +182,92 @@ void MIDI_synth_cc_noteDeltaFromBuffer_control(void *data, MIDIMsg *msg)
     MIDIMsg_free(msg);
 }
 
+void MIDI_synth_record_stop_helper(void *data)
+{
+    ((MMWavTabRecorder*)data)->state = MMWavTabRecorderState_STOPPED;
+    /* If the index the recorder got to is greater than 2 times the fade
+     * time in samples, do the fade by adding the fade time's worth of
+     * samples to the beginning where the end and the beginning are weighted
+     * by a window */
+    if (((MMWavTabRecorder*)data)->currentIndex >= hannWindowTableLength) {
+        int _n;
+        for (_n = 0; _n < hannWindowTableLength/2; _n++) {
+            MMWavTab_get(((MMWavTabRecorder*)data)->buffer,_n) =
+                MMWavTab_get(((MMWavTabRecorder*)data)->buffer,_n)
+                * hannWindowTable[_n]
+                + MMWavTab_get(((MMWavTabRecorder*)data)->buffer,
+                        ((MMWavTabRecorder*)data)->currentIndex 
+                        - hannWindowTableLength/2 + _n)
+                * hannWindowTable[hannWindowTableLength/2 + _n];
+        }
+        if (noteDeltaFromBuffer == 0) {
+            /* Set the length to the index the recorder got to minus half the
+             * hannWindowTableLength */
+            ((MMArray*)recordingSound)->length =
+                ((MMWavTabRecorder*)data)->currentIndex
+                - hannWindowTableLength/2;
+        } else {
+            /* Set the length to the index the recorder got to so the loop
+             * is more precise */
+            ((MMArray*)recordingSound)->length =
+                ((MMWavTabRecorder*)data)->currentIndex;
+        }
+    }
+    /* If the noteDeltaFromBuffer flag is set, compute the tempo from
+     * the buffer length, set the playback rate to 1 and set the eventDelta
+     * to 1 beat so that the recording plays once per beat and the tempo is
+     * one beat per length of recording */
+    if (noteDeltaFromBuffer == 1) {
+        /* When noteDeltaFromBuffer flag set
+         *  - the tempo is adjusted so the recording plays in the time of one
+         *    beat.
+         *
+         * If noteDeltaFromBuffer flag is set and the feedback is enabled,
+         * then:
+         *  - the sustain time is made to be 1
+         *  - the the amplitudes of notes that aren't the 0th are set to 0
+         *  - the pitch of note 0 is set to unison (60 so that rate is 1)
+         *  - the delta time of note 0 is set to 1 beat
+         */
+        tempoBPM = 60. * (MMSample)audio_hw_get_sample_rate(NULL) 
+            / (MMSample)((MMArray*)recordingSound)->length;
+        if (feedbackState == 1) {
+            int n;
+            noteParamSets[0].eventDeltaBeats = 1;
+            noteParamSets[0].pitch = 60.;
+            for (n = 1; n < NUM_NOTE_PARAM_SETS; n++) {
+                noteParamSets[n].amplitude = 0;
+            }
+            noteParamSets[0].sustainTime = 1.;
+        }
+    }
+    /* Swap the playing and the recording sounds */
+    MMWavTab *tmp = recordingSound;
+    recordingSound = theSound;
+    theSound = tmp;
+}
+
+void MIDI_synth_record_start_helper(void *data)
+{
+    /* Set to max length so it would be possible to record all the way to
+     * the end of allocated space */
+    ((MMArray*)recordingSound)->length = soundSampleMaxLength;
+    ((MMWavTabRecorder*)data)->buffer = recordingSound;
+    ((MMWavTabRecorder*)data)->currentIndex = 0;
+    ((MMWavTabRecorder*)data)->state = MMWavTabRecorderState_RECORDING;
+}
+
+
 /* Start recording with non-zero control change value. Stop with value of 0. */
 void MIDI_synth_cc_record_trig(void *data, MIDIMsg *msg)
 {
     if (msg->data[2] > 0) {
-        /* Set to max length so it would be possible to record all the way to
-         * the end of allocated space */
-        ((MMArray*)recordingSound)->length = soundSampleMaxLength;
-        ((MMWavTabRecorder*)data)->buffer = recordingSound;
-        ((MMWavTabRecorder*)data)->currentIndex = 0;
-        ((MMWavTabRecorder*)data)->state = MMWavTabRecorderState_RECORDING;
+        /* Only allow recording if recording is not scheduled */
+        if (scheduleRecording == 0) {
+            MIDI_synth_record_start_helper(data);
+        }
     } else {
-        ((MMWavTabRecorder*)data)->state = MMWavTabRecorderState_STOPPED;
-        /* If the index the recorder got to is greater than 2 times the fade
-         * time in samples, do the fade by adding the fade time's worth of
-         * samples to the beginning where the end and the beginning are weighted
-         * by a window */
-        if (((MMWavTabRecorder*)data)->currentIndex >= hannWindowTableLength) {
-            int _n;
-            for (_n = 0; _n < hannWindowTableLength/2; _n++) {
-                MMWavTab_get(((MMWavTabRecorder*)data)->buffer,_n) =
-                    MMWavTab_get(((MMWavTabRecorder*)data)->buffer,_n)
-                        * hannWindowTable[_n]
-                    + MMWavTab_get(((MMWavTabRecorder*)data)->buffer,
-                           ((MMWavTabRecorder*)data)->currentIndex 
-                            - hannWindowTableLength/2 + _n)
-                        * hannWindowTable[hannWindowTableLength/2 + _n];
-            }
-            if (noteDeltaFromBuffer == 0) {
-                /* Set the length to the index the recorder got to minus half the
-                 * hannWindowTableLength */
-                ((MMArray*)recordingSound)->length =
-                    ((MMWavTabRecorder*)data)->currentIndex
-                    - hannWindowTableLength/2;
-            } else {
-                /* Set the length to the index the recorder got to so the loop
-                 * is more precise */
-                ((MMArray*)recordingSound)->length =
-                    ((MMWavTabRecorder*)data)->currentIndex;
-            }
-        }
-        /* If the noteDeltaFromBuffer flag is set, compute the tempo from
-         * the buffer length, set the playback rate to 1 and set the eventDelta
-         * to 1 beat so that the recording plays once per beat and the tempo is
-         * one beat per length of recording */
-        if (noteDeltaFromBuffer == 1) {
-            /* When noteDeltaFromBuffer flag set
-             *  - the tempo is adjusted so the recording plays in the time of one
-             *    beat.
-             *
-             * If noteDeltaFromBuffer flag is set and the feedback is enabled,
-             * then:
-             *  - the sustain time is made to be 1
-             *  - the the amplitudes of notes that aren't the 0th are set to 0
-             *  - the pitch of note 0 is set to unison (60 so that rate is 1)
-             *  - the delta time of note 0 is set to 1 beat
-             */
-            tempoBPM = 60. * (MMSample)audio_hw_get_sample_rate(NULL) 
-                / (MMSample)((MMArray*)recordingSound)->length;
-            if (feedbackState == 1) {
-                int n;
-                noteParamSets[0].eventDeltaBeats = 1;
-                noteParamSets[0].pitch = 60.;
-                for (n = 1; n < NUM_NOTE_PARAM_SETS; n++) {
-                    noteParamSets[n].amplitude = 0;
-                }
-                noteParamSets[0].sustainTime = 1.;
-            }
-        }
-        /* Swap the playing and the recording sounds */
-        MMWavTab *tmp = recordingSound;
-        recordingSound = theSound;
-        theSound = tmp;
+        MIDI_synth_record_stop_helper(data);
     }
     MIDIMsg_free(msg);
 }
@@ -296,6 +312,10 @@ void MIDI_synth_cc_schedulerState_control(void *data, MIDIMsg *msg)
         /* Disactivate the noteSchedEvents */
         set_noteSchedEvents_inactive(
                 (NoteSchedEventListNode*)MMDLList_getNext(&noteSchedEventListHead));
+        if (scheduleRecording == 1) {
+            /* Discard what was last recorded */
+            wtr.state = MMWavTabRecorderState_STOPPED;
+        }
     }
     MIDIMsg_free(msg);
 }
@@ -327,6 +347,29 @@ void MIDI_synth_cc_deltaButtonMode_control(void *data, MIDIMsg *msg)
     } else {
         *((SynthControlDeltaButtonMode*)data) =
             SynthControlDeltaButtonMode_EVENT_DELTA;
+    }
+}
+
+void MIDI_synth_cc_recordScheduling_control(void *data, MIDIMsg *msg)
+{
+    if (msg->data[2]) {
+        /* If recording in progress, stop it */
+        if (wtr.state == MMWavTabRecorderState_RECORDING) {
+            wtr.state = MMWavTabRecorderState_STOPPED;
+/*             MIDI_synth_record_stop_helper((void*)&wtr); */
+        }
+        *((int*)data) = 1;
+        /* Set first scheduled recording to true so that when the first
+         * scheduled recording happens, the buffers aren't swapped. This is
+         * because the buffer it swaps with might contain garbage. */
+        firstScheduledRecording = 1;
+    } else {
+        *((int*)data) = 0;
+        /* Stop recording (it will most likely be in progress) but don't swap
+         * the recording and playing sounds. We discard the most recent
+         * recording to give the user time to flip the switch if they like the
+         * previous recording */
+        wtr.state = MMWavTabRecorderState_STOPPED;
     }
 }
 
@@ -365,6 +408,7 @@ void synth_control_setup(void)
     tempoBPM            = 120;
     deltaButtonMode     = SynthControlDeltaButtonMode_EVENT_DELTA;
     feedbackState       = 0;
+    scheduleRecording   = 0;
     MIDI_Router_addCB(&midiRouter.router, MIDIMSG_NOTE_ON, 1, 
             MIDI_note_on_autorelease_do, spsps);
     MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x0e,
@@ -400,4 +444,6 @@ void synth_control_setup(void)
             MIDI_synth_cc_editingWhichParams_control,&editingWhichParams);
     MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x1c,
             MIDI_synth_cc_deltaButtonMode_control,&deltaButtonMode);
+    MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x22,
+            MIDI_synth_cc_recordScheduling_control,&scheduleRecording);
 }

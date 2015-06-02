@@ -70,7 +70,11 @@ extern SynthControlPitchMode       pitchMode;
 extern int16_t  dryGain;
 /* The amount the scheduler is incremented each block */
 extern MMSample tempoBPM; 
+extern int                         scheduleRecording;
+extern int                         firstScheduledRecording;
 
 void autorelease_on_done(MMEnvedSamplePlayer * esp);
+void MIDI_synth_record_stop_helper(void *data);
+void MIDI_synth_record_start_helper(void *data);
 
 #endif /* SYNTH_CONTROL_H */

@@ -203,6 +203,22 @@ static void NoteSchedEvent_happen(MMEvent *event)
         schedule_noteSched_event(noteParamSets[0].eventDeltaBeats
                 * 0xffffffff,
                 NoteSchedEvent_new(1));
+        /* If scheduled recording enabled, stop the previous recording and start
+         * a new one. When scheduled recording is disabled, it turns off
+         * recording immediately and so it is okay that we don't turn off
+         * recording from the scheduled event when schedule recording is unset
+         * (== 0) */
+        if (scheduleRecording == 1) {
+            if (firstScheduledRecording == 0) {
+                MIDI_synth_record_stop_helper((void*)&wtr);
+            } else {
+                /* If this is the first scheduled recording, don't stop any
+                 * recording and swap the buffers because the last buffer might
+                 * have garbage in it */
+                firstScheduledRecording = 0;
+            }
+            MIDI_synth_record_start_helper((void*)&wtr);
+        }
     }
     MMDLList_remove((MMDLList*)((NoteSchedEvent*)event)->parent);
     free(((NoteSchedEvent*)event)->parent);
