@@ -6,6 +6,7 @@
 #include "mm_wavtab_recorder.h" 
 #include "mm_bussplitter.h"
 #include "mm_busmerger.h" 
+#include "mm_envelope.h" 
 
 #define NUM_NOTES 8 
 

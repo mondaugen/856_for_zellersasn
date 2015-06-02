@@ -44,3 +44,16 @@ int pm_get_next_free_voice_number(void)
     }
     return -1; /* no voices free */
 }
+
+/* Call the function voice_cb on each busy voice. This implementation will pass
+ * a pointer to a value of type int to voice_cb */
+void pm_do_for_each_busy_voice(void *allocator, void (*voice_cb)(void *params))
+{
+    int n;
+    for (n = 0; n < NUM_NOTES; n++) {
+        if (~(*((uint32_t*)allocator) >> n) & 0x1) {
+            /* This is a busy voice, call voice_cb on it */
+            voice_cb(&n);
+        }
+    }
+}

@@ -228,6 +228,8 @@ void MIDI_synth_record_stop_helper(void *data)
          *  - the the amplitudes of notes that aren't the 0th are set to 0
          *  - the pitch of note 0 is set to unison (60 so that rate is 1)
          *  - the delta time of note 0 is set to 1 beat
+         *  - the intermittence of note 0 is set to 0
+         *  - the offset of note 0 is set to 0
          */
         tempoBPM = 60. * (MMSample)audio_hw_get_sample_rate(NULL) 
             / (MMSample)((MMArray*)recordingSound)->length;
@@ -239,6 +241,8 @@ void MIDI_synth_record_stop_helper(void *data)
                 noteParamSets[n].amplitude = 0;
             }
             noteParamSets[0].sustainTime = 1.;
+            noteParamSets[0].intermittency = 0;
+            noteParamSets[0].offsetBeats = 0;
         }
     }
     /* Swap the playing and the recording sounds */
@@ -294,6 +298,12 @@ void MIDI_synth_cc_dryGain_control(void *data, MIDIMsg *msg)
     MIDIMsg_free(msg);
 }
 
+static void free_playing_spsp_voice(void *voice_number)
+{
+    MMEnvelope_startRelease(
+            ((MMEnvedSamplePlayer*)&spsps[*((int*)voice_number)])->envelope);
+}
+
 void MIDI_synth_cc_schedulerState_control(void *data, MIDIMsg *msg)
 {
     if (msg->data[2] > 0) {
@@ -312,6 +322,8 @@ void MIDI_synth_cc_schedulerState_control(void *data, MIDIMsg *msg)
         /* Disactivate the noteSchedEvents */
         set_noteSchedEvents_inactive(
                 (NoteSchedEventListNode*)MMDLList_getNext(&noteSchedEventListHead));
+        /* Turn off all playing notes */
+        pm_do_for_each_busy_voice(&voiceAllocator,free_playing_spsp_voice);
         if (scheduleRecording == 1) {
             /* Discard what was last recorded */
             wtr.state = MMWavTabRecorderState_STOPPED;
