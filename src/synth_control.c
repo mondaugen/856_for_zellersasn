@@ -8,6 +8,7 @@
 #include "scheduling.h" 
 #include "quantization_tables.h" 
 #include "env_map.h" 
+#include "mm_mark_zerox.h" 
 
 /* Stuff that could be saved */
 NoteParamSet                noteParamSets[NUM_NOTE_PARAM_SETS];
@@ -56,19 +57,19 @@ void MIDI_note_on_autorelease_do(void *data, MIDIMsg *msg)
             voiceNum,
             msg->data[2]/127.,
             MMInterpMethod_CUBIC,
-            noteParamSets[0].startPoint * MMArray_get_length(theSound),
+            noteParamSets[0].startPoint * MMArray_get_length(theSound.wavtab),
             noteParamSets[0].attackTime,
             noteParamSets[0].releaseTime,
-            ((noteParamSets[0].sustainTime * (MMSample)MMArray_get_length(theSound) 
+            ((noteParamSets[0].sustainTime * (MMSample)MMArray_get_length(theSound.wavtab) 
                 / (MMSample)audio_hw_get_sample_rate(NULL) 
                 - noteParamSets[0].attackTime 
                 - noteParamSets[0].releaseTime) < 0) ? 
                 0 :
                 (noteParamSets[0].sustainTime *
-                (MMSample)MMArray_get_length(theSound) /
+                (MMSample)MMArray_get_length(theSound.wavtab) /
                 (MMSample)audio_hw_get_sample_rate(NULL)
                     - noteParamSets[0].attackTime - noteParamSets[0].releaseTime),
-            theSound, 
+            theSound.wavtab, 
             1,
             pow(2.,(msg->data[1]-60)/12.));
     MIDIMsg_free(msg);
@@ -106,7 +107,7 @@ void MIDI_synth_cc_tempoBPM_control(void *data, MIDIMsg *msg)
              * the tempo is faster */
             MMSample K = (msg->data[2] / 127.) * 0.1 + 0.95;
             *((MMSample*)data) = 60. * (MMSample)audio_hw_get_sample_rate(NULL) 
-                / ((MMSample)((MMArray*)theSound)->length * K);
+                / ((MMSample)((MMArray*)theSound.wavtab)->length * K);
         } else {
             *((MMSample*)data) = 40. + (240. - 40.)*msg->data[2] / 127.;
         }
@@ -198,34 +199,93 @@ void MIDI_synth_cc_noteDeltaFromBuffer_control(void *data, MIDIMsg *msg)
 
 void MIDI_synth_record_stop_helper(void *data)
 {
+    /* Set the length to the index the recorder got to */
+    ((MMArray*)((MMWavTabRecorder*)data)->buffer)->length =
+        ((MMWavTabRecorder*)data)->currentIndex;
     ((MMWavTabRecorder*)data)->state = MMWavTabRecorderState_STOPPED;
-    /* If the index the recorder got to is greater than 2 times the fade
-     * time in samples, do the fade by adding the fade time's worth of
-     * samples to the beginning where the end and the beginning are weighted
-     * by a window */
-    if (((MMWavTabRecorder*)data)->currentIndex >= hannWindowTableLength) {
-        int _n;
-        for (_n = 0; _n < hannWindowTableLength/2; _n++) {
-            MMWavTab_get(((MMWavTabRecorder*)data)->buffer,_n) =
-                MMWavTab_get(((MMWavTabRecorder*)data)->buffer,_n)
-                * hannWindowTable[_n]
-                + MMWavTab_get(((MMWavTabRecorder*)data)->buffer,
-                        ((MMWavTabRecorder*)data)->currentIndex 
-                        - hannWindowTableLength/2 + _n)
-                * hannWindowTable[hannWindowTableLength/2 + _n];
-        }
-        if (noteDeltaFromBuffer == 0) {
-            /* Set the length to the index the recorder got to minus half the
-             * hannWindowTableLength */
-            ((MMArray*)recordingSound)->length =
-                ((MMWavTabRecorder*)data)->currentIndex
-                - hannWindowTableLength/2;
-        } else {
-            /* Set the length to the index the recorder got to so the loop
-             * is more precise */
-            ((MMArray*)recordingSound)->length =
-                ((MMWavTabRecorder*)data)->currentIndex;
-        }
+    /* If the index the recorder got to is greater than the length within which
+     * zero crossings are searched, search for zero crossings near the beginning
+     * and end of the recording in order to determine points at which it would
+     * be better to loop */
+    if (((MMWavTabRecorder*)data)->currentIndex >= zeroxSearchMaxLength) {
+        /* We search for a maximum of 2 crossings, plus we need room for a final
+         * NULL in the array if one array happens to contain two crossings */
+        MMSample *upwardCrossingsForward[3], *downwardCrossingsForward[3],
+                 *upwardCrossingsBackward[3], *downwardCrossingsBackward[3];
+        /* Search for crossings in the forward direction */
+        MM_mark_zeroxs(
+                ((MMArray*)((MMWavTabRecorder*)data)->buffer)->data,
+                zeroxSearchMaxLength,
+                upwardCrossingsForward,
+                downwardCrossingsForward,
+                1,
+                ((MMArray*)((MMWavTabRecorder*)data)->buffer)->data,
+                2,
+                MZX_GROUP_CROSSINGS);
+        /* Search for crossings in the backward direction */
+        MM_mark_zeroxs(
+                &(((MMSample*)((MMArray*)
+                    ((MMWavTabRecorder*)data)->buffer)->data)[
+                        ((MMWavTabRecorder*)data)->currentIndex - 1]),
+                zeroxSearchMaxLength,
+                upwardCrossingsBackward,
+                downwardCrossingsBackward,
+                1,
+                &(((MMSample*)((MMArray*)
+                    ((MMWavTabRecorder*)data)->buffer)->data)[
+                        ((MMWavTabRecorder*)data)->currentIndex - 1]),
+                2,
+                MZX_GROUP_CROSSINGS|MZX_SEARCH_BACKWARD);
+        /* Find a forward and backward pairing possibility. */
+        MMSample *newStart = NULL, *newEnd = NULL;
+        do {
+            if (upwardCrossingsForward[0] && upwardCrossingsBackward[0]) {
+                newStart = upwardCrossingsForward[0];
+                newEnd = upwardCrossingsBackward[0] - 1;
+                break;
+            }
+            if (downwardCrossingsForward[0] && downwardCrossingsBackward[0]) {
+                newStart = downwardCrossingsForward[0];
+                newEnd = downwardCrossingsBackward[0] - 1;
+                break;
+            }
+            if (upwardCrossingsForward[0] && downwardCrossingsBackward[0]) {
+                newStart = upwardCrossingsForward[0];
+                newEnd = downwardCrossingsBackward[0] - 1;
+                break;
+            }
+            if (downwardCrossingsForward[0] && upwardCrossingsBackward[0]) {
+                newStart = downwardCrossingsForward[0];
+                newEnd = upwardCrossingsBackward[0] - 1;
+                break;
+            }
+            if (upwardCrossingsForward[0]) {
+                newStart = upwardCrossingsForward[0];
+                break;
+            }
+            if (downwardCrossingsForward[0]) {
+                newStart = downwardCrossingsForward[0];
+                break;
+            }
+        } while (0);
+        if (newStart) {
+            /* Make the wavetable's data point to the newStart */
+            ((MMArray*)((MMWavTabRecorder*)data)->buffer)->data = newStart;
+            /* Keep track of this offset */
+            size_t offset = newStart 
+                - ((MMSample*)((MMArray*)((MMWavTabRecorder*)data)->buffer)->data);
+            if (newEnd) {
+                /* Make the wavtable's data's length such that its last valid
+                 * index is the new end */
+                ((MMArray*)((MMWavTabRecorder*)data)->buffer)->length
+                    = (newEnd - newStart) + 1;
+            } else {
+                /* Otherwise adjust the length so that the end is still the same
+                 * given that the initial index has changed */
+                ((MMArray*)((MMWavTabRecorder*)data)->buffer)->length
+                    -= offset;
+            }
+        } /* Otherwise the memory area pointed to by the MMArray should not have changed */
     }
     /* If the noteDeltaFromBuffer flag is set, compute the tempo from
      * the buffer length, set the playback rate to 1 and set the eventDelta
@@ -248,7 +308,7 @@ void MIDI_synth_record_stop_helper(void *data)
          *  schedule a note schedule event immediately.
          */
         tempoBPM = 60. * (MMSample)audio_hw_get_sample_rate(NULL) 
-            / (MMSample)((MMArray*)recordingSound)->length;
+            / (MMSample)((MMArray*)((MMWavTabRecorder*)data)->buffer)->length;
         if (feedbackState == 1) {
             int n;
             noteParamSets[0].eventDeltaBeats = 1;
@@ -266,7 +326,7 @@ void MIDI_synth_record_stop_helper(void *data)
         }
     }
     /* Swap the playing and the recording sounds */
-    MMWavTab *tmp = recordingSound;
+    WavTabAreaPair tmp = recordingSound;
     recordingSound = theSound;
     theSound = tmp;
 }
@@ -275,8 +335,10 @@ void MIDI_synth_record_start_helper(void *data)
 {
     /* Set to max length so it would be possible to record all the way to
      * the end of allocated space */
-    ((MMArray*)recordingSound)->length = soundSampleMaxLength;
-    ((MMWavTabRecorder*)data)->buffer = recordingSound;
+    ((MMArray*)recordingSound.wavtab)->length = soundSampleMaxLength;
+    /* Set the area it is pointing to to the beginning of the allocated space */
+    ((MMArray*)recordingSound.wavtab)->data = recordingSound.area;
+    ((MMWavTabRecorder*)data)->buffer = recordingSound.wavtab;
     ((MMWavTabRecorder*)data)->currentIndex = 0;
     ((MMWavTabRecorder*)data)->state = MMWavTabRecorderState_RECORDING;
 }
@@ -522,9 +584,8 @@ void synth_control_setup(void)
             MIDI_synth_cc_eventDeltaBeats_control,noteParamSets);
     MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x16,
             MIDI_synth_cc_offsetBeats_control,noteParamSets);
-    /* The recorder trigger requires the Hann window wavetable, initialize it
-     * first. */
-    HannWindowTable_init(REC_LOOP_FADE_TIME_S * 2.);
+    /* The recorder trigger requires the zero crossing search be initialized */
+    ZeroxSearch_init(REC_LOOP_FADE_TIME_S * 2.);
     MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x17,
             MIDI_synth_cc_record_trig, &wtr);
     MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x18,

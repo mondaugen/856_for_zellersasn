@@ -167,19 +167,19 @@ static void NoteOnEvent_happen(MMEvent *event)
              * noteParamSets[parametersSet].releaseTime) */
             sustainTime =
                 noteParamSets[((NoteOnEvent*)event)->parameterSet].sustainTime
-                * (MMSample)MMArray_get_length(theSound)
+                * (MMSample)MMArray_get_length(theSound.wavtab)
                 / (MMSample)audio_hw_get_sample_rate(NULL)
                 * (1.
                         - noteParamSets[((NoteOnEvent*)event)->parameterSet].attackTime
                         - noteParamSets[((NoteOnEvent*)event)->parameterSet].releaseTime);
             attackTime = 
                 noteParamSets[((NoteOnEvent*)event)->parameterSet].sustainTime
-                * (MMSample)MMArray_get_length(theSound)
+                * (MMSample)MMArray_get_length(theSound.wavtab)
                 / (MMSample)audio_hw_get_sample_rate(NULL)
                 * noteParamSets[((NoteOnEvent*)event)->parameterSet].attackTime;
             releaseTime = 
                 noteParamSets[((NoteOnEvent*)event)->parameterSet].sustainTime
-                * (MMSample)MMArray_get_length(theSound)
+                * (MMSample)MMArray_get_length(theSound.wavtab)
                 / (MMSample)audio_hw_get_sample_rate(NULL)
                 * noteParamSets[((NoteOnEvent*)event)->parameterSet].releaseTime;
             MMTrapEnvedSamplePlayer_noteOn_Rate(
@@ -192,11 +192,11 @@ static void NoteOnEvent_happen(MMEvent *event)
                             * ((NoteOnEvent*)event)->currentFade),
                     MMInterpMethod_CUBIC,
                     ((NoteOnEvent*)event)->currentPosition
-                        * MMArray_get_length(theSound),
+                        * MMArray_get_length(theSound.wavtab),
                     attackTime,
                     releaseTime,
                     sustainTime,
-                    theSound, 
+                    theSound.wavtab, 
                     1,
                     pow(2.,
                         (noteParamSets[((NoteOnEvent*)event)->parameterSet].pitch-60)/12.));

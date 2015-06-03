@@ -12,12 +12,15 @@ MMWavTab WaveTable;
 MMWavTab soundSample;
 static MMSample waveTableData[WAVTABLE_LENGTH_SAMPLES];
 
+/* Areas in memory where samples are recorded */
+MMSample *sampleTableAreas[NUM_SAMPLE_TABLES];
 MMWavTab    sampleTable[NUM_SAMPLE_TABLES];
 size_t      soundSampleMaxLength;
-MMWavTab   *theSound;
-MMWavTab   *recordingSound;
+WavTabAreaPair theSound;
+WavTabAreaPair recordingSound;
 MMSample     *hannWindowTable;
 size_t       hannWindowTableLength;
+size_t       zeroxSearchMaxLength;
 
 void WaveTable_init(void)
 {
@@ -32,7 +35,8 @@ void WaveTable_init(void)
                     * (j + 1) * M_PI * 2.) / (MMSample)(j + 1);
         }
     }
-    theSound = &WaveTable;
+    theSound.wavtab = &WaveTable;
+    theSound.area = waveTableData;
 }
 
 /* Read a sound from path. Sound must be mono and have the sample sample data
@@ -62,7 +66,8 @@ void SoundSample_init(char *path)
                 sizeof(MMSample)*(((MMArray*)&soundSample)->length - rem));
     }
     fclose(f);
-    theSound = &soundSample;
+    theSound.wavtab = &soundSample;
+    theSound.area = ((MMArray*)&soundSample)->data;
 }
 
 void SampleTable_init(void)
@@ -72,13 +77,15 @@ void SampleTable_init(void)
         sampleTable[n].samplerate = audio_hw_get_sample_rate(NULL);
         ((MMArray*)&sampleTable[n])->length = SAMPLE_TABLE_LENGTH_SEC 
             * sampleTable[n].samplerate;
-        ((MMArray*)&sampleTable[n])->data = 
-            (MMSample*)malloc(((MMArray*)&sampleTable[n])->length*sizeof(MMSample));
+        sampleTableAreas[n] = (MMSample*)malloc(((MMArray*)&sampleTable[n])->length*sizeof(MMSample));
+        ((MMArray*)&sampleTable[n])->data = sampleTableAreas[n];
         memset(((MMArray*)&sampleTable[n])->data,0,
                 sizeof(MMSample) * ((MMArray*)&sampleTable[n])->length);
     }
-    theSound = &sampleTable[0];
-    recordingSound = &sampleTable[1];
+    theSound.wavtab = &sampleTable[0];
+    theSound.area = sampleTableAreas[0];
+    recordingSound.wavtab = &sampleTable[1];
+    recordingSound.area   = sampleTableAreas[1];
     soundSampleMaxLength = SAMPLE_TABLE_LENGTH_SEC 
         * audio_hw_get_sample_rate(NULL);
 }
@@ -89,4 +96,9 @@ void HannWindowTable_init(MMSample len_sec)
     hannWindowTable = (MMSample*)malloc(sizeof(MMSample) * N);
     MM_hann_fill(hannWindowTable,N);
     hannWindowTableLength = N;
+}
+
+void ZeroxSearch_init(MMSample len_sec)
+{
+    zeroxSearchMaxLength = (MMSample)audio_hw_get_sample_rate(NULL) * len_sec;
 }

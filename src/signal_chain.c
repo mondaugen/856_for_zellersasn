@@ -54,7 +54,7 @@ void signal_chain_setup(void)
     MMSigProc_insertAfter(fbOffNode, &fbBusSplitter);
     /* Make a recorder */
     MMWavTabRecorder_init(&wtr);
-    wtr.buffer = recordingSound;
+    wtr.buffer = recordingSound.wavtab;
     wtr.inputBus = inBus;
     wtr.currentIndex = 0;
     wtr.state = MMWavTabRecorderState_STOPPED;

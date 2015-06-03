@@ -16,7 +16,7 @@ void play_note_rate(int midinote, float rate)
         1.,
         4.,
         10.,
-        theSound,
+        theSound.wavtab,
         1,
         rate);
 }
@@ -32,7 +32,7 @@ void play_note(int midinote)
         1.,
         4.,
         10.,
-        theSound,
+        theSound.wavtab,
         1);
 }
 
