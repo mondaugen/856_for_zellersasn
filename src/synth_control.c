@@ -133,8 +133,16 @@ void MIDI_synth_cc_amplitude_control(void *data, MIDIMsg *msg)
 
 void MIDI_synth_cc_startPoint_control(void *data, MIDIMsg *msg)
 {
-    ((NoteParamSet*)data)[editingWhichParams].startPoint
-        = msg->data[2]/127.;
+    switch (posMode) {
+        case SynthControlPosMode_ABSOLUTE:
+            ((NoteParamSet*)data)[editingWhichParams].startPoint
+                = msg->data[2]/127.;
+            break;
+        case SynthControlPosMode_STRIDE:
+            ((NoteParamSet*)data)[editingWhichParams].positionStride
+                = msg->data[2] / 127. * 0.2 - 0.1;
+            break;
+    }
     MIDIMsg_free(msg);
 }
 
@@ -431,7 +439,17 @@ void MIDI_synth_cc_gain_control(void *data, MIDIMsg *msg)
             break;
         case SynthControlGainMode_FADE:
             ((NoteParamSet*)data)[editingWhichParams].fadeRate
-                = msg->data[2] / 127.;
+                = msg->data[2] / 127. * 2.;
+    }
+    MIDIMsg_free(msg);
+}
+
+void MIDI_synth_cc_posMode_control(void *data, MIDIMsg *msg)
+{
+    if (msg->data[2] > 0) {
+        *((SynthControlPosMode*)data) = SynthControlPosMode_STRIDE;
+    } else {
+        *((SynthControlPosMode*)data) = SynthControlPosMode_ABSOLUTE;
     }
     MIDIMsg_free(msg);
 }
@@ -447,9 +465,15 @@ void synth_control_setup(void)
         .amplitude = .5,        /* amplitude */
         .startPoint = 0,        /* startPoint */
         .numRepeats = 0,        /* The number of times repeated */
-        .offsetBeats = 0,       /* The amount of beats offset from the beginning of the bar */
-        .intermittency = 0,      /* Canonically the number of repeats that are ignored */
-        .fadeRate      = 0      /* Fade rate doesn't apply to the first parameter set */
+        .offsetBeats = 0,       /* The amount of beats offset from the beginning
+                                   of the bar */
+        .intermittency = 0,      /* Canonically the number of repeats that are
+                                    ignored */
+        .fadeRate      = 0,      /* Fade rate doesn't apply to the first
+                                    parameter set */
+        .positionStride = 0      /* The amount the starting point in the sample
+                                    is advanced each time it is scheduled (if
+                                    stride enabled) */
     };
     int n;
     for (n = 1; n < NUM_NOTE_PARAM_SETS; n++) {
@@ -462,9 +486,14 @@ void synth_control_setup(void)
             .amplitude = 0,         /* amplitude */
             .startPoint = 0,        /* startPoint */
             .numRepeats = 0,        /* The number of times repeated */
-            .offsetBeats = 0,       /* The amount of beats offset from the beginning of the bar */
-            .intermittency = 0,      /* Canonically the number of repeats that are ignored */
-            .fadeRate      = 1      /* Default fade rate of 1 means no fade */
+            .offsetBeats = 0,       /* The amount of beats offset from the
+                                       beginning of the bar */
+            .intermittency = 0,      /* Canonically the number of repeats that
+                                        are ignored */
+            .fadeRate      = 1,      /* Default fade rate of 1 means no fade */
+            .positionStride = 0      /* The amount the starting point in the
+                                        sample is advanced each time it is
+                                        scheduled (if stride enabled) */
         };
     }
     noteDeltaFromBuffer = 0;
@@ -516,4 +545,6 @@ void synth_control_setup(void)
             MIDI_synth_cc_gainMode_control,&gainMode);
     MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x0c,
             MIDI_synth_cc_gain_control,noteParamSets);
+    MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x1d,
+            MIDI_synth_cc_posMode_control,&posMode);
 }

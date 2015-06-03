@@ -63,6 +63,7 @@ typedef struct __NoteParamSet {
                             Of course this number could later stand for some
                             more complicated pattern. */
     MMSample fadeRate;
+    MMSample positionStride; /* If stride enabled, how much the position head is advanced each playback */
 } NoteParamSet;
 
 extern NoteParamSet noteParamSets[];

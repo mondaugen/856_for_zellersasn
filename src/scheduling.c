@@ -16,9 +16,16 @@ struct __NoteOnEvent {
     NoteOnEventListNode *parent;
     int active; /* 1 if active, 0 if not */
     int parameterSet; /* Which set of parameters to use */
-    int numRepeats;   /* The number of times to repeat (reschedule) after playing this event */
-    int repeatIndex;  /* 0 means the first time this has been played, 1 means the first repeat, etc. */
-    MMSample currentFade; /* a value of 1 means no fade, and this decreases every time if the parameterSet's fadeRate value < 1 */
+    int numRepeats;   /* The number of times to repeat (reschedule) after
+                         playing this event */
+    int repeatIndex;  /* 0 means the first time this has been played, 1 means
+                         the first repeat, etc. */
+    MMSample currentFade; /* a value of 1 means no fade, and this decreases
+                             every time if the parameterSet's fadeRate value < 1
+                             */
+    MMSample currentPosition; /* a value between 0 and 1 determining the
+                                 starting point within the valid range of the
+                                 buffer */
 };
 
 /* Event that schedules other notes to play. */
@@ -54,7 +61,8 @@ NoteOnEvent *NoteOnEvent_new(int active,
         int parameterSet,
         int numRepeats,
         int repeatIndex,
-        MMSample currentFade)
+        MMSample currentFade,
+        MMSample currentPosition)
 {
     NoteOnEvent *ev = (NoteOnEvent*)malloc(sizeof(NoteOnEvent));
     if (!ev) {
@@ -66,6 +74,7 @@ NoteOnEvent *NoteOnEvent_new(int active,
     ev->numRepeats = numRepeats;
     ev->repeatIndex = repeatIndex;
     ev->currentFade = currentFade;
+    ev->currentPosition = currentPosition;
     return ev;
 }
 
@@ -129,7 +138,16 @@ static void NoteOnEvent_happen(MMEvent *event)
                         ((NoteOnEvent*)event)->numRepeats - 1,
                         ((NoteOnEvent*)event)->repeatIndex + 1,
                         ((NoteOnEvent*)event)->currentFade 
-                            * noteParamSets[((NoteOnEvent*)event)->parameterSet].fadeRate));
+                            * noteParamSets[((NoteOnEvent*)event)->parameterSet].fadeRate,
+                        /* If stride enabled, increment the previous current
+                         * position by the stride amount, wrapping between 0 and
+                         * 1, otherwise just put the position as dictated by the
+                         * parameter set */
+                        (posMode == SynthControlPosMode_STRIDE) ?
+                            MM_fwrap(((NoteOnEvent*)event)->currentPosition
+                                + noteParamSets[((NoteOnEvent*)event)->parameterSet].positionStride,
+                                0,1) :
+                            noteParamSets[((NoteOnEvent*)event)->parameterSet].startPoint));
         }
         MMSample voiceNum = pm_get_next_free_voice_number();
         noteOnEventCount[((NoteOnEvent*)event)->parameterSet] = 0;
@@ -167,11 +185,14 @@ static void NoteOnEvent_happen(MMEvent *event)
             MMTrapEnvedSamplePlayer_noteOn_Rate(
                     &spsps[(int)voiceNum],
                     voiceNum,
-                    noteParamSets[((NoteOnEvent*)event)->parameterSet].amplitude
-                        * ((NoteOnEvent*)event)->currentFade,
+                    (noteParamSets[((NoteOnEvent*)event)->parameterSet].amplitude
+                        * ((NoteOnEvent*)event)->currentFade) > 1. ? 
+                        1. :
+                        (noteParamSets[((NoteOnEvent*)event)->parameterSet].amplitude
+                            * ((NoteOnEvent*)event)->currentFade),
                     MMInterpMethod_CUBIC,
-                    noteParamSets[((NoteOnEvent*)event)->parameterSet].startPoint
-                    * MMArray_get_length(theSound),
+                    ((NoteOnEvent*)event)->currentPosition
+                        * MMArray_get_length(theSound),
                     attackTime,
                     releaseTime,
                     sustainTime,
@@ -202,7 +223,8 @@ static void NoteSchedEvent_happen(MMEvent *event)
                             n,
                             noteParamSets[n].numRepeats,
                             0,
-                            1));
+                            1,
+                            noteParamSets[n].startPoint));
             } else {
                 noteOnEventCount[n] += 1;
             }

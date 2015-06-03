@@ -32,6 +32,7 @@ NoteOnEvent *NoteOnEvent_new(int active,
         int parameterSet,
         int numRepeats,
         int repeatIndex,
-        MMSample currentFade);
+        MMSample currentFade,
+        MMSample currentPosition);
 
 #endif /* SCHEDULING_H */
