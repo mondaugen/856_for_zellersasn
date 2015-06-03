@@ -32,6 +32,7 @@ int                         schedulerState;
 int16_t                     dryGain;
 
 static void schedulerState_off_helper(void *data);
+static void schedulerState_on_helper(void);
 
 void autorelease_on_done(MMEnvedSamplePlayer * esp)
 {
@@ -252,9 +253,7 @@ void MIDI_synth_record_stop_helper(void *data)
             noteParamSets[0].offsetBeats = 0;
             if (schedulerState == 1) {
                 schedulerState_off_helper((void*)noteOnEventListHead);
-                /* schedule 1st event which is initially active */
-                schedule_noteSched_event(0, NoteSchedEvent_new(1));
-                schedulerState = 1;
+                schedulerState_on_helper();
             }
         }
     }
@@ -341,12 +340,17 @@ static void schedulerState_off_helper(void *data)
     schedulerState = 0;
 }
 
+static void schedulerState_on_helper(void)
+{
+    /* schedule 1st event which is initially active */
+    schedule_noteSched_event(0, NoteSchedEvent_new(1));
+    schedulerState = 1;
+}
+
 void MIDI_synth_cc_schedulerState_control(void *data, MIDIMsg *msg)
 {
     if (msg->data[2] > 0) {
-        /* schedule 1st event which is initially active */
-        schedule_noteSched_event(0, NoteSchedEvent_new(1));
-        schedulerState = 1;
+        schedulerState_on_helper();
     } else {
         schedulerState_off_helper(data);
     }
