@@ -203,89 +203,17 @@ void MIDI_synth_record_stop_helper(void *data)
     ((MMArray*)((MMWavTabRecorder*)data)->buffer)->length =
         ((MMWavTabRecorder*)data)->currentIndex;
     ((MMWavTabRecorder*)data)->state = MMWavTabRecorderState_STOPPED;
-    /* If the index the recorder got to is greater than the length within which
-     * zero crossings are searched, search for zero crossings near the beginning
-     * and end of the recording in order to determine points at which it would
-     * be better to loop */
-    if (((MMWavTabRecorder*)data)->currentIndex >= zeroxSearchMaxLength) {
-        /* We search for a maximum of 2 crossings, plus we need room for a final
-         * NULL in the array if one array happens to contain two crossings */
-        MMSample *upwardCrossingsForward[3], *downwardCrossingsForward[3],
-                 *upwardCrossingsBackward[3], *downwardCrossingsBackward[3];
-        /* Search for crossings in the forward direction */
-        MM_mark_zeroxs(
-                ((MMArray*)((MMWavTabRecorder*)data)->buffer)->data,
-                zeroxSearchMaxLength,
-                upwardCrossingsForward,
-                downwardCrossingsForward,
-                1,
-                ((MMArray*)((MMWavTabRecorder*)data)->buffer)->data,
-                2,
-                MZX_GROUP_CROSSINGS);
-        /* Search for crossings in the backward direction */
-        MM_mark_zeroxs(
-                &(((MMSample*)((MMArray*)
-                    ((MMWavTabRecorder*)data)->buffer)->data)[
-                        ((MMWavTabRecorder*)data)->currentIndex - 1]),
-                zeroxSearchMaxLength,
-                upwardCrossingsBackward,
-                downwardCrossingsBackward,
-                1,
-                &(((MMSample*)((MMArray*)
-                    ((MMWavTabRecorder*)data)->buffer)->data)[
-                        ((MMWavTabRecorder*)data)->currentIndex - 1]),
-                2,
-                MZX_GROUP_CROSSINGS|MZX_SEARCH_BACKWARD);
-        /* Find a forward and backward pairing possibility. */
-        MMSample *newStart = NULL, *newEnd = NULL;
-        do {
-            if (upwardCrossingsForward[0] && upwardCrossingsBackward[0]) {
-                newStart = upwardCrossingsForward[0];
-                newEnd = upwardCrossingsBackward[0] - 1;
-                break;
-            }
-            if (downwardCrossingsForward[0] && downwardCrossingsBackward[0]) {
-                newStart = downwardCrossingsForward[0];
-                newEnd = downwardCrossingsBackward[0] - 1;
-                break;
-            }
-            if (upwardCrossingsForward[0] && downwardCrossingsBackward[0]) {
-                newStart = upwardCrossingsForward[0];
-                newEnd = downwardCrossingsBackward[0] - 1;
-                break;
-            }
-            if (downwardCrossingsForward[0] && upwardCrossingsBackward[0]) {
-                newStart = downwardCrossingsForward[0];
-                newEnd = upwardCrossingsBackward[0] - 1;
-                break;
-            }
-            if (upwardCrossingsForward[0]) {
-                newStart = upwardCrossingsForward[0];
-                break;
-            }
-            if (downwardCrossingsForward[0]) {
-                newStart = downwardCrossingsForward[0];
-                break;
-            }
-        } while (0);
-        if (newStart) {
-            /* Make the wavetable's data point to the newStart */
-            ((MMArray*)((MMWavTabRecorder*)data)->buffer)->data = newStart;
-            /* Keep track of this offset */
-            size_t offset = newStart 
-                - ((MMSample*)((MMArray*)((MMWavTabRecorder*)data)->buffer)->data);
-            if (newEnd) {
-                /* Make the wavtable's data's length such that its last valid
-                 * index is the new end */
-                ((MMArray*)((MMWavTabRecorder*)data)->buffer)->length
-                    = (newEnd - newStart) + 1;
-            } else {
-                /* Otherwise adjust the length so that the end is still the same
-                 * given that the initial index has changed */
-                ((MMArray*)((MMWavTabRecorder*)data)->buffer)->length
-                    -= offset;
-            }
-        } /* Otherwise the memory area pointed to by the MMArray should not have changed */
+    /* If the index the recorder got to is greater than the window length of a
+     * Hann window, window the beginning and ends of the file using this window
+     * */
+    if (((MMWavTabRecorder*)data)->currentIndex >= hannWindowTableLength) {
+        int n;
+        for (n = 0; n < hannWindowTableLength/2; n++) {
+            MMWavTab_get(((MMWavTabRecorder*)data)->buffer,n) *= hannWindowTable[n];
+            MMWavTab_get(((MMWavTabRecorder*)data)->buffer,
+                    ((MMArray*)((MMWavTabRecorder*)data)->buffer)->length - n - 1)
+                *= hannWindowTable[hannWindowTableLength - n - 1];
+        }
     }
     /* If the noteDeltaFromBuffer flag is set, compute the tempo from
      * the buffer length, set the playback rate to 1 and set the eventDelta
@@ -319,6 +247,7 @@ void MIDI_synth_record_stop_helper(void *data)
             noteParamSets[0].sustainTime = 1.;
             noteParamSets[0].intermittency = 0;
             noteParamSets[0].offsetBeats = 0;
+            noteParamSets[0].startPoint = 0;
             if (schedulerState == 1) {
                 schedulerState_off_helper((void*)noteOnEventListHead);
                 schedulerState_on_helper();
@@ -585,7 +514,8 @@ void synth_control_setup(void)
     MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x16,
             MIDI_synth_cc_offsetBeats_control,noteParamSets);
     /* The recorder trigger requires the zero crossing search be initialized */
-    ZeroxSearch_init(REC_LOOP_FADE_TIME_S * 2.);
+    HannWindowTable_init(REC_LOOP_FADE_TIME_S * 2.);
+//    ZeroxSearch_init(REC_LOOP_FADE_TIME_S * 2.);
     MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x17,
             MIDI_synth_cc_record_trig, &wtr);
     MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x18,
