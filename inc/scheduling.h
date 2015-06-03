@@ -2,6 +2,7 @@
 #define SCHEDULING_H 
 #include "mm_seq.h"
 #include "mm_dllist.h" 
+#include "mm_sample.h" 
 
 typedef struct __NoteOnEvent NoteOnEvent;
 typedef struct __NoteSchedEvent NoteSchedEvent;
@@ -30,6 +31,7 @@ void set_noteOnEvents_inactive(NoteOnEventListNode *head);
 NoteOnEvent *NoteOnEvent_new(int active,
         int parameterSet,
         int numRepeats,
-        int repeatIndex);
+        int repeatIndex,
+        MMSample currentFade);
 
 #endif /* SCHEDULING_H */

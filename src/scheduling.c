@@ -1,6 +1,5 @@
 #include "scheduling.h" 
 #include "audio_setup.h" 
-#include "mm_sample.h" 
 #include "synth_control.h" 
 #include "wavetables.h" 
 #include "poly_management.h" 
@@ -19,6 +18,7 @@ struct __NoteOnEvent {
     int parameterSet; /* Which set of parameters to use */
     int numRepeats;   /* The number of times to repeat (reschedule) after playing this event */
     int repeatIndex;  /* 0 means the first time this has been played, 1 means the first repeat, etc. */
+    MMSample currentFade; /* a value of 1 means no fade, and this decreases every time if the parameterSet's fadeRate value < 1 */
 };
 
 /* Event that schedules other notes to play. */
@@ -53,7 +53,8 @@ void scheduler_setup(void)
 NoteOnEvent *NoteOnEvent_new(int active,
         int parameterSet,
         int numRepeats,
-        int repeatIndex)
+        int repeatIndex,
+        MMSample currentFade)
 {
     NoteOnEvent *ev = (NoteOnEvent*)malloc(sizeof(NoteOnEvent));
     if (!ev) {
@@ -64,6 +65,7 @@ NoteOnEvent *NoteOnEvent_new(int active,
     ev->parameterSet = parameterSet;
     ev->numRepeats = numRepeats;
     ev->repeatIndex = repeatIndex;
+    ev->currentFade = currentFade;
     return ev;
 }
 
@@ -125,11 +127,15 @@ static void NoteOnEvent_happen(MMEvent *event)
                     NoteOnEvent_new(1,
                         ((NoteOnEvent*)event)->parameterSet,
                         ((NoteOnEvent*)event)->numRepeats - 1,
-                        ((NoteOnEvent*)event)->repeatIndex + 1));
+                        ((NoteOnEvent*)event)->repeatIndex + 1,
+                        ((NoteOnEvent*)event)->currentFade 
+                            * noteParamSets[((NoteOnEvent*)event)->parameterSet].fadeRate));
         }
         MMSample voiceNum = pm_get_next_free_voice_number();
         noteOnEventCount[((NoteOnEvent*)event)->parameterSet] = 0;
-        if (voiceNum != -1 && (noteParamSets[((NoteOnEvent*)event)->parameterSet].amplitude > 0.001)) { 
+        if (voiceNum != -1 && 
+                ((noteParamSets[((NoteOnEvent*)event)->parameterSet].amplitude
+                    * ((NoteOnEvent*)event)->currentFade) > 0.001)) { 
             /* there is a voice free */
             pm_claim_params_from_allocator((void*)&voiceAllocator,
                     (void*)&voiceNum);
@@ -161,7 +167,8 @@ static void NoteOnEvent_happen(MMEvent *event)
             MMTrapEnvedSamplePlayer_noteOn_Rate(
                     &spsps[(int)voiceNum],
                     voiceNum,
-                    noteParamSets[((NoteOnEvent*)event)->parameterSet].amplitude,
+                    noteParamSets[((NoteOnEvent*)event)->parameterSet].amplitude
+                        * ((NoteOnEvent*)event)->currentFade,
                     MMInterpMethod_CUBIC,
                     noteParamSets[((NoteOnEvent*)event)->parameterSet].startPoint
                     * MMArray_get_length(theSound),
@@ -194,7 +201,8 @@ static void NoteSchedEvent_happen(MMEvent *event)
                         NoteOnEvent_new(1,
                             n,
                             noteParamSets[n].numRepeats,
-                            0));
+                            0,
+                            1));
             } else {
                 noteOnEventCount[n] += 1;
             }

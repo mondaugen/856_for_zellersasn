@@ -16,6 +16,7 @@ SynthControlPosMode         posMode;
 //SynthControlEventDeltaMode  eventDeltaMode;
 SynthControlDeltaButtonMode deltaButtonMode;
 SynthControlPitchMode       pitchMode;
+SynthControlGainMode         gainMode;
 
 /* Stuff that shouldn't really be saved */
 int                         noteDeltaFromBuffer;
@@ -24,9 +25,13 @@ int                         currentPreset;
 int                         feedbackState;
 int                         scheduleRecording;
 int                         firstScheduledRecording;
+/* Is the scheduler on or off ? */
+int                         schedulerState;
 
 /* Stuff that might not make it into the final application */
 int16_t                     dryGain;
+
+static void schedulerState_off_helper(void *data);
 
 void autorelease_on_done(MMEnvedSamplePlayer * esp)
 {
@@ -230,6 +235,8 @@ void MIDI_synth_record_stop_helper(void *data)
          *  - the delta time of note 0 is set to 1 beat
          *  - the intermittence of note 0 is set to 0
          *  - the offset of note 0 is set to 0
+         *  If the scheduler is on, clear the pending scheduled notes and
+         *  schedule a note schedule event immediately.
          */
         tempoBPM = 60. * (MMSample)audio_hw_get_sample_rate(NULL) 
             / (MMSample)((MMArray*)recordingSound)->length;
@@ -243,6 +250,12 @@ void MIDI_synth_record_stop_helper(void *data)
             noteParamSets[0].sustainTime = 1.;
             noteParamSets[0].intermittency = 0;
             noteParamSets[0].offsetBeats = 0;
+            if (schedulerState == 1) {
+                schedulerState_off_helper((void*)noteOnEventListHead);
+                /* schedule 1st event which is initially active */
+                schedule_noteSched_event(0, NoteSchedEvent_new(1));
+                schedulerState = 1;
+            }
         }
     }
     /* Swap the playing and the recording sounds */
@@ -304,30 +317,38 @@ static void free_playing_spsp_voice(void *voice_number)
             ((MMEnvedSamplePlayer*)&spsps[*((int*)voice_number)])->envelope);
 }
 
+/* Pass a pointer to the first NoteOnEventListNode */
+static void schedulerState_off_helper(void *data)
+{
+    int n;
+    for (n = 0; n < NUM_NOTE_PARAM_SETS; n++) {
+        /* Disactivate all events of all parameter sets */
+        set_noteOnEvents_inactive(
+                (NoteOnEventListNode*)MMDLList_getNext(
+                    &(((NoteOnEventListNode*)data)[n])));
+        /* Reset the note on event counts */
+        noteOnEventCount[n] = 0;
+    }
+    /* Disactivate the noteSchedEvents */
+    set_noteSchedEvents_inactive(
+            (NoteSchedEventListNode*)MMDLList_getNext(&noteSchedEventListHead));
+    /* Turn off all playing notes */
+    pm_do_for_each_busy_voice(&voiceAllocator,free_playing_spsp_voice);
+    if (scheduleRecording == 1) {
+        /* Discard what was last recorded */
+        wtr.state = MMWavTabRecorderState_STOPPED;
+    }
+    schedulerState = 0;
+}
+
 void MIDI_synth_cc_schedulerState_control(void *data, MIDIMsg *msg)
 {
     if (msg->data[2] > 0) {
         /* schedule 1st event which is initially active */
         schedule_noteSched_event(0, NoteSchedEvent_new(1));
+        schedulerState = 1;
     } else {
-        int n;
-        for (n = 0; n < NUM_NOTE_PARAM_SETS; n++) {
-            /* Disactivate all events of all parameter sets */
-            set_noteOnEvents_inactive(
-                (NoteOnEventListNode*)MMDLList_getNext(
-                    &(((NoteOnEventListNode*)data)[n])));
-            /* Reset the note on event counts */
-            noteOnEventCount[n] = 0;
-        }
-        /* Disactivate the noteSchedEvents */
-        set_noteSchedEvents_inactive(
-                (NoteSchedEventListNode*)MMDLList_getNext(&noteSchedEventListHead));
-        /* Turn off all playing notes */
-        pm_do_for_each_busy_voice(&voiceAllocator,free_playing_spsp_voice);
-        if (scheduleRecording == 1) {
-            /* Discard what was last recorded */
-            wtr.state = MMWavTabRecorderState_STOPPED;
-        }
+        schedulerState_off_helper(data);
     }
     MIDIMsg_free(msg);
 }
@@ -360,6 +381,7 @@ void MIDI_synth_cc_deltaButtonMode_control(void *data, MIDIMsg *msg)
         *((SynthControlDeltaButtonMode*)data) =
             SynthControlDeltaButtonMode_EVENT_DELTA;
     }
+    MIDIMsg_free(msg);
 }
 
 void MIDI_synth_cc_recordScheduling_control(void *data, MIDIMsg *msg)
@@ -383,6 +405,31 @@ void MIDI_synth_cc_recordScheduling_control(void *data, MIDIMsg *msg)
          * previous recording */
         wtr.state = MMWavTabRecorderState_STOPPED;
     }
+    MIDIMsg_free(msg);
+}
+
+void MIDI_synth_cc_gainMode_control(void *data, MIDIMsg *msg)
+{
+    if (msg->data[2]) {
+        *((SynthControlGainMode*)data) = SynthControlGainMode_FADE;
+    } else {
+        *((SynthControlGainMode*)data) = SynthControlGainMode_WET;
+    }
+
+    MIDIMsg_free(msg);
+}
+
+void MIDI_synth_cc_gain_control(void *data, MIDIMsg *msg)
+{
+    switch (gainMode) {
+        case SynthControlGainMode_WET:
+            /* Don't do anything for now */
+            break;
+        case SynthControlGainMode_FADE:
+            ((NoteParamSet*)data)[editingWhichParams].fadeRate
+                = msg->data[2] / 127.;
+    }
+    MIDIMsg_free(msg);
 }
 
 void synth_control_setup(void)
@@ -397,7 +444,8 @@ void synth_control_setup(void)
         .startPoint = 0,        /* startPoint */
         .numRepeats = 0,        /* The number of times repeated */
         .offsetBeats = 0,       /* The amount of beats offset from the beginning of the bar */
-        .intermittency = 0      /* Canonically the number of repeats that are ignored */
+        .intermittency = 0,      /* Canonically the number of repeats that are ignored */
+        .fadeRate      = 0      /* Fade rate doesn't apply to the first parameter set */
     };
     int n;
     for (n = 1; n < NUM_NOTE_PARAM_SETS; n++) {
@@ -407,11 +455,12 @@ void synth_control_setup(void)
             .releaseTime = 0.01,    /* releaseTime */
             .eventDeltaBeats = 1,   /* eventDeltaBeats */
             .pitch = 60,            /* pitch */
-            .amplitude = 0,        /* amplitude */
+            .amplitude = 0,         /* amplitude */
             .startPoint = 0,        /* startPoint */
             .numRepeats = 0,        /* The number of times repeated */
             .offsetBeats = 0,       /* The amount of beats offset from the beginning of the bar */
-            .intermittency = 0      /* Canonically the number of repeats that are ignored */
+            .intermittency = 0,      /* Canonically the number of repeats that are ignored */
+            .fadeRate      = 1      /* Default fade rate of 1 means no fade */
         };
     }
     noteDeltaFromBuffer = 0;
@@ -421,6 +470,7 @@ void synth_control_setup(void)
     deltaButtonMode     = SynthControlDeltaButtonMode_EVENT_DELTA;
     feedbackState       = 0;
     scheduleRecording   = 0;
+    schedulerState      = 0;
     MIDI_Router_addCB(&midiRouter.router, MIDIMSG_NOTE_ON, 1, 
             MIDI_note_on_autorelease_do, spsps);
     MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x0e,
@@ -458,4 +508,8 @@ void synth_control_setup(void)
             MIDI_synth_cc_deltaButtonMode_control,&deltaButtonMode);
     MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x22,
             MIDI_synth_cc_recordScheduling_control,&scheduleRecording);
+    MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x29,
+            MIDI_synth_cc_gainMode_control,&gainMode);
+    MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x0c,
+            MIDI_synth_cc_gain_control,noteParamSets);
 }

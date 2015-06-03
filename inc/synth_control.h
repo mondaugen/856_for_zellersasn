@@ -37,6 +37,11 @@ typedef enum {
     SynthControlPitchMode_LINKTEMPO
 } SynthControlPitchMode;
 
+typedef enum {
+    SynthControlGainMode_WET,
+    SynthControlGainMode_FADE
+} SynthControlGainMode;
+
 typedef struct __NoteParamSet {
     MMSample attackTime;
     MMSample sustainTime;
@@ -57,15 +62,16 @@ typedef struct __NoteParamSet {
                             repeats (it will be played numRepeats/2 times).
                             Of course this number could later stand for some
                             more complicated pattern. */
-
+    MMSample fadeRate;
 } NoteParamSet;
 
 extern NoteParamSet noteParamSets[];
 
-extern SynthControlPosMode         posMode;
+extern SynthControlPosMode          posMode;
 //extern SynthControlEventDeltaMode  eventDeltaMode;
 extern SynthControlDeltaButtonMode  deltaButtonMode;
-extern SynthControlPitchMode       pitchMode;
+extern SynthControlPitchMode        pitchMode;
+extern SynthControlGainMode         gainMode;
 
 extern int16_t  dryGain;
 /* The amount the scheduler is incremented each block */
