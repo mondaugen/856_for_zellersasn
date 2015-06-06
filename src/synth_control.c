@@ -14,10 +14,9 @@
 NoteParamSet                noteParamSets[NUM_NOTE_PARAM_SETS];
 MMSample                    tempoBPM; 
 SynthControlPosMode         posMode;
-//SynthControlEventDeltaMode  eventDeltaMode;
 SynthControlDeltaButtonMode deltaButtonMode;
 SynthControlPitchMode       pitchMode;
-SynthControlGainMode         gainMode;
+SynthControlGainMode        gainMode;
 
 /* Stuff that shouldn't really be saved */
 int                         noteDeltaFromBuffer;
@@ -28,6 +27,8 @@ int                         scheduleRecording;
 int                         firstScheduledRecording;
 /* Is the scheduler on or off ? */
 int                         schedulerState;
+/* What preset would be recalled/stored. First preset is numbered 0. */
+int                         presetNumber;
 
 /* Stuff that might not make it into the final application */
 int16_t                     dryGain;
@@ -363,18 +364,6 @@ void MIDI_synth_cc_editingWhichParams_control(void *data, MIDIMsg *msg)
     MIDIMsg_free(msg);
 }
 
-/*
-void MIDI_synth_cc_eventDeltaMode_control(void *data, MIDIMsg *msg)
-{
-    if (msg->data[2]) {
-        *((SynthControlEventDeltaMode*)data) = SynthControlEventDeltaMode_QUANT;
-    } else {
-        *((SynthControlEventDeltaMode*)data) = SynthControlEventDeltaMode_FREE;
-    }
-    MIDIMsg_free(msg);
-}
-*/
-
 void MIDI_synth_cc_deltaButtonMode_control(void *data, MIDIMsg *msg)
 {
     if (msg->data[2]) {
@@ -442,6 +431,25 @@ void MIDI_synth_cc_posMode_control(void *data, MIDIMsg *msg)
     } else {
         *((SynthControlPosMode*)data) = SynthControlPosMode_ABSOLUTE;
     }
+    MIDIMsg_free(msg);
+}
+
+void MIDI_synth_cc_presetNumber_control(void *data, MIDIMsg *msg)
+{
+    *((int*)data) = (int)(((MMSample)(NUM_SYNTH_CONTROL_PRESETS - 1))
+                        * msg->data[2] / 127.);
+    MIDIMsg_free(msg);
+}
+
+void MIDI_synth_cc_presetStore_control(void *data, MIDIMsg *msg)
+{
+    sc_presets_store(*((int*)data));
+    MIDIMsg_free(msg);
+}
+
+void MIDI_synth_cc_presetRecall_control(void *data, MIDIMsg *msg)
+{
+    sc_presets_recall(*((int*)data));
     MIDIMsg_free(msg);
 }
 
@@ -538,4 +546,10 @@ void synth_control_setup(void)
             MIDI_synth_cc_gain_control,noteParamSets);
     MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x1d,
             MIDI_synth_cc_posMode_control,&posMode);
+    MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x04,
+            MIDI_synth_cc_presetNumber_control,&presetNumber);
+    MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x25,
+            MIDI_synth_cc_presetStore_control,&presetNumber);
+    MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x26,
+            MIDI_synth_cc_presetRecall_control,&presetNumber);
 }

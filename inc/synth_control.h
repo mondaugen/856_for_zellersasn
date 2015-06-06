@@ -3,6 +3,7 @@
 #include "mm_time.h" 
 #include "signal_chain.h" 
 #include <stdint.h> 
+#include "synth_control_presets.h" 
 
 /* The amount of fade at the end of the recording in seconds */
 #define REC_LOOP_FADE_TIME_S 0.025 
@@ -66,17 +67,17 @@ typedef struct __NoteParamSet {
     MMSample positionStride; /* If stride enabled, how much the position head is advanced each playback */
 } NoteParamSet;
 
-extern NoteParamSet noteParamSets[];
-
+/* Stuff that could be saved in a preset */
+extern NoteParamSet                 noteParamSets[];
+extern MMSample                     tempoBPM; 
 extern SynthControlPosMode          posMode;
-//extern SynthControlEventDeltaMode  eventDeltaMode;
 extern SynthControlDeltaButtonMode  deltaButtonMode;
 extern SynthControlPitchMode        pitchMode;
 extern SynthControlGainMode         gainMode;
+extern int                          schedulerState;
 
 extern int16_t  dryGain;
 /* The amount the scheduler is incremented each block */
-extern MMSample tempoBPM; 
 extern int                         scheduleRecording;
 extern int                         firstScheduledRecording;
 

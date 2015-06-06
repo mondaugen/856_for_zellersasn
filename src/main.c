@@ -55,6 +55,7 @@ int main (int argc, char **argv)
     if (argc == 4) {
         SoundSample_init(argv[3]);
     }
+    sc_presets_init("/tmp/zn_presets.dat");
     signal_chain_setup();
 //    poly_management_setup();
     synth_control_setup();
