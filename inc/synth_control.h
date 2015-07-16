@@ -81,6 +81,7 @@ extern int16_t  dryGain;
 extern int                         scheduleRecording;
 extern int                         firstScheduledRecording;
 
+void synth_control_setup(void);
 void autorelease_on_done(MMEnvedSamplePlayer * esp);
 void MIDI_synth_record_stop_helper(void *data);
 void MIDI_synth_record_start_helper(void *data);

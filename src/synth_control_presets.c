@@ -17,16 +17,18 @@ static SCPreset scpresets[NUM_SYNTH_CONTROL_PRESETS];
 
 /* File is a file in which to store presets. This will obviously depend on the
  * implementation. */
-void sc_presets_init(char *file)
+void sc_presets_init(void)
 {
-    presets_lowlevel_init(&scpresets_handle,(void*)file);
+    /* (The flash implementation requires no initialization) */
+    presets_lowlevel_init(&scpresets_handle,NULL);
     presets_lowlevel_read(scpresets_handle,(void*)scpresets,
             sizeof(scpresets),NULL);
 }
 
 void sc_presets_store(int npreset)
 {
-    memcpy(&scpresets[npreset].noteParamSets,noteParamSets,sizeof(NoteParamSet)*NUM_NOTE_PARAM_SETS);
+    memcpy(&scpresets[npreset].noteParamSets,noteParamSets,
+            sizeof(NoteParamSet)*NUM_NOTE_PARAM_SETS);
     scpresets[npreset].tempoBPM = tempoBPM; 
     scpresets[npreset].posMode = posMode;
     scpresets[npreset].deltaButtonMode = deltaButtonMode;

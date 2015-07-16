@@ -1,7 +1,6 @@
 #ifndef MIDI_SETUP_H
 #define MIDI_SETUP_H 
-#include "alsa_midi_lowlevel.h"
-#include "midi_hw.h" 
+#include "uart_midi_lowlevel.h"
 #include "mm_midirouter_standard.h" 
 
 extern MIDI_Router_Standard midiRouter;

@@ -1,1 +1,1 @@
-First prototype using ALSA.
+First prototype using the STM32F429DISCOVERY daughter card.

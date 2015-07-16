@@ -1,7 +1,6 @@
 #ifndef AUDIO_SETUP_H
 #define AUDIO_SETUP_H 
-#include "alsa_lowlevel.h"
-#include "audio_hw.h" 
+#include "i2s_lowlevel.h"
 
 #define audio_start() audio_hw_start(NULL) 
 int audio_setup(void *data);

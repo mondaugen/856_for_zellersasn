@@ -28,6 +28,10 @@ void schedule_noteOn_event(MMTime timeFromNow, NoteOnEvent *ev);
 void scheduler_incTimeAndDoEvents(void);
 void set_noteOnEvents_active(NoteOnEventListNode *head);
 void set_noteOnEvents_inactive(NoteOnEventListNode *head);
+void set_noteSchedEvents_active(NoteSchedEventListNode *head);
+void set_noteSchedEvents_inactive(NoteSchedEventListNode *head);
+void schedule_noteSched_event(uint64_t timeFromNow, NoteSchedEvent *ev);
+NoteSchedEvent *NoteSchedEvent_new(int active);
 NoteOnEvent *NoteOnEvent_new(int active,
         int parameterSet,
         int numRepeats,

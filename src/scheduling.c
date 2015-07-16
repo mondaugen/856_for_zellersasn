@@ -4,6 +4,7 @@
 #include "wavetables.h" 
 #include "poly_management.h" 
 #include "signal_chain.h" 
+#include "mm_common_calcs.h" 
 #include <math.h> 
 
 /* The scheduler is set up so that the 32 LSB of the time are fractional part 
@@ -132,7 +133,7 @@ static void NoteOnEvent_happen(MMEvent *event)
         if (((NoteOnEvent*)event)->numRepeats > 0) {
             schedule_noteOn_event(
                     noteParamSets[((NoteOnEvent*)event)->parameterSet].eventDeltaBeats
-                    * 0xffffffff,
+                    * 0xffffffffULL,
                     NoteOnEvent_new(1,
                         ((NoteOnEvent*)event)->parameterSet,
                         ((NoteOnEvent*)event)->numRepeats - 1,
@@ -159,47 +160,46 @@ static void NoteOnEvent_happen(MMEvent *event)
                     (void*)&voiceNum);
             ((MMEnvedSamplePlayer*)&spsps[(int)voiceNum])->onDone =
                 autorelease_on_done;
-            MMSample sustainTime, attackTime, releaseTime;
+            MMTrapEnvedSamplePlayer_noteOnStruct no;
+            no.note = voiceNum;
+            no.amplitude =
+                (noteParamSets[((NoteOnEvent*)event)->parameterSet].amplitude
+                    * ((NoteOnEvent*)event)->currentFade) > 1. ? 
+                    1. :
+                    (noteParamSets[((NoteOnEvent*)event)->parameterSet].amplitude
+                            * ((NoteOnEvent*)event)->currentFade);
+            no.index = ((NoteOnEvent*)event)->currentPosition
+                        * MMArray_get_length(theSound.wavtab);
             /* sustainTime is the length of the audio, times
              * noteParamSets[parameterSet].sustainTime *
              * length_of_sound_seconds * (1 -
              * noteParamSets[parameterSet].attackTime -
              * noteParamSets[parametersSet].releaseTime) */
-            sustainTime =
+            no.sustainTime =
                 noteParamSets[((NoteOnEvent*)event)->parameterSet].sustainTime
                 * (MMSample)MMArray_get_length(theSound.wavtab)
                 / (MMSample)audio_hw_get_sample_rate(NULL)
                 * (1.
                         - noteParamSets[((NoteOnEvent*)event)->parameterSet].attackTime
                         - noteParamSets[((NoteOnEvent*)event)->parameterSet].releaseTime);
-            attackTime = 
+            no.attackTime = 
                 noteParamSets[((NoteOnEvent*)event)->parameterSet].sustainTime
                 * (MMSample)MMArray_get_length(theSound.wavtab)
                 / (MMSample)audio_hw_get_sample_rate(NULL)
                 * noteParamSets[((NoteOnEvent*)event)->parameterSet].attackTime;
-            releaseTime = 
+            no.releaseTime = 
                 noteParamSets[((NoteOnEvent*)event)->parameterSet].sustainTime
                 * (MMSample)MMArray_get_length(theSound.wavtab)
                 / (MMSample)audio_hw_get_sample_rate(NULL)
                 * noteParamSets[((NoteOnEvent*)event)->parameterSet].releaseTime;
+            no.samples = theSound.wavtab;
+            /* 9 is added because MMCC_et12_rate considers pitch 69 to be a note of no
+             * transposition. In this we consider middle C to be a note of no
+             * transposition, so we add 9 (middle C is note 60) */
+            no.rate = MMCC_et12_rate(
+                    noteParamSets[((NoteOnEvent*)event)->parameterSet].pitch + 9);
             MMTrapEnvedSamplePlayer_noteOn_Rate(
-                    &spsps[(int)voiceNum],
-                    voiceNum,
-                    (noteParamSets[((NoteOnEvent*)event)->parameterSet].amplitude
-                        * ((NoteOnEvent*)event)->currentFade) > 1. ? 
-                        1. :
-                        (noteParamSets[((NoteOnEvent*)event)->parameterSet].amplitude
-                            * ((NoteOnEvent*)event)->currentFade),
-                    MMInterpMethod_CUBIC,
-                    ((NoteOnEvent*)event)->currentPosition
-                        * MMArray_get_length(theSound.wavtab),
-                    attackTime,
-                    releaseTime,
-                    sustainTime,
-                    theSound.wavtab, 
-                    1,
-                    pow(2.,
-                        (noteParamSets[((NoteOnEvent*)event)->parameterSet].pitch-60)/12.));
+                    &spsps[(int)voiceNum], &no);
         }
     }
     MMDLList_remove((MMDLList*)((NoteOnEvent*)event)->parent);
@@ -218,7 +218,7 @@ static void NoteSchedEvent_happen(MMEvent *event)
                 noteOnEventCount[n] = 0;
                 schedule_noteOn_event(
                         noteParamSets[n].offsetBeats
-                        * 0xffffffff,
+                        * 0xffffffffULL,
                         NoteOnEvent_new(1,
                             n,
                             noteParamSets[n].numRepeats,
@@ -231,7 +231,7 @@ static void NoteSchedEvent_happen(MMEvent *event)
         }
         /* Schedule next noteSchedEvent using note 0's eventDeltaBeats */
         schedule_noteSched_event(noteParamSets[0].eventDeltaBeats
-                * 0xffffffff,
+                * 0xffffffffULL,
                 NoteSchedEvent_new(1));
         /* If scheduled recording enabled, stop the previous recording and start
          * a new one. When scheduled recording is disabled, it turns off
@@ -259,7 +259,7 @@ void scheduler_incTimeAndDoEvents(void)
 {
     MMSeq_incTime(sequence,(tempoBPM / 60.) 
             / ((MMSample)audio_hw_get_sample_rate(NULL) 
-                / (MMSample)audio_hw_get_block_size(NULL)) * 0xffffffff);
+                / (MMSample)audio_hw_get_block_size(NULL)) * 0xffffffffULL);
     MMSeq_doAllCurrentEvents(sequence);
 }
 

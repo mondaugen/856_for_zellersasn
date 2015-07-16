@@ -1,48 +1,59 @@
 #include "signal_chain.h" 
 #include "wavetables.h" 
 #include "audio_setup.h" 
+#include <string.h> 
 
 MMBus *inBus, *outBus, *fbBus;
 MMSigChain sigChain;
 MMTrapEnvedSamplePlayer spsps[NUM_NOTES];
 MMWavTabRecorder wtr;
 MMBusSplitter fbBusSplitter;
-/* Insert the fbBusSplitter after this node to turn it off */
-MMSigProc *fbOffNode; 
+/* TODO: Because we aren't using the sigConst anymore to zero the bus, what we
+ * have to do is remove the fbBusSplitter from the signal chain and zero its
+ * bus. */
 /* Insert the fbBusSplitter after this node to turn it on */
 MMSigProc *fbOnNode;
 
 static MMBusMerger fbBusMerger;
-static MMSigConst  sigConstTop;
 
 void signal_chain_setup(void)
 {
     /* Allocate space for the busses */
     /* The bus the signal chain is reading */
-    inBus = MMBus_new(audio_hw_get_block_size(NULL), 
-            audio_hw_get_num_input_channels(NULL));
+    inBus = MMBus_new(audio_hw_get_block_size(NULL),1);
     /* The bus the signal chain is writing */
-    outBus = MMBus_new(audio_hw_get_block_size(NULL), 
-            audio_hw_get_num_output_channels(NULL));
+    outBus = MMBus_new(audio_hw_get_block_size(NULL),1);
     /* A bus to feed the output back to the input so that it can be recorded */
-    fbBus = MMBus_new(audio_hw_get_block_size(NULL), 
-            audio_hw_get_num_output_channels(NULL));
+    fbBus = MMBus_new(audio_hw_get_block_size(NULL),1);
+    /* Set the bus to contain all 0s initially */
+    memset(fbBus->data,0,sizeof(MMSample)*fbBus->size*fbBus->channels);
     /* Initializes the signal chain that signal processors are put in to */
     MMSigChain_init(&sigChain);
-    /* A constant that zeros the bus each iteration */
-    MMSigConst_init(&sigConstTop,outBus,0,MMSigConst_doSum_FALSE);
-    /* put sig constant at the top of the sig chain */
-    MMSigProc_insertAfter(&sigChain.sigProcs,&sigConstTop);
-    fbOffNode = (MMSigProc*)&sigConstTop;
     int i;
-    for (i = 0; i < NUM_NOTES; i++) {
-        /* Initialize sample player */
-        MMTrapEnvedSamplePlayer_init(&spsps[i], outBus, 
-                audio_hw_get_block_size(NULL), 
-                1. / (MMSample)audio_hw_get_sample_rate(NULL));
+    /* The last (NUM_NOTES-1) sample players sum into the bus, the first one
+     * coming right at the top of the signal chain writes straight into the bus
+     * */
+    MMTrapEnvedSamplePlayerInitStruct tespinit;
+    ((MMEnvedSamplePlayerInitStruct*)&tespinit)->outBus
+        = outBus;
+    ((MMEnvedSamplePlayerInitStruct*)&tespinit)->interp
+        = MMInterpMethod_CUBIC;
+    ((MMEnvedSamplePlayerInitStruct*)&tespinit)->tickType
+        = MMEnvedSamplePlayerTickType_SUM;
+    ((MMEnvedSamplePlayerInitStruct*)&tespinit)->internalBusSize
+        = audio_hw_get_block_size(NULL); 
+    tespinit.tickPeriod = 1. / (MMSample)audio_hw_get_sample_rate(NULL);
+    for (i = 0; i < (NUM_NOTES-1); i++) {
+        MMTrapEnvedSamplePlayer_init(&spsps[i],&tespinit);
         /* insert in signal chain after sig const*/
-        MMSigProc_insertAfter(&sigConstTop, &spsps[i]);
+        MMSigProc_insertAfter(&sigChain.sigProcs, &spsps[i]);
     }
+    /* Initialize sample player */
+    ((MMEnvedSamplePlayerInitStruct*)&tespinit)->tickType
+        = MMEnvedSamplePlayerTickType_NOSUM;
+    MMTrapEnvedSamplePlayer_init(&spsps[i],&tespinit);
+    /* insert in signal chain after sig const*/
+    MMSigProc_insertAfter(&sigChain.sigProcs, &spsps[i]);
     /* The first spsps is the last one in the chain and so this is where you
      * want to write to the feedback bus */
     fbOnNode = (MMSigProc*)&spsps[0];
@@ -50,8 +61,8 @@ void signal_chain_setup(void)
      * bus splitter  will go after the last sampleplayer. When feedback is off,
      * it goes after the sig const and therefore only receives 0s */
     MMBusSplitter_init(&fbBusSplitter, outBus, fbBus);
-    /* Initially, 0s are written to the fbBus (it is off) */
-    MMSigProc_insertAfter(fbOffNode, &fbBusSplitter);
+    /* Initially, 0s are written to the fbBus (it is not inserted into the
+     * signal chain) */
     /* Make a recorder */
     MMWavTabRecorder_init(&wtr);
     wtr.buffer = recordingSound.wavtab;

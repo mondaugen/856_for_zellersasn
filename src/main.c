@@ -3,59 +3,49 @@
 #include "midi_setup.h" 
 #include "wavetables.h" 
 #include "signal_chain.h" 
-#include <unistd.h> 
+#include "synth_control.h" 
+#include "synth_control_presets.h" 
+#include "scheduling.h" 
 
 void play_note_rate(int midinote, float rate)
 {
+    MMTrapEnvedSamplePlayer_noteOnStruct no;
+    no.note = midinote;
+    no.amplitude = 1;
+    no.index = 0;
+    no.attackTime = 1.;
+    no.releaseTime = 4.;
+    no.sustainTime = 10.;
+    no.samples = theSound.wavtab;
+    no.rate = rate;
     MMTrapEnvedSamplePlayer_noteOn_Rate(
-        &spsps[0],
-        midinote,
-        1,
-        MMInterpMethod_CUBIC,
-        0,
-        1.,
-        4.,
-        10.,
-        theSound.wavtab,
-        1,
-        rate);
+        &spsps[0],&no);
 }
 
 void play_note(int midinote)
 {
+    MMTrapEnvedSamplePlayer_noteOnStruct no;
+    no.note = midinote;
+    no.amplitude = 1;
+    no.index = 0;
+    no.attackTime = 1.;
+    no.releaseTime = 4.;
+    no.sustainTime = 10.;
+    no.samples = theSound.wavtab;
     MMTrapEnvedSamplePlayer_noteOn(
-        &spsps[0],
-        midinote,
-        1,
-        MMInterpMethod_CUBIC,
-        0,
-        1.,
-        4.,
-        10.,
-        theSound.wavtab,
-        1);
+        &spsps[0],&no);
 }
 
-int main (int argc, char **argv)
+int main (void)
 {
-    if ((argc != 3) && (argc != 4)) {
-        fprintf(stderr,
-                "Arguments are %s audio-device midi-input-port\n",argv[0]);
-        return(-1);
-    }
-    if (audio_setup(argv[1])) {
+    if (audio_setup(NULL)) {
         THROW_ERR("Error setting up audio.");
     }
-    if (midi_setup(argv[2])) {
+    if (midi_setup(NULL)) {
         THROW_ERR("Error setting up MIDI.");
     }
-    if (argc == 3) {
-        SampleTable_init();
-    }
-    if (argc == 4) {
-        SoundSample_init(argv[3]);
-    }
-    sc_presets_init("/tmp/zn_presets.dat");
+    SampleTable_init();
+    sc_presets_init();
     signal_chain_setup();
 //    poly_management_setup();
     synth_control_setup();

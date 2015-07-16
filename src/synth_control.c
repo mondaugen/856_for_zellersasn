@@ -9,6 +9,8 @@
 #include "quantization_tables.h" 
 #include "env_map.h" 
 #include "mm_mark_zerox.h" 
+#include <string.h> 
+#include "mm_common_calcs.h" 
 
 /* Stuff that could be saved */
 NoteParamSet                noteParamSets[NUM_NOTE_PARAM_SETS];
@@ -53,26 +55,29 @@ void MIDI_note_on_autorelease_do(void *data, MIDIMsg *msg)
     }
     pm_claim_params_from_allocator((void*)&voiceAllocator,(void*)&voiceNum);
     ((MMEnvedSamplePlayer*)&spsps[(int)voiceNum])->onDone = autorelease_on_done;
+    MMTrapEnvedSamplePlayer_noteOnStruct no;
+    no.note = voiceNum;
+    no.amplitude = msg->data[2]/127.;
+    no.index = noteParamSets[0].startPoint * MMArray_get_length(theSound.wavtab);
+    no.attackTime = noteParamSets[0].attackTime;
+    no.releaseTime = noteParamSets[0].releaseTime;
+    no.sustainTime = ((noteParamSets[0].sustainTime *
+        (MMSample)MMArray_get_length(theSound.wavtab) 
+          / (MMSample)audio_hw_get_sample_rate(NULL) 
+          - noteParamSets[0].attackTime 
+          - noteParamSets[0].releaseTime) < 0) ? 
+            0 :
+            (noteParamSets[0].sustainTime *
+             (MMSample)MMArray_get_length(theSound.wavtab) /
+             (MMSample)audio_hw_get_sample_rate(NULL)
+             - noteParamSets[0].attackTime - noteParamSets[0].releaseTime);
+    no.samples = theSound.wavtab;
+    /* 9 is added because MMCC_et12_rate considers pitch 69 to be a note of no
+     * transposition. In this we consider middle C to be a note of no
+     * transposition, so we add 9 (middle C is note 60) */
+    no.rate = MMCC_et12_rate(msg->data[1] + 9);
     MMTrapEnvedSamplePlayer_noteOn_Rate(
-            &spsps[(int)voiceNum],
-            voiceNum,
-            msg->data[2]/127.,
-            MMInterpMethod_CUBIC,
-            noteParamSets[0].startPoint * MMArray_get_length(theSound.wavtab),
-            noteParamSets[0].attackTime,
-            noteParamSets[0].releaseTime,
-            ((noteParamSets[0].sustainTime * (MMSample)MMArray_get_length(theSound.wavtab) 
-                / (MMSample)audio_hw_get_sample_rate(NULL) 
-                - noteParamSets[0].attackTime 
-                - noteParamSets[0].releaseTime) < 0) ? 
-                0 :
-                (noteParamSets[0].sustainTime *
-                (MMSample)MMArray_get_length(theSound.wavtab) /
-                (MMSample)audio_hw_get_sample_rate(NULL)
-                    - noteParamSets[0].attackTime - noteParamSets[0].releaseTime),
-            theSound.wavtab, 
-            1,
-            pow(2.,(msg->data[1]-60)/12.));
+            &spsps[(int)voiceNum], &no);
     MIDIMsg_free(msg);
 }
 
@@ -291,14 +296,17 @@ void MIDI_synth_cc_record_trig(void *data, MIDIMsg *msg)
 void MIDI_synth_cc_feedback_control(void *data, MIDIMsg *msg)
 {
     if (msg->data[2] > 0) {
-        /* Move fbBusBusSplitter to onNode */
-        MMSigProc_remove(data);
+        /* Move fbBusSplitter to onNode */
         MMSigProc_insertAfter(fbOnNode,data);
         feedbackState = 1;
     } else {
-        /* Move fbBusBusSplitter to offNode */
+        /* Move fbBusSplitter to offNode */
         MMSigProc_remove(data);
-        MMSigProc_insertAfter(fbOffNode,data);
+        /* Zero the feedback bus */
+        memset(((MMBusSplitter*)data)->destBus->data,0,
+                sizeof(MMSample)
+                *((MMBusSplitter*)data)->destBus->size
+                *((MMBusSplitter*)data)->destBus->channels);
         feedbackState = 0;
     }
     MIDIMsg_free(msg);
