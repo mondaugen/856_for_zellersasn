@@ -1,4 +1,4 @@
-OPTIMIZE				 = -O0
+OPTIMIZE				 ?= -O0
 BIN 					 = main.elf
 MMMIDI_PATH				 = ../mmmidi
 MM_DSP_PATH				 = ../mm_dsp

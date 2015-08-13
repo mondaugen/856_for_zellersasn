@@ -55,6 +55,11 @@ void scheduler_setup(void)
     int n;
     for (n = 0; n < NUM_NOTE_PARAM_SETS; n++) {
         noteOnEventCount[n] = 0;
+        /* Initialize first list member as if it were a list item because the
+         * program should never call on its child. Nodes whose children are
+         * called are appended to this list node. */
+        MMDLList_init(&noteOnEventListHead[n]);
+        MMDLList_init(&noteSchedEventListHead);
     }
 }
 
