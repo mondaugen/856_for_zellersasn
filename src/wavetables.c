@@ -20,9 +20,31 @@ WavTabAreaPair recordingSound;
 MMSample     *hannWindowTable;
 size_t       hannWindowTableLength;
 size_t       zeroxSearchMaxLength;
+#ifdef WAVETABLES_IN_SRAM
+ #define SRAM_WAVETABLE_SIZE 1000 
+    MMSample sramSampleTableData[NUM_SAMPLE_TABLES*SRAM_WAVETABLE_SIZE];
+#endif /* WAVETABLES_IN_SRAM */
+
 
 void SampleTable_init(void)
 {
+#ifdef WAVETABLES_IN_SRAM
+    int n;
+    for (n = 0; n < NUM_SAMPLE_TABLES; n++) {
+        sampleTable[n].samplerate = audio_hw_get_sample_rate(NULL);
+        ((MMArray*)&sampleTable[n])->length = SRAM_WAVETABLE_SIZE;
+        sampleTableAreas[n] = ((MMSample*)sramSampleTableData)
+            + ((MMArray*)&sampleTable[n])->length*n;
+        ((MMArray*)&sampleTable[n])->data = sampleTableAreas[n];
+        memset(((MMArray*)&sampleTable[n])->data,0,
+                sizeof(MMSample) * ((MMArray*)&sampleTable[n])->length);
+    }
+    theSound.wavtab = &sampleTable[0];
+    theSound.area = sampleTableAreas[0];
+    recordingSound.wavtab = &sampleTable[1];
+    recordingSound.area   = sampleTableAreas[1];
+    soundSampleMaxLength = SRAM_WAVETABLE_SIZE;
+#else
     int n;
     for (n = 0; n < NUM_SAMPLE_TABLES; n++) {
         sampleTable[n].samplerate = audio_hw_get_sample_rate(NULL);
@@ -45,6 +67,7 @@ void SampleTable_init(void)
     recordingSound.area   = sampleTableAreas[1];
     soundSampleMaxLength = SAMPLE_TABLE_LENGTH_SEC 
         * audio_hw_get_sample_rate(NULL);
+#endif /* WAVETABLES_IN_SRAM */
 }
 
 void HannWindowTable_init(MMSample len_sec)

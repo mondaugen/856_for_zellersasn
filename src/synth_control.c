@@ -507,6 +507,7 @@ void synth_control_setup(void)
     dryGain             = 0;
     editingWhichParams  = 0;
     tempoBPM            = 120;
+    posMode             = SynthControlPosMode_ABSOLUTE;
     deltaButtonMode     = SynthControlDeltaButtonMode_EVENT_DELTA;
     feedbackState       = 0;
     scheduleRecording   = 0;

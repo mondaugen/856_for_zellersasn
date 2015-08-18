@@ -38,6 +38,14 @@ void play_note(int midinote)
 
 int main (void)
 {
+#ifdef AUDIO_HW_TEST_THROUGHPUT 
+    if (audio_setup(NULL)) {
+        THROW_ERR("Error setting up audio.");
+    }
+    audio_start();
+    while(1) {
+    }
+#else
     if (audio_setup(NULL)) {
         THROW_ERR("Error setting up audio.");
     }
@@ -53,5 +61,6 @@ int main (void)
     audio_start();
     while(1) {
     }
+#endif /* AUDIO_HW_TEST_THROUGHPUT */
     return(0);
 }

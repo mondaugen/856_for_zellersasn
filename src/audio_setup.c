@@ -20,6 +20,13 @@ int audio_setup(void *data)
 
 void audio_hw_io(audio_hw_io_t *params)
 {
+#ifdef AUDIO_HW_TEST_THROUGHPUT
+    int n;
+    for (n = 0; n < params->length; n++) {
+        params->out[n*params->nchans_out] =
+            params->in[n*params->nchans_in];
+    }
+#else
     /* Process MIDI once every audioblock */
     midi_hw_process_input(NULL);
     /* Increment scheduler and do pending events */
@@ -28,10 +35,6 @@ void audio_hw_io(audio_hw_io_t *params)
     MMSigProc_tick(&sigChain);
     int n;
     for (n = 0; n < params->length; n++) {
-#ifdef AUDIO_HW_TEST_THROUGHPUT
-        params->out[n*params->nchans_out] =
-            params->in[n*params->nchans_in];
-#else
         /* Only the first channel is written/read */
         params->out[n*params->nchans_out] =
             outBus->data[outBus->channels*n] * AUDIO_HW_SAMPLE_T_MAX;
@@ -43,13 +46,6 @@ void audio_hw_io(audio_hw_io_t *params)
             += ((int16_t)((((MMSample)(params->in[n*params->nchans_in]))
                             /AUDIO_HW_SAMPLE_T_MAX) * AUDIO_HW_SAMPLE_T_MAX))
             * dryGain / 127;
-#endif /* AUDIO_HW_TEST_THROUGHPUT
-        /* The rest of the channels are 0 */
-        /* 
-        for (c = 1; c < params->nchans_out; c++) {
-            params->out[n*params->nchans_out + c] = 0;
-            inBus->data[n*params->nchans_out + c] = 0;
-        }
-        */
     }
+#endif /* AUDIO_HW_TEST_THROUGHPUT */
 }
