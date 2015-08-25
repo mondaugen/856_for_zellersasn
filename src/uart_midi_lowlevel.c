@@ -3,8 +3,6 @@
 
 static char midiBuffer[MIDI_BUF_SIZE];
 static int MIDIlastIndex = 0;
-/* This could be used to throttle midi processing, currently not used though */
-static int MIDITimeToProcessBuffer = 1;
 
 midi_hw_err_t midi_hw_setup(midi_hw_setup_t *params)
 {

@@ -528,11 +528,14 @@ void Reset_Handler(void)
 {
     extern char _sdata, _sidata, _edata,
            _ssmall_data, _sismall_data, _esmall_data,
+           _sbig_data, _sibig_data, _ebig_data,
            _sbss, _ebss;
     /* Copy data section from flash to RAM */
     memcpy(&_sdata,&_sidata,(&_edata)-(&_sdata));
     /* Copy small_data section from flash to RAM */
     memcpy(&_ssmall_data,&_sismall_data,(&_esmall_data)-(&_ssmall_data));
+    /* Copy big_data section from flash to RAM */
+    memcpy(&_sbig_data,&_sibig_data,(&_ebig_data)-(&_sbig_data));
     /* Zero-fill the .bss section */
     memset(&_sbss,0,(&_ebss)-(&_sbss));
     /* Initialize system */

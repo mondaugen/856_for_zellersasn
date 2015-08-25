@@ -64,6 +64,16 @@ SECTIONS
         . = ALIGN(4);
         _esmall_data = .;
     } >sram2 AT> flash
+    _sibig_data = LOADADDR(.big_data);
+    .big_data :
+    {
+        . = ALIGN(4);
+        _sbig_data = .;
+        *(.big_data)
+        *(.big_data*)
+        . = ALIGN(4);
+        _ebig_data = .;
+    } >sram3 AT> flash
     .bss :
     {
         . = ALIGN(4);

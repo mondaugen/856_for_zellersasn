@@ -205,6 +205,11 @@ void MIDI_synth_cc_noteDeltaFromBuffer_control(void *data, MIDIMsg *msg)
 
 void MIDI_synth_record_stop_helper(void *data)
 {
+    /* Only do something if it was recording */
+    if (((MMWavTabRecorder*)data)->state == MMWavTabRecorderState_STOPPED) {
+        return;
+    }
+
     /* Set the length to the index the recorder got to */
     ((MMArray*)((MMWavTabRecorder*)data)->buffer)->length =
         ((MMWavTabRecorder*)data)->currentIndex;

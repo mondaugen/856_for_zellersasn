@@ -59,8 +59,8 @@ void scheduler_setup(void)
          * program should never call on its child. Nodes whose children are
          * called are appended to this list node. */
         MMDLList_init(&noteOnEventListHead[n]);
-        MMDLList_init(&noteSchedEventListHead);
     }
+    MMDLList_init(&noteSchedEventListHead);
 }
 
 NoteOnEvent *NoteOnEvent_new(int active,

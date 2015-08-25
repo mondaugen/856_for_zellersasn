@@ -5,6 +5,10 @@
 #include "audio_hw.h" 
 #include <string.h>
 
+#ifdef CODEC_DMA_HARDFAULT_ON_I2S_ERR
+extern void HardFault_Handler(void);
+#endif
+
 /* Where data to be transferred to CODEC reside */
 static int16_t codecDmaTxBuf[CODEC_DMA_BUF_LEN * 2]
     __attribute__((section(".small_data"),aligned(1024)));
@@ -71,8 +75,11 @@ static int __attribute__((optimize("O0"))) i2s_clock_setup(uint32_t sr)
     /* see stm32f4 reference manual, p. 894 */
     switch(sr) {
         case 44100:
+            /* Set I2SN and I2SR prescalars */
             RCC->PLLI2SCFGR = (271 << 6) | (2 << 28);
+            /* Enable Master clock and set ODD bit and I2SDIV */
             SPI3->I2SPR     = ((0x2 << 8) | 0x6); // 44.1Khz
+            /* Enable master clock for extended block. */
             I2S3ext->I2SPR  = ((0x2 << 8) | 0x6);
             break;
         case 16000:
@@ -97,6 +104,14 @@ static int __attribute__((optimize("O0"))) i2s_clock_setup(uint32_t sr)
 
     return 0;
 }
+
+static void __attribute__((optimize("O0"))) i2s_error_setup(void)
+{
+    SPI3->CR2 |= SPI_CR2_ERRIE;
+    I2S3ext->CR2 |= SPI_CR2_ERRIE;
+    NVIC_EnableIRQ(SPI3_IRQn);
+}
+
 
 /* Pass a pointer to a uint32_t containing the desired sampling rate. */
 audio_hw_err_t audio_hw_setup(audio_hw_setup_t *params)
@@ -157,12 +172,17 @@ audio_hw_err_t audio_hw_setup(audio_hw_setup_t *params)
     /* Priority VERY HIGH */
     DMA1_Stream7->CR &= ~DMA_SxCR_PL;
     DMA1_Stream7->CR |= 0x3 << 16;
+#ifdef CODEC_DMA_DIRECT_MODE
+    DMA1_Stream7->FCR &= ~DMA_SxFCR_DMDIS;
+#else
+    DMA1_Stream7->FCR |= DMA_SxFCR_DMDIS;
     /* PBURST one burst of 8 beats */
     DMA1_Stream7->CR &= ~DMA_SxCR_PBURST;
     DMA1_Stream7->CR |= 0x2 << 21;
     /* MBURST one burst of 8 beats */
     DMA1_Stream7->CR &= ~DMA_SxCR_MBURST;
     DMA1_Stream7->CR |= 0x2 << 23;
+#endif /* CODEC_DMA_DIRECT_MODE */
     /* No Double Buffer Mode (we do this ourselves with the HALF and FULL
      * transfer) */
     DMA1_Stream7->CR &= ~DMA_SxCR_DBM;
@@ -184,14 +204,15 @@ audio_hw_err_t audio_hw_setup(audio_hw_setup_t *params)
     /* DMA is the flow controller (DMA will keep transferring items from memory
      * to peripheral until disabled) */
     DMA1_Stream7->CR &= ~DMA_SxCR_PFCTRL;
-    /* Enable interrupt on transfer complete */
-    DMA1_Stream7->CR |= DMA_SxCR_TCIE;
-    /* Enable interrupt on transfer half complete */
-    DMA1_Stream7->CR |= DMA_SxCR_HTIE;
-    /* No interrupt on transfer error */
-    DMA1_Stream7->CR &= ~DMA_SxCR_TEIE;
-    /* No interrupt on direct mode error */
-    DMA1_Stream7->CR &= ~DMA_SxCR_DMEIE;
+    // /* Only trigger interrupt on RX line */
+    ///* Enable interrupt on transfer complete */
+    //DMA1_Stream7->CR |= DMA_SxCR_TCIE;
+    ///* Enable interrupt on transfer half complete */
+    //DMA1_Stream7->CR |= DMA_SxCR_HTIE;
+    /* Interrupt on transfer error */
+    DMA1_Stream7->CR |= DMA_SxCR_TEIE;
+    /* Interrupt on direct mode error */
+    DMA1_Stream7->CR |= DMA_SxCR_DMEIE;
     
     /* Set up peripheral to memory DMA */
     /* Disable DMA peripheral */
@@ -214,12 +235,17 @@ audio_hw_err_t audio_hw_setup(audio_hw_setup_t *params)
     /* Priority VERY HIGH */
     DMA1_Stream0->CR &= ~DMA_SxCR_PL;
     DMA1_Stream0->CR |= 0x3 << 16;
+#ifdef CODEC_DMA_DIRECT_MODE
+    DMA1_Stream0->FCR &= ~DMA_SxFCR_DMDIS;
+#else
+    DMA1_Stream0->FCR |= DMA_SxFCR_DMDIS;
     /* PBURST one burst of 8 beats */
     DMA1_Stream0->CR &= ~DMA_SxCR_PBURST;
     DMA1_Stream0->CR |= 0x2 << 21;
     /* MBURST one burst of 8 beats */
     DMA1_Stream0->CR &= ~DMA_SxCR_MBURST;
     DMA1_Stream0->CR |= 0x2 << 23;
+#endif /* CODEC_DMA_DIRECT_MODE */
     /* No Double Buffer Mode (we do this ourselves with the HALF and FULL
      * transfer) */
     DMA1_Stream0->CR &= ~DMA_SxCR_DBM;
@@ -244,10 +270,10 @@ audio_hw_err_t audio_hw_setup(audio_hw_setup_t *params)
     DMA1_Stream0->CR |= DMA_SxCR_TCIE;
     /* Enable interrupt on transfer half complete */
     DMA1_Stream0->CR |= DMA_SxCR_HTIE;
-    /* No interrupt on transfer error */
-    DMA1_Stream0->CR &= ~DMA_SxCR_TEIE;
-    /* No interrupt on direct mode error */
-    DMA1_Stream0->CR &= ~DMA_SxCR_DMEIE;
+    /* Interrupt on transfer error */
+    DMA1_Stream0->CR |= DMA_SxCR_TEIE;
+    /* Interrupt on direct mode error */
+    DMA1_Stream0->CR |= DMA_SxCR_DMEIE;
 
     /* Turn on I2S3 clock (SPI3) */
     RCC->APB1ENR |= RCC_APB1ENR_SPI3EN;
@@ -269,20 +295,12 @@ audio_hw_err_t audio_hw_setup(audio_hw_setup_t *params)
     I2S3ext->I2SCFGR = 0x900;
     /* RXDMAEN = 1 (Receive buffer not empty DMA request enable), other bits off */
     I2S3ext->CR2 = SPI_CR2_RXDMAEN ;
+    
+    /* Enable I2S error interrupts */
+//    i2s_error_setup();
 
     /* Enable the DMA peripherals */
    
-    /* clear possible Interrupt flags */
-    DMA1->HIFCR |= 0x00000f80;
-    DMA1_Stream7->CR |= DMA_SxCR_EN;
-    /* clear possible Interrupt flags */
-    DMA1->LIFCR &= 0x0000001f;
-    DMA1_Stream0->CR |= DMA_SxCR_EN;
-
-    /* Enable DMA interrupts */
-    NVIC_EnableIRQ(DMA1_Stream7_IRQn);
-    NVIC_EnableIRQ(DMA1_Stream0_IRQn);
-
     /* Audio should now be configured but is not yet enabled (must call
      * audio_hw_start). */
 
@@ -295,6 +313,17 @@ audio_hw_err_t audio_hw_start(audio_hw_setup_t *params)
     audiohwio.nchans_in = audio_hw_get_num_input_channels(NULL);
     audiohwio.nchans_out = audio_hw_get_num_output_channels(NULL);
 
+    /* clear possible Interrupt flags */
+    DMA1->HIFCR |= 0x00000f80;
+    DMA1_Stream7->CR |= DMA_SxCR_EN;
+    /* clear possible Interrupt flags */
+    DMA1->LIFCR &= 0x0000001f;
+    DMA1_Stream0->CR |= DMA_SxCR_EN;
+
+    /* Enable DMA interrupts */
+    NVIC_EnableIRQ(DMA1_Stream7_IRQn);
+    NVIC_EnableIRQ(DMA1_Stream0_IRQn);
+
     /* Turn on I2S3 and its extended block */
     I2S3ext->I2SCFGR |= 0x400;
     SPI3->I2SCFGR |= 0x400;
@@ -305,39 +334,37 @@ audio_hw_err_t audio_hw_start(audio_hw_setup_t *params)
     return 0;
 }
 
-void __attribute__((optimize("O0"))) DMA1_Stream0_IRQHandler(void)
+void DMA1_Stream0_IRQHandler(void)
 {
     NVIC_ClearPendingIRQ(DMA1_Stream0_IRQn);
+    uint32_t dma1_lisr = DMA1->LISR;
+    if (dma1_lisr & DMA_LISR_TEIF0) {
+        /* Transfer error */
+#ifdef CODEC_DMA_HARDFAULT_ON_I2S_ERR
+        HardFault_Handler();
+#endif
+        DMA1->LIFCR |= DMA_LIFCR_CTEIF0;
+    }
+    if (dma1_lisr & DMA_LISR_DMEIF0) {
+        /* Direct mode error */
+#ifdef CODEC_DMA_HARDFAULT_ON_I2S_ERR
+        HardFault_Handler();
+#endif
+        DMA1->LIFCR |= DMA_LIFCR_CDMEIF0;
+    }
     /* If transfer complete on stream 0 (peripheral to memory), set current rx
      * pointer to half of the buffer */
-    if (DMA1->LISR & DMA_LISR_TCIF0) {
+    if (dma1_lisr & DMA_LISR_TCIF0) {
         /* clear flag */
-        DMA1->LIFCR = DMA_LIFCR_CTCIF0;
-    }
-    /* If half of transfer complete on stream 0 (peripheral to memory), set
-     * current rx pointer to beginning of the buffer */
-    if (DMA1->LISR & DMA_LISR_HTIF0) {
-        /* clear flag */
-        DMA1->LIFCR = DMA_LIFCR_CHTIF0;
-    }
-}
-
-void DMA1_Stream7_IRQHandler(void)
-{
-    NVIC_ClearPendingIRQ(DMA1_Stream7_IRQn);
-    /* If transfer complete on stream 5 (memory to peripheral), set current tx
-     * pointer to half of the buffer */
-    if (DMA1->HISR & DMA_HISR_TCIF7) {
-        /* clear flag */
-        DMA1->HIFCR = DMA_HIFCR_CTCIF7;
+        DMA1->LIFCR |= DMA_LIFCR_CTCIF0;
         codecDmaTxPtr = codecDmaTxBuf + CODEC_DMA_BUF_LEN;
         codecDmaRxPtr = codecDmaRxBuf + CODEC_DMA_BUF_LEN;
     }
-    /* If half of transfer complete on stream 5 (memory to peripheral), set
-     * current tx pointer to beginning of the buffer */
-    if (DMA1->HISR & DMA_HISR_HTIF7) {
+    /* If half of transfer complete on stream 0 (peripheral to memory), set
+     * current rx pointer to beginning of the buffer */
+    if (dma1_lisr & DMA_LISR_HTIF0) {
         /* clear flag */
-        DMA1->HIFCR = DMA_HIFCR_CHTIF7;
+        DMA1->LIFCR |= DMA_LIFCR_CHTIF0;
         codecDmaTxPtr = codecDmaTxBuf;
         codecDmaRxPtr = codecDmaRxBuf;
     }
@@ -345,3 +372,73 @@ void DMA1_Stream7_IRQHandler(void)
     audiohwio.out = codecDmaTxPtr;
     audio_hw_io(&audiohwio);
 }
+
+void DMA1_Stream7_IRQHandler(void)
+{
+    NVIC_ClearPendingIRQ(DMA1_Stream7_IRQn);
+    uint32_t dma1_hisr = DMA1->LISR;
+    if (dma1_hisr & DMA_HISR_TEIF7) {
+        /* Transfer error */
+#ifdef CODEC_DMA_HARDFAULT_ON_I2S_ERR
+        HardFault_Handler();
+#endif
+        DMA1->HIFCR |= DMA_HIFCR_CTEIF7;
+    }
+    if (dma1_hisr & DMA_HISR_DMEIF7) {
+        /* Direct mode error */
+#ifdef CODEC_DMA_HARDFAULT_ON_I2S_ERR
+        HardFault_Handler();
+#endif
+        DMA1->HIFCR |= DMA_HIFCR_CDMEIF7;
+    }
+
+}
+
+void SPI3_IRQHandler (void)
+{
+    NVIC_ClearPendingIRQ(SPI3_IRQn);
+    uint32_t spi3_sr = SPI3->SR, i2s3ext_sr = I2S3ext->SR;
+    if (spi3_sr & SPI_SR_OVR) {
+#ifdef CODEC_DMA_HARDFAULT_ON_I2S_ERR
+        HardFault_Handler();
+#endif
+    }
+    if (spi3_sr & SPI_SR_UDR) {
+#ifdef CODEC_DMA_HARDFAULT_ON_I2S_ERR
+        HardFault_Handler();
+#endif
+        /* ... */
+    }
+    /* Check frame error */
+    if (spi3_sr & 0x100) {
+#ifdef CODEC_DMA_HARDFAULT_ON_I2S_ERR
+        HardFault_Handler();
+#endif
+        /* ... */
+    }
+    if (i2s3ext_sr & SPI_SR_OVR) {
+#ifdef CODEC_DMA_HARDFAULT_ON_I2S_ERR
+        HardFault_Handler();
+#endif
+        /* ... */
+    }
+    if (i2s3ext_sr & SPI_SR_OVR) {
+#ifdef CODEC_DMA_HARDFAULT_ON_I2S_ERR
+        HardFault_Handler();
+#endif
+        /* ... */
+    }
+    /* Check frame error */
+    if (i2s3ext_sr & 0x100) {
+#ifdef CODEC_DMA_HARDFAULT_ON_I2S_ERR
+        HardFault_Handler();
+#endif
+        /* Disable I2S */
+//        I2S3ext->I2SCFGR &= ~SPI_I2SCFGR_I2SE;
+//        SPI3->I2SCFGR &= ~SPI_I2SCFGR_I2SE;
+        /* Enable I2S */
+//        I2S3ext->I2SCFGR |= SPI_I2SCFGR_I2SE;
+//        SPI3->I2SCFGR |= SPI_I2SCFGR_I2SE;
+    }
+}
+

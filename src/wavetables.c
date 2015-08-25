@@ -21,8 +21,9 @@ MMSample     *hannWindowTable;
 size_t       hannWindowTableLength;
 size_t       zeroxSearchMaxLength;
 #ifdef WAVETABLES_IN_SRAM
- #define SRAM_WAVETABLE_SIZE 1000 
-    MMSample sramSampleTableData[NUM_SAMPLE_TABLES*SRAM_WAVETABLE_SIZE];
+ #define SRAM_WAVETABLE_SIZE 32000/4
+    MMSample sramSampleTableData[NUM_SAMPLE_TABLES*SRAM_WAVETABLE_SIZE]
+        __attribute__((section(".big_data")));
 #endif /* WAVETABLES_IN_SRAM */
 
 
