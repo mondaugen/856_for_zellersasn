@@ -25,8 +25,9 @@ presets_lowlevel_err_t presets_lowlevel_read(presets_lowlevel_handle_t *handle,
      * number of reads needed */
     size /= 4;
     uint32_t *ptr = (uint32_t*)FLASH_START_ADDR;
+    uint32_t *dest_ptr = (uint32_t*)dest;
     while (size--) {
-        *((uint32_t*)dest++) = *ptr++;
+        *dest_ptr++ = *ptr++;
     }
     return(0);
 }

@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <stddef.h> 
 
-#define CODEC_DMA_HARDFAULT_ON_I2S_ERR 
+//#define CODEC_DMA_HARDFAULT_ON_I2S_ERR 
 #define CODEC_DMA_DIRECT_MODE 
 
 #ifdef  TEST_CODEC_UNDERRUN

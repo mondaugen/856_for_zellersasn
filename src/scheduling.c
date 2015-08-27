@@ -262,6 +262,9 @@ static void NoteSchedEvent_happen(MMEvent *event)
 
 void scheduler_incTimeAndDoEvents(void)
 {
+#ifdef DEBUG
+    assert(sequence);
+#endif
     MMSeq_incTime(sequence,(tempoBPM / 60.) 
             / ((MMSample)audio_hw_get_sample_rate(NULL) 
                 / (MMSample)audio_hw_get_block_size(NULL)) * 0xffffffffULL);

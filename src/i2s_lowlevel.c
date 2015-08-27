@@ -297,7 +297,7 @@ audio_hw_err_t audio_hw_setup(audio_hw_setup_t *params)
     I2S3ext->CR2 = SPI_CR2_RXDMAEN ;
     
     /* Enable I2S error interrupts */
-//    i2s_error_setup();
+    i2s_error_setup();
 
     /* Enable the DMA peripherals */
    
@@ -325,8 +325,11 @@ audio_hw_err_t audio_hw_start(audio_hw_setup_t *params)
     NVIC_EnableIRQ(DMA1_Stream0_IRQn);
 
     /* Turn on I2S3 and its extended block */
-    I2S3ext->I2SCFGR |= 0x400;
     SPI3->I2SCFGR |= 0x400;
+    /* Wait for word select line to go high before enabling extended block as it
+     * is running as slave. (See STM32F429 errata sheet). */
+    while (!(GPIOA->IDR & (1 << 15)));
+    I2S3ext->I2SCFGR |= 0x400;
 
     /* Wait for them to be enabled (to show they are ready) */
     while(!((DMA1_Stream7->CR & DMA_SxCR_EN) && (DMA1_Stream0->CR & DMA_SxCR_EN)));
@@ -398,6 +401,7 @@ void SPI3_IRQHandler (void)
 {
     NVIC_ClearPendingIRQ(SPI3_IRQn);
     uint32_t spi3_sr = SPI3->SR, i2s3ext_sr = I2S3ext->SR;
+    static volatile uint32_t num_i2s3ext = 0;
     if (spi3_sr & SPI_SR_OVR) {
 #ifdef CODEC_DMA_HARDFAULT_ON_I2S_ERR
         HardFault_Handler();
@@ -430,6 +434,7 @@ void SPI3_IRQHandler (void)
     }
     /* Check frame error */
     if (i2s3ext_sr & 0x100) {
+        num_i2s3ext++;
 #ifdef CODEC_DMA_HARDFAULT_ON_I2S_ERR
         HardFault_Handler();
 #endif
