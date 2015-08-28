@@ -11,6 +11,7 @@
 #include "mm_mark_zerox.h" 
 #include <string.h> 
 #include "mm_common_calcs.h" 
+#include "leds.h" 
 
 /* Stuff that could be saved */
 NoteParamSet                noteParamSets[NUM_NOTE_PARAM_SETS];
@@ -466,6 +467,39 @@ void MIDI_synth_cc_presetRecall_control(void *data, MIDIMsg *msg)
     MIDIMsg_free(msg);
 }
 
+void MIDI_led1_toggle(void *data, MIDIMsg *msg)
+{
+    if (msg->data[2] > 0) {
+        led1_set();
+    } else {
+        led1_reset();
+    }
+}
+
+void MIDI_leds_cycle(void *data, MIDIMsg *msg)
+{
+    if (msg->data[2] & (1 << 3)) {
+        led1_set();
+    } else {
+        led1_reset();
+    }
+    if (msg->data[2] & (1 << 2)) {
+        led3_set();
+    } else {
+        led3_reset();
+    }
+    if (msg->data[2] & (1 << 1)) {
+        led5_set();
+    } else {
+        led5_reset();
+    }
+    if (msg->data[2] & (1 << 0)) {
+        led7_set();
+    } else {
+        led7_reset();
+    }
+}
+
 void synth_control_setup(void)
 {
     noteParamSets[0] = (NoteParamSet) {
@@ -566,4 +600,7 @@ void synth_control_setup(void)
             MIDI_synth_cc_presetStore_control,&presetNumber);
     MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x26,
             MIDI_synth_cc_presetRecall_control,&presetNumber);
+
+    MIDI_CC_CB_Router_addCB(&midiRouter.cbRouters[0],0x0f,
+            MIDI_leds_cycle,LED1_PORT);
 }

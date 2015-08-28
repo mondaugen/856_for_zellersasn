@@ -6,6 +6,7 @@
 #include "synth_control.h" 
 #include "synth_control_presets.h" 
 #include "scheduling.h" 
+#include "leds.h" 
 
 void play_note_rate(int midinote, float rate)
 {
@@ -52,6 +53,7 @@ int main (void)
     if (midi_setup(NULL)) {
         THROW_ERR("Error setting up MIDI.");
     }
+    leds_setup();
     SampleTable_init();
     sc_presets_init();
     signal_chain_setup();
