@@ -3,9 +3,13 @@
 void leds_setup(void)
 {
     RCC->AHB1ENR |= LED1_ENR | LED3_ENR | LED5_ENR | LED7_ENR;
+    LED1_PORT->MODER &= ~(0x3 << LED1_PORT_PIN*2);
     LED1_PORT->MODER |= (0x1 << LED1_PORT_PIN*2);
+    LED3_PORT->MODER &= ~(0x3 << LED3_PORT_PIN*2);
     LED3_PORT->MODER |= (0x1 << LED3_PORT_PIN*2);
+    LED5_PORT->MODER &= ~(0x3 << LED5_PORT_PIN*2);
     LED5_PORT->MODER |= (0x1 << LED5_PORT_PIN*2);
+    LED7_PORT->MODER &= ~(0x3 << LED7_PORT_PIN*2);
     LED7_PORT->MODER |= (0x1 << LED7_PORT_PIN*2);
 }
 

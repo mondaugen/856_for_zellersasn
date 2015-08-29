@@ -7,6 +7,7 @@
 #include "synth_control_presets.h" 
 #include "scheduling.h" 
 #include "leds.h" 
+#include "switches.h" 
 
 void play_note_rate(int midinote, float rate)
 {
@@ -54,14 +55,16 @@ int main (void)
         THROW_ERR("Error setting up MIDI.");
     }
     leds_setup();
+    switches_setup();
     SampleTable_init();
     sc_presets_init();
     signal_chain_setup();
-//    poly_management_setup();
     synth_control_setup();
     scheduler_setup();
     audio_start();
+    uint32_t switch_states[NUM_SWITCHES];
     while(1) {
+        get_switch_states(switch_states);
     }
 #endif /* AUDIO_HW_TEST_THROUGHPUT */
     return(0);

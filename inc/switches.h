@@ -1,64 +1,90 @@
 #ifndef SWITCHES_H
 #define SWITCHES_H 
 
-FSW1_ENR        RCC_AHB1ENR_GPIOBEN
-FSW2_ENR        RCC_AHB1ENR_GPIOEEN
+#include <stdint.h> 
+#include "stm32f4xx.h"
 
-SW1_UP_ENR      RCC_AHB1ENR_GPIOGEN
-SW1_DN_ENR      RCC_AHB1ENR_GPIOGEN
-SW2_UP_ENR      RCC_AHB1ENR_GPIODEN
-SW2_DN_ENR      RCC_AHB1ENR_GPIODEN
-SW3_UP_ENR      RCC_AHB1ENR_GPIODEN
-SW3_DN_ENR      RCC_AHB1ENR_GPIOBEN
-SW4_UP_ENR      RCC_AHB1ENR_GPIOBEN
-SW4_DN_ENR      RCC_AHB1ENR_GPIOCEN
-SW5_UP_ENR      RCC_AHB1ENR_GPIOCEN
-SW5_DN_ENR      RCC_AHB1ENR_GPIODEN
-SW6_UP_ENR      RCC_AHB1ENR_GPIODEN
-SW6_DN_ENR      RCC_AHB1ENR_GPIODEN
-SW7_UP_ENR      RCC_AHB1ENR_GPIODEN
-SW7_DN_ENR      RCC_AHB1ENR_GPIOBEN
-SW8_UP_ENR      RCC_AHB1ENR_GPIOBEN
-SW8_DN_ENR      RCC_AHB1ENR_GPIOBEN
+#define NUM_SWITCHES    18
 
-FSW1_PORT       GPIOB
-FSW2_PORT       GPIOE
+#define FSW1_ENR        RCC_AHB1ENR_GPIOBEN
+#define FSW2_ENR        RCC_AHB1ENR_GPIOEEN
 
-SW1_UP_PORT     GPIOG
-SW1_DN_PORT     GPIOG
-SW2_UP_PORT     GPIOD
-SW2_DN_PORT     GPIOD
-SW3_UP_PORT     GPIOD
-SW3_DN_PORT     GPIOB
-SW4_UP_PORT     GPIOB
-SW4_DN_PORT     GPIOC
-SW5_UP_PORT     GPIOC
-SW5_DN_PORT     GPIOD
-SW6_UP_PORT     GPIOD
-SW6_DN_PORT     GPIOD
-SW7_UP_PORT     GPIOD
-SW7_DN_PORT     GPIOB
-SW8_UP_PORT     GPIOB
-SW8_DN_PORT     GPIOB
+#define SW1_TOP_ENR      RCC_AHB1ENR_GPIOGEN
+#define SW1_BTM_ENR      RCC_AHB1ENR_GPIOGEN
+#define SW2_TOP_ENR      RCC_AHB1ENR_GPIODEN
+#define SW2_BTM_ENR      RCC_AHB1ENR_GPIODEN
+#define SW3_TOP_ENR      RCC_AHB1ENR_GPIODEN
+#define SW3_BTM_ENR      RCC_AHB1ENR_GPIOBEN
+#define SW4_TOP_ENR      RCC_AHB1ENR_GPIOBEN
+#define SW4_BTM_ENR      RCC_AHB1ENR_GPIOBEN
+#define SW5_TOP_ENR      RCC_AHB1ENR_GPIOBEN
+#define SW5_BTM_ENR      RCC_AHB1ENR_GPIODEN
+#define SW6_TOP_ENR      RCC_AHB1ENR_GPIODEN
+#define SW6_BTM_ENR      RCC_AHB1ENR_GPIODEN
+#define SW7_TOP_ENR      RCC_AHB1ENR_GPIODEN
+#define SW7_BTM_ENR      RCC_AHB1ENR_GPIOCEN
+#define SW8_TOP_ENR      RCC_AHB1ENR_GPIOBEN
+#define SW8_BTM_ENR      RCC_AHB1ENR_GPIOCEN
 
-FSW1_PORT_PIN   4
-FSW2_PORT_PIN   6
+#define FSW1_PORT       GPIOB
+#define FSW2_PORT       GPIOE
 
-SW1_UP_PORT_PIN 2
-SW1_DN_PORT_PIN 3
-SW2_UP_PORT_PIN 12
-SW2_DN_PORT_PIN 13
-SW3_UP_PORT_PIN 11 
-SW3_DN_PORT_PIN 0
-SW4_UP_PORT_PIN 1
-SW4_DN_PORT_PIN 6
-SW5_UP_PORT_PIN 8
-SW5_DN_PORT_PIN 2
-SW6_UP_PORT_PIN 3
-SW6_DN_PORT_PIN 4
-SW7_UP_PORT_PIN 7
-SW7_DN_PORT_PIN 7
-SW8_UP_PORT_PIN 9
-SW8_DN_PORT_PIN 8
+#define SW1_TOP_PORT     GPIOG
+#define SW1_BTM_PORT     GPIOG
+#define SW2_TOP_PORT     GPIOD
+#define SW2_BTM_PORT     GPIOD
+#define SW3_TOP_PORT     GPIOD
+#define SW3_BTM_PORT     GPIOB
+#define SW4_TOP_PORT     GPIOB
+#define SW4_BTM_PORT     GPIOB
+#define SW5_TOP_PORT     GPIOB
+#define SW5_BTM_PORT     GPIOD
+#define SW6_TOP_PORT     GPIOD
+#define SW6_BTM_PORT     GPIOD
+#define SW7_TOP_PORT     GPIOD
+#define SW7_BTM_PORT     GPIOC
+#define SW8_TOP_PORT     GPIOB
+#define SW8_BTM_PORT     GPIOC
+
+#define FSW1_PORT_PIN   4
+#define FSW2_PORT_PIN   6
+
+#define SW1_TOP_PORT_PIN 2
+#define SW1_BTM_PORT_PIN 3
+#define SW2_TOP_PORT_PIN 12
+#define SW2_BTM_PORT_PIN 13
+#define SW3_TOP_PORT_PIN 11 
+#define SW3_BTM_PORT_PIN 0
+#define SW4_TOP_PORT_PIN 1
+#define SW4_BTM_PORT_PIN 7
+#define SW5_TOP_PORT_PIN 8
+#define SW5_BTM_PORT_PIN 7
+#define SW6_TOP_PORT_PIN 4
+#define SW6_BTM_PORT_PIN 2
+#define SW7_TOP_PORT_PIN 3
+#define SW7_BTM_PORT_PIN 8
+#define SW8_TOP_PORT_PIN 9
+#define SW8_BTM_PORT_PIN 6
+
+void switches_setup(void);
+uint32_t fsw1_get_state(void);
+uint32_t fsw2_get_state(void);
+uint32_t sw1_top_get_state(void);
+uint32_t sw1_btm_get_state(void);
+uint32_t sw2_top_get_state(void);
+uint32_t sw2_btm_get_state(void);
+uint32_t sw3_top_get_state(void);
+uint32_t sw3_btm_get_state(void);
+uint32_t sw4_top_get_state(void);
+uint32_t sw4_btm_get_state(void);
+uint32_t sw5_top_get_state(void);
+uint32_t sw5_btm_get_state(void);
+uint32_t sw6_top_get_state(void);
+uint32_t sw6_btm_get_state(void);
+uint32_t sw7_top_get_state(void);
+uint32_t sw7_btm_get_state(void);
+uint32_t sw8_top_get_state(void);
+uint32_t sw8_btm_get_state(void);
+void get_switch_states(uint32_t *states);
 
 #endif /* SWITCHES_H */
