@@ -17,10 +17,11 @@
  */
 #define ADC_CHANNEL_RAW_VALUE_STRIDE NUM_CHANNELS_PER_ADC
 
+typedef uint16_t adc_channel_datatype_t;
+
 typedef struct __adc_channel {
-    uint16_t cur_val;
-    uint16_t prev_val;
-    uint16_t *raw_vals;
+    adc_channel_datatype_t cur_val;
+    volatile adc_channel_datatype_t *raw_vals;
     uint32_t raw_val_stride;
     uint32_t n_raw_vals;
     /* The function that is used to calculate cur_val from raw_vals */
@@ -42,14 +43,15 @@ typedef struct __adc_channel_do_data {
     adc_channel_do_style_t style;
     /* The difference between the current value and the last value that can be
      * used to optionally do something if surpassed. */
-    uint32_t threshold;
+    adc_channel_datatype_t threshold;
+    adc_channel_datatype_t prev_val;
 } adc_channel_do_data_t;
 
-typedef void (*adc_channel_do_func)(adc_channel_t *,adc_channel_do_data_t *);
+typedef void (*adc_channel_do_func_t)(adc_channel_t *,adc_channel_do_data_t *);
 
 typedef struct __adc_channel_do_set_t {
     adc_channel_t *chan;
-    adc_channel_do_func func;
+    adc_channel_do_func_t func;
     adc_channel_do_data_t *data;
     struct __adc_channel_do_set_t *next;
 } adc_channel_do_set_t;
@@ -57,21 +59,21 @@ typedef struct __adc_channel_do_set_t {
 void adc_channel_do_set_add(adc_channel_do_set_t *set);
 void adc_channel_do_set_init(adc_channel_do_set_t *set,
                              adc_channel_t *chan,
-                             adc_channel_do_func func,
+                             adc_channel_do_func_t func,
                              adc_channel_do_data_t *do_data);
 void adc_channels_update(adc_channel_t *chans, uint32_t nchans);
 void adc_channel_do_all_sets(void);
 void adc_channel_init(adc_channel_t *chan,
-                      uint16_t *raw_vals,
+                      volatile adc_channel_datatype_t *raw_vals,
                       uint32_t raw_val_stride,
                       uint32_t nraw_vals);
 void adc_channel_setup(void);
-
-#define adc_channel_do(chan,data,what) (what)(chan,data)
-
-#define adc_channel_do_if_changed(chan,data,what)\
-    abs(chan->cur_val - chan->prev_val) > data->threshold ?\
-    adc_channel_do(chan,data,what)\
-    : NULL
+void adc_channel_do_data_init(adc_channel_do_data_t *data,
+                              adc_channel_do_style_t style,
+                              adc_channel_datatype_t threshold,
+                              adc_channel_datatype_t init_val);
+void adc_channel_do(adc_channel_t *chan,
+                    adc_channel_do_data_t *data,
+                    adc_channel_do_func_t what);
 
 #endif /* ADC_CHANNEL_H */

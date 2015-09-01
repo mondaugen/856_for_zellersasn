@@ -35,11 +35,21 @@ static void adc_channel_test_do_func(adc_channel_t *chan,
     true_data->adc_channel_value = chan->cur_val;
 }
 
+static void adc_channel_test_do_data_init(adc_channel_test_do_data_t *data)
+{
+    adc_channel_do_data_init((adc_channel_do_data_t*)data,
+                             adc_channel_do_style_CHANGED,
+                             100,
+                             0);
+    data->adc_channel_value = 0;
+}
+
 void adc_channel_test_setup(void)
 {
     int n;
     adc_channel_setup();
     for (n = 0; n < TOTAL_NUM_ADC_CHANNELS; n++) {
+        adc_channel_test_do_data_init(&adc_channel_values[n]);
         adc_channel_init(&adc_test_channels[n],
                          adc_data_starts[n],
                          NUM_CHANNELS_PER_ADC,
@@ -47,7 +57,7 @@ void adc_channel_test_setup(void)
         adc_channel_do_set_init(&adc_channel_do_sets[n],
                                 &adc_test_channels[n],
                                 adc_channel_test_do_func,
-                                &adc_channel_values[n]);
+                                (adc_channel_do_data_t*)&adc_channel_values[n]);
         adc_channel_do_set_add(&adc_channel_do_sets[n]);
     }
 }

@@ -1,8 +1,8 @@
 #include "adc.h" 
 #include "stm32f4xx.h"
 
-static volatile uint16_t adc1_values[NUM_ADC_VALUES];
-static volatile uint16_t adc3_values[NUM_ADC_VALUES];
+static volatile uint16_t adc1_values[ADC1_DMA_NUM_VALS_TRANS];
+static volatile uint16_t adc3_values[ADC3_DMA_NUM_VALS_TRANS];
 /* Stores the address of the first datum converted on the ADC channels */
 uint16_t volatile *adc_data_starts[TOTAL_NUM_ADC_CHANNELS];
 
@@ -120,6 +120,8 @@ void __attribute__((optimize("O0"))) adc_setup_dma_scan(void)
     ADC1->CR2 &= ~ADC_CR2_EOCS;
     /* Set continuous conversion */
     ADC1->CR2 |= ADC_CR2_CONT;
+    /* Continue requesting DMA as long as DMA enabled */
+    ADC1->CR2 |= ADC_CR2_DDS;
     /* Set scan mode */
     ADC1->CR1 |= ADC_CR1_SCAN;
     /* Enable DMA */
@@ -132,6 +134,8 @@ void __attribute__((optimize("O0"))) adc_setup_dma_scan(void)
     ADC3->CR2 &= ~ADC_CR2_EOCS;
     /* Set continuous conversion */
     ADC3->CR2 |= ADC_CR2_CONT;
+    /* Continue requesting DMA as long as DMA enabled */
+    ADC3->CR2 |= ADC_CR2_DDS;
     /* Set scan mode */
     ADC3->CR1 |= ADC_CR1_SCAN;
     /* Enable DMA */
