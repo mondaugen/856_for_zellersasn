@@ -8,6 +8,8 @@
 #include "scheduling.h" 
 #include "leds.h" 
 #include "switches.h" 
+#include "adc.h" 
+#include "adc_channel_test.h" 
 
 void play_note_rate(int midinote, float rate)
 {
@@ -38,6 +40,8 @@ void play_note(int midinote)
         &spsps[0],&no);
 }
 
+#define INITIAL_COUNT 1000000L 
+
 int main (void)
 {
 #ifdef AUDIO_HW_TEST_THROUGHPUT 
@@ -63,8 +67,16 @@ int main (void)
     scheduler_setup();
     audio_start();
     uint32_t switch_states[NUM_SWITCHES];
+    int32_t count = INITIAL_COUNT;
+    adc_setup_dma_scan();
+    adc_channel_test_setup();
     while(1) {
-        get_switch_states(switch_states);
+        if (!count--) {
+            count = INITIAL_COUNT;
+            adc_channels_update(adc_test_channels,TOTAL_NUM_ADC_CHANNELS);
+            adc_channel_do_all_sets();
+            get_switch_states(switch_states);
+        }
     }
 #endif /* AUDIO_HW_TEST_THROUGHPUT */
     return(0);
