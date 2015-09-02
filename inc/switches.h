@@ -92,23 +92,23 @@
 #define FSW1_TOG_ADDR  (&fsw_toggle_states) 
 #define FSW2_TOG_ADDR  (&fsw_toggle_states)
 
-#define FSW1_EXTICR    SYSCFG->EXTICR2 
-#define FSW2_EXTICR    SYSCFG->EXTICR2 
+#define FSW1_EXTICR    SYSCFG->EXTICR[1] 
+#define FSW2_EXTICR    SYSCFG->EXTICR[1] 
 
 #define FSW1_EXTI_PIN  SYSCFG_EXTICR2_EXTI4
 #define FSW2_EXTI_PIN  SYSCFG_EXTICR2_EXTI6
 
 #define FSW1_EXTI_PIN_PORT SYSCFG_EXTICR2_EXTI4_PB
-#define FSW2_EXTI_PIN_PORT SYSCFG_EXTICR2_EXTI4_PE
+#define FSW2_EXTI_PIN_PORT SYSCFG_EXTICR2_EXTI6_PE
 
 #define FSW1_IRQ_HANDLER    EXTI4_IRQHandler 
-#define FSW2_IRQ_HANDLER    EXTI6_IRQHandler 
+#define FSW2_IRQ_HANDLER    EXTI9_5_IRQHandler 
 
 #define FSW1_IRQ_N    EXTI4_IRQn 
-#define FSW2_IRQ_N    EXTI6_IRQn 
+#define FSW2_IRQ_N    EXTI9_5_IRQn 
 
-#define FSW1_EXTI   EXTI4
-#define FSW2_EXTI   EXTI6
+#define FSW1_EXTI   EXTI
+#define FSW2_EXTI   EXTI
 
 extern volatile uint32_t fsw_toggle_states;
 

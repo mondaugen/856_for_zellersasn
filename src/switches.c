@@ -114,15 +114,17 @@ void switches_setup(void)
     }
 
     fsw_toggle_states = 0;
+    /* enable SYSCFG */
+    RCC->APB2ENR |= RCC_APB2ENR_SYSCFGEN;
     /* set up EXTI interrupts */
-    FSW1_EXTICR &= ~FSW1_EXTI_PIN;
-    FSW1_EXTICR |= FSW1_EXTI_PIN_PORT;
-    FSW2_EXTICR &= ~FSW2_EXTI_PIN;
-    FSW2_EXTICR |= FSW2_EXTI_PIN_PORT;
-    FSW1_EXTI->IMR |= (0x1 << FSW1_PORT_PIN);
-    FSW2_EXTI->IMR |= (0x1 << FSW2_PORT_PIN);
-    FSW1_EXTI->RTSR |= (0x1 << FSW1_PORT_PIN);
-    FSW2_EXTI->RTSR |= (0x1 << FSW2_PORT_PIN);
+    FSW1_EXTICR     &= ~FSW1_EXTI_PIN;
+    FSW1_EXTICR     |= FSW1_EXTI_PIN_PORT;
+    FSW2_EXTICR     &= ~FSW2_EXTI_PIN;
+    FSW2_EXTICR     |= FSW2_EXTI_PIN_PORT;
+    FSW1_EXTI->IMR  |= (0x1 << FSW1_PORT_PIN);
+    FSW2_EXTI->IMR  |= (0x1 << FSW2_PORT_PIN);
+    FSW1_EXTI->FTSR |= (0x1 << FSW1_PORT_PIN);
+    FSW2_EXTI->FTSR |= (0x1 << FSW2_PORT_PIN);
     NVIC_EnableIRQ(FSW1_IRQ_N);
     NVIC_EnableIRQ(FSW2_IRQ_N);
 }

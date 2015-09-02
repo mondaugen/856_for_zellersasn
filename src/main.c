@@ -10,6 +10,7 @@
 #include "switches.h" 
 #include "adc.h" 
 #include "adc_channel_test.h" 
+#include "leds.h" 
 
 void play_note_rate(int midinote, float rate)
 {
@@ -70,12 +71,15 @@ int main (void)
     int32_t count = INITIAL_COUNT;
     adc_setup_dma_scan();
     adc_channel_test_setup();
+    switch_control_test_setup();
     while(1) {
         if (!count--) {
             count = INITIAL_COUNT;
             adc_channels_update(adc_test_channels,TOTAL_NUM_ADC_CHANNELS);
             adc_channel_do_all_sets();
             get_switch_states(switch_states);
+            switch_control_do_all();
+            led5_tog();
         }
     }
 #endif /* AUDIO_HW_TEST_THROUGHPUT */

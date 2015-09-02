@@ -82,7 +82,7 @@ void synth_control_tempoBPM_control(void *data, float tempoBPM_param)
         }
     } else {
         noteParamSets[editingWhichParams].numRepeats = 
-            (int)(16. * msg->data[2] / 128.);        
+            (int)(16. * tempoBPM_param);        
     }
 }
 
@@ -378,9 +378,9 @@ void synth_control_posMode_control(void *data, uint32_t posMode_param)
 
 void synth_control_presetNumber_control(void *data, uint32_t presetNumber_param)
 {
-    presetNumber_param = presetNumber_param >= NUM_SYNTH_CONTROL_PRESETS ?
-        presetNumber_param = NUM_SYNTH_CONTROL_PRESETS - 1 :
-        presetNumber_param;
+    if (presetNumber_param >= NUM_SYNTH_CONTROL_PRESETS) {
+        presetNumber_param = NUM_SYNTH_CONTROL_PRESETS - 1;
+    }
     *((int*)data) = (int)(presetNumber_param);
 }
 

@@ -27,5 +27,10 @@ void led5_set(void);
 void led5_reset(void);
 void led7_set(void);
 void led7_reset(void);
+void led1_tog(void);
+void led3_tog(void);
+void led5_tog(void);
+void led7_tog(void);
+
 
 #endif /* LEDS_H */
