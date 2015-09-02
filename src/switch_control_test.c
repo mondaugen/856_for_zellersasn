@@ -80,51 +80,12 @@ static void switch_control_test_fsw_func(switch_control_t *sc)
     }
 }
 
-typedef struct __switch_debouncer_t {
-    /* Should return 1 if request has been made */
-    uint32_t (*get_req_state)(struct __switch_debouncer_t *);
-    /* Should return 1 if pin is high, so for a momentary switch that means the
-     * state that it is in when untouched. */
-    uint32_t (*get_pin_state)(struct __switch_debouncer_t *);
-    /* Resets the request state */
-    void     (*reset_req_state)(struct __switch_debouncer_t *);
-    /* What to do when a request has been verified and acknowledged */
-    void     (*func)(struct __switch_debouncer_t *);
-    /* The number of ignores that are specified after an acknowledged request */
-    uint32_t init_n_ignores;
-    /* The number of request that are to be ignored from now on */
-    uint32_t n_ignores;
-    void     *data;
-} switch_debouncer_t;
-
 typedef struct __fsw_state_t {
     volatile uint32_t *req_state_addr;
     uint32_t           req_state_bit;
     volatile uint32_t *pin_state_addr;
     uint32_t           pin_state_bit;
 } fsw_state_t;
-
-static void switch_control_test_debounce_fsw_func(switch_control_t *sc)
-{
-    switch_debouncer_t *sd = (switch_debouncer_t*)sc->data;
-    if (sd->get_req_state(sd)) {
-        if (sd->n_ignores) {
-            /* Did this request come too soon after a previous acknowledge? If
-             * so, the request is bogus. */
-            sd->reset_req_state(sd);
-        } else if (sd->get_pin_state(sd) == 0) {
-            /* The pin is low. */
-            /* Pin has been brought to its rest (reset) position again */
-            sd->func(sd);
-            sd->n_ignores = sd->init_n_ignores;
-            sd->reset_req_state(sd);
-        } 
-        /* Otherwise we are still waiting for the pin to go low. */
-    }
-    if (sd->n_ignores) {
-        sd->n_ignores--;
-    }
-}
 
 static uint32_t get_fsw_req_state(switch_debouncer_t *sd)
 {
@@ -253,16 +214,8 @@ void switch_control_test_setup(void)
             (void*)&fsw_states[1]},
     };
     /* The addresses and pins passed here are just dummy values. */
-    switch_control_init(&switch_control[0],
-                        (volatile uint32_t*)NULL,
-                        0,
-                        switch_control_test_debounce_fsw_func,
-                        (void*)&fsw_debouncers[0]);
-    switch_control_init(&switch_control[1],
-                        (volatile uint32_t*)NULL,
-                        0,
-                        switch_control_test_debounce_fsw_func,
-                        (void*)&fsw_debouncers[1]);
+    switch_control_debounce_init(&switch_control[0],(void*)&fsw_debouncers[0]);
+    switch_control_debounce_init(&switch_control[1],(void*)&fsw_debouncers[1]);
 #elif defined SWITCH_CONTROL_TEST_6
     switch_control_init(&switch_control[0],
                         FSW1_ADDR,

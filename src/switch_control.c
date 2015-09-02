@@ -32,3 +32,35 @@ void switch_control_init(switch_control_t *sc,
     sc->data = data;
     sc->next = NULL;
 }
+
+static void switch_control_debounce_func(switch_control_t *sc)
+{
+    switch_debouncer_t *sd = (switch_debouncer_t*)sc->data;
+    if (sd->get_req_state(sd)) {
+        if (sd->n_ignores) {
+            /* Did this request come too soon after a previous acknowledge? If
+             * so, the request is bogus. */
+            sd->reset_req_state(sd);
+        } else if (sd->get_pin_state(sd) == 0) {
+            /* The pin is low. */
+            /* Pin has been brought to its rest (reset) position again */
+            sd->func(sd);
+            sd->n_ignores = sd->init_n_ignores;
+            sd->reset_req_state(sd);
+        } 
+        /* Otherwise we are still waiting for the pin to go low. */
+    }
+    if (sd->n_ignores) {
+        sd->n_ignores--;
+    }
+}
+
+void switch_control_debounce_init(switch_control_t *sc,
+                                  switch_debouncer_t *sd)
+{
+    switch_control_init(sc,
+                        (volatile uint32_t*)NULL,
+                        0,
+                        switch_control_debounce_func,
+                        (void*)sd);
+}
