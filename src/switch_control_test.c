@@ -203,16 +203,13 @@ void switch_control_test_setup(void)
                         switch_control_test_func,
                         (void*)&switch_data[3]);
 #elif defined SWITCH_CONTROL_TEST_5
-    static fsw_state_t fsw_states[] = {
+    static mom_state_t fsw_states[] = {
         {FSW1_TOG_ADDR, FSW1_TOG_PORT_PIN, FSW1_ADDR, FSW1_PORT_PIN},
         {FSW2_TOG_ADDR, FSW2_TOG_PORT_PIN, FSW2_ADDR, FSW2_PORT_PIN}
     };
-    static switch_debouncer_t fsw_debouncers[] = {
-        {get_fsw_req_state, get_fsw_pin_state, reset_fsw_req_state, fsw1_func, 1, 0,
-            (void*)&fsw_states[0]},
-        {get_fsw_req_state, get_fsw_pin_state, reset_fsw_req_state, fsw2_func, 1, 0,
-            (void*)&fsw_states[1]},
-    };
+    static switch_debouncer_t fsw_debouncers[2];
+    switch_debouncer_init(&fsw_debouncers[0],fsw1_func,1,&fsw_states[0]);
+    switch_debouncer_init(&fsw_debouncers[1],fsw2_func,1,&fsw_states[1]);
     /* The addresses and pins passed here are just dummy values. */
     switch_control_debounce_init(&switch_control[0],(void*)&fsw_debouncers[0]);
     switch_control_debounce_init(&switch_control[1],(void*)&fsw_debouncers[1]);

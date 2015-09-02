@@ -35,6 +35,13 @@ typedef struct __switch_debouncer_t {
     void     *data;
 } switch_debouncer_t;
 
+typedef struct __mom_state_t {
+    volatile uint32_t *req_state_addr;
+    uint32_t           req_state_bit;
+    volatile uint32_t *pin_state_addr;
+    uint32_t           pin_state_bit;
+} mom_state_t;
+
 void switch_control_do_all(void);
 void switch_control_init(switch_control_t *sc,
                          volatile uint32_t *port_addr,
@@ -44,6 +51,10 @@ void switch_control_init(switch_control_t *sc,
 void switch_control_add(switch_control_t *sc);
 void switch_control_debounce_init(switch_control_t *sc,
                                   switch_debouncer_t *sd);
+void switch_debouncer_init(switch_debouncer_t *sd,
+                           void (*func)(switch_debouncer_t *),
+                           uint32_t init_n_ignores,
+                           mom_state_t *state);
 
 #define switch_control_get_state(ctl) ((*((ctl)->port_addr) >> ctl->port_bit) & 0x1)
 #define switch_control_set_state(ctl,state)\

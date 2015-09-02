@@ -55,6 +55,39 @@ static void switch_control_debounce_func(switch_control_t *sc)
     }
 }
 
+static uint32_t get_mom_req_state(switch_debouncer_t *sd)
+{
+    mom_state_t* data = (mom_state_t*)sd->data;
+    return (*(data->req_state_addr) >> data->req_state_bit) & 0x1;
+}
+
+static uint32_t get_mom_pin_state(switch_debouncer_t *sd)
+{
+    /* Because the pins are active when low, we reverse polarity here */
+    mom_state_t* data = (mom_state_t*)sd->data;
+    return !((*(data->pin_state_addr) >> data->pin_state_bit) & 0x1);
+}
+
+static void reset_mom_req_state(switch_debouncer_t *sd)
+{
+    mom_state_t* data = (mom_state_t*)sd->data;
+    *(data->req_state_addr) &= ~(0x1 << data->req_state_bit);
+}
+
+void switch_debouncer_init(switch_debouncer_t *sd,
+                           void (*func)(switch_debouncer_t *),
+                           uint32_t init_n_ignores,
+                           mom_state_t *state)
+{
+        sd->get_req_state = get_mom_req_state;
+        sd->get_pin_state = get_mom_pin_state;
+        sd->reset_req_state = reset_mom_req_state;
+        sd->func = func;
+        sd->init_n_ignores = init_n_ignores;
+        sd->n_ignores = 0;
+        sd->data = (void*)state;
+}
+
 void switch_control_debounce_init(switch_control_t *sc,
                                   switch_debouncer_t *sd)
 {
