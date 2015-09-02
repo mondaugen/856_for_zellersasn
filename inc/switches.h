@@ -66,6 +66,52 @@
 #define SW8_TOP_PORT_PIN 9
 #define SW8_BTM_PORT_PIN 6
 
+#define FSW1_TOG_PORT_PIN 0 
+#define FSW2_TOG_PORT_PIN 1
+
+#define FSW1_ADDR      (&((FSW1_PORT)->IDR))
+#define FSW2_ADDR      (&((FSW2_PORT)->IDR)) 
+
+#define SW1_TOP_ADDR   (&((SW1_TOP_PORT)->IDR))
+#define SW1_BTM_ADDR   (&((SW1_BTM_PORT)->IDR))
+#define SW2_TOP_ADDR   (&((SW2_TOP_PORT)->IDR))
+#define SW2_BTM_ADDR   (&((SW2_BTM_PORT)->IDR))
+#define SW3_TOP_ADDR   (&((SW3_TOP_PORT)->IDR))   
+#define SW3_BTM_ADDR   (&((SW3_BTM_PORT)->IDR))   
+#define SW4_TOP_ADDR   (&((SW4_TOP_PORT)->IDR))   
+#define SW4_BTM_ADDR   (&((SW4_BTM_PORT)->IDR))   
+#define SW5_TOP_ADDR   (&((SW5_TOP_PORT)->IDR))   
+#define SW5_BTM_ADDR   (&((SW5_BTM_PORT)->IDR))   
+#define SW6_TOP_ADDR   (&((SW6_TOP_PORT)->IDR))   
+#define SW6_BTM_ADDR   (&((SW6_BTM_PORT)->IDR))   
+#define SW7_TOP_ADDR   (&((SW7_TOP_PORT)->IDR))   
+#define SW7_BTM_ADDR   (&((SW7_BTM_PORT)->IDR))   
+#define SW8_TOP_ADDR   (&((SW8_TOP_PORT)->IDR))   
+#define SW8_BTM_ADDR   (&((SW8_BTM_PORT)->IDR))   
+
+#define FSW1_TOG_ADDR  (&fsw_toggle_states) 
+#define FSW2_TOG_ADDR  (&fsw_toggle_states)
+
+#define FSW1_EXTICR    SYSCFG->EXTICR2 
+#define FSW2_EXTICR    SYSCFG->EXTICR2 
+
+#define FSW1_EXTI_PIN  SYSCFG_EXTICR2_EXTI4
+#define FSW2_EXTI_PIN  SYSCFG_EXTICR2_EXTI6
+
+#define FSW1_EXTI_PIN_PORT SYSCFG_EXTICR2_EXTI4_PB
+#define FSW2_EXTI_PIN_PORT SYSCFG_EXTICR2_EXTI4_PE
+
+#define FSW1_IRQ_HANDLER    EXTI4_IRQHandler 
+#define FSW2_IRQ_HANDLER    EXTI6_IRQHandler 
+
+#define FSW1_IRQ_N    EXTI4_IRQn 
+#define FSW2_IRQ_N    EXTI6_IRQn 
+
+#define FSW1_EXTI   EXTI4
+#define FSW2_EXTI   EXTI6
+
+extern volatile uint32_t fsw_toggle_states;
+
 void switches_setup(void);
 uint32_t fsw1_get_state(void);
 uint32_t fsw2_get_state(void);

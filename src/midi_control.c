@@ -1,3 +1,40 @@
+void MIDI_note_on_autorelease_do(void *data, MIDIMsg *msg)
+{
+    MMSample voiceNum = pm_get_next_free_voice_number();
+    if ((voiceNum == -1) || (msg->data[2] <= 0)) { 
+        /* No more voices free or actually received a cheap note off (note on
+         * with velocity 0). */
+        MIDIMsg_free(msg);
+        return;
+    }
+    pm_claim_params_from_allocator((void*)&voiceAllocator,(void*)&voiceNum);
+    ((MMEnvedSamplePlayer*)&spsps[(int)voiceNum])->onDone = autorelease_on_done;
+    MMTrapEnvedSamplePlayer_noteOnStruct no;
+    no.note = voiceNum;
+    no.amplitude = msg->data[2]/127.;
+    no.index = noteParamSets[0].startPoint * MMArray_get_length(theSound.wavtab);
+    no.attackTime = noteParamSets[0].attackTime;
+    no.releaseTime = noteParamSets[0].releaseTime;
+    no.sustainTime = ((noteParamSets[0].sustainTime *
+        (MMSample)MMArray_get_length(theSound.wavtab) 
+          / (MMSample)audio_hw_get_sample_rate(NULL) 
+          - noteParamSets[0].attackTime 
+          - noteParamSets[0].releaseTime) < 0) ? 
+            0 :
+            (noteParamSets[0].sustainTime *
+             (MMSample)MMArray_get_length(theSound.wavtab) /
+             (MMSample)audio_hw_get_sample_rate(NULL)
+             - noteParamSets[0].attackTime - noteParamSets[0].releaseTime);
+    no.samples = theSound.wavtab;
+    /* 9 is added because MMCC_et12_rate considers pitch 69 to be a note of no
+     * transposition. In this we consider middle C to be a note of no
+     * transposition, so we add 9 (middle C is note 60) */
+    no.rate = MMCC_et12_rate(msg->data[1] + 9);
+    MMTrapEnvedSamplePlayer_noteOn_Rate(
+            &spsps[(int)voiceNum], &no);
+    MIDIMsg_free(msg);
+}
+
 void MIDI_synth_cc_envelopeTime_control(void *data, MIDIMsg *msg)
 {
     env_map_attack_release_f(
@@ -119,87 +156,6 @@ void MIDI_synth_cc_noteDeltaFromBuffer_control(void *data, MIDIMsg *msg)
     }
     MIDIMsg_free(msg);
 }
-
-void MIDI_synth_record_stop_helper(void *data)
-{
-    /* Only do something if it was recording */
-    if (((MMWavTabRecorder*)data)->state == MMWavTabRecorderState_STOPPED) {
-        return;
-    }
-
-    /* Set the length to the index the recorder got to */
-    ((MMArray*)((MMWavTabRecorder*)data)->buffer)->length =
-        ((MMWavTabRecorder*)data)->currentIndex;
-    ((MMWavTabRecorder*)data)->state = MMWavTabRecorderState_STOPPED;
-    /* If the index the recorder got to is greater than the window length of a
-     * Hann window, window the beginning and ends of the file using this window
-     * */
-    if (((MMWavTabRecorder*)data)->currentIndex >= hannWindowTableLength) {
-        int n;
-        for (n = 0; n < hannWindowTableLength/2; n++) {
-            MMWavTab_get(((MMWavTabRecorder*)data)->buffer,n) *= hannWindowTable[n];
-            MMWavTab_get(((MMWavTabRecorder*)data)->buffer,
-                    ((MMArray*)((MMWavTabRecorder*)data)->buffer)->length - n - 1)
-                *= hannWindowTable[hannWindowTableLength - n - 1];
-        }
-    }
-    /* If the noteDeltaFromBuffer flag is set, compute the tempo from
-     * the buffer length, set the playback rate to 1 and set the eventDelta
-     * to 1 beat so that the recording plays once per beat and the tempo is
-     * one beat per length of recording */
-    if (noteDeltaFromBuffer == 1) {
-        /* When noteDeltaFromBuffer flag set
-         *  - the tempo is adjusted so the recording plays in the time of one
-         *    beat.
-         *
-         * If noteDeltaFromBuffer flag is set and the feedback is enabled,
-         * then:
-         *  - the sustain time is made to be 1
-         *  - the the amplitudes of notes that aren't the 0th are set to 0
-         *  - the pitch of note 0 is set to unison (60 so that rate is 1)
-         *  - the delta time of note 0 is set to 1 beat
-         *  - the intermittence of note 0 is set to 0
-         *  - the offset of note 0 is set to 0
-         *  If the scheduler is on, clear the pending scheduled notes and
-         *  schedule a note schedule event immediately.
-         */
-        tempoBPM = 60. * (MMSample)audio_hw_get_sample_rate(NULL) 
-            / (MMSample)((MMArray*)((MMWavTabRecorder*)data)->buffer)->length;
-        if (feedbackState == 1) {
-            int n;
-            noteParamSets[0].eventDeltaBeats = 1;
-            noteParamSets[0].pitch = 60.;
-            for (n = 1; n < NUM_NOTE_PARAM_SETS; n++) {
-                noteParamSets[n].amplitude = 0;
-            }
-            noteParamSets[0].sustainTime = 1.;
-            noteParamSets[0].intermittency = 0;
-            noteParamSets[0].offsetBeats = 0;
-            noteParamSets[0].startPoint = 0;
-            if (schedulerState == 1) {
-                schedulerState_off_helper((void*)noteOnEventListHead);
-                schedulerState_on_helper();
-            }
-        }
-    }
-    /* Swap the playing and the recording sounds */
-    WavTabAreaPair tmp = recordingSound;
-    recordingSound = theSound;
-    theSound = tmp;
-}
-
-void MIDI_synth_record_start_helper(void *data)
-{
-    /* Set to max length so it would be possible to record all the way to
-     * the end of allocated space */
-    ((MMArray*)recordingSound.wavtab)->length = soundSampleMaxLength;
-    /* Set the area it is pointing to to the beginning of the allocated space */
-    ((MMArray*)recordingSound.wavtab)->data = recordingSound.area;
-    ((MMWavTabRecorder*)data)->buffer = recordingSound.wavtab;
-    ((MMWavTabRecorder*)data)->currentIndex = 0;
-    ((MMWavTabRecorder*)data)->state = MMWavTabRecorderState_RECORDING;
-}
-
 
 /* Start recording with non-zero control change value. Stop with value of 0. */
 void MIDI_synth_cc_record_trig(void *data, MIDIMsg *msg)

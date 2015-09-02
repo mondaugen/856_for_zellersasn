@@ -23,6 +23,12 @@ static uint32_t (*sw_get_state_funcs[]) (void) = {
     NULL
 };
 
+/* The footswitches are momentary. This pseudo-register is set when the
+ * footswitch is pressed the first time, and reset the second time. It can be
+ * passed to functions expecting a register. The bits that are set or reset are
+ * defined in switches.h */
+volatile uint32_t fsw_toggle_states;
+
 void switches_setup(void)
 {
     uint32_t enrs[] = {
@@ -106,8 +112,38 @@ void switches_setup(void)
         enr++;
         pin++;
     }
+
+    fsw_toggle_states = 0;
+    /* set up EXTI interrupts */
+    FSW1_EXTICR &= ~FSW1_EXTI_PIN;
+    FSW1_EXTICR |= FSW1_EXTI_PIN_PORT;
+    FSW2_EXTICR &= ~FSW2_EXTI_PIN;
+    FSW2_EXTICR |= FSW2_EXTI_PIN_PORT;
+    FSW1_EXTI->IMR |= (0x1 << FSW1_PORT_PIN);
+    FSW2_EXTI->IMR |= (0x1 << FSW2_PORT_PIN);
+    FSW1_EXTI->RTSR |= (0x1 << FSW1_PORT_PIN);
+    FSW2_EXTI->RTSR |= (0x1 << FSW2_PORT_PIN);
+    NVIC_EnableIRQ(FSW1_IRQ_N);
+    NVIC_EnableIRQ(FSW2_IRQ_N);
 }
 
+void FSW1_IRQ_HANDLER (void)
+{
+    NVIC_ClearPendingIRQ(FSW1_IRQ_N);
+    if (FSW1_EXTI->PR & (0x1 << FSW1_PORT_PIN)) {
+        FSW1_EXTI->PR |= 0x1 << FSW1_PORT_PIN;
+        fsw_toggle_states |= (0x1 << FSW1_TOG_PORT_PIN);
+    }
+}
+
+void FSW2_IRQ_HANDLER (void)
+{
+    NVIC_ClearPendingIRQ(FSW2_IRQ_N);
+    if (FSW2_EXTI->PR & (0x1 << FSW2_PORT_PIN)) {
+        FSW2_EXTI->PR |= 0x1 << FSW2_PORT_PIN;
+        fsw_toggle_states |= (0x1 << FSW2_TOG_PORT_PIN);
+    }
+}
 
 uint32_t fsw1_get_state(void)
 {
