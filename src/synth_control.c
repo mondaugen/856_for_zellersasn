@@ -49,8 +49,8 @@ void autorelease_on_done(MMEnvedSamplePlayer * esp)
 void synth_control_envelopeTime_control(void *data, float envelopeTime_param)
 {
     env_map_attack_release_f(
-            &((NoteParamSet*)data)[editingWhichParams].attackTime,
-            &((NoteParamSet*)data)[editingWhichParams].releaseTime,
+            noteParamSets[editingWhichParams].attackTime,
+            noteParamSets[editingWhichParams].releaseTime,
             envelopeTime_param,
             SYNTH_CONTROL_MIN_ATTACK_TIME,
             SYNTH_CONTROL_MAX_ATTACK_TIME,
@@ -63,7 +63,7 @@ void synth_control_sustainTime_control(void *data, float sustainTime_param)
     /* Sustain time is relative to length of recording, so here just 0-1.
      * It is scaled this way so that the length selection is more precise for
      * short lengths and less precise for longer ones */
-    ((NoteParamSet*)data)[editingWhichParams].sustainTime
+    noteParamSets[editingWhichParams].sustainTime
         = powf(2.,-7.*(1 - sustainTime_param));
 }
 
@@ -75,10 +75,10 @@ void synth_control_tempoBPM_control(void *data, float tempoBPM_param)
              * where K is some scalar. So if K > 1, the tempo is slower and K < 1
              * the tempo is faster */
             MMSample K = tempoBPM_param * 0.1 + 0.95;
-            *((MMSample*)data) = 60. * (MMSample)audio_hw_get_sample_rate(NULL) 
+            tempoBPM = 60. * (MMSample)audio_hw_get_sample_rate(NULL) 
                 / ((MMSample)((MMArray*)theSound.wavtab)->length * K);
         } else {
-            *((MMSample*)data) = 40. + (240. - 40.)*tempoBPM_param;
+            tempoBPM = 40. + (240. - 40.)*tempoBPM_param;
         }
     } else {
         noteParamSets[editingWhichParams].numRepeats = 
@@ -88,7 +88,7 @@ void synth_control_tempoBPM_control(void *data, float tempoBPM_param)
 
 void synth_control_pitch_control(void *data, float pitch_param)
 {
-    ((NoteParamSet*)data)[editingWhichParams].pitch
+    noteParamSets[editingWhichParams].pitch
         = 48. + (72. - 48.) * pitch_param;
 }
 
@@ -96,11 +96,11 @@ void synth_control_startPoint_control(void *data, float startPoint_param)
 {
     switch (posMode) {
         case SynthControlPosMode_ABSOLUTE:
-            ((NoteParamSet*)data)[editingWhichParams].startPoint
+            noteParamSets[editingWhichParams].startPoint
                 = startPoint_param;
             break;
         case SynthControlPosMode_STRIDE:
-            ((NoteParamSet*)data)[editingWhichParams].positionStride
+            noteParamSets[editingWhichParams].positionStride
                 = startPoint_param * 0.2 - 0.1;
             break;
     }
@@ -112,11 +112,11 @@ void synth_control_eventDeltaBeats_control(void *data, float eventDeltaBeats_par
         case SynthControlDeltaButtonMode_EVENT_DELTA:
             if (editingWhichParams == 0) {
                 /* The first set is quantized */
-                ((NoteParamSet*)data)[editingWhichParams].eventDeltaBeats
+                noteParamSets[editingWhichParams].eventDeltaBeats
                     = (MMSample)(1 + (int)(3. * (MMSample)eventDeltaBeats_param));
             } else {
                 /* Other sets are free */
-                ((NoteParamSet*)data)[editingWhichParams].eventDeltaBeats
+                noteParamSets[editingWhichParams].eventDeltaBeats
                     = powf(2.,-6.*(1 - eventDeltaBeats_param));
                 /*
                 ((NoteParamSet*)data)[editingWhichParams].eventDeltaBeats
@@ -125,7 +125,7 @@ void synth_control_eventDeltaBeats_control(void *data, float eventDeltaBeats_par
             }
             break;
         case SynthControlDeltaButtonMode_INTERMITTENCY:
-            ((NoteParamSet*)data)[editingWhichParams].intermittency =
+            noteParamSets[editingWhichParams].intermittency =
                 0 + (int)(3. * eventDeltaBeats_param);
             break;
     }
@@ -134,20 +134,21 @@ void synth_control_eventDeltaBeats_control(void *data, float eventDeltaBeats_par
 void synth_control_offsetBeats_control(void *data, float offsetBeats_param)
 {
     if (editingWhichParams == 0) {
-        ((NoteParamSet*)data)[editingWhichParams].offsetBeats
+        noteParamSets[editingWhichParams].offsetBeats
             = offsetBeats_param + 0.001;
     } else {
         /* The offset is relative to the total event delta of the note event
          * with parameterSet 0 */
-        ((NoteParamSet*)data)[editingWhichParams].offsetBeats
-            = ((NoteParamSet*)data)[0].eventDeltaBeats * offsetBeats_param;
+        noteParamSets[editingWhichParams].offsetBeats
+            = noteParamSets[0].eventDeltaBeats * offsetBeats_param;
     }
 }
 
 void synth_control_noteDeltaFromBuffer_control(void *data,
+        te
         uint32_t noteDeltaFromBuffer_param)
 {
-    *((int*)data) = (int)noteDeltaFromBuffer_param;
+    noteDeltaFromBuffer = (int)noteDeltaFromBuffer_param;
 }
 
 void MIDI_synth_record_stop_helper(void *data)
@@ -236,10 +237,24 @@ void synth_control_record_trig(void *data, uint32_t record_param)
     if (record_param > 0) {
         /* Only allow recording if recording is not scheduled */
         if (scheduleRecording == 0) {
-            MIDI_synth_record_start_helper(data);
+            MIDI_synth_record_start_helper(&wtr);
         }
-    } else {
-        MIDI_synth_record_stop_helper(data);
+    } else if (wtr.state == MMWavTabRecorderState_STOPPED) {
+        MIDI_synth_record_stop_helper(&wtr);
+    }
+}
+
+/* Starts recording if recording is stopped, stops recording if recording going
+ * on */
+void synth_control_record_tog(void *data)
+{
+    if (wtr.state == MMWavTabRecorderState_RECORDING) {
+        MIDI_synth_record_stop_helper(&wtr);
+    } else if (wtr.state == MMWavTabRecorderState_STOPPED) {
+        /* Only allow recording if recording is not scheduled */
+        if (scheduleRecording == 0) {
+            MIDI_synth_record_start_helper(&wtr);
+        }
     }
 }
 
@@ -247,23 +262,23 @@ void synth_control_feedback_control(void *data, uint32_t feedback_param)
 {
     if (feedback_param > 0) {
         /* Move fbBusSplitter to onNode */
-        MMSigProc_insertAfter(fbOnNode,data);
+        MMSigProc_insertAfter(fbOnNode,&fbBusSplitter);
         feedbackState = 1;
     } else {
         /* Move fbBusSplitter to offNode */
-        MMSigProc_remove(data);
+        MMSigProc_remove(&fbBusSplitter);
         /* Zero the feedback bus */
-        memset(((MMBusSplitter*)data)->destBus->data,0,
+        memset(fbBusSplitter.destBus->data,0,
                 sizeof(MMSample)
-                *((MMBusSplitter*)data)->destBus->size
-                *((MMBusSplitter*)data)->destBus->channels);
+                fbBusSplitter.destBus->size
+                fbBusSplitter.destBus->channels);
         feedbackState = 0;
     }
 }
 
 void synth_control_dryGain_control(void *data, float dryGain_param)
 {
-    *((int16_t*)data) = (int16_t)(dryGain_param * 127.);
+    dryGain = (int16_t)(dryGain_param * 127.);
 }
 
 static void free_playing_spsp_voice(void *voice_number)
@@ -308,23 +323,23 @@ void synth_control_schedulerState_control(void *data, uint32_t schedulerState_pa
     if (schedulerState_param > 0) {
         schedulerState_on_helper();
     } else {
-        schedulerState_off_helper(data);
+        schedulerState_off_helper(&noteOnEventListHead);
     }
 }
 
 void synth_control_editingWhichParams_control(void *data,
         uint32_t editingWhichParams_param)
 {
-    editingWhichParams_param = editingWhichParams_param >= NUM_NOTE_PARAM_SETS ?
-                               NUM_NOTE_PARAM_SETS - 1 :
-                               editingWhichParams_param;
-    *((int*)data) = (int)editingWhichParams_param;
+    if (editingWhichParams_param >= NUM_NOTE_PARAM_SETS) {
+            editingWhichParams_param = NUM_NOTE_PARAM_SETS - 1;
+    } 
+    editingWhichParams = (int)editingWhichParams_param;
 }
 
 void synth_control_deltaButtonMode_control(void *data,
         uint32_t deltaButtonMode_param)
 {
-    *((SynthControlDeltaButtonMode*)data) =
+    deltaButtonMode =
         (SynthControlDeltaButtonMode)deltaButtonMode_param;
 }
 
@@ -337,13 +352,13 @@ void synth_control_recordScheduling_control(void *data,
             wtr.state = MMWavTabRecorderState_STOPPED;
 /*             MIDI_synth_record_stop_helper((void*)&wtr); */
         }
-        *((int*)data) = 1;
+        scheduleRecording = 1;
         /* Set first scheduled recording to true so that when the first
          * scheduled recording happens, the buffers aren't swapped. This is
          * because the buffer it swaps with might contain garbage. */
         firstScheduledRecording = 1;
     } else {
-        *((int*)data) = 0;
+        scheduleRecording = 0;
         /* Stop recording (it will most likely be in progress) but don't swap
          * the recording and playing sounds. We discard the most recent
          * recording to give the user time to flip the switch if they like the
@@ -355,25 +370,25 @@ void synth_control_recordScheduling_control(void *data,
 void synth_control_gainMode_control(void *data,
         uint32_t gainMode_param)
 {
-    *((SynthControlGainMode*)data) = (SynthControlGainMode)gainMode_param;
+    gainMode = (SynthControlGainMode)gainMode_param;
 }
 
 void synth_control_gain_control(void *data, float gain_param)
 {
     switch (gainMode) {
         case SynthControlGainMode_WET:
-            ((NoteParamSet*)data)[editingWhichParams].amplitude
+            noteParamSets[editingWhichParams].amplitude
                 = gain_param;
             break;
         case SynthControlGainMode_FADE:
-            ((NoteParamSet*)data)[editingWhichParams].fadeRate
+            noteParamSets[editingWhichParams].fadeRate
                 = gain_param * 2.;
     }
 }
 
 void synth_control_posMode_control(void *data, uint32_t posMode_param)
 {
-    *((SynthControlPosMode*)data) = (SynthControlPosMode)posMode_param;
+    posMode = (SynthControlPosMode)posMode_param;
 }
 
 void synth_control_presetNumber_control(void *data, uint32_t presetNumber_param)
@@ -381,17 +396,17 @@ void synth_control_presetNumber_control(void *data, uint32_t presetNumber_param)
     if (presetNumber_param >= NUM_SYNTH_CONTROL_PRESETS) {
         presetNumber_param = NUM_SYNTH_CONTROL_PRESETS - 1;
     }
-    *((int*)data) = (int)(presetNumber_param);
+    presetNumber = (int)(presetNumber_param);
 }
 
 void synth_control_presetStore_control(void *data, uint32_t presetStore_param)
 {
-    sc_presets_store(*((int*)data));
+    sc_presets_store(presetNumber);
 }
 
 void synth_control_presetRecall_control(void *data, uint32_t presetRecall_param)
 {
-    sc_presets_recall(*((int*)data));
+    sc_presets_recall(presetNumber);
 }
 
 void synth_control_setup(void)
