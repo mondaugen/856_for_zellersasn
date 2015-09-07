@@ -115,18 +115,28 @@ void switches_setup(void)
 
     fsw_toggle_states = 0;
     /* enable SYSCFG */
-    RCC->APB2ENR |= RCC_APB2ENR_SYSCFGEN;
+    RCC->APB2ENR        |= RCC_APB2ENR_SYSCFGEN;
     /* set up EXTI interrupts */
-    FSW1_EXTICR     &= ~FSW1_EXTI_PIN;
-    FSW1_EXTICR     |= FSW1_EXTI_PIN_PORT;
-    FSW2_EXTICR     &= ~FSW2_EXTI_PIN;
-    FSW2_EXTICR     |= FSW2_EXTI_PIN_PORT;
-    FSW1_EXTI->IMR  |= (0x1 << FSW1_PORT_PIN);
-    FSW2_EXTI->IMR  |= (0x1 << FSW2_PORT_PIN);
-    FSW1_EXTI->FTSR |= (0x1 << FSW1_PORT_PIN);
-    FSW2_EXTI->FTSR |= (0x1 << FSW2_PORT_PIN);
+    FSW1_EXTICR         &= ~FSW1_EXTI_PIN;
+    FSW1_EXTICR         |= FSW1_EXTI_PIN_PORT;
+    FSW2_EXTICR         &= ~FSW2_EXTI_PIN;
+    FSW2_EXTICR         |= FSW2_EXTI_PIN_PORT;
+    MSW3_TOP_EXTICR     &= ~MSW3_TOP_EXTI_PIN;
+    MSW3_TOP_EXTICR     |= MSW3_TOP_EXTI_PIN_PORT;
+    MSW3_BTM_EXTICR     &= ~MSW3_BTM_EXTI_PIN;
+    MSW3_BTM_EXTICR     |= MSW3_BTM_EXTI_PIN_PORT;
+    FSW1_EXTI->IMR      |= (0x1 << FSW1_PORT_PIN);
+    FSW2_EXTI->IMR      |= (0x1 << FSW2_PORT_PIN);
+    MSW3_TOP_EXTI->IMR  |= (0x1 << MSW3_TOP_PORT_PIN);
+    MSW3_BTM_EXTI->IMR  |= (0x1 << MSW3_BTM_PORT_PIN);
+    FSW1_EXTI->FTSR     |= (0x1 << FSW1_PORT_PIN);
+    FSW2_EXTI->FTSR     |= (0x1 << FSW2_PORT_PIN);
+    MSW3_TOP_EXTI->FTSR |= (0x1 << MSW3_TOP_PORT_PIN);
+    MSW3_BTM_EXTI->FTSR |= (0x1 << MSW3_BTM_PORT_PIN);
     NVIC_EnableIRQ(FSW1_IRQ_N);
     NVIC_EnableIRQ(FSW2_IRQ_N);
+    NVIC_EnableIRQ(MSW3_TOP_IRQ_N);
+    NVIC_EnableIRQ(MSW3_BTM_IRQ_N);
 }
 
 void FSW1_IRQ_HANDLER (void)
@@ -144,6 +154,24 @@ void FSW2_IRQ_HANDLER (void)
     if (FSW2_EXTI->PR & (0x1 << FSW2_PORT_PIN)) {
         FSW2_EXTI->PR |= 0x1 << FSW2_PORT_PIN;
         fsw_toggle_states |= (0x1 << FSW2_TOG_PORT_PIN);
+    }
+}
+
+void MSW3_TOP_IRQ_HANDLER (void)
+{
+    NVIC_ClearPendingIRQ(MSW3_TOP_IRQ_N);
+    if (MSW3_TOP_EXTI->PR & (0x1 << MSW3_TOP_PORT_PIN)) {
+        MSW3_TOP_EXTI->PR |= 0x1 << MSW3_TOP_PORT_PIN;
+        fsw_toggle_states |= (0x1 << MSW3_TOP_TOG_PORT_PIN);
+    }
+}
+
+void MSW3_BTM_IRQ_HANDLER (void)
+{
+    NVIC_ClearPendingIRQ(MSW3_BTM_IRQ_N);
+    if (MSW3_BTM_EXTI->PR & (0x1 << MSW3_BTM_PORT_PIN)) {
+        MSW3_BTM_EXTI->PR |= 0x1 << MSW3_BTM_PORT_PIN;
+        fsw_toggle_states |= (0x1 << MSW3_BTM_TOG_PORT_PIN);
     }
 }
 

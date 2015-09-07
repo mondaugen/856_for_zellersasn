@@ -116,6 +116,16 @@ static void fsw2_func(switch_debouncer_t *sd)
     led3_tog();
 }
 
+static void msw3_top_func(switch_debouncer_t *sd)
+{
+    led5_tog();
+}
+
+static void msw3_btm_func(switch_debouncer_t *sd)
+{
+    led7_tog();
+}
+
 void switch_control_test_setup(void)
 {
 #if defined SWITCH_CONTROL_TEST_1
@@ -205,14 +215,22 @@ void switch_control_test_setup(void)
 #elif defined SWITCH_CONTROL_TEST_5
     static mom_state_t fsw_states[] = {
         {FSW1_TOG_ADDR, FSW1_TOG_PORT_PIN, FSW1_ADDR, FSW1_PORT_PIN},
-        {FSW2_TOG_ADDR, FSW2_TOG_PORT_PIN, FSW2_ADDR, FSW2_PORT_PIN}
+        {FSW2_TOG_ADDR, FSW2_TOG_PORT_PIN, FSW2_ADDR, FSW2_PORT_PIN},
+        {MSW3_TOP_TOG_ADDR, MSW3_TOP_TOG_PORT_PIN, MSW3_TOP_ADDR,     
+            MSW3_TOP_PORT_PIN},
+        {MSW3_BTM_TOG_ADDR, MSW3_BTM_TOG_PORT_PIN, MSW3_BTM_ADDR, 
+            MSW3_BTM_PORT_PIN}
     };
-    static switch_debouncer_t fsw_debouncers[2];
+    static switch_debouncer_t fsw_debouncers[4];
     switch_debouncer_init(&fsw_debouncers[0],fsw1_func,1,&fsw_states[0]);
     switch_debouncer_init(&fsw_debouncers[1],fsw2_func,1,&fsw_states[1]);
+    switch_debouncer_init(&fsw_debouncers[2],msw3_top_func,1,&fsw_states[2]);
+    switch_debouncer_init(&fsw_debouncers[3],msw3_btm_func,3,&fsw_states[3]);
     /* The addresses and pins passed here are just dummy values. */
     switch_control_debounce_init(&switch_control[0],(void*)&fsw_debouncers[0]);
     switch_control_debounce_init(&switch_control[1],(void*)&fsw_debouncers[1]);
+    switch_control_debounce_init(&switch_control[2],(void*)&fsw_debouncers[2]);
+    switch_control_debounce_init(&switch_control[3],(void*)&fsw_debouncers[3]);
 #elif defined SWITCH_CONTROL_TEST_6
     switch_control_init(&switch_control[0],
                         FSW1_ADDR,
@@ -224,15 +242,16 @@ void switch_control_test_setup(void)
                         FSW2_PORT_PIN,
                         switch_control_test_func,
                         (void*)&switch_data[1]);
-#endif /* SWITCH_CONTROL_TEST_{1-4,6} */
+#endif /* SWITCH_CONTROL_TEST_{1-5} */
 #if defined(SWITCH_CONTROL_TEST_1) || defined(SWITCH_CONTROL_TEST_2) \
-    || defined(SWITCH_CONTROL_TEST_3) || defined(SWITCH_CONTROL_TEST_4)
+    || defined(SWITCH_CONTROL_TEST_3) || defined(SWITCH_CONTROL_TEST_4) \
+    || defined(SWITCH_CONTROL_TEST_5)
     int n;
     for (n = 0; n < 4; n++) {
         switch_control_add(&switch_control[n]);
     }
 #endif
-#if defined(SWITCH_CONTROL_TEST_5)|| defined(SWITCH_CONTROL_TEST_6)
+#if defined(SWITCH_CONTROL_TEST_6)
     int n;
     for (n = 0; n < 2; n++) {
         switch_control_add(&switch_control[n]);

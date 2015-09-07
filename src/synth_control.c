@@ -46,11 +46,11 @@ void autorelease_on_done(MMEnvedSamplePlayer * esp)
 }
 
 
-void synth_control_envelopeTime_control(void *data, float envelopeTime_param)
+void synth_control_envelopeTime_control(void *data_, float envelopeTime_param)
 {
     env_map_attack_release_f(
-            noteParamSets[editingWhichParams].attackTime,
-            noteParamSets[editingWhichParams].releaseTime,
+            &noteParamSets[editingWhichParams].attackTime,
+            &noteParamSets[editingWhichParams].releaseTime,
             envelopeTime_param,
             SYNTH_CONTROL_MIN_ATTACK_TIME,
             SYNTH_CONTROL_MAX_ATTACK_TIME,
@@ -58,7 +58,7 @@ void synth_control_envelopeTime_control(void *data, float envelopeTime_param)
             SYNTH_CONTROL_MAX_RELEASE_TIME);
 }
 
-void synth_control_sustainTime_control(void *data, float sustainTime_param)
+void synth_control_sustainTime_control(void *data_, float sustainTime_param)
 {
     /* Sustain time is relative to length of recording, so here just 0-1.
      * It is scaled this way so that the length selection is more precise for
@@ -67,7 +67,7 @@ void synth_control_sustainTime_control(void *data, float sustainTime_param)
         = powf(2.,-7.*(1 - sustainTime_param));
 }
 
-void synth_control_tempoBPM_control(void *data, float tempoBPM_param)
+void synth_control_tempoBPM_control(void *data_, float tempoBPM_param)
 {
     if (editingWhichParams == 0) {
         if (noteDeltaFromBuffer == 1) {
@@ -86,13 +86,13 @@ void synth_control_tempoBPM_control(void *data, float tempoBPM_param)
     }
 }
 
-void synth_control_pitch_control(void *data, float pitch_param)
+void synth_control_pitch_control(void *data_, float pitch_param)
 {
     noteParamSets[editingWhichParams].pitch
         = 48. + (72. - 48.) * pitch_param;
 }
 
-void synth_control_startPoint_control(void *data, float startPoint_param)
+void synth_control_startPoint_control(void *data_, float startPoint_param)
 {
     switch (posMode) {
         case SynthControlPosMode_ABSOLUTE:
@@ -106,7 +106,7 @@ void synth_control_startPoint_control(void *data, float startPoint_param)
     }
 }
 
-void synth_control_eventDeltaBeats_control(void *data, float eventDeltaBeats_param)
+void synth_control_eventDeltaBeats_control(void *data_, float eventDeltaBeats_param)
 {
     switch (deltaButtonMode) {
         case SynthControlDeltaButtonMode_EVENT_DELTA:
@@ -131,7 +131,7 @@ void synth_control_eventDeltaBeats_control(void *data, float eventDeltaBeats_par
     }
 }
 
-void synth_control_offsetBeats_control(void *data, float offsetBeats_param)
+void synth_control_offsetBeats_control(void *data_, float offsetBeats_param)
 {
     if (editingWhichParams == 0) {
         noteParamSets[editingWhichParams].offsetBeats
@@ -144,8 +144,7 @@ void synth_control_offsetBeats_control(void *data, float offsetBeats_param)
     }
 }
 
-void synth_control_noteDeltaFromBuffer_control(void *data,
-        te
+void synth_control_noteDeltaFromBuffer_control(void *data_,
         uint32_t noteDeltaFromBuffer_param)
 {
     noteDeltaFromBuffer = (int)noteDeltaFromBuffer_param;
@@ -232,7 +231,7 @@ void MIDI_synth_record_start_helper(void *data)
 }
 
 /* Start recording with non-zero control change value. Stop with value of 0. */
-void synth_control_record_trig(void *data, uint32_t record_param)
+void synth_control_record_trig(void *data_, uint32_t record_param)
 {
     if (record_param > 0) {
         /* Only allow recording if recording is not scheduled */
@@ -258,7 +257,7 @@ void synth_control_record_tog(void *data)
     }
 }
 
-void synth_control_feedback_control(void *data, uint32_t feedback_param)
+void synth_control_feedback_control(void *data_, uint32_t feedback_param)
 {
     if (feedback_param > 0) {
         /* Move fbBusSplitter to onNode */
@@ -270,13 +269,13 @@ void synth_control_feedback_control(void *data, uint32_t feedback_param)
         /* Zero the feedback bus */
         memset(fbBusSplitter.destBus->data,0,
                 sizeof(MMSample)
-                fbBusSplitter.destBus->size
-                fbBusSplitter.destBus->channels);
+                * fbBusSplitter.destBus->size
+                * fbBusSplitter.destBus->channels);
         feedbackState = 0;
     }
 }
 
-void synth_control_dryGain_control(void *data, float dryGain_param)
+void synth_control_dryGain_control(void *data_, float dryGain_param)
 {
     dryGain = (int16_t)(dryGain_param * 127.);
 }
@@ -318,7 +317,7 @@ static void schedulerState_on_helper(void)
     schedulerState = 1;
 }
 
-void synth_control_schedulerState_control(void *data, uint32_t schedulerState_param)
+void synth_control_schedulerState_control(void *data_, uint32_t schedulerState_param)
 {
     if (schedulerState_param > 0) {
         schedulerState_on_helper();
@@ -327,7 +326,7 @@ void synth_control_schedulerState_control(void *data, uint32_t schedulerState_pa
     }
 }
 
-void synth_control_editingWhichParams_control(void *data,
+void synth_control_editingWhichParams_control(void *data_,
         uint32_t editingWhichParams_param)
 {
     if (editingWhichParams_param >= NUM_NOTE_PARAM_SETS) {
@@ -336,14 +335,14 @@ void synth_control_editingWhichParams_control(void *data,
     editingWhichParams = (int)editingWhichParams_param;
 }
 
-void synth_control_deltaButtonMode_control(void *data,
+void synth_control_deltaButtonMode_control(void *data_,
         uint32_t deltaButtonMode_param)
 {
     deltaButtonMode =
         (SynthControlDeltaButtonMode)deltaButtonMode_param;
 }
 
-void synth_control_recordScheduling_control(void *data,
+void synth_control_recordScheduling_control(void *data_,
         uint32_t recordScheduling_param)
 {
     if (recordScheduling_param) {
@@ -367,13 +366,13 @@ void synth_control_recordScheduling_control(void *data,
     }
 }
 
-void synth_control_gainMode_control(void *data,
+void synth_control_gainMode_control(void *data_,
         uint32_t gainMode_param)
 {
     gainMode = (SynthControlGainMode)gainMode_param;
 }
 
-void synth_control_gain_control(void *data, float gain_param)
+void synth_control_gain_control(void *data_, float gain_param)
 {
     switch (gainMode) {
         case SynthControlGainMode_WET:
@@ -386,12 +385,12 @@ void synth_control_gain_control(void *data, float gain_param)
     }
 }
 
-void synth_control_posMode_control(void *data, uint32_t posMode_param)
+void synth_control_posMode_control(void *data_, uint32_t posMode_param)
 {
     posMode = (SynthControlPosMode)posMode_param;
 }
 
-void synth_control_presetNumber_control(void *data, uint32_t presetNumber_param)
+void synth_control_presetNumber_control(void *data_, uint32_t presetNumber_param)
 {
     if (presetNumber_param >= NUM_SYNTH_CONTROL_PRESETS) {
         presetNumber_param = NUM_SYNTH_CONTROL_PRESETS - 1;
@@ -399,12 +398,12 @@ void synth_control_presetNumber_control(void *data, uint32_t presetNumber_param)
     presetNumber = (int)(presetNumber_param);
 }
 
-void synth_control_presetStore_control(void *data, uint32_t presetStore_param)
+void synth_control_presetStore_control(void *data_, uint32_t presetStore_param)
 {
     sc_presets_store(presetNumber);
 }
 
-void synth_control_presetRecall_control(void *data, uint32_t presetRecall_param)
+void synth_control_presetRecall_control(void *data_, uint32_t presetRecall_param)
 {
     sc_presets_recall(presetNumber);
 }
