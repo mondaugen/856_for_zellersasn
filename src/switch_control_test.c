@@ -225,7 +225,7 @@ void switch_control_test_setup(void)
     switch_debouncer_init(&fsw_debouncers[0],fsw1_func,1,&fsw_states[0]);
     switch_debouncer_init(&fsw_debouncers[1],fsw2_func,1,&fsw_states[1]);
     switch_debouncer_init(&fsw_debouncers[2],msw3_top_func,1,&fsw_states[2]);
-    switch_debouncer_init(&fsw_debouncers[3],msw3_btm_func,3,&fsw_states[3]);
+    switch_debouncer_init(&fsw_debouncers[3],msw3_btm_func,1,&fsw_states[3]);
     /* The addresses and pins passed here are just dummy values. */
     switch_control_debounce_init(&switch_control[0],(void*)&fsw_debouncers[0]);
     switch_control_debounce_init(&switch_control[1],(void*)&fsw_debouncers[1]);

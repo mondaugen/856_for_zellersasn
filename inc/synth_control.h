@@ -16,9 +16,16 @@
 #define SYNTH_CONTROL_MAX_RELEASE_TIME 0.5
 
 typedef enum {
+    /* Control the absolute starting point in the sound file */
     SynthControlPosMode_ABSOLUTE,
+    /* Control the amount by which the starting point is incremented or
+     * decremented each time playback is repeated. The starting point is reset
+     * when the initial note is played. */
     SynthControlPosMode_STRIDE
+    /* There is room for an additional mode here. */
 } SynthControlPosMode;
+/* TODO: See if this can be automated with a macro. */
+#define SYNTH_CONTROL_POS_MODE_N_MODES 2 
 
 /*
 typedef enum {
@@ -28,20 +35,50 @@ typedef enum {
 */
 
 typedef enum {
-    SynthControlDeltaButtonMode_EVENT_DELTA,
+    /* Adjust the event delta freely */
+    SynthControlDeltaButtonMode_EVENT_DELTA_FREE,
+    /* Adjust the event delta, quantizing to some fractions of a beat */
+    SynthControlDeltaButtonMode_EVENT_DELTA_QUANT,
+    /* Adjust how often an event occurs. */
     SynthControlDeltaButtonMode_INTERMITTENCY
 } SynthControlDeltaButtonMode;
+#define SYNTH_CONTROL_DELTA_BUTTON_MODE_N_MODES 3 
 
 typedef enum {
+    /* The pitches chosen are quantized to the chromatic notes -12 to 12 where 0
+     * will play the soundfile at a speed of 0. Or perhaps free, limited by
+     * precision of input. */
     SynthControlPitchMode_CHROM,
+    /* Pitches chosen are quantized to ... -7, -5, 0, 5, 7 ... for some yet
+     * undetermined range. */
     SynthControlPitchMode_4TH5TH,
-    SynthControlPitchMode_LINKTEMPO
+    /* Pitches change according to some sequence, starting at the pitch given by
+     * CHROM or 4TH5TH. The sequences have yet to be determined. */
+    SynthControlPitchMode_ARP
 } SynthControlPitchMode;
+#define SYNTH_CONTROL_PITCH_MODE_N_MODES 3 
 
 typedef enum {
+    /* Control the gain of new notes */
     SynthControlGainMode_WET,
+    /* Control the fade amount for repeated notes. */
     SynthControlGainMode_FADE
 } SynthControlGainMode;
+#define SYNTH_CONTROL_GAIN_MODE_N_MODES 2 
+
+typedef enum {
+    /* The length of the recording does not influence the scheduler tempo. */
+    SynthControlRecMode_NORMAL,
+    /* The length of the recording is used to adjust the tempo of the scheduler
+     * so that its length is equal to 1 beat. */
+    SynthControlRecMode_REC_LEN_1_BEAT,
+    /* The scheduler's tempo is adjusted as with
+     * SynthControlRecMode_REC_LEN_1_BEAT but after the first recording, new
+     * recordings are automatically scheduled which will have the same duration
+     * as the first recording. */
+    SynthControlRecMode_REC_LEN_1_BEAT_REC_SCHED
+} SynthControlRecMode;
+#define SYNTH_CONTROL_REC_MODE_N_MODES 2
 
 typedef struct __NoteParamSet {
     MMSample attackTime;
@@ -74,6 +111,7 @@ extern SynthControlPosMode          posMode;
 extern SynthControlDeltaButtonMode  deltaButtonMode;
 extern SynthControlPitchMode        pitchMode;
 extern SynthControlGainMode         gainMode;
+extern SynthControlRecMode          recMode;
 extern int                          schedulerState;
 
 extern int16_t  dryGain;
@@ -85,5 +123,19 @@ void synth_control_setup(void);
 void autorelease_on_done(MMEnvedSamplePlayer * esp);
 void MIDI_synth_record_stop_helper(void *data);
 void MIDI_synth_record_start_helper(void *data);
+
+uint32_t synth_control_get_editingWhichParams(void);
+void synth_control_set_editingWhichParams(uint32_t editingWhichParams_param);
+void synth_control_set_deltaButtonMode(SynthControlDeltaButtonMode
+        deltaButtonMode_param);
+SynthControlDeltaButtonMode synth_control_get_deltaButtonMode(void);
+void synth_control_set_recMode(SynthControlRecMode recMode_param);
+SynthControlRecMode synth_control_get_recMode(void);
+void synth_control_set_pitchMode(SynthControlPitchMode pitchMode_param);
+SynthControlPitchMode synth_control_get_pitchMode(void);
+void synth_control_set_posMode(SynthControlPosMode posMode_param);
+SynthControlPosMode synth_control_get_posMode(void);
+void synth_control_set_gainMode(SynthControlGainMode gainMode_param);
+SynthControlGainMode synth_control_get_gainMode(void);
 
 #endif /* SYNTH_CONTROL_H */

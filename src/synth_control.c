@@ -20,10 +20,11 @@ SynthControlPosMode         posMode;
 SynthControlDeltaButtonMode deltaButtonMode;
 SynthControlPitchMode       pitchMode;
 SynthControlGainMode        gainMode;
+SynthControlRecMode         recMode;
 
 /* Stuff that shouldn't really be saved */
 int                         noteDeltaFromBuffer;
-int                         editingWhichParams;
+uint32_t                    editingWhichParams;
 int                         currentPreset;
 int                         feedbackState;
 int                         scheduleRecording;
@@ -332,7 +333,7 @@ void synth_control_editingWhichParams_control(void *data_,
     if (editingWhichParams_param >= NUM_NOTE_PARAM_SETS) {
             editingWhichParams_param = NUM_NOTE_PARAM_SETS - 1;
     } 
-    editingWhichParams = (int)editingWhichParams_param;
+    editingWhichParams = editingWhichParams_param;
 }
 
 void synth_control_deltaButtonMode_control(void *data_,
@@ -456,9 +457,75 @@ void synth_control_setup(void)
     tempoBPM            = 120;
     posMode             = SynthControlPosMode_ABSOLUTE;
     deltaButtonMode     = SynthControlDeltaButtonMode_EVENT_DELTA;
+    recMode             = SynthControlRecMode_NORMAL;
+    pitchMode           = SynthControlPitchMode_CHROM;
     feedbackState       = 0;
     scheduleRecording   = 0;
     schedulerState      = 0;
     /* The recorder trigger requires the zero crossing search be initialized */
     HannWindowTable_init(REC_LOOP_FADE_TIME_S * 2.);
+}
+
+uint32_t synth_control_get_editingWhichParams(void)
+{
+    return editingWhichParams;
+}
+
+void synth_control_set_editingWhichParams(uint32_t editingWhichParams_param)
+{
+    if (editingWhichParams_param >= NUM_NOTE_PARAM_SETS) {
+            editingWhichParams_param = NUM_NOTE_PARAM_SETS - 1;
+    } 
+    editingWhichParams = editingWhichParams_param;
+}
+
+void synth_control_set_deltaButtonMode(SynthControlDeltaButtonMode 
+        deltaButtonMode_param)
+{
+    deltaButtonMode = deltaButtonMode_param;
+}
+
+SynthControlDeltaButtonMode synth_control_get_deltaButtonMode(void)
+{
+    return deltaButtonMode;
+}
+
+void synth_control_set_recMode(SynthControlRecMode recMode_param)
+{
+    recMode = recMode_param;
+}
+
+SynthControlRecMode synth_control_get_recMode(void)
+{
+    return recMode;
+}
+
+void synth_control_set_pitchMode(SynthControlPitchMode pitchMode_param)
+{
+    pitchMode = pitchMode_param;
+}
+
+SynthControlPitchMode synth_control_get_pitchMode(void)
+{
+    return pitchMode;
+}
+
+void synth_control_set_posMode(SynthControlPosMode posMode_param)
+{
+    posMode = (SynthControlPosMode)posMode_param;
+}
+
+SynthControlPosMode synth_control_get_posMode(void)
+{
+    return posMode;
+}
+
+void synth_control_set_gainMode(SynthControlGainMode gainMode_param)
+{
+    gainMode = (SynthControlGainMode)gainMode_param;
+}
+
+SynthControlGainMode synth_control_get_gainMode(void)
+{
+    return gainMode;
 }
