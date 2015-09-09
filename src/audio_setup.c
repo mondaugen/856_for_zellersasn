@@ -7,6 +7,7 @@
 #include <stdint.h> 
 #include "synth_control.h" 
 #include "scheduling.h" 
+#include "switch_control.h" 
 
 int audio_ready = 0;
 
@@ -27,6 +28,8 @@ void audio_hw_io(audio_hw_io_t *params)
             params->in[n*params->nchans_in];
     }
 #else
+    /* Process switches. MIDI trumps switches if messages present */
+    switch_control_do_all();
     /* Process MIDI once every audioblock */
     midi_hw_process_input(NULL);
     /* Increment scheduler and do pending events */

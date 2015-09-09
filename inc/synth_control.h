@@ -7,13 +7,17 @@
 
 /* The amount of fade at the end of the recording in seconds */
 #define REC_LOOP_FADE_TIME_S 0.025 
-/* The number of sets of note parameters */
-#define NUM_NOTE_PARAM_SETS 3 
 /* Envelope parameters */
 #define SYNTH_CONTROL_MIN_ATTACK_TIME 0.001 
 #define SYNTH_CONTROL_MAX_ATTACK_TIME 0.5
 #define SYNTH_CONTROL_MIN_RELEASE_TIME 0.001
 #define SYNTH_CONTROL_MAX_RELEASE_TIME 0.5
+
+typedef uint32_t SynthControlEditingWhichParamsIndex;
+/* The number of sets of note parameters */
+#define NUM_NOTE_PARAM_SETS 3 
+typedef uint32_t SynthControlPresetNumber;
+
 
 typedef enum {
     /* Control the absolute starting point in the sound file */
@@ -21,11 +25,11 @@ typedef enum {
     /* Control the amount by which the starting point is incremented or
      * decremented each time playback is repeated. The starting point is reset
      * when the initial note is played. */
-    SynthControlPosMode_STRIDE
+    SynthControlPosMode_STRIDE,
     /* There is room for an additional mode here. */
+    SynthControlPosMode_UNKNOWN
 } SynthControlPosMode;
-/* TODO: See if this can be automated with a macro. */
-#define SYNTH_CONTROL_POS_MODE_N_MODES 2 
+#define SYNTH_CONTROL_POS_MODE_N_MODES 3
 
 /*
 typedef enum {
@@ -59,10 +63,10 @@ typedef enum {
 #define SYNTH_CONTROL_PITCH_MODE_N_MODES 3 
 
 typedef enum {
-    /* Control the gain of new notes */
-    SynthControlGainMode_WET,
     /* Control the fade amount for repeated notes. */
-    SynthControlGainMode_FADE
+    SynthControlGainMode_FADE,
+    /* Control the gain of new notes */
+    SynthControlGainMode_WET
 } SynthControlGainMode;
 #define SYNTH_CONTROL_GAIN_MODE_N_MODES 2 
 
@@ -123,9 +127,15 @@ void synth_control_setup(void);
 void autorelease_on_done(MMEnvedSamplePlayer * esp);
 void MIDI_synth_record_stop_helper(void *data);
 void MIDI_synth_record_start_helper(void *data);
+void synth_control_record_tog(void);
+void synth_control_schedulerState_tog(void);
+void synth_control_presetStore_tog(void);
+void synth_control_presetRecall_tog(void);
+void synth_control_feedback_tog(void);
 
-uint32_t synth_control_get_editingWhichParams(void);
-void synth_control_set_editingWhichParams(uint32_t editingWhichParams_param);
+SynthControlEditingWhichParamsIndex synth_control_get_editingWhichParams(void);
+void synth_control_set_editingWhichParams(
+        SynthControlEditingWhichParamsIndex editingWhichParams_param);
 void synth_control_set_deltaButtonMode(SynthControlDeltaButtonMode
         deltaButtonMode_param);
 SynthControlDeltaButtonMode synth_control_get_deltaButtonMode(void);
@@ -137,5 +147,7 @@ void synth_control_set_posMode(SynthControlPosMode posMode_param);
 SynthControlPosMode synth_control_get_posMode(void);
 void synth_control_set_gainMode(SynthControlGainMode gainMode_param);
 SynthControlGainMode synth_control_get_gainMode(void);
+void synth_control_set_presetNumber(SynthControlPresetNumber presetNumber_param);
+SynthControlPresetNumber synth_control_get_presetNumber(void);
 
 #endif /* SYNTH_CONTROL_H */

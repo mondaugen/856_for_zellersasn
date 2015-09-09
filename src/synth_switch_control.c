@@ -1,195 +1,143 @@
+#include "switches.h"
 #include "switch_control.h"
+#include "synth_control.h" 
 
-//void synth_control_noteDeltaFromBuffer_control(void *data_,
-//        uint32_t noteDeltaFromBuffer_param)
-//void synth_control_record_trig(void *data_, uint32_t record_param)
-//void synth_control_feedback_control(void *data_, uint32_t feedback_param)
-//void synth_control_schedulerState_control(void *data_, uint32_t schedulerState_param)
-//void synth_control_editingWhichParams_control(void *data_,
-//        uint32_t editingWhichParams_param)
-//void synth_control_deltaButtonMode_control(void *data_,
-//        uint32_t deltaButtonMode_param)
-//void synth_control_recordScheduling_control(void *data_,
-//        uint32_t recordScheduling_param)
-//void synth_control_gainMode_control(void *data_,
-//        uint32_t gainMode_param)
-//void synth_control_posMode_control(void *data_, uint32_t posMode_param)
-//void synth_control_presetNumber_control(void *data_, uint32_t presetNumber_param)
-//void synth_control_presetStore_control(void *data_, uint32_t presetStore_param)
-//void synth_control_presetRecall_control(void *data_, uint32_t presetRecall_param)
+/* This structure is a subclass of a switch_control_t struct but includes two
+ * additional port_addr and port_bit fields so that the state of two pins can be
+ * checked. */
+typedef struct __synth_switch_control_t {
+    switch_control_t head;
+    volatile uint32_t *port_addr;
+    uint32_t port_bit;
+} synth_switch_control_t;
 
-/* sc must contain a uint32_t indicating which note the switch selects */
-static void synth_switch_control_editingWhichParams_control(switch_control_t *sc)
-{
-    switch (*((uint32_t*)sc->data)) {
-        case 0:
-        case 2:
-            if (!switch_control_get_state(sc)) {
-                synth_control_set_editingWhichParams(*((uint32_t*)sc->data));
-            }
-            break;
-        case 1:
-            if (switch_control_get_state(sc)) {
-                synth_control_set_editingWhichParams(*((uint32_t*)sc->data));
-            }
-            break;
+#define SYNTH_SWITCH_CONTROL(type,fun,c0,c1,c2)\
+    static void synth_switch_control_ ## type ## _control(switch_control_t *sc)\
+    {\
+        if (!switch_control_get_state(sc)) {\
+            fun(c0);\
+        } else if (!switch_control_get_state((synth_switch_control_t*)sc)) {\
+            fun(c2);\
+        } else {\
+            fun(c1);\
+        }\
     }
-}
 
-void synth_switch_control_editingWhichParams_setup(void)
-{
-    static switch_control_t _switch_controls[NUM_NOTE_PARAM_SETS];
-    static uint32_t _param_indices[] = {0, 1, 2};
-    /* For the middle switch we just want to check that it is "off", so we
-     * arbitrarily use the top port pin */
-    volatile uint32_t *_sw_addrs[] = {SW2_TOP_ADDR,SW2_TOP_ADDR,SW2_BTM_ADDR};
-    uint32_t _sw_pins[] = {SW2_TOP_PORT_PIN,SW2_TOP_PORT_PIN,SW2_BTM_PORT_PIN};
-    uint32_t n;
-    for (n = 0; n < NUM_NOTE_PARAM_SETS; n++) {
-        switch_control_init(&_switch_controls[n],
-                _sw_addrs[n],
-                _sw_pins[n],
-                synth_switch_control_editingWhichParams_control,
-                (void*)&_param_indices[n]);
+#define SYNTH_SWITCH_SETUP(type,sw)\
+    void synth_switch_control_ ## type ## _setup(void)\
+    {\
+        static synth_switch_control_t _switch_control;\
+        volatile uint32_t *_sw_addrs[] = {\
+            sw ## _TOP_ADDR,\
+            sw ## _BTM_ADDR};\
+        uint32_t _sw_pins[] = {\
+            sw ## _TOP_PORT_PIN,\
+            sw ## _BTM_PORT_PIN};\
+        switch_control_init((switch_control_t*)&_switch_control,\
+                _sw_addrs[1],/* Because btm is when the head of switch is up. */\
+                _sw_pins[1],\
+                synth_switch_control_ ## type ## _control,\
+                NULL);\
+        _switch_control.port_addr = _sw_addrs[0];\
+        _switch_control.port_bit  = _sw_pins[0];\
+        switch_control_add((switch_control_t*)&_switch_control);\
     }
-}
 
-void synth_switch_control_editingWhichParams_setup(void)
-{
-    static switch_control_t _switch_controls[NUM_NOTE_PARAM_SETS];
-    static uint32_t _param_indices[] = {0, 1, 2};
-    /* For the middle switch we just want to check that it is "off", so we
-     * arbitrarily use the top port pin */
-    volatile uint32_t *_sw_addrs[] = {SW2_TOP_ADDR,SW2_TOP_ADDR,SW2_BTM_ADDR};
-    uint32_t _sw_pins[] = {SW2_TOP_PORT_PIN,SW2_TOP_PORT_PIN,SW2_BTM_PORT_PIN};
-    uint32_t n;
-    for (n = 0; n < NUM_NOTE_PARAM_SETS; n++) {
-        switch_control_init(&_switch_controls[n],
-                _sw_addrs[n],
-                _sw_pins[n],
-                synth_switch_control_editingWhichParams_control,
-                (void*)&_param_indices[n]);
+#define SYNTH_SWITCH_SETUP_CALL(type)\
+    synth_switch_control_ ## type ## _setup()
+
+#define SYNTH_SWITCH_CONTROL_TOG(name)\
+    void synth_switch_control_ ## name ## _tog_func(switch_debouncer_t *sd)\
+    {\
+        synth_control_ ## name ## _tog();\
     }
-}
 
-/* sc must contain a uint32_t indicating which preset the switch selects */
-static void synth_switch_control_presetNumber_control(switch_control_t *sc)
-{
-    switch (*((uint32_t*)sc->data)) {
-        case 0:
-        case 2:
-            if (!switch_control_get_state(sc)) {
-                synth_control_set_presetNumber(*((uint32_t*)sc->data));
-            }
-            break;
-        case 1:
-            if (switch_control_get_state(sc)) {
-                synth_control_set_presetNumber(*((uint32_t*)sc->data));
-            }
-            break;
+#define SYNTH_SWITCH_SETUP_TOG(name,sw)\
+    void synth_switch_control_ ## name ## _tog_setup(void)\
+    {\
+        static mom_state_t mom_state = {\
+            sw ## _TOG_ADDR,\
+            sw ## _TOG_PORT_PIN,\
+            sw ## _ADDR,\
+            sw ## _PORT_PIN\
+        };\
+        static switch_debouncer_t debouncer;\
+        static switch_control_t control;\
+        switch_debouncer_init(&debouncer,\
+                synth_switch_control_ ## name ## _tog_func,\
+                1,\
+                &mom_state);\
+        switch_control_debounce_init(&control,&debouncer);\
+        switch_control_add(&control);\
     }
-}
 
-void synth_switch_control_presetNumber_setup(void)
-{
-    static switch_control_t _switch_controls[NUM_SYNTH_CONTROL_PRESETS];
-    static uint32_t _preset_numbers[] = {0, 1, 2};
-    /* For the middle switch we just want to check that it is "off", so we
-     * arbitrarily use the top port pin */
-    volatile uint32_t *_sw_addrs[] = {SW5_TOP_ADDR,SW5_TOP_ADDR,SW5_BTM_ADDR};
-    uint32_t _sw_pins[] = {SW5_TOP_PORT_PIN,SW5_TOP_PORT_PIN,SW5_BTM_PORT_PIN};
-    uint32_t n;
-    for (n = 0; n < ; n++) {
-        switch_control_init(&_switch_controls[n],
-                _sw_addrs[n],
-                _sw_pins[n],
-                synth_switch_control_presetNumber_control,
-                (void*)&_preset_numbers[n]);
-    }
-}
+#define SYNTH_SWITCH_SETUP_TOG_CALL(name)\
+   synth_switch_control_ ## name ## _tog_setup() 
 
-/* sc must contain a SynthControlPosMode indicating which preset the switch
- * selects */
-static void synth_switch_control_posMode_control(switch_control_t *sc)
-{
-    switch (*((uint32_t*)sc->data)) {
-        case SynthControlPosMode_ABSOLUTE:
-        case SynthControlPosMode_STRIDE: /* Should eventually be replaced */
-            if (!switch_control_get_state(sc)) {
-                synth_control_set_posMode(*((SynthControlPosMode*)sc->data));
-            }
-            break;
-        case SynthControlPosMode_STRIDE:
-            if (switch_control_get_state(sc)) {
-                synth_control_set_posMode(*((SynthControlPosMode*)sc->data));
-            }
-            break;
-    }
-}
 
-void synth_switch_control_posMode_setup(void)
-{
-    static switch_control_t _switch_controls[SYNTH_CONTROL_POS_MODE_N_MODES];
-    static SynthControlPosMode _pos_modes[] = {
+SYNTH_SWITCH_CONTROL(SynthControlEditingWhichParamsIndex,
+        synth_control_set_editingWhichParams,0,1,2);
+SYNTH_SWITCH_SETUP(SynthControlEditingWhichParamsIndex,SW2);
+
+SYNTH_SWITCH_CONTROL(SynthControlPresetNumber,
+        synth_control_set_presetNumber,0,1,2);
+SYNTH_SWITCH_SETUP(SynthControlPresetNumber,
+        SW5);
+SYNTH_SWITCH_CONTROL(SynthControlPosMode,
+        synth_control_set_posMode,
         SynthControlPosMode_ABSOLUTE,
         SynthControlPosMode_STRIDE,
-        SynthControlPosMode_STRIDE /* Should eventually be replaced by something
-                                      more interesting. */
-    };
-    /* For the middle switch we just want to check that it is "off", so we
-     * arbitrarily use the top port pin */
-    volatile uint32_t *_sw_addrs[] = {SW1_TOP_ADDR,SW1_TOP_ADDR,SW1_BTM_ADDR};
-    uint32_t _sw_pins[] = {SW1_TOP_PORT_PIN,SW1_TOP_PORT_PIN,SW1_BTM_PORT_PIN};
-    uint32_t n;
-    for (n = 0; n < ; n++) {
-        switch_control_init(&_switch_controls[n],
-                _sw_addrs[n],
-                _sw_pins[n],
-                synth_switch_control_posMode_control,
-                (void*)&_pos_modes[n]);
-    }
-}
+        SynthControlPosMode_UNKNOWN);
+SYNTH_SWITCH_SETUP(SynthControlPosMode,SW1);
+SYNTH_SWITCH_CONTROL(SynthControlDeltaButtonMode,
+        synth_control_set_deltaButtonMode,
+        SynthControlDeltaButtonMode_EVENT_DELTA_FREE,
+        SynthControlDeltaButtonMode_EVENT_DELTA_QUANT,
+        SynthControlDeltaButtonMode_INTERMITTENCY);
+SYNTH_SWITCH_SETUP(SynthControlDeltaButtonMode,SW4);
+SYNTH_SWITCH_CONTROL(SynthControlPitchMode,
+        synth_control_set_pitchMode,
+        SynthControlPitchMode_CHROM,
+        SynthControlPitchMode_4TH5TH,
+        SynthControlPitchMode_ARP);
+SYNTH_SWITCH_SETUP(SynthControlPitchMode,SW8);
+SYNTH_SWITCH_CONTROL(SynthControlRecMode,
+        synth_control_set_recMode,
+        SynthControlRecMode_NORMAL,
+        SynthControlRecMode_REC_LEN_1_BEAT,
+        SynthControlRecMode_REC_LEN_1_BEAT_REC_SCHED);
+SYNTH_SWITCH_SETUP(SynthControlRecMode,SW6);
+        /* Incase the switch gets caught down momentarily when toggling the
+         * feedback, the gain mode will stay in wet mode. */
+SYNTH_SWITCH_CONTROL(SynthControlGainMode,
+        synth_control_set_gainMode,
+        SynthControlGainMode_FADE,
+        SynthControlGainMode_WET,
+        SynthControlGainMode_WET); 
+SYNTH_SWITCH_SETUP(SynthControlGainMode,SW7);
+SYNTH_SWITCH_CONTROL_TOG(record);
+SYNTH_SWITCH_SETUP_TOG(record,FSW1);
+SYNTH_SWITCH_CONTROL_TOG(schedulerState);
+SYNTH_SWITCH_SETUP_TOG(schedulerState,FSW2);
+SYNTH_SWITCH_CONTROL_TOG(presetRecall);
+SYNTH_SWITCH_SETUP_TOG(presetRecall,MSW3_TOP);
+SYNTH_SWITCH_CONTROL_TOG(presetStore);
+SYNTH_SWITCH_SETUP_TOG(presetStore,MSW3_BTM);
+SYNTH_SWITCH_CONTROL_TOG(feedback);
+SYNTH_SWITCH_SETUP_TOG(feedback,MSW7_TOP);
 
-/* sc must contain a SynthControlDeltaButtonMode indicating which preset the switch
- * selects */
-static void synth_switch_control_deltaButtonMode_control(switch_control_t *sc)
+void synth_switch_control_setup(void)
 {
-    switch (*((uint32_t*)sc->data)) {
-        case 0:
-        case 2:
-            if (!switch_control_get_state(sc)) {
-                synth_control_set_deltaButtonMode(
-                        *((SynthControlDeltaButtonMode*)sc->data));
-            }
-            break;
-        case 1:
-            if (switch_control_get_state(sc)) {
-                synth_control_set_deltaButtonMode(
-                        *((SynthControlDeltaButtonMode*)sc->data));
-            }
-            break;
-    }
+    SYNTH_SWITCH_SETUP_CALL(SynthControlEditingWhichParamsIndex);
+    SYNTH_SWITCH_SETUP_CALL(SynthControlPresetNumber);
+    SYNTH_SWITCH_SETUP_CALL(SynthControlPosMode);
+    SYNTH_SWITCH_SETUP_CALL(SynthControlDeltaButtonMode);
+    SYNTH_SWITCH_SETUP_CALL(SynthControlPitchMode);
+    SYNTH_SWITCH_SETUP_CALL(SynthControlRecMode);
+    SYNTH_SWITCH_SETUP_CALL(SynthControlGainMode);
+    SYNTH_SWITCH_SETUP_TOG_CALL(record);
+    SYNTH_SWITCH_SETUP_TOG_CALL(schedulerState);
+    SYNTH_SWITCH_SETUP_TOG_CALL(presetRecall);
+    SYNTH_SWITCH_SETUP_TOG_CALL(presetStore);
+    SYNTH_SWITCH_SETUP_TOG_CALL(feedback);
 }
-
-void synth_switch_control_deltaButtonMode_setup(void)
-{
-    static switch_control_t _switch_controls[SYNTH_CONTROL_POS_MODE_N_MODES];
-    static SynthControlDeltaButtonMode _pos_modes[] = {
-        SynthControlDeltaButtonMode_ABSOLUTE,
-        SynthControlDeltaButtonMode_STRIDE,
-        SynthControlDeltaButtonMode_STRIDE 
-    };
-    /* For the middle switch we just want to check that it is "off", so we
-     * arbitrarily use the top port pin */
-    volatile uint32_t *_sw_addrs[] = {SW1_TOP_ADDR,SW1_TOP_ADDR,SW1_BTM_ADDR};
-    uint32_t _sw_pins[] = {SW1_TOP_PORT_PIN,SW1_TOP_PORT_PIN,SW1_BTM_PORT_PIN};
-    uint32_t n;
-    for (n = 0; n < ; n++) {
-        switch_control_init(&_switch_controls[n],
-                _sw_addrs[n],
-                _sw_pins[n],
-                synth_switch_control_deltaButtonMode_control,
-                (void*)&_pos_modes[n]);
-    }
-}
-

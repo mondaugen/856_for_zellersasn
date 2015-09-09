@@ -68,11 +68,13 @@
 
 #define MSW3_TOP_PORT_PIN       SW3_TOP_PORT_PIN
 #define MSW3_BTM_PORT_PIN       SW3_BTM_PORT_PIN
+#define MSW7_TOP_PORT_PIN       SW7_TOP_PORT_PIN
 
 #define FSW1_TOG_PORT_PIN       0 
 #define FSW2_TOG_PORT_PIN       1
 #define MSW3_TOP_TOG_PORT_PIN   2
 #define MSW3_BTM_TOG_PORT_PIN   3 
+#define MSW7_TOP_TOG_PORT_PIN   4
 
 #define FSW1_ADDR               (&((FSW1_PORT)->IDR))
 #define FSW2_ADDR               (&((FSW2_PORT)->IDR)) 
@@ -96,41 +98,49 @@
 
 #define MSW3_TOP_ADDR           SW3_TOP_ADDR 
 #define MSW3_BTM_ADDR           SW3_BTM_ADDR 
+#define MSW7_TOP_ADDR           SW7_TOP_ADDR 
 
 #define FSW1_TOG_ADDR           (&fsw_toggle_states) 
 #define FSW2_TOG_ADDR           (&fsw_toggle_states)
-#define MSW3_TOP_TOG_ADDR           (&fsw_toggle_states)
-#define MSW3_BTM_TOG_ADDR           (&fsw_toggle_states) 
+#define MSW3_TOP_TOG_ADDR       (&fsw_toggle_states)
+#define MSW3_BTM_TOG_ADDR       (&fsw_toggle_states) 
+#define MSW7_TOP_TOG_ADDR       (&fsw_toggle_states)
 
 #define FSW1_EXTICR             SYSCFG->EXTICR[1] 
 #define FSW2_EXTICR             SYSCFG->EXTICR[1] 
 #define MSW3_TOP_EXTICR         SYSCFG->EXTICR[2] 
 #define MSW3_BTM_EXTICR         SYSCFG->EXTICR[0] 
+#define MSW7_TOP_EXTICR         SYSCFG->EXTICR[0] 
 
 #define FSW1_EXTI_PIN           SYSCFG_EXTICR2_EXTI4
 #define FSW2_EXTI_PIN           SYSCFG_EXTICR2_EXTI6
 #define MSW3_TOP_EXTI_PIN       SYSCFG_EXTICR3_EXTI11
 #define MSW3_BTM_EXTI_PIN       SYSCFG_EXTICR1_EXTI0
+#define MSW7_TOP_EXTI_PIN       SYSCFG_EXTICR1_EXTI3
 
 #define FSW1_EXTI_PIN_PORT      SYSCFG_EXTICR2_EXTI4_PB
 #define FSW2_EXTI_PIN_PORT      SYSCFG_EXTICR2_EXTI6_PE
 #define MSW3_TOP_EXTI_PIN_PORT  SYSCFG_EXTICR3_EXTI11_PD
 #define MSW3_BTM_EXTI_PIN_PORT  SYSCFG_EXTICR1_EXTI0_PB
+#define MSW7_TOP_EXTI_PIN_PORT  SYSCFG_EXTICR1_EXTI3_PD
 
 #define FSW1_IRQ_HANDLER        EXTI4_IRQHandler 
 #define FSW2_IRQ_HANDLER        EXTI9_5_IRQHandler 
 #define MSW3_TOP_IRQ_HANDLER    EXTI15_10_IRQHandler 
 #define MSW3_BTM_IRQ_HANDLER    EXTI0_IRQHandler 
+#define MSW7_TOP_IRQ_HANDLER    EXTI3_IRQHandler 
 
 #define FSW1_IRQ_N              EXTI4_IRQn 
 #define FSW2_IRQ_N              EXTI9_5_IRQn 
 #define MSW3_TOP_IRQ_N          EXTI15_10_IRQn 
 #define MSW3_BTM_IRQ_N          EXTI0_IRQn 
+#define MSW7_TOP_IRQ_N          EXTI3_IRQn 
 
 #define FSW1_EXTI               EXTI
 #define FSW2_EXTI               EXTI
 #define MSW3_TOP_EXTI           EXTI
 #define MSW3_BTM_EXTI           EXTI
+#define MSW7_TOP_EXTI           EXTI
 
 extern volatile uint32_t fsw_toggle_states;
 

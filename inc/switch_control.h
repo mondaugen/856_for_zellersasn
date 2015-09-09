@@ -56,9 +56,10 @@ void switch_debouncer_init(switch_debouncer_t *sd,
                            uint32_t init_n_ignores,
                            mom_state_t *state);
 
-#define switch_control_get_state(ctl) ((*((ctl)->port_addr) >> ctl->port_bit) & 0x1)
+#define switch_control_get_state(ctl) ((*((ctl)->port_addr) >> (ctl)->port_bit) \
+        & 0x1)
 #define switch_control_set_state(ctl,state)\
-    *((ctl)->port_addr) &= ~(0x1  << ctl->port_bit);\
-    *((ctl)->port_addr) |= (state << ctl->port_bit)
+    *((ctl)->port_addr) &= ~(0x1  << (ctl)->port_bit);\
+    *((ctl)->port_addr) |= (state << (ctl)->port_bit)
 
 #endif /* SWITCH_CONTROL_H */

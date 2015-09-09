@@ -9,10 +9,9 @@
 #include "leds.h" 
 #include "switches.h" 
 #include "adc.h" 
-#include "adc_channel_test.h" 
 #include "leds.h" 
 #include "switch_control.h" 
-#include "switch_control_test.h" 
+#include "synth_switch_control.h" 
 
 void play_note_rate(int midinote, float rate)
 {
@@ -63,25 +62,15 @@ int main (void)
     }
     leds_setup();
     switches_setup();
+    synth_switch_control_setup();
+    adc_setup_dma_scan();
     SampleTable_init();
     sc_presets_init();
     signal_chain_setup();
     synth_control_setup();
     scheduler_setup();
     audio_start();
-    uint32_t switch_states[NUM_SWITCHES];
-    int32_t count = INITIAL_COUNT;
-    adc_setup_dma_scan();
-    adc_channel_test_setup();
-    switch_control_test_setup();
     while(1) {
-        if (!count--) {
-            count = INITIAL_COUNT;
-            adc_channels_update(adc_test_channels,TOTAL_NUM_ADC_CHANNELS);
-            adc_channel_do_all_sets();
-            get_switch_states(switch_states);
-            switch_control_do_all();
-        }
     }
 #endif /* AUDIO_HW_TEST_THROUGHPUT */
     return(0);
