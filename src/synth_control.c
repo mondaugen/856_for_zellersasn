@@ -32,7 +32,7 @@ int                         firstScheduledRecording;
 /* Is the scheduler on or off ? */
 int                         schedulerState;
 /* What preset would be recalled/stored. First preset is numbered 0. */
-int                         presetNumber;
+uint32_t                    presetNumber;
 
 /* Stuff that might not make it into the final application */
 int16_t                     dryGain;
@@ -528,4 +528,12 @@ void synth_control_set_gainMode(SynthControlGainMode gainMode_param)
 SynthControlGainMode synth_control_get_gainMode(void)
 {
     return gainMode;
+}
+
+void synth_control_set_presetNumber(uint32_t presetNumber_param)
+{
+    if (presetNumber_param >= NUM_SYNTH_CONTROL_PRESETS) {
+        presetNumber_param = NUM_SYNTH_CONTROL_PRESETS - 1;
+    }
+    presetNumber = presetNumber_param;
 }
