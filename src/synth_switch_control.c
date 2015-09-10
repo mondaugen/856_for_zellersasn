@@ -24,7 +24,7 @@ typedef struct __synth_switch_control_t {
     }
 
 #define SYNTH_SWITCH_SETUP(type,sw)\
-    void synth_switch_control_ ## type ## _setup(void)\
+    static void synth_switch_control_ ## type ## _setup(void)\
     {\
         static synth_switch_control_t _switch_control;\
         volatile uint32_t *_sw_addrs[] = {\
@@ -53,7 +53,7 @@ typedef struct __synth_switch_control_t {
     }
 
 #define SYNTH_SWITCH_SETUP_TOG(name,sw)\
-    void synth_switch_control_ ## name ## _tog_setup(void)\
+    static void synth_switch_control_ ## name ## _tog_setup(void)\
     {\
         static mom_state_t mom_state = {\
             sw ## _TOG_ADDR,\

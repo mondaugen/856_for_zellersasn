@@ -149,5 +149,12 @@ void synth_control_set_gainMode(SynthControlGainMode gainMode_param);
 SynthControlGainMode synth_control_get_gainMode(void);
 void synth_control_set_presetNumber(SynthControlPresetNumber presetNumber_param);
 SynthControlPresetNumber synth_control_get_presetNumber(void);
+void synth_control_set_envelopeTime(float envelopeTime_param);
+void synth_control_set_sustainTime(float sustainTime_param);
+void synth_control_set_startPoint(float startPoint_param);
+void synth_control_set_positionStride(float positionStride_param);
+void synth_control_set_eventDelta_quant(float eventDeltaBeats_param);
+void synth_control_set_eventDelta_free(float eventDeltaBeats_param);
+void synth_control_set_intermittency(float intermittency_param);
 
 #endif /* SYNTH_CONTROL_H */

@@ -46,8 +46,7 @@ void autorelease_on_done(MMEnvedSamplePlayer * esp)
             (void *)&(MMEnvedSamplePlayer_getSamplePlayerSigProc(esp).note));
 }
 
-
-void synth_control_envelopeTime_control(void *data_, float envelopeTime_param)
+void synth_control_set_envelopeTime(float envelopeTime_param)
 {
     env_map_attack_release_f(
             &noteParamSets[editingWhichParams].attackTime,
@@ -59,13 +58,23 @@ void synth_control_envelopeTime_control(void *data_, float envelopeTime_param)
             SYNTH_CONTROL_MAX_RELEASE_TIME);
 }
 
-void synth_control_sustainTime_control(void *data_, float sustainTime_param)
+void synth_control_envelopeTime_control(void *data_, float envelopeTime_param)
+{
+    synth_control_set_envelopeTime(envelopeTime_param);
+}
+
+void synth_control_set_sustainTime(float sustainTime_param)
 {
     /* Sustain time is relative to length of recording, so here just 0-1.
      * It is scaled this way so that the length selection is more precise for
      * short lengths and less precise for longer ones */
     noteParamSets[editingWhichParams].sustainTime
         = powf(2.,-7.*(1 - sustainTime_param));
+}
+
+void synth_control_sustainTime_control(void *data_, float sustainTime_param)
+{
+    synth_control_set_sustainTime(sustainTime_param);
 }
 
 void synth_control_tempoBPM_control(void *data_, float tempoBPM_param)
@@ -87,40 +96,73 @@ void synth_control_tempoBPM_control(void *data_, float tempoBPM_param)
     }
 }
 
+/* Set the pitch to any pitch between midi note 48 and 72, limited by the
+ * precision of pitch_param */
+void synth_control_set_pitch_chrom(float pitch_param)
+{
+    noteParamSets[editingWhichParams].pitch
+        = 48. + (72. - 48.) * pitch_param;
+}
+
 void synth_control_pitch_control(void *data_, float pitch_param)
 {
     noteParamSets[editingWhichParams].pitch
         = 48. + (72. - 48.) * pitch_param;
 }
 
+void synth_control_set_startPoint(float startPoint_param)
+{
+    noteParamSets[editingWhichParams].startPoint
+        = startPoint_param;
+}
+
+void synth_control_set_positionStride(float positionStride_param)
+{
+            noteParamSets[editingWhichParams].positionStride
+                = positionStride_param * 0.2 - 0.1;
+}
+
 void synth_control_startPoint_control(void *data_, float startPoint_param)
 {
     switch (posMode) {
         case SynthControlPosMode_ABSOLUTE:
-            noteParamSets[editingWhichParams].startPoint
-                = startPoint_param;
+            synth_control_set_startPoint(startPoint_param);
             break;
         case SynthControlPosMode_UNKNOWN:
         case SynthControlPosMode_STRIDE:
-            noteParamSets[editingWhichParams].positionStride
-                = startPoint_param * 0.2 - 0.1;
+            synth_control_set_positionStride(startPoint_param);
             break;
     }
+}
+
+void synth_control_set_eventDelta_quant(float eventDeltaBeats_param)
+{
+    noteParamSets[editingWhichParams].eventDeltaBeats
+        = (MMSample)(1 + (int)(3. * (MMSample)eventDeltaBeats_param));
+}
+
+void synth_control_set_eventDelta_free(float eventDeltaBeats_param)
+{
+    noteParamSets[editingWhichParams].eventDeltaBeats
+        = powf(2.,-6.*(1 - eventDeltaBeats_param));
+}
+
+void synth_control_set_intermittency(float intermittency_param)
+{
+    noteParamSets[editingWhichParams].intermittency =
+        0 + (int)(3. * intermittency_param);
 }
 
 void synth_control_eventDeltaBeats_control(void *data_, float eventDeltaBeats_param)
 {
     switch (deltaButtonMode) {
         case SynthControlDeltaButtonMode_EVENT_DELTA_QUANT:
-            noteParamSets[editingWhichParams].eventDeltaBeats
-                = (MMSample)(1 + (int)(3. * (MMSample)eventDeltaBeats_param));
+            synth_control_set_eventDelta_quant(eventDeltaBeats_param);
         case SynthControlDeltaButtonMode_EVENT_DELTA_FREE:
-            noteParamSets[editingWhichParams].eventDeltaBeats
-                = powf(2.,-6.*(1 - eventDeltaBeats_param));
+            synth_control_set_eventDelta_free(eventDeltaBeats_param);
             break;
         case SynthControlDeltaButtonMode_INTERMITTENCY:
-            noteParamSets[editingWhichParams].intermittency =
-                0 + (int)(3. * eventDeltaBeats_param);
+            synth_control_set_intermittency(eventDeltaBeats_param);
             break;
     }
 }
