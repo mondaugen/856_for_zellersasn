@@ -156,5 +156,10 @@ void synth_control_set_positionStride(float positionStride_param);
 void synth_control_set_eventDelta_quant(float eventDeltaBeats_param);
 void synth_control_set_eventDelta_free(float eventDeltaBeats_param);
 void synth_control_set_intermittency(float intermittency_param);
+void synth_control_set_pitch_chrom(float pitch_param);
+void synth_control_set_pitch_4ths5ths(float pitch_param);
+void synth_control_set_pitch_arp(float pitch_param);
+void synth_control_set_wet(float gain_param);
+void synth_control_set_fade(float gain_param);
 
 #endif /* SYNTH_CONTROL_H */

@@ -159,7 +159,7 @@ static void NoteOnEvent_happen(MMEvent *event)
         noteOnEventCount[((NoteOnEvent*)event)->parameterSet] = 0;
         if (voiceNum != -1 && 
                 ((noteParamSets[((NoteOnEvent*)event)->parameterSet].amplitude
-                    * ((NoteOnEvent*)event)->currentFade) > 0.001)) { 
+                    * ((NoteOnEvent*)event)->currentFade) > SCHEDULING_AMP_FLOOR)) { 
             /* there is a voice free */
             pm_claim_params_from_allocator((void*)&voiceAllocator,
                     (void*)&voiceNum);

@@ -104,10 +104,27 @@ void synth_control_set_pitch_chrom(float pitch_param)
         = 48. + (72. - 48.) * pitch_param;
 }
 
+void synth_control_set_pitch_4ths5ths(float pitch_param)
+{
+    static int32_t ivals[] = {-19,-17,-12,-7,-5,0,5,7,12,17,19};
+    /* Half the total number of intervals that aren't 0 */
+    static uint32_t n_ivals = 5; 
+    pitch_param = pitch_param * 2. - 1.;
+    uint32_t idx = (uint32_t)((int32_t)n_ivals
+            + (int32_t)((float)n_ivals*pitch_param));
+    noteParamSets[editingWhichParams].pitch
+        = 60. + (float)ivals[idx];
+}
+
+void synth_control_set_pitch_arp(float pitch_param)
+{
+    /* Not yet capable of supporting this, just set to middle C */
+    noteParamSets[editingWhichParams].pitch = 60.;
+}
+
 void synth_control_pitch_control(void *data_, float pitch_param)
 {
-    noteParamSets[editingWhichParams].pitch
-        = 48. + (72. - 48.) * pitch_param;
+    synth_control_set_pitch_chrom(pitch_param);
 }
 
 void synth_control_set_startPoint(float startPoint_param)
@@ -426,16 +443,35 @@ void synth_control_gainMode_control(void *data_,
     gainMode = (SynthControlGainMode)gainMode_param;
 }
 
+void synth_control_set_wet(float gain_param)
+{
+    noteParamSets[editingWhichParams].amplitude
+        = gain_param;
+}
+
+void synth_control_set_fade(float gain_param)
+{
+    /* To control the fade rate via "number of repeats before note is below
+     * -60dB" the following formula can be employed, assuming the original
+     *  amplitude is 1.
+     *  pow(10^-6,1./n_repeats)
+     *  
+     *  This should be optimized using linearly interpolated table lookup for
+     *  select values./
+     */
+    noteParamSets[editingWhichParams].fadeRate
+        = gain_param * 2.;
+}
+
 void synth_control_gain_control(void *data_, float gain_param)
 {
     switch (gainMode) {
         case SynthControlGainMode_WET:
-            noteParamSets[editingWhichParams].amplitude
-                = gain_param;
+            synth_control_set_wet(gain_param);
             break;
         case SynthControlGainMode_FADE:
-            noteParamSets[editingWhichParams].fadeRate
-                = gain_param * 2.;
+            synth_control_set_fade(gain_param);
+            break;
     }
 }
 

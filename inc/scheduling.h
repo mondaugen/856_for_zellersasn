@@ -4,6 +4,9 @@
 #include "mm_dllist.h" 
 #include "mm_sample.h" 
 
+/* Amplitude below which playback is not triggered */
+#define SCHEDULING_AMP_FLOOR 3.05E-5 /* ~ 2^-15 */
+
 typedef struct __NoteOnEvent NoteOnEvent;
 typedef struct __NoteSchedEvent NoteSchedEvent;
 typedef struct __NoteOnEventListNode NoteOnEventListNode;

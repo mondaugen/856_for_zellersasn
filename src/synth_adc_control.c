@@ -69,11 +69,46 @@ static void synth_adc_eventDelta_control(adc_channel_t *chan,
     }
 }
 
-static void synth_adc_pitch_control(adc_channel_t *chan,
-                                    adc_channel_do_data_t *data)
-
 SYNTH_ADC_SETUP(eventDelta,SYNTH_ADC_EVENTDELTA_IDX,
         synth_adc_eventDelta_control);
+
+static void synth_adc_pitch_control(adc_channel_t *chan,
+                                    adc_channel_do_data_t *data)
+{
+    switch (synth_control_get_pitchMode()) {
+        case SynthControlPitchMode_CHROM:
+            synth_control_set_pitch_chrom(
+                    ((float)chan->cur_val)/((float)ADC_MAX));
+            break;
+        case SynthControlPitchMode_4TH5TH,
+             synth_control_set_pitch_4ths5ths(
+                    ((float)chan->cur_val)/((float)ADC_MAX));
+            break;
+        case SynthControlPitchMode_ARP
+            synth_control_set_pitch_arp(
+                    ((float)chan->cur_val)/((float)ADC_MAX));
+            break;
+    }
+}
+
+SYNTH_ADC_SETUP(pitch,SYNTH_ADC_PITCH_IDX,synth_adc_pitch_control);
+
+static void synth_adc_gain_control(adc_channel_t *chan,
+                                   adc_channel_do_data_t *data)
+{
+    switch (synth_control_get_gainMode()) {
+        case SynthControlGainMode_FADE:
+            synth_control_set_fade(
+                    ((float)chan->cur_val)/((float)ADC_MAX));
+            break;
+        case SynthControlGainMode_WET:
+            synth_control_set_wet(
+                    ((float)chan->cur_val)/((float)ADC_MAX));
+            break;
+    }
+}
+
+SYNTH_ADC_SETUP(gain,SYNTH_ADC_GAIN_IDX,synth_adc_gain_control);
 
 void synth_adc_control_setup(void)
 {
@@ -82,4 +117,7 @@ void synth_adc_control_setup(void)
     synth_adc_sustainTime_control_setup();
     synth_adc_pos_control_setup();
     synth_adc_eventDelta_control_setup();
+    synth_adc_pitch_control_setup();
+    synth_adc_gain_control_setup();
+}
 
