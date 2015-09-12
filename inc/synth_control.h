@@ -6,7 +6,7 @@
 #include "synth_control_presets.h" 
 
 /* The amount of fade at the end of the recording in seconds */
-#define REC_LOOP_FADE_TIME_S 0.025 
+#define REC_LOOP_FADE_TIME_S 0.010
 /* Envelope parameters */
 #define SYNTH_CONTROL_MIN_ATTACK_TIME 0.001 
 #define SYNTH_CONTROL_MAX_ATTACK_TIME 0.5
@@ -161,5 +161,13 @@ void synth_control_set_pitch_4ths5ths(float pitch_param);
 void synth_control_set_pitch_arp(float pitch_param);
 void synth_control_set_wet(float gain_param);
 void synth_control_set_fade(float gain_param);
+int synth_control_get_noteDeltaFromBuffer(void);
+void synth_control_tempoNudge(float tempoNudge_param);
+void synth_control_set_tempo(float tempo_param);
+void synth_control_set_repeats(float repeats_param);
+int synth_control_get_recordState(void);
+int synth_control_get_schedulerState(void);
+int synth_control_get_feedbackState(void);
+void synth_control_set_offset(float offset_param);
 
 #endif /* SYNTH_CONTROL_H */

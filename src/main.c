@@ -12,6 +12,8 @@
 #include "leds.h" 
 #include "switch_control.h" 
 #include "synth_switch_control.h" 
+#include "adc_channel.h" 
+#include "synth_adc_control.h" 
 
 void play_note_rate(int midinote, float rate)
 {
@@ -64,6 +66,8 @@ int main (void)
     switches_setup();
     synth_switch_control_setup();
     adc_setup_dma_scan();
+    adc_channel_setup();
+    synth_adc_control_setup();
     SampleTable_init();
     sc_presets_init();
     signal_chain_setup();

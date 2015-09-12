@@ -77,22 +77,46 @@ void synth_control_sustainTime_control(void *data_, float sustainTime_param)
     synth_control_set_sustainTime(sustainTime_param);
 }
 
+void synth_control_tempoNudge(float tempoNudge_param)
+{
+    /* the tempo is calculated so that 1 buffer * K is played per 1 beat where K
+     * is some scalar. The value is negated so if K < 1, the tempo is slower and
+     * K > 1 the tempo is faster */
+    MMSample K =  1.05 - tempoNudge_param * 0.1;
+    tempoBPM = 60. * (MMSample)audio_hw_get_sample_rate(NULL) 
+        / ((MMSample)((MMArray*)theSound.wavtab)->length * K);
+}
+
+void synth_control_set_tempoBPM(float tempoBPM_param)
+{
+    tempoBPM = tempoBPM_param;
+}
+
+void synth_control_set_tempo(float tempo_param)
+{
+    synth_control_set_tempoBPM(40. + (240. - 40.)*tempo_param);
+}
+
+void synth_control_set_numRepeats(int numRepeats_param)
+{
+    noteParamSets[editingWhichParams].numRepeats = numRepeats_param;
+}
+
+void synth_control_set_repeats(float repeats_param)
+{
+    synth_control_set_numRepeats((int)(16. * repeats_param));        
+}
+
 void synth_control_tempoBPM_control(void *data_, float tempoBPM_param)
 {
     if (editingWhichParams == 0) {
         if (noteDeltaFromBuffer == 1) {
-            /* the tempo is calculated so that 1 buffer * K is played per 1 beat
-             * where K is some scalar. So if K > 1, the tempo is slower and K < 1
-             * the tempo is faster */
-            MMSample K = tempoBPM_param * 0.1 + 0.95;
-            tempoBPM = 60. * (MMSample)audio_hw_get_sample_rate(NULL) 
-                / ((MMSample)((MMArray*)theSound.wavtab)->length * K);
+            synth_control_tempoNudge(tempoBPM_param);
         } else {
-            tempoBPM = 40. + (240. - 40.)*tempoBPM_param;
+            synth_control_set_tempo(tempoBPM_param);
         }
     } else {
-        noteParamSets[editingWhichParams].numRepeats = 
-            (int)(16. * tempoBPM_param);        
+        synth_control_set_repeats(tempoBPM_param);
     }
 }
 
@@ -184,6 +208,19 @@ void synth_control_eventDeltaBeats_control(void *data_, float eventDeltaBeats_pa
     }
 }
 
+void synth_control_set_offset(float offset_param)
+{
+    if (editingWhichParams == 0) {
+        noteParamSets[editingWhichParams].offsetBeats
+            = offset_param + 0.001;
+    } else {
+        /* The offset is relative to the total event delta of the note event
+         * with parameterSet 0 */
+        noteParamSets[editingWhichParams].offsetBeats
+            = noteParamSets[0].eventDeltaBeats * offset_param;
+    }
+}
+
 void synth_control_offsetBeats_control(void *data_, float offsetBeats_param)
 {
     if (editingWhichParams == 0) {
@@ -230,12 +267,15 @@ void MIDI_synth_record_stop_helper(void *data)
      * the buffer length, set the playback rate to 1 and set the eventDelta
      * to 1 beat so that the recording plays once per beat and the tempo is
      * one beat per length of recording */
-    if (noteDeltaFromBuffer == 1) {
-        /* When noteDeltaFromBuffer flag set
+//    if (noteDeltaFromBuffer == 1) {
+    SynthControlRecMode _recMode = synth_control_get_recMode();
+    if ((_recMode == SynthControlRecMode_REC_LEN_1_BEAT)
+            || (_recMode == SynthControlRecMode_REC_LEN_1_BEAT_REC_SCHED)) {
+        /* When REC_LEN_1_BEAT* flag set
          *  - the tempo is adjusted so the recording plays in the time of one
          *    beat.
          *
-         * If noteDeltaFromBuffer flag is set and the feedback is enabled,
+         * If REC_LEN_1_BEAT* flag is set and the feedback is enabled,
          * then:
          *  - the sustain time is made to be 1
          *  - the the amplitudes of notes that aren't the 0th are set to 0
@@ -243,8 +283,8 @@ void MIDI_synth_record_stop_helper(void *data)
          *  - the delta time of note 0 is set to 1 beat
          *  - the intermittence of note 0 is set to 0
          *  - the offset of note 0 is set to 0
-         *  If the scheduler is on, clear the pending scheduled notes and
-         *  schedule a note schedule event immediately.
+         *
+         * The scheduler is (re) started immediately in this case.
          */
         tempoBPM = 60. * (MMSample)audio_hw_get_sample_rate(NULL) 
             / (MMSample)((MMArray*)((MMWavTabRecorder*)data)->buffer)->length;
@@ -259,11 +299,11 @@ void MIDI_synth_record_stop_helper(void *data)
             noteParamSets[0].intermittency = 0;
             noteParamSets[0].offsetBeats = 0;
             noteParamSets[0].startPoint = 0;
-            if (schedulerState == 1) {
-                schedulerState_off_helper((void*)noteOnEventListHead);
-                schedulerState_on_helper();
-            }
         }
+        if (schedulerState == 1) {
+            schedulerState_off_helper((void*)noteOnEventListHead);
+        }
+        schedulerState_on_helper();
     }
     /* Swap the playing and the recording sounds */
     WavTabAreaPair tmp = recordingSound;
@@ -445,8 +485,14 @@ void synth_control_gainMode_control(void *data_,
 
 void synth_control_set_wet(float gain_param)
 {
-    noteParamSets[editingWhichParams].amplitude
-        = gain_param;
+    /* Gain in dB */
+    gain_param = -1 * (96 - 96. * gain_param);
+    if (gain_param < -80.) {
+        noteParamSets[editingWhichParams].amplitude = 0.;
+    } else {
+        noteParamSets[editingWhichParams].amplitude =
+            powf(10.,gain_param / 10.);
+    }
 }
 
 void synth_control_set_fade(float gain_param)
@@ -641,4 +687,31 @@ void synth_control_set_presetNumber(SynthControlPresetNumber presetNumber_param)
 SynthControlPresetNumber synth_control_get_presetNumber(void)
 {
     return presetNumber;
+}
+
+int synth_control_get_noteDeltaFromBuffer(void)
+{
+    return noteDeltaFromBuffer;
+}
+
+/* Returns 1 if currently recording, 0 otherwise */
+int synth_control_get_recordState(void)
+{
+    switch (wtr.state) {
+        case MMWavTabRecorderState_RECORDING:
+            return 1;
+    }
+    return 0;
+}
+
+/* Returns 1 if scheduler play, 0 otherwise */
+int synth_control_get_schedulerState(void)
+{
+    return schedulerState;
+}
+
+/* Returns 1 if feedback enable, 0 otherwise */
+int synth_control_get_feedbackState(void)
+{
+    return feedbackState;
 }

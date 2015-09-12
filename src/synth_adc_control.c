@@ -1,4 +1,7 @@
 #include "adc_channel.h" 
+#include "synth_adc_control.h" 
+#include "synth_control.h"
+
 #define SYNTH_ADC_SETUP(name,data_start_idx,func)\
     static void synth_adc_ ## name ## _control_setup(void)\
     {\
@@ -24,14 +27,16 @@
    static void synth_adc_ ## name ## _control(adc_channel_t *chan,\
                                                adc_channel_do_data_t *data)\
     {\
-         synth_control_set_ ## name ## (((float)chan->cur_val)/((float)ADC_MAX));\
+         synth_control_set_ ## name (((float)chan->cur_val)/((float)ADC_MAX));\
     }
 
 
 SYNTH_ADC_CONTROL_FLOAT(envelopeTime);
 SYNTH_ADC_SETUP(envelopeTime,SYNTH_ADC_ENV_IDX,synth_adc_envelopeTime_control);
 SYNTH_ADC_CONTROL_FLOAT(sustainTime);
-SYNTH_ADC_SETUP(sustainTime,SYNTH_ADC_ENV_IDX,synth_adc_envelopeTime_control);
+SYNTH_ADC_SETUP(sustainTime,SYNTH_ADC_SUS_IDX,synth_adc_sustainTime_control);
+SYNTH_ADC_CONTROL_FLOAT(offset);
+SYNTH_ADC_SETUP(offset,SYNTH_ADC_OFFSET_IDX,synth_adc_offset_control);
 
 static void synth_adc_pos_control(adc_channel_t *chan,
                                   adc_channel_do_data_t *data)
@@ -80,11 +85,11 @@ static void synth_adc_pitch_control(adc_channel_t *chan,
             synth_control_set_pitch_chrom(
                     ((float)chan->cur_val)/((float)ADC_MAX));
             break;
-        case SynthControlPitchMode_4TH5TH,
+        case SynthControlPitchMode_4TH5TH:
              synth_control_set_pitch_4ths5ths(
                     ((float)chan->cur_val)/((float)ADC_MAX));
             break;
-        case SynthControlPitchMode_ARP
+        case SynthControlPitchMode_ARP:
             synth_control_set_pitch_arp(
                     ((float)chan->cur_val)/((float)ADC_MAX));
             break;
@@ -110,14 +115,32 @@ static void synth_adc_gain_control(adc_channel_t *chan,
 
 SYNTH_ADC_SETUP(gain,SYNTH_ADC_GAIN_IDX,synth_adc_gain_control);
 
+static void synth_adc_tempo_control(adc_channel_t *chan,
+                                   adc_channel_do_data_t *data)
+{
+    if (synth_control_get_editingWhichParams() == 0) {
+        if (synth_control_get_noteDeltaFromBuffer()) {
+            synth_control_tempoNudge(((float)chan->cur_val)/((float)ADC_MAX));
+        } else {
+            synth_control_set_tempo(((float)chan->cur_val)/((float)ADC_MAX));
+        }
+    } else {
+        synth_control_set_repeats(((float)chan->cur_val)/((float)ADC_MAX));
+    }
+}
+
+SYNTH_ADC_SETUP(tempo,SYNTH_ADC_TEMPO_IDX,synth_adc_tempo_control);
+
 void synth_adc_control_setup(void)
 {
     adc_channel_setup();
     synth_adc_envelopeTime_control_setup();
     synth_adc_sustainTime_control_setup();
+    synth_adc_offset_control_setup();
     synth_adc_pos_control_setup();
     synth_adc_eventDelta_control_setup();
     synth_adc_pitch_control_setup();
     synth_adc_gain_control_setup();
+    synth_adc_tempo_control_setup();
 }
 

@@ -8,6 +8,8 @@
 #include "synth_control.h" 
 #include "scheduling.h" 
 #include "switch_control.h" 
+#include "adc_channel.h" 
+#include "led_status.h" 
 
 int audio_ready = 0;
 
@@ -30,8 +32,13 @@ void audio_hw_io(audio_hw_io_t *params)
 #else
     /* Process switches. MIDI trumps switches if messages present */
     switch_control_do_all();
+    /* Process knobs. MIDI trumps knobs if messages present. */
+    adc_channels_update();
+    adc_channel_do_all_sets();
     /* Process MIDI once every audioblock */
     midi_hw_process_input(NULL);
+    /* Update LEDs */
+    led_status_update();
     /* Increment scheduler and do pending events */
     scheduler_incTimeAndDoEvents();
     /* Process audio */

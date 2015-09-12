@@ -61,7 +61,7 @@ void adc_channel_do_set_init(adc_channel_do_set_t *set,
                              adc_channel_t *chan,
                              adc_channel_do_func_t func,
                              adc_channel_do_data_t *do_data);
-void adc_channels_update(adc_channel_t *chans, uint32_t nchans);
+void adc_channels_update(void);
 void adc_channel_do_all_sets(void);
 void adc_channel_init(adc_channel_t *chan,
                       volatile adc_channel_datatype_t *raw_vals,

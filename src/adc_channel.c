@@ -19,11 +19,12 @@ void adc_channel_do_set_add(adc_channel_do_set_t *set)
     _do_sets = set;
 }
 
-void adc_channels_update(adc_channel_t *chans, uint32_t nchans)
+void adc_channels_update(void)
 {
-    while (nchans--) {
-        chans->update(chans);
-        chans++;
+    adc_channel_do_set_t *set = _do_sets;
+    while (set) {
+        set->chan->update(set->chan);
+        set = set->next;
     }
 }
 
