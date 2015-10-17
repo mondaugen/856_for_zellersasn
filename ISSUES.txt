@@ -10,4 +10,5 @@ Some preset fields shouldn't be stored, for instance, the "mode" field.
 
 What is the initial preset when the device ships?
 
-
+Switch debouncing doesn't seem to work when toggling recording.
+    - LED1 lights up randomly for some reason because it is not recording anew even though the light is on.
