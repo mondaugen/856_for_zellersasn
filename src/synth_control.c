@@ -284,7 +284,7 @@ void MIDI_synth_record_stop_helper(void *data)
          *  - the intermittence of note 0 is set to 0
          *  - the offset of note 0 is set to 0
          *
-         * The scheduler is (re) started immediately in this case.
+         * The scheduler is (re) started immediately in both cases.
          */
         tempoBPM = 60. * (MMSample)audio_hw_get_sample_rate(NULL) 
             / (MMSample)((MMArray*)((MMWavTabRecorder*)data)->buffer)->length;

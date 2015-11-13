@@ -6,6 +6,7 @@
 #include <string.h>
 
 #define WM8778_CODEC_ADDR  ((uint8_t)0x34)
+#define CODEC_I2C_TIMEOUT       ((uint32_t)1000000) 
 
 #ifdef CODEC_DMA_HARDFAULT_ON_I2S_ERR
 extern void HardFault_Handler(void);
@@ -461,6 +462,7 @@ void SPI3_IRQHandler (void)
 #endif
 #ifdef CODEC_DMA_TRIGGER_ON_I2S3_FRAME_ERR
         GPIOG->ODR |= 1 << 9;
+//        GPIOG->ODR &= ~(1 << 9);
 #endif
         /* Disable I2S */
         I2S3ext->I2SCFGR &= ~SPI_I2SCFGR_I2SE;
@@ -479,6 +481,7 @@ void SPI3_IRQHandler (void)
         I2S3ext->I2SCFGR |= SPI_I2SCFGR_I2SE;
 #ifdef CODEC_DMA_TRIGGER_ON_I2S3_FRAME_ERR
         GPIOG->ODR &= ~(1 << 9);
+//        GPIOG->ODR &= ~(1 << 9);
 #endif
     }
     /* Enable SPI interrupts */
@@ -488,47 +491,45 @@ void SPI3_IRQHandler (void)
 static int codec_i2c_check_flags(uint32_t flags)
 {
     uint32_t tmp;
-    tmp = (I2C2->SR1 << 16) | (I2C2->SR2);
+    tmp = (I2C2->SR1 << 16);
+    tmp |= (I2C2->SR2);
     if ((tmp & flags) == flags) {
         return 1;
     }
     return 0;
 }
 
+static void codec_i2c_swrst(void)
+{
+    I2C2->CR1 |= I2C_CR1_SWRST;
+    while (codec_i2c_check_flags(0x00c00000));
+    I2C2->CR1 &= ~I2C_CR1_SWRST;
+}
+
 static void codec_prog_reg_i2c(uint8_t addr,
                                uint8_t reg_addr,
                                uint16_t reg_val)
 {
-//    uint32_t tmp1, tmp2;
-#ifdef     CODEC_I2C_PROG_START_TRIGGER
-    GPIOG->ODR |= 1 << 9;
-    GPIOG->ODR &= ~(1 << 9);
-#endif  
-    /* Wait while busy */
-    while (codec_i2c_check_flags(0x2)); 
     /* Send start condition */
     I2C2->CR1 |= I2C_CR1_START;
-    /* Wait for master mode select */
-    while (!codec_i2c_check_flags(0x10003));
+    /* Wait for start condition */
+    while (!codec_i2c_check_flags(0x00010001));
     /* Send address */
     I2C2->DR = addr;
-    /* Wait for master mode selected. */
-    while (!codec_i2c_check_flags(0x00820007));
-    /* Send bytes */
-    uint8_t byte1, byte2;
+    /* Wait for ADDR bit to be set */
+    while (!codec_i2c_check_flags(0x00020000));
+    uint32_t byte1, byte2;
     byte1 = (reg_addr << 1) | ((reg_val >> 8) & (0x1));
     byte2 = (uint8_t)(reg_val & 0xff);
-    /* Write byte */
+    /* Wait for I2C to finish transmitting */
+    while(!codec_i2c_check_flags(0x00800000));
     I2C2->DR = byte1;
     /* Wait for I2C to finish transmitting */
-    while (!codec_i2c_check_flags(0x00800007));
-    /* Write byte */
+    while(!codec_i2c_check_flags(0x00800000));
     I2C2->DR = byte2;
     /* Wait for I2C to finish transmitting */
-    while (!codec_i2c_check_flags(0x00800007));
-    /* Wait for buffer to be empty */
-    while (!codec_i2c_check_flags(0x00040000));
-    /* Send stop condition */
+    while(!codec_i2c_check_flags(0x00800000));
+    /* Send stop bit */
     I2C2->CR1 |= I2C_CR1_STOP;
 }
 
@@ -537,6 +538,9 @@ static void codec_i2c_setup(void)
     /* Enable GPIOB, I2C2 clock */
     RCC->APB1ENR |= RCC_APB1ENR_I2C2EN;
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOBEN | RCC_AHB1ENR_GPIOCEN;
+    /* Reset I2C clock */
+    RCC->APB1RSTR |= RCC_APB1RSTR_I2C2RST;
+    RCC->APB1RSTR &= ~RCC_APB1RSTR_I2C2RST;
     /* Enable CE pin to set codec's address */
     GPIOC->MODER &= ~(0x3 << (2 * 13));
     /* Set to output */
@@ -547,8 +551,8 @@ static void codec_i2c_setup(void)
     GPIOC->OSPEEDR &= ~(0x3 << (2* 13));
     GPIOC->OSPEEDR |= (0x2 << (2* 13));
     /* Pull down */
-//    GPIOC->PUPDR &= ~(0x3 << (2 * 13));
-//    GPIOC->PUPDR |= (0x2 << (2 * 13));
+    GPIOC->PUPDR &= ~(0x3 << (2 * 13));
+    GPIOC->PUPDR |= (0x2 << (2 * 13));
     /* Set low */
     GPIOC->ODR &= ~(0x1 << 13);
     /* Enable I2C2 Pins, set to AF */
@@ -561,19 +565,25 @@ static void codec_i2c_setup(void)
     /* I2C Functions are alternate function 4 */
     GPIOB->AFR[1] &= ~((0xf << (4*2)) | (0xf << (4*3)));
     GPIOB->AFR[1] |= ((0x4 << (4*2)) | (0x4 << (4*3)));
-    /* Pull-up */
+    /* Extra Pull-up */
     GPIOB->PUPDR &= ~((0x3 << (2 * 10)) | (0x3 << (2 * 11)));
     GPIOB->PUPDR |= ((0x2 << (2 * 10)) | (0x2 << (2 * 11)));
     /* Open / Drain */
     GPIOB->OTYPER |= ((0x1 << 10) | (0x1 << 11));
+    /* Disable peripheral */
+    I2C2->CR1 &= ~I2C_CR1_PE;
+    /* Reset peripheral */
+    I2C2->CR1 |= I2C_CR1_SWRST;
+    I2C2->CR1 &= ~I2C_CR1_SWRST;
     /* Set clock equal to APB1 clock */
     I2C2->CR2 &= ~(0x1f);
     I2C2->CR2 |= (uint32_t)45; /* 45Mhz */
     /* Set up rise time based on clock and codec's I2C characteristics. */
     I2C2->TRISE &= ~(0xf3);
-    I2C2->TRISE |= 0x46; /* See p. 853 STM32F429 reference manual. */
+    /* no more than 14 clocks fit into the minimum rise time */
+    I2C2->TRISE |= (uint32_t)14; /* See p. 853 STM32F429 reference manual. */
     /* Set clock control register (see p. 852 ibid)*/
-    I2C2->CCR = (uint32_t)113; /* SCL is about 200KHz */
+    I2C2->CCR = (uint32_t)452; /* SCL is about 50Khz */
     /* Enable acknowledge */
 //    I2C2->CR1 |= I2C_CR1_ACK;
     /* Enable peripheral */
@@ -589,4 +599,29 @@ static void codec_config_via_i2c(void)
     codec_prog_reg_i2c(WM8778_CODEC_ADDR,0x5,0x00ff);
     /* invert MCLK */
     /* That's it */
+}
+
+/* This can't work yet. SPI2 DA pin not connected. */
+static void codec_spi_setup(void)
+{
+    /* Enable GPIOB, GPIOC, SPI Clock */
+    RCC->APB1ENR |= RCC_APB1ENR_SPI2EN;
+    RCC->AHB1ENR |= RCC_AHB1ENR_GPIOBEN | RCC_AHB1ENR_GPIOCEN;
+    /* Enable CE pin */
+    GPIOC->MODER &= ~(0x3 << (2 * 13));
+    /* Set to output */
+    GPIOC->MODER |= (0x1 << (2 * 13));
+    /* High speed (?) */
+    GPIOC->OSPEEDR &= ~(0x3 << (2* 13));
+    GPIOC->OSPEEDR |= (0x2 << (2* 13));
+    /* Enable SPI2 Pins, set to AF */
+    /* PB10,PB11 */
+    GPIOB->MODER &= ~((0x3 << (2* 10)) | (0x3 << (2*11)));
+    GPIOB->MODER |= ((0x2 << (2* 10)) | (0x2 << (2*11)));
+    /* High speed (?) */
+    GPIOB->OSPEEDR &= ~((0x3 << (2* 10)) | (0x3 << (2*11)));
+    GPIOB->OSPEEDR |= ((0x2 << (2* 10)) | (0x2 << (2*11)));
+    /* I2C Functions are alternate function 4 */
+    GPIOB->AFR[1] &= ~((0xf << (4*2)) | (0xf << (4*3)));
+    GPIOB->AFR[1] |= ((0x4 << (4*2)) | (0x4 << (4*3)));
 }
