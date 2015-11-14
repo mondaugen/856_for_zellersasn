@@ -292,6 +292,7 @@ void MIDI_synth_record_stop_helper(void *data)
             int n;
             noteParamSets[0].eventDeltaBeats = 1;
             noteParamSets[0].pitch = 60.;
+            noteParamSets[0].amplitude = 1.;
             for (n = 1; n < NUM_NOTE_PARAM_SETS; n++) {
                 noteParamSets[n].amplitude = 0;
             }
