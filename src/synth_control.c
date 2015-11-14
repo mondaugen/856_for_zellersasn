@@ -240,26 +240,36 @@ void synth_control_noteDeltaFromBuffer_control(void *data_,
     noteDeltaFromBuffer = (int)noteDeltaFromBuffer_param;
 }
 
-void MIDI_synth_record_stop_helper(void *data)
+/* Set flag if called from human interface device
+ * (like switch or MIDI callback) */ 
+#define SC_REC_HELPER_FROM_HID 0x000000001
+
+typedef struct __synth_control_record_helper_t {
+    MMWavTabRecorder *recorder;
+    uint32_t            flags;
+} synth_control_record_helper_t;
+
+void synth_control_record_stop_helper(void *data)
 {
+    synth_control_record_helper_t *rec_helper = (synth_control_record_helper_t*)data;
     /* Only do something if it was recording */
-    if (((MMWavTabRecorder*)data)->state == MMWavTabRecorderState_STOPPED) {
+    if (rec_helper->recorder->state == MMWavTabRecorderState_STOPPED) {
         return;
     }
 
     /* Set the length to the index the recorder got to */
-    ((MMArray*)((MMWavTabRecorder*)data)->buffer)->length =
-        ((MMWavTabRecorder*)data)->currentIndex;
-    ((MMWavTabRecorder*)data)->state = MMWavTabRecorderState_STOPPED;
+    ((MMArray*)rec_helper->recorder->buffer)->length =
+        rec_helper->recorder->currentIndex;
+    rec_helper->recorder->state = MMWavTabRecorderState_STOPPED;
     /* If the index the recorder got to is greater than the window length of a
      * Hann window, window the beginning and ends of the file using this window
      * */
-    if (((MMWavTabRecorder*)data)->currentIndex >= hannWindowTableLength) {
+    if (rec_helper->recorder->currentIndex >= hannWindowTableLength) {
         int n;
         for (n = 0; n < hannWindowTableLength/2; n++) {
-            MMWavTab_get(((MMWavTabRecorder*)data)->buffer,n) *= hannWindowTable[n];
-            MMWavTab_get(((MMWavTabRecorder*)data)->buffer,
-                    ((MMArray*)((MMWavTabRecorder*)data)->buffer)->length - n - 1)
+            MMWavTab_get(rec_helper->recorder->buffer,n) *= hannWindowTable[n];
+            MMWavTab_get(rec_helper->recorder->buffer,
+                    ((MMArray*)rec_helper->recorder->buffer)->length - n - 1)
                 *= hannWindowTable[hannWindowTableLength - n - 1];
         }
     }
@@ -267,7 +277,6 @@ void MIDI_synth_record_stop_helper(void *data)
      * the buffer length, set the playback rate to 1 and set the eventDelta
      * to 1 beat so that the recording plays once per beat and the tempo is
      * one beat per length of recording */
-//    if (noteDeltaFromBuffer == 1) {
     SynthControlRecMode _recMode = synth_control_get_recMode();
     if ((_recMode == SynthControlRecMode_REC_LEN_1_BEAT)
             || (_recMode == SynthControlRecMode_REC_LEN_1_BEAT_REC_SCHED)) {
@@ -287,7 +296,7 @@ void MIDI_synth_record_stop_helper(void *data)
          * The scheduler is (re) started immediately in both cases.
          */
         tempoBPM = 60. * (MMSample)audio_hw_get_sample_rate(NULL) 
-            / (MMSample)((MMArray*)((MMWavTabRecorder*)data)->buffer)->length;
+            / (MMSample)((MMArray*)rec_helper->recorder->buffer)->length;
         if (feedbackState == 1) {
             int n;
             noteParamSets[0].eventDeltaBeats = 1;
@@ -305,6 +314,10 @@ void MIDI_synth_record_stop_helper(void *data)
             schedulerState_off_helper((void*)noteOnEventListHead);
         }
         schedulerState_on_helper();
+        if ((rec_helper->flags & SC_REC_HELPER_FROM_HID)
+                && (_recMode == SynthControlRecMode_REC_LEN_1_BEAT_REC_SCHED)) {
+            /* I actually don't know how to do this yet. */
+        }
     }
     /* Swap the playing and the recording sounds */
     WavTabAreaPair tmp = recordingSound;
@@ -333,7 +346,11 @@ void synth_control_record_trig(void *data_, uint32_t record_param)
             MIDI_synth_record_start_helper(&wtr);
         }
     } else if (wtr.state == MMWavTabRecorderState_STOPPED) {
-        MIDI_synth_record_stop_helper(&wtr);
+        synth_control_record_helper_t rec_helper = {
+            .recorder = &wtr;
+            .flags = SC_REC_HELPER_FROM_HID
+        };
+        synth_control_record_stop_helper(&rec_helper);
     }
 }
 
@@ -342,11 +359,19 @@ void synth_control_record_trig(void *data_, uint32_t record_param)
 void synth_control_record_tog(void)
 {
     if (wtr.state == MMWavTabRecorderState_RECORDING) {
-        MIDI_synth_record_stop_helper(&wtr);
+        synth_control_record_helper_t rec_helper = {
+            .recorder = &wtr;
+            .flags = SC_REC_HELPER_FROM_HID
+        };
+        synth_control_record_stop_helper(&rec_helper);
     } else if (wtr.state == MMWavTabRecorderState_STOPPED) {
         /* Only allow recording if recording is not scheduled */
         if (scheduleRecording == 0) {
-            MIDI_synth_record_start_helper(&wtr);
+            synth_control_record_helper_t rec_helper = {
+                .recorder = &wtr;
+                .flags = SC_REC_HELPER_FROM_HID
+            };
+            MIDI_synth_record_start_helper(&rec_helper);
         }
     }
 }
@@ -461,7 +486,6 @@ void synth_control_recordScheduling_control(void *data_,
         /* If recording in progress, stop it */
         if (wtr.state == MMWavTabRecorderState_RECORDING) {
             wtr.state = MMWavTabRecorderState_STOPPED;
-/*             MIDI_synth_record_stop_helper((void*)&wtr); */
         }
         scheduleRecording = 1;
         /* Set first scheduled recording to true so that when the first

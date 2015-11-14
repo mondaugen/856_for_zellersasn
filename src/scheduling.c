@@ -245,7 +245,11 @@ static void NoteSchedEvent_happen(MMEvent *event)
          * (== 0) */
         if (scheduleRecording == 1) {
             if (firstScheduledRecording == 0) {
-                MIDI_synth_record_stop_helper((void*)&wtr);
+                synth_control_record_helper_t rec_helper = {
+                    .recorder = &wtr;
+                    .flags = SC_REC_HELPER_FROM_HID
+                };
+                synth_control_record_stop_helper(&rec_helper);
             } else {
                 /* If this is the first scheduled recording, don't stop any
                  * recording and swap the buffers because the last buffer might
