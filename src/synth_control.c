@@ -13,6 +13,10 @@
 #include "mm_common_calcs.h" 
 #include "leds.h" 
 
+#ifdef DEBUG
+ #include <assert.h>
+#endif  
+
 /* Stuff that could be saved */
 NoteParamSet                noteParamSets[NUM_NOTE_PARAM_SETS];
 MMSample                    tempoBPM; 
@@ -240,26 +244,36 @@ void synth_control_noteDeltaFromBuffer_control(void *data_,
     noteDeltaFromBuffer = (int)noteDeltaFromBuffer_param;
 }
 
-void MIDI_synth_record_stop_helper(void *data)
+/* Called when you want to turn recording off, but not switch buffers, do
+ * windowing, etc. This is done when auto record is turned off so that the last
+ * completed recording can still be used. */
+void synth_control_autoRecord_stop_helper(void)
+{
+    /* No more record scheduling */
+    scheduleRecording = 0;
+    /* Just stop the recorder, that's it. */
+    wtr.state = MMWavTabRecorderState_STOPPED;
+}
+
+void synth_control_record_stop_helper(void)
 {
     /* Only do something if it was recording */
-    if (((MMWavTabRecorder*)data)->state == MMWavTabRecorderState_STOPPED) {
+    if (wtr.state == MMWavTabRecorderState_STOPPED) {
         return;
     }
-
     /* Set the length to the index the recorder got to */
-    ((MMArray*)((MMWavTabRecorder*)data)->buffer)->length =
-        ((MMWavTabRecorder*)data)->currentIndex;
-    ((MMWavTabRecorder*)data)->state = MMWavTabRecorderState_STOPPED;
+    ((MMArray*)wtr.buffer)->length =
+        wtr.currentIndex;
+    wtr.state = MMWavTabRecorderState_STOPPED;
     /* If the index the recorder got to is greater than the window length of a
      * Hann window, window the beginning and ends of the file using this window
      * */
-    if (((MMWavTabRecorder*)data)->currentIndex >= hannWindowTableLength) {
+    if (wtr.currentIndex >= hannWindowTableLength) {
         int n;
         for (n = 0; n < hannWindowTableLength/2; n++) {
-            MMWavTab_get(((MMWavTabRecorder*)data)->buffer,n) *= hannWindowTable[n];
-            MMWavTab_get(((MMWavTabRecorder*)data)->buffer,
-                    ((MMArray*)((MMWavTabRecorder*)data)->buffer)->length - n - 1)
+            MMWavTab_get(wtr.buffer,n) *= hannWindowTable[n];
+            MMWavTab_get(wtr.buffer,
+                    ((MMArray*)wtr.buffer)->length - n - 1)
                 *= hannWindowTable[hannWindowTableLength - n - 1];
         }
     }
@@ -267,7 +281,6 @@ void MIDI_synth_record_stop_helper(void *data)
      * the buffer length, set the playback rate to 1 and set the eventDelta
      * to 1 beat so that the recording plays once per beat and the tempo is
      * one beat per length of recording */
-//    if (noteDeltaFromBuffer == 1) {
     SynthControlRecMode _recMode = synth_control_get_recMode();
     if ((_recMode == SynthControlRecMode_REC_LEN_1_BEAT)
             || (_recMode == SynthControlRecMode_REC_LEN_1_BEAT_REC_SCHED)) {
@@ -287,7 +300,7 @@ void MIDI_synth_record_stop_helper(void *data)
          * The scheduler is (re) started immediately in both cases.
          */
         tempoBPM = 60. * (MMSample)audio_hw_get_sample_rate(NULL) 
-            / (MMSample)((MMArray*)((MMWavTabRecorder*)data)->buffer)->length;
+            / (MMSample)((MMArray*)wtr.buffer)->length;
         if (feedbackState == 1) {
             int n;
             noteParamSets[0].eventDeltaBeats = 1;
@@ -312,42 +325,44 @@ void MIDI_synth_record_stop_helper(void *data)
     theSound = tmp;
 }
 
-void MIDI_synth_record_start_helper(void *data)
+void synth_control_record_start_helper(void)
 {
     /* Set to max length so it would be possible to record all the way to
      * the end of allocated space */
     ((MMArray*)recordingSound.wavtab)->length = soundSampleMaxLength;
     /* Set the area it is pointing to to the beginning of the allocated space */
     ((MMArray*)recordingSound.wavtab)->data = recordingSound.area;
-    ((MMWavTabRecorder*)data)->buffer = recordingSound.wavtab;
-    ((MMWavTabRecorder*)data)->currentIndex = 0;
-    ((MMWavTabRecorder*)data)->state = MMWavTabRecorderState_RECORDING;
+    wtr.buffer = recordingSound.wavtab;
+    wtr.currentIndex = 0;
+    wtr.state = MMWavTabRecorderState_RECORDING;
 }
 
-/* Start recording with non-zero control change value. Stop with value of 0. */
-void synth_control_record_trig(void *data_, uint32_t record_param)
-{
-    if (record_param > 0) {
-        /* Only allow recording if recording is not scheduled */
-        if (scheduleRecording == 0) {
-            MIDI_synth_record_start_helper(&wtr);
-        }
-    } else if (wtr.state == MMWavTabRecorderState_STOPPED) {
-        MIDI_synth_record_stop_helper(&wtr);
-    }
-}
-
-/* Starts recording if recording is stopped, stops recording if recording going
- * on */
+/* If record switch pressed, recording on-going and record scheduling off, turn
+ * off the current recording and use the "record stop helper".
+ * If record switch pressed, recording on-going but record scheduling on,
+ * re-start the recording by calling record start using the "record start
+ * helper".
+ * If record switch pressed, recording not on-going and recording in any mode,
+ * start recording. If record scheduling is on in this case, there is an error.
+ * */
 void synth_control_record_tog(void)
 {
     if (wtr.state == MMWavTabRecorderState_RECORDING) {
-        MIDI_synth_record_stop_helper(&wtr);
-    } else if (wtr.state == MMWavTabRecorderState_STOPPED) {
-        /* Only allow recording if recording is not scheduled */
-        if (scheduleRecording == 0) {
-            MIDI_synth_record_start_helper(&wtr);
+        if (scheduleRecording == 1) {
+            /* Turn off scheduleRecording so the recording is not stopped
+             * prematurely when an event that does that is called by the
+             * scheduler. when an event that does that is called by the
+             * scheduler. */
+            scheduleRecording = 0;
+            synth_control_record_start_helper();
+        } else {
+            synth_control_record_stop_helper();
         }
+    } else if (wtr.state == MMWavTabRecorderState_STOPPED) {
+#ifdef DEBUG
+       assert(scheduleRecording == 0);
+#endif  
+       synth_control_record_start_helper();
     }
 }
 
@@ -432,6 +447,11 @@ void synth_control_schedulerState_control(void *data_, uint32_t schedulerState_p
 void synth_control_schedulerState_tog(void)
 {
     if (schedulerState) {
+        /* If record scheduling on, it is turned off when the scheduler is
+         * turned off. */
+        if (scheduleRecording == 1) {
+            synth_control_autoRecord_stop_helper();
+        }
         schedulerState_off_helper(&noteOnEventListHead);
     } else {
         schedulerState_on_helper();
@@ -461,7 +481,6 @@ void synth_control_recordScheduling_control(void *data_,
         /* If recording in progress, stop it */
         if (wtr.state == MMWavTabRecorderState_RECORDING) {
             wtr.state = MMWavTabRecorderState_STOPPED;
-/*             MIDI_synth_record_stop_helper((void*)&wtr); */
         }
         scheduleRecording = 1;
         /* Set first scheduled recording to true so that when the first
@@ -639,7 +658,16 @@ SynthControlDeltaButtonMode synth_control_get_deltaButtonMode(void)
 
 void synth_control_set_recMode(SynthControlRecMode recMode_param)
 {
-    recMode = recMode_param;
+    SynthControlRecMode _recMode = synth_control_get_recMode();
+    if (_recMode != recMode_param) {
+        recMode = recMode_param;
+        /* This effectively means we're leaving 
+         * SynthControlRecMode_REC_LEN_1_BEAT_REC_SCHED mode and when we do this
+         * we turn off auto record. */
+        if (recMode != SynthControlRecMode_REC_LEN_1_BEAT_REC_SCHED) {
+            synth_control_autoRecord_stop_helper();
+        }
+    }
 }
 
 SynthControlRecMode synth_control_get_recMode(void)

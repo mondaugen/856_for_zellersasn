@@ -239,20 +239,13 @@ static void NoteSchedEvent_happen(MMEvent *event)
                 * 0xffffffffULL,
                 NoteSchedEvent_new(1));
         /* If scheduled recording enabled, stop the previous recording and start
-         * a new one. When scheduled recording is disabled, it turns off
-         * recording immediately and so it is okay that we don't turn off
-         * recording from the scheduled event when schedule recording is unset
-         * (== 0) */
+         * a new one. It is always okay to stop the recording, because the
+         * scheduleRecording flag is set when recording is turned off in the
+         * SynthControlRecMode_REC_LEN_1_BEAT_REC_SCHED state, and actually not
+         * turned off at that point (as it is with SynthControlRecMode_REC_LEN_1_BEAT) */
         if (scheduleRecording == 1) {
-            if (firstScheduledRecording == 0) {
-                MIDI_synth_record_stop_helper((void*)&wtr);
-            } else {
-                /* If this is the first scheduled recording, don't stop any
-                 * recording and swap the buffers because the last buffer might
-                 * have garbage in it */
-                firstScheduledRecording = 0;
-            }
-            MIDI_synth_record_start_helper((void*)&wtr);
+            synth_control_record_stop_helper();
+            synth_control_record_start_helper();
         }
     }
     MMDLList_remove((MMDLList*)((NoteSchedEvent*)event)->parent);
