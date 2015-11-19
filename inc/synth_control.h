@@ -13,6 +13,12 @@
 #define SYNTH_CONTROL_MIN_RELEASE_TIME 0.001
 #define SYNTH_CONTROL_MAX_RELEASE_TIME 0.5
 
+/* Gain parameters */
+#define SYNTH_CONTROL_MAX_GAIN 0
+#define SYNTH_CONTROL_MIN_GAIN -30
+/* gains below this are effectively 0 */
+#define SYNTH_CONTROL_GAIN_THRESH -25
+
 typedef uint32_t SynthControlEditingWhichParamsIndex;
 /* The number of sets of note parameters */
 #define NUM_NOTE_PARAM_SETS 3 

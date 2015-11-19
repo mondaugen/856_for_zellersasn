@@ -297,7 +297,6 @@ void synth_control_record_stop_helper(void)
          *  - the intermittence of note 0 is set to 0
          *  - the offset of note 0 is set to 0
          *
-         * The scheduler is (re) started immediately in both cases.
          */
         tempoBPM = 60. * (MMSample)audio_hw_get_sample_rate(NULL) 
             / (MMSample)((MMArray*)wtr.buffer)->length;
@@ -314,10 +313,6 @@ void synth_control_record_stop_helper(void)
             noteParamSets[0].offsetBeats = 0;
             noteParamSets[0].startPoint = 0;
         }
-        if (schedulerState == 1) {
-            schedulerState_off_helper((void*)noteOnEventListHead);
-        }
-        schedulerState_on_helper();
     }
     /* Swap the playing and the recording sounds */
     WavTabAreaPair tmp = recordingSound;
@@ -356,7 +351,17 @@ void synth_control_record_tog(void)
             scheduleRecording = 0;
             synth_control_record_start_helper();
         } else {
-            synth_control_record_stop_helper();
+            if (schedulerState == 1) {
+                schedulerState_off_helper((void*)noteOnEventListHead);
+            }
+            SynthControlRecMode _recMode = synth_control_get_recMode();
+            if (_recMode == SynthControlRecMode_REC_LEN_1_BEAT_REC_SCHED) {
+                /* Recording will be stopped by event in scheduler */
+                scheduleRecording = 1;
+            } else {
+                synth_control_record_stop_helper();
+            }
+            schedulerState_on_helper();
         }
     } else if (wtr.state == MMWavTabRecorderState_STOPPED) {
 #ifdef DEBUG
@@ -421,10 +426,6 @@ static void schedulerState_off_helper(void *data)
             (NoteSchedEventListNode*)MMDLList_getNext(&noteSchedEventListHead));
     /* Turn off all playing notes */
     pm_do_for_each_busy_voice(&voiceAllocator,free_playing_spsp_voice);
-    if (scheduleRecording == 1) {
-        /* Discard what was last recorded */
-        wtr.state = MMWavTabRecorderState_STOPPED;
-    }
     schedulerState = 0;
 }
 
@@ -506,8 +507,9 @@ void synth_control_gainMode_control(void *data_,
 void synth_control_set_wet(float gain_param)
 {
     /* Gain in dB */
-    gain_param = -1 * (96 - 96. * gain_param);
-    if (gain_param < -80.) {
+    gain_param = SYNTH_CONTROL_MIN_GAIN 
+        + (SYNTH_CONTROL_MAX_GAIN - SYNTH_CONTROL_MIN_GAIN)*gain_param;
+    if (gain_param < SYNTH_CONTROL_GAIN_THRESH) {
         noteParamSets[editingWhichParams].amplitude = 0.;
     } else {
         noteParamSets[editingWhichParams].amplitude =
