@@ -187,6 +187,10 @@ static void NoteOnEvent_happen(MMEvent *event)
                 * (1.
                         - noteParamSets[((NoteOnEvent*)event)->parameterSet].attackTime
                         - noteParamSets[((NoteOnEvent*)event)->parameterSet].releaseTime);
+#ifdef SIG_CHAIN_FILL_BUF_ONES
+            no.attackTime = 0;
+            no.releaseTime = 0;
+#else
             no.attackTime = 
                 noteParamSets[((NoteOnEvent*)event)->parameterSet].sustainTime
                 * (MMSample)MMArray_get_length(theSound.wavtab)
@@ -197,6 +201,7 @@ static void NoteOnEvent_happen(MMEvent *event)
                 * (MMSample)MMArray_get_length(theSound.wavtab)
                 / (MMSample)audio_hw_get_sample_rate(NULL)
                 * noteParamSets[((NoteOnEvent*)event)->parameterSet].releaseTime;
+#endif
             no.samples = theSound.wavtab;
             /* 9 is added because MMCC_et12_rate considers pitch 69 to be a note of no
              * transposition. In this we consider middle C to be a note of no

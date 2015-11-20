@@ -8,11 +8,13 @@ MMSigChain sigChain;
 MMTrapEnvedSamplePlayer spsps[NUM_NOTES];
 MMWavTabRecorder wtr;
 MMBusSplitter fbBusSplitter;
-/* TODO: Because we aren't using the sigConst anymore to zero the bus, what we
- * have to do is remove the fbBusSplitter from the signal chain and zero its
- * bus. */
 /* Insert the fbBusSplitter after this node to turn it on */
 MMSigProc *fbOnNode;
+
+#ifdef SIG_CHAIN_FILL_BUF_ONES
+/* Instead of recording what comes in the input, just send 1s to the recorder. */
+MMSigConst fillOnesSigConst;
+#endif  
 
 static MMBusMerger fbBusMerger;
 
@@ -75,4 +77,8 @@ void signal_chain_setup(void)
      * this leaves the inBus unaffected by adding only 0s to it */
     MMBusMerger_init(&fbBusMerger, fbBus, inBus);
     MMSigProc_insertBefore(&wtr, &fbBusMerger);
+#ifdef SIG_CHAIN_FILL_BUF_ONES
+    MMSigConst_init(&fillOnesSigConst,inBus,1,MMSigConst_doSum_FALSE);
+    MMSigProc_insertBefore(&wtr,&fillOnesSigConst);
+#endif  
 }

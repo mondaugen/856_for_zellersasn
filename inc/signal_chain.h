@@ -8,7 +8,9 @@
 #include "mm_busmerger.h" 
 #include "mm_envelope.h" 
 
-#define NUM_NOTES 8 
+#ifndef NUM_NOTES
+ #define NUM_NOTES 8 
+#endif
 
 extern MMBus *inBus, *outBus, *fbBus;
 extern MMSigChain sigChain;

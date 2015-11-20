@@ -265,6 +265,8 @@ void synth_control_record_stop_helper(void)
     ((MMArray*)wtr.buffer)->length =
         wtr.currentIndex;
     wtr.state = MMWavTabRecorderState_STOPPED;
+    /* Don't window, we want to see the buffer filled only with ones. */
+#if !defined(SIG_CHAIN_FILL_BUF_ONES)
     /* If the index the recorder got to is greater than the window length of a
      * Hann window, window the beginning and ends of the file using this window
      * */
@@ -277,6 +279,7 @@ void synth_control_record_stop_helper(void)
                 *= hannWindowTable[hannWindowTableLength - n - 1];
         }
     }
+#endif
     /* If the noteDeltaFromBuffer flag is set, compute the tempo from
      * the buffer length, set the playback rate to 1 and set the eventDelta
      * to 1 beat so that the recording plays once per beat and the tempo is
@@ -513,7 +516,7 @@ void synth_control_set_wet(float gain_param)
         noteParamSets[editingWhichParams].amplitude = 0.;
     } else {
         noteParamSets[editingWhichParams].amplitude =
-            powf(10.,gain_param / 10.);
+            powf(10.,gain_param / 20.);
     }
 }
 

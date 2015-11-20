@@ -51,11 +51,6 @@ void audio_hw_io(audio_hw_io_t *params)
         inBus->data[n*inBus->channels] = 
             ((MMSample)params->in[n*params->nchans_in])
             /AUDIO_HW_SAMPLE_T_MAX;
-        /* Mix some dry signal into the output */
-        params->out[n*params->nchans_out] 
-            += ((int16_t)((((MMSample)(params->in[n*params->nchans_in]))
-                            /AUDIO_HW_SAMPLE_T_MAX) * AUDIO_HW_SAMPLE_T_MAX))
-            * dryGain / 127;
     }
 #endif /* AUDIO_HW_TEST_THROUGHPUT */
 }
