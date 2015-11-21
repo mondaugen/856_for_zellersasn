@@ -9,7 +9,7 @@
 #include "mm_envelope.h" 
 
 #ifndef NUM_NOTES
- #define NUM_NOTES 8 
+ #define NUM_NOTES 10
 #endif
 
 extern MMBus *inBus, *outBus, *fbBus;

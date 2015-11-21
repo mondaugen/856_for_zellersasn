@@ -103,7 +103,7 @@ static void synth_adc_gain_control(adc_channel_t *chan,
 {
     switch (synth_control_get_gainMode()) {
         case SynthControlGainMode_FADE:
-            synth_control_set_fade(
+            synth_control_set_ampLastEcho(
                     ((float)chan->cur_val)/((float)ADC_MAX));
             break;
         case SynthControlGainMode_WET:

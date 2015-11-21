@@ -19,6 +19,40 @@
 /* gains below this are effectively 0 */
 #define SYNTH_CONTROL_GAIN_THRESH -30
 
+/* Repeat parameters */
+#define SYNTH_CONTROL_MAX_NUM_REPEATS 16
+/* The minimum amplitude for the last repeat */
+#define SYNTH_CONTROL_ECHO_MIN 1.E-3 /* -60dB */
+#define SYNTH_CONTROL_ECHO_MAX 4.    /* 12 dB */
+
+#define SYNTH_CONTROL_DEFAULT_ATTACKTIME 0.01     
+#define SYNTH_CONTROL_DEFAULT_SUSTAINTIME  1 
+#define SYNTH_CONTROL_DEFAULT_RELEASETIME 0.01
+#define SYNTH_CONTROL_DEFAULT_EVENTDELTABEATS 1
+#define SYNTH_CONTROL_DEFAULT_PITCH 60
+#define SYNTH_CONTROL_DEFAULT_AMPLITUDE .5
+/* Other notes are off by default */
+#define SYNTH_CONTROL_DEFAULT_AMPLITUDE_AUXNOTE 0 
+#define SYNTH_CONTROL_DEFAULT_STARTPOINT 0
+#define SYNTH_CONTROL_DEFAULT_NUMREPEATS 0
+/* The amount of beats offset from the beginning
+   of the bar */
+#define SYNTH_CONTROL_DEFAULT_OFFSETBEATS 0       
+/* Canonically the number of repeats that are
+   ignored */
+#define SYNTH_CONTROL_DEFAULT_INTERMITTENCY 0      
+/* Fade rate doesn't apply to the first
+   parameter set */
+#define SYNTH_CONTROL_DEFAULT_FADERATE      0      
+/* The amount the starting point in the sample
+   is advanced each time it is scheduled (if
+   stride enabled) */
+/* The fade rate of notes other than the first note is not 0 */
+#define SYNTH_CONTROL_DEFAULT_FADERATE_AUXNOTE 1
+#define SYNTH_CONTROL_DEFAULT_POSITIONSTRIDE 0      
+#define SYNTH_CONTROL_DEFAULT_TEMPOBPM 120 
+
+
 typedef uint32_t SynthControlEditingWhichParamsIndex;
 /* The number of sets of note parameters */
 #define NUM_NOTE_PARAM_SETS 3 
@@ -110,6 +144,9 @@ typedef struct __NoteParamSet {
                             repeats (it will be played numRepeats/2 times).
                             Of course this number could later stand for some
                             more complicated pattern. */
+    MMSample ampLastEcho; /* The amplitude of the last echo, which is used to
+                             calculate the fade rate based on the number of
+                             repeats */
     MMSample fadeRate;
     MMSample positionStride; /* If stride enabled, how much the position head is advanced each playback */
 } NoteParamSet;
@@ -166,7 +203,7 @@ void synth_control_set_pitch_chrom(float pitch_param);
 void synth_control_set_pitch_4ths5ths(float pitch_param);
 void synth_control_set_pitch_arp(float pitch_param);
 void synth_control_set_wet(float gain_param);
-void synth_control_set_fade(float gain_param);
+void synth_control_set_fade(float gain_param, int num_repeats);
 int synth_control_get_noteDeltaFromBuffer(void);
 void synth_control_tempoNudge(float tempoNudge_param);
 void synth_control_set_tempo(float tempo_param);
@@ -175,5 +212,7 @@ int synth_control_get_recordState(void);
 int synth_control_get_schedulerState(void);
 int synth_control_get_feedbackState(void);
 void synth_control_set_offset(float offset_param);
+void synth_control_set_ampLastEcho(float gain_param);
+void synth_control_reset_param_sets(NoteParamSet *param_sets, int size);
 
 #endif /* SYNTH_CONTROL_H */

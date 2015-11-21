@@ -45,6 +45,12 @@ void audio_hw_io(audio_hw_io_t *params)
     MMSigProc_tick(&sigChain);
     int n;
     for (n = 0; n < params->length; n++) {
+        /* saturate output */
+        if (outBus->data[outBus->channels*n] > 1.) {
+            outBus->data[outBus->channels*n] = 1.;
+        } else if (outBus->data[outBus->channels*n] < -1.) {
+            outBus->data[outBus->channels*n] = -1.;
+        }
         /* Only the first channel is written/read */
         params->out[n*params->nchans_out] =
             outBus->data[outBus->channels*n] * AUDIO_HW_SAMPLE_T_MAX;

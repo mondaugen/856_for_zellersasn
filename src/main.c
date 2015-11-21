@@ -64,12 +64,14 @@ int main (void)
     }
     leds_setup();
     switches_setup();
-    synth_switch_control_setup();
     adc_setup_dma_scan();
     adc_channel_setup();
     synth_adc_control_setup();
     SampleTable_init();
+    /* Preset init must be before switch control setup so that switch toggling
+     * to recall default presets doesn't screw up the synth switch control. */
     sc_presets_init();
+    synth_switch_control_setup();
     signal_chain_setup();
     synth_control_setup();
     scheduler_setup();

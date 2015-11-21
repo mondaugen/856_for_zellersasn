@@ -104,11 +104,14 @@ void synth_control_set_tempo(float tempo_param)
 void synth_control_set_numRepeats(int numRepeats_param)
 {
     noteParamSets[editingWhichParams].numRepeats = numRepeats_param;
+    synth_control_set_fade(noteParamSets[editingWhichParams].ampLastEcho,
+                           noteParamSets[editingWhichParams].numRepeats);
 }
 
 void synth_control_set_repeats(float repeats_param)
 {
-    synth_control_set_numRepeats((int)(16. * repeats_param));        
+    synth_control_set_numRepeats((int)(
+                ((float)SYNTH_CONTROL_MAX_NUM_REPEATS) * repeats_param));        
 }
 
 void synth_control_tempoBPM_control(void *data_, float tempoBPM_param)
@@ -520,18 +523,26 @@ void synth_control_set_wet(float gain_param)
     }
 }
 
-void synth_control_set_fade(float gain_param)
+void synth_control_set_fade(float gain_param, int num_repeats)
 {
-    /* To control the fade rate via "number of repeats before note is below
-     * -60dB" the following formula can be employed, assuming the original
-     *  amplitude is 1.
-     *  pow(10^-6,1./n_repeats)
-     *  
-     *  This should be optimized using linearly interpolated table lookup for
-     *  select values./
-     */
-    noteParamSets[editingWhichParams].fadeRate
-        = gain_param * 2.;
+    /* This sets the amplitude scaling at the last repeat */
+    gain_param = powf(gain_param,1./((float)(num_repeats+1)));
+    noteParamSets[editingWhichParams].fadeRate = gain_param;
+}
+
+void synth_control_set_ampLastEcho(float gain_param)
+{
+    if (gain_param <= 0.5) {
+        gain_param *= 2.;
+        gain_param = (1. - SYNTH_CONTROL_ECHO_MIN) * gain_param
+            + SYNTH_CONTROL_ECHO_MIN;
+    } else {
+        gain_param = (gain_param - 0.5) * 2.;
+        gain_param =  (SYNTH_CONTROL_ECHO_MAX - 1.) * gain_param + 1.;
+    }
+    noteParamSets[editingWhichParams].ampLastEcho = gain_param;
+    synth_control_set_fade(noteParamSets[editingWhichParams].ampLastEcho,
+                           noteParamSets[editingWhichParams].numRepeats);
 }
 
 void synth_control_gain_control(void *data_, float gain_param)
@@ -541,7 +552,7 @@ void synth_control_gain_control(void *data_, float gain_param)
             synth_control_set_wet(gain_param);
             break;
         case SynthControlGainMode_FADE:
-            synth_control_set_fade(gain_param);
+            synth_control_set_ampLastEcho(gain_param);
             break;
     }
 }
@@ -579,52 +590,48 @@ void synth_control_presetRecall_tog(void)
     sc_presets_recall(presetNumber);
 }
 
-void synth_control_setup(void)
+void synth_control_reset_param_sets(NoteParamSet *param_sets, int size)
 {
-    noteParamSets[0] = (NoteParamSet) {
-        .attackTime = 0.01,     /* attackTime */
-        .sustainTime  = 1,      /* sustainTime */
-        .releaseTime = 0.01,    /* releaseTime */
-        .eventDeltaBeats = 1,   /* eventDeltaBeats */
-        .pitch = 60,            /* pitch */
-        .amplitude = .5,        /* amplitude */
-        .startPoint = 0,        /* startPoint */
-        .numRepeats = 0,        /* The number of times repeated */
-        .offsetBeats = 0,       /* The amount of beats offset from the beginning
-                                   of the bar */
-        .intermittency = 0,      /* Canonically the number of repeats that are
-                                    ignored */
-        .fadeRate      = 0,      /* Fade rate doesn't apply to the first
-                                    parameter set */
-        .positionStride = 0      /* The amount the starting point in the sample
-                                    is advanced each time it is scheduled (if
-                                    stride enabled) */
+    param_sets[0] = (NoteParamSet) {
+        .attackTime = SYNTH_CONTROL_DEFAULT_ATTACKTIME,     
+        .sustainTime  = SYNTH_CONTROL_DEFAULT_SUSTAINTIME, 
+        .releaseTime = SYNTH_CONTROL_DEFAULT_RELEASETIME, 
+        .eventDeltaBeats = SYNTH_CONTROL_DEFAULT_EVENTDELTABEATS,   
+        .pitch = SYNTH_CONTROL_DEFAULT_PITCH,
+        .amplitude = SYNTH_CONTROL_DEFAULT_AMPLITUDE,
+        .startPoint = SYNTH_CONTROL_DEFAULT_STARTPOINT,
+        .numRepeats = SYNTH_CONTROL_DEFAULT_NUMREPEATS,
+        .offsetBeats = SYNTH_CONTROL_DEFAULT_OFFSETBEATS,
+        .intermittency = SYNTH_CONTROL_DEFAULT_INTERMITTENCY,
+        .fadeRate      = SYNTH_CONTROL_DEFAULT_FADERATE,
+        .positionStride = SYNTH_CONTROL_DEFAULT_POSITIONSTRIDE
     };
-    int n;
-    for (n = 1; n < NUM_NOTE_PARAM_SETS; n++) {
-        noteParamSets[n] = (NoteParamSet) {
-            .attackTime = 0.01,     /* attackTime */
-            .sustainTime  = 1,      /* sustainTime */
-            .releaseTime = 0.01,    /* releaseTime */
-            .eventDeltaBeats = 1,   /* eventDeltaBeats */
-            .pitch = 60,            /* pitch */
-            .amplitude = 0,         /* amplitude */
-            .startPoint = 0,        /* startPoint */
-            .numRepeats = 0,        /* The number of times repeated */
-            .offsetBeats = 0,       /* The amount of beats offset from the
-                                       beginning of the bar */
-            .intermittency = 0,      /* Canonically the number of repeats that
-                                        are ignored */
-            .fadeRate      = 1,      /* Default fade rate of 1 means no fade */
-            .positionStride = 0      /* The amount the starting point in the
-                                        sample is advanced each time it is
-                                        scheduled (if stride enabled) */
+    while (size-- > 1) {
+        param_sets[size] = (NoteParamSet) {
+            .attackTime = SYNTH_CONTROL_DEFAULT_ATTACKTIME,     
+            .sustainTime  = SYNTH_CONTROL_DEFAULT_SUSTAINTIME, 
+            .releaseTime = SYNTH_CONTROL_DEFAULT_RELEASETIME, 
+            .eventDeltaBeats = SYNTH_CONTROL_DEFAULT_EVENTDELTABEATS,   
+            .pitch = SYNTH_CONTROL_DEFAULT_PITCH,            
+            .amplitude = 0,
+            .startPoint = SYNTH_CONTROL_DEFAULT_STARTPOINT,
+            .numRepeats = SYNTH_CONTROL_DEFAULT_NUMREPEATS,
+            .offsetBeats = SYNTH_CONTROL_DEFAULT_OFFSETBEATS,
+            .intermittency = SYNTH_CONTROL_DEFAULT_INTERMITTENCY,
+            .fadeRate      = SYNTH_CONTROL_DEFAULT_FADERATE_AUXNOTE,
+            .positionStride = SYNTH_CONTROL_DEFAULT_POSITIONSTRIDE
         };
     }
+}
+    
+
+void synth_control_setup(void)
+{
+    synth_control_reset_param_sets(noteParamSets,NUM_NOTE_PARAM_SETS);
     noteDeltaFromBuffer = 0;
     dryGain             = 0;
     editingWhichParams  = 0;
-    tempoBPM            = 120;
+    tempoBPM            = SYNTH_CONTROL_DEFAULT_TEMPOBPM;
     posMode             = SynthControlPosMode_ABSOLUTE;
     deltaButtonMode     = SynthControlDeltaButtonMode_EVENT_DELTA_FREE;
     recMode             = SynthControlRecMode_NORMAL;

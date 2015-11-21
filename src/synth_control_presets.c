@@ -1,5 +1,6 @@
 #include "synth_control.h" 
 #include "presets_lowlevel.h"
+#include "switches.h" 
 #include <string.h> 
 
 
@@ -21,19 +22,28 @@ void sc_presets_init(void)
 {
     /* (The flash implementation requires no initialization) */
     presets_lowlevel_init(&scpresets_handle,NULL);
-    presets_lowlevel_read(scpresets_handle,(void*)scpresets,
+    /* If both footswitches down on startup, set presets to default values. This
+     * doesn't overwrite what is in flash. That will only happen if the user
+     * chooses to save the presets. */
+    if ((fsw1_get_state() == 0) && (fsw2_get_state() == 0)) {
+        int n;
+        for (n = 0; n < NUM_SYNTH_CONTROL_PRESETS; n++) {
+            synth_control_reset_param_sets(scpresets[n].noteParamSets,NUM_NOTE_PARAM_SETS);
+            scpresets[n].tempoBPM = SYNTH_CONTROL_DEFAULT_TEMPOBPM;
+        }
+        /* Wait for switches to go high before continuing */
+        while ((fsw1_get_state() == 0) || (fsw2_get_state() == 0));
+    } else {
+        presets_lowlevel_read(scpresets_handle,(void*)scpresets,
             sizeof(scpresets),NULL);
+    }
 }
 
 void sc_presets_store(int npreset)
 {
-    memcpy(&scpresets[npreset].noteParamSets,noteParamSets,
+    memcpy(scpresets[npreset].noteParamSets,noteParamSets,
             sizeof(NoteParamSet)*NUM_NOTE_PARAM_SETS);
     scpresets[npreset].tempoBPM = tempoBPM; 
-    scpresets[npreset].posMode = posMode;
-    scpresets[npreset].deltaButtonMode = deltaButtonMode;
-    scpresets[npreset].pitchMode = pitchMode;
-    scpresets[npreset].gainMode = gainMode;
     /* Store every time, because program could be terminated at any moment */
     presets_lowlevel_write(scpresets_handle,(void*)scpresets,
             sizeof(scpresets),NULL);
@@ -42,13 +52,9 @@ void sc_presets_store(int npreset)
 void sc_presets_recall(int npreset)
 {
     /* No need to load from file, this is done only on initialization */
-    memcpy(noteParamSets,&scpresets[npreset].noteParamSets,sizeof(NoteParamSet)*NUM_NOTE_PARAM_SETS);
+    memcpy(noteParamSets,scpresets[npreset].noteParamSets,sizeof(NoteParamSet)*NUM_NOTE_PARAM_SETS);
     if (schedulerState == 0) {
         /* Only recall tempo if sequencer not playing */
         tempoBPM = scpresets[npreset].tempoBPM; 
     }
-    posMode = scpresets[npreset].posMode;
-    deltaButtonMode = scpresets[npreset].deltaButtonMode;
-    pitchMode = scpresets[npreset].pitchMode;
-    gainMode = scpresets[npreset].gainMode;
 }
