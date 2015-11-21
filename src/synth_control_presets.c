@@ -2,6 +2,8 @@
 #include "presets_lowlevel.h"
 #include "switches.h" 
 #include <string.h> 
+#include "timers.h" 
+#include "leds.h" 
 
 
 typedef struct __SCPreset {
@@ -16,10 +18,18 @@ typedef struct __SCPreset {
 static presets_lowlevel_handle_t *scpresets_handle;
 static SCPreset scpresets[NUM_SYNTH_CONTROL_PRESETS];
 
+void sc_presets_debounce_on_timeout(timer_event_t *ev)
+{
+    ev->active = 0;
+    *((uint32_t*)ev->data) = 0;
+}
+
 /* File is a file in which to store presets. This will obviously depend on the
  * implementation. */
 void sc_presets_init(void)
 {
+    static volatile uint32_t debounce_wait_flag;
+    static timer_event_t debounce_event;
     /* (The flash implementation requires no initialization) */
     presets_lowlevel_init(&scpresets_handle,NULL);
     /* If both footswitches down on startup, set presets to default values. This
@@ -33,6 +43,39 @@ void sc_presets_init(void)
         }
         /* Wait for switches to go high before continuing */
         while ((fsw1_get_state() == 0) || (fsw2_get_state() == 0));
+        /* Wait additional time to debounce. */
+        int _timstate = timers_get_state();
+        debounce_wait_flag = 1;
+        timer_event_init(&debounce_event);
+        debounce_event.data = (void*)&debounce_wait_flag;
+        debounce_event.time_rem = SCP_RESET_DEBOUNCE_TIME_MS;
+        debounce_event.active = 1;
+        debounce_event.on_timeout = sc_presets_debounce_on_timeout;
+        timer_events_add_event(&debounce_event);
+        if (_timstate == 0) {
+            timers_enable();
+        }
+        while (debounce_wait_flag);
+        /* flash leds to show it worked */
+        led1_set();
+        led3_set();
+        led5_set();
+        led7_set();
+        /* wait again */
+        debounce_event.time_rem = SCP_RESET_DEBOUNCE_TIME_MS;
+        debounce_event.active = 1;
+        debounce_wait_flag = 1;
+        while (debounce_wait_flag);
+        /* reset leds */
+        led1_reset();
+        led3_reset();
+        led5_reset();
+        led7_reset();
+        if (_timstate == 0) {
+            timers_disable();
+        }
+        /* reset toggle states to get rid of erroneous toggling */
+        reset_fsw_toggle_states();
     } else {
         presets_lowlevel_read(scpresets_handle,(void*)scpresets,
             sizeof(scpresets),NULL);

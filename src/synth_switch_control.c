@@ -65,7 +65,7 @@ typedef struct __synth_switch_control_t {
         static switch_control_t control;\
         switch_debouncer_init(&debouncer,\
                 synth_switch_control_ ## name ## _tog_func,\
-                1,\
+                2,\
                 &mom_state);\
         switch_control_debounce_init(&control,&debouncer);\
         switch_control_add(&control);\

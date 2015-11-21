@@ -164,5 +164,6 @@ uint32_t sw7_btm_get_state(void);
 uint32_t sw8_top_get_state(void);
 uint32_t sw8_btm_get_state(void);
 void get_switch_states(uint32_t *states);
+void reset_fsw_toggle_states(void);
 
 #endif /* SWITCHES_H */

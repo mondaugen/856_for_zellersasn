@@ -29,6 +29,11 @@ static uint32_t (*sw_get_state_funcs[]) (void) = {
  * defined in switches.h */
 volatile uint32_t fsw_toggle_states;
 
+void reset_fsw_toggle_states(void)
+{
+    fsw_toggle_states = 0;
+}
+
 void switches_setup(void)
 {
     uint32_t enrs[] = {

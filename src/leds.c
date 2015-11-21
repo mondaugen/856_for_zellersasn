@@ -2,7 +2,11 @@
 
 void leds_setup(void)
 {
-    RCC->AHB1ENR |= LED1_ENR | LED3_ENR | LED5_ENR | LED7_ENR;
+    RCC->AHB1ENR |= LED1_ENR 
+        | LED3_ENR 
+        | LED5_ENR 
+        | LED7_ENR 
+        | LED_DISCO_GREEN_ENR;
     LED1_PORT->MODER &= ~(0x3 << LED1_PORT_PIN*2);
     LED1_PORT->MODER |= (0x1 << LED1_PORT_PIN*2);
     LED3_PORT->MODER &= ~(0x3 << LED3_PORT_PIN*2);
@@ -11,6 +15,23 @@ void leds_setup(void)
     LED5_PORT->MODER |= (0x1 << LED5_PORT_PIN*2);
     LED7_PORT->MODER &= ~(0x3 << LED7_PORT_PIN*2);
     LED7_PORT->MODER |= (0x1 << LED7_PORT_PIN*2);
+    LED_DISCO_GREEN_PORT->MODER &= ~(0x3 << LED_DISCO_GREEN_PORT_PIN*2);
+    LED_DISCO_GREEN_PORT->MODER |= (0x1 << LED_DISCO_GREEN_PORT_PIN*2);
+}
+
+void led_disco_green_set(void)
+{
+    LED_DISCO_GREEN_PORT->ODR |= 0x1 << LED_DISCO_GREEN_PORT_PIN;
+}
+
+void led_disco_green_reset(void)
+{
+    LED_DISCO_GREEN_PORT->ODR &= ~(0x1 << LED_DISCO_GREEN_PORT_PIN);
+}
+
+void led_disco_green_tog(void)
+{
+    LED_DISCO_GREEN_PORT->ODR ^= 0x1 << LED_DISCO_GREEN_PORT_PIN;
 }
 
 void led1_set(void)

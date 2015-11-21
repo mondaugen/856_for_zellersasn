@@ -14,35 +14,7 @@
 #include "synth_switch_control.h" 
 #include "adc_channel.h" 
 #include "synth_adc_control.h" 
-
-void play_note_rate(int midinote, float rate)
-{
-    MMTrapEnvedSamplePlayer_noteOnStruct no;
-    no.note = midinote;
-    no.amplitude = 1;
-    no.index = 0;
-    no.attackTime = 1.;
-    no.releaseTime = 4.;
-    no.sustainTime = 10.;
-    no.samples = theSound.wavtab;
-    no.rate = rate;
-    MMTrapEnvedSamplePlayer_noteOn_Rate(
-        &spsps[0],&no);
-}
-
-void play_note(int midinote)
-{
-    MMTrapEnvedSamplePlayer_noteOnStruct no;
-    no.note = midinote;
-    no.amplitude = 1;
-    no.index = 0;
-    no.attackTime = 1.;
-    no.releaseTime = 4.;
-    no.sustainTime = 10.;
-    no.samples = theSound.wavtab;
-    MMTrapEnvedSamplePlayer_noteOn(
-        &spsps[0],&no);
-}
+#include "timers.h" 
 
 #define INITIAL_COUNT 1000000L 
 
@@ -63,6 +35,7 @@ int main (void)
         THROW_ERR("Error setting up MIDI.");
     }
     leds_setup();
+    timers_setup();
     switches_setup();
     adc_setup_dma_scan();
     adc_channel_setup();
@@ -76,6 +49,9 @@ int main (void)
     synth_control_setup();
     scheduler_setup();
     audio_start();
+#if defined(TIMER_EVENT_TEST) || defined(TIMER_TEST)
+    timers_enable();
+#endif
     while(1) {
     }
 #endif /* AUDIO_HW_TEST_THROUGHPUT */
