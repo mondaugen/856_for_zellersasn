@@ -119,7 +119,9 @@ static void synth_adc_tempo_control(adc_channel_t *chan,
                                    adc_channel_do_data_t *data)
 {
     if (synth_control_get_editingWhichParams() == 0) {
-        if (synth_control_get_noteDeltaFromBuffer()) {
+        SynthControlRecMode _recMode = synth_control_get_recMode();
+        if ((_recMode == SynthControlRecMode_REC_LEN_1_BEAT_REC_SCHED)
+                || (_recMode == SynthControlRecMode_REC_LEN_1_BEAT)) {
             synth_control_tempoNudge(((float)chan->cur_val)/((float)ADC_MAX));
         } else {
             synth_control_set_tempo(((float)chan->cur_val)/((float)ADC_MAX));
