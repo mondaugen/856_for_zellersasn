@@ -124,7 +124,8 @@ static void synth_adc_tempo_control(adc_channel_t *chan,
                 || (_recMode == SynthControlRecMode_REC_LEN_1_BEAT)) {
             synth_control_tempoNudge(((float)chan->cur_val)/((float)ADC_MAX));
         } else {
-            synth_control_set_tempo(((float)chan->cur_val)/((float)ADC_MAX));
+//            synth_control_set_tempo(((float)chan->cur_val)/((float)ADC_MAX));
+            synth_control_set_tempo_pitch(((float)chan->cur_val)/((float)ADC_MAX));
         }
     } else {
         synth_control_set_repeats(((float)chan->cur_val)/((float)ADC_MAX));

@@ -101,6 +101,19 @@ void synth_control_set_tempo(float tempo_param)
     synth_control_set_tempoBPM(40. + (240. - 40.)*tempo_param);
 }
 
+void synth_control_set_tempo_pitch(float tempo_param)
+{
+    if ((MMSample)((MMArray*)theSound.wavtab)->length <= 1) {
+        synth_control_set_tempoBPM(40. + (240. - 40.)*tempo_param);
+    } else {
+        MMSample K =  1.5 - tempo_param;
+        tempoBPM = 60. * (MMSample)audio_hw_get_sample_rate(NULL) 
+            / ((MMSample)((MMArray*)theSound.wavtab)->length * K);
+        noteParamSets[editingWhichParams].pitch = SYNTH_CONTROL_DEFAULT_PITCH +
+            logf(1./K)/log(2.) * 12.0;
+    }
+}
+
 void synth_control_set_numRepeats(int numRepeats_param)
 {
     noteParamSets[editingWhichParams].numRepeats = numRepeats_param;

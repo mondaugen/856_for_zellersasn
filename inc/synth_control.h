@@ -214,5 +214,6 @@ int synth_control_get_feedbackState(void);
 void synth_control_set_offset(float offset_param);
 void synth_control_set_ampLastEcho(float gain_param);
 void synth_control_reset_param_sets(NoteParamSet *param_sets, int size);
+void synth_control_set_tempo_pitch(float tempo_param);
 
 #endif /* SYNTH_CONTROL_H */
