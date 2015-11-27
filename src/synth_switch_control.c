@@ -33,11 +33,15 @@ typedef struct __synth_switch_control_t {
         uint32_t _sw_pins[] = {\
             sw ## _TOP_PORT_PIN,\
             sw ## _BTM_PORT_PIN};\
+        /* Note that the following function sets the _sw_addrs and _sw_pins\
+         * of the parent class! */\
         switch_control_init((switch_control_t*)&_switch_control,\
                 _sw_addrs[1],/* Because btm is when the head of switch is up. */\
                 _sw_pins[1],\
                 synth_switch_control_ ## type ## _control,\
                 NULL);\
+        /* Note that the following sets the _sw_addrs and _sw_pins\
+         * of the sub class! */\
         _switch_control.port_addr = _sw_addrs[0];\
         _switch_control.port_bit  = _sw_pins[0];\
         switch_control_add((switch_control_t*)&_switch_control);\

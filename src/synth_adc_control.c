@@ -60,12 +60,26 @@ static void synth_adc_eventDelta_control(adc_channel_t *chan,
 {
     switch (synth_control_get_deltaButtonMode()) {
         case SynthControlDeltaButtonMode_EVENT_DELTA_QUANT:
-            synth_control_set_eventDelta_quant(
+            if (synth_control_get_editingWhichParams() == 0) {
+                /* If editing 0th params, note delta controls tempo scaling */
+                synth_control_set_tempo_scale_norm(
                     ((float)chan->cur_val)/((float)ADC_MAX));
+            } else {
+                /* Otherwise it controls the event delta in a quantized way */
+                synth_control_set_eventDelta_quant(
+                    ((float)chan->cur_val)/((float)ADC_MAX));
+            }
             break;
         case SynthControlDeltaButtonMode_EVENT_DELTA_FREE:
-            synth_control_set_eventDelta_free(
+            if (synth_control_get_editingWhichParams() == 0) {
+                /* Controls fine tempo control */
+                synth_control_set_tempo_fine_norm(
                     ((float)chan->cur_val)/((float)ADC_MAX));
+            } else {
+                /* Otherwise freely controls event delta (no quantization) */
+                synth_control_set_eventDelta_free(
+                        ((float)chan->cur_val)/((float)ADC_MAX));
+            }
             break;
         case SynthControlDeltaButtonMode_INTERMITTENCY:
             synth_control_set_intermittency(
@@ -124,7 +138,8 @@ static void synth_adc_tempo_control(adc_channel_t *chan,
                 || (_recMode == SynthControlRecMode_REC_LEN_1_BEAT)) {
             synth_control_tempoNudge(((float)chan->cur_val)/((float)ADC_MAX));
         } else {
-            synth_control_set_tempo(((float)chan->cur_val)/((float)ADC_MAX));
+            synth_control_set_tempo_coarse_norm(
+                    ((float)chan->cur_val)/((float)ADC_MAX));
         }
     } else {
         synth_control_set_repeats(((float)chan->cur_val)/((float)ADC_MAX));

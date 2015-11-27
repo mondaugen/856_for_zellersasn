@@ -50,8 +50,25 @@
 /* The fade rate of notes other than the first note is not 0 */
 #define SYNTH_CONTROL_DEFAULT_FADERATE_AUXNOTE 1
 #define SYNTH_CONTROL_DEFAULT_POSITIONSTRIDE 0      
-#define SYNTH_CONTROL_DEFAULT_TEMPOBPM 120 
-
+#define SYNTH_CONTROL_DEFAULT_TEMPOBPM_COARSE 120 
+#define SYNTH_CONTROL_DEFAULT_TEMPOBPM_FINE   0 
+#define SYNTH_CONTROL_DEFAULT_TEMPOBPM_SCALE  1. 
+#define SYNTH_CONTROL_DEFAULT_TEMPOBPM\
+   ((SYNTH_CONTROL_DEFAULT_TEMPOBPM_COARSE\
+    + SYNTH_CONTROL_DEFAULT_TEMPOBPM_FINE)\
+    * SYNTH_CONTROL_DEFAULT_TEMPOBPM_SCALE)
+#define SYNTH_CONTROL_TEMPOBPM_COARSE_MIN     40.
+#define SYNTH_CONTROL_TEMPOBPM_COARSE_MAX     240.
+#define SYNTH_CONTROL_TEMPOBPM_COARSE_QUANT   10.
+#define SYNTH_CONTROL_TEMPOBPM_FINE_MIN       -10.
+#define SYNTH_CONTROL_TEMPOBPM_FINE_MAX       10.
+#define SYNTH_CONTROL_TEMPOBPM_FINE_QUANT     0.1
+#define SYNTH_CONTROL_TEMPOBPM_SCALE_TABLE\
+    { 1./4., 1./3., 1./2., 1. }
+#define SYNTH_CONTROL_TEMPOBPM_SCALE_TABLE_LENGTH 4 
+#define SYNTH_CONTROL_EVENTDELTA_QUANT_TABLE\
+    { 1/8., 1./6., 0.25, 1./3., 0.5, 1. }
+#define SYNTH_CONTROL_EVENTDELTA_QUANT_TABLE_LENGTH 6 
 
 typedef uint32_t SynthControlEditingWhichParamsIndex;
 /* The number of sets of note parameters */
@@ -153,7 +170,6 @@ typedef struct __NoteParamSet {
 
 /* Stuff that could be saved in a preset */
 extern NoteParamSet                 noteParamSets[];
-extern MMSample                     tempoBPM; 
 extern SynthControlPosMode          posMode;
 extern SynthControlDeltaButtonMode  deltaButtonMode;
 extern SynthControlPitchMode        pitchMode;
@@ -206,7 +222,9 @@ void synth_control_set_wet(float gain_param);
 void synth_control_set_fade(float gain_param, int num_repeats);
 int synth_control_get_noteDeltaFromBuffer(void);
 void synth_control_tempoNudge(float tempoNudge_param);
-void synth_control_set_tempo(float tempo_param);
+void synth_control_set_tempo(float _tempoBPM_coarse,
+                             float _tempoBPM_fine,
+                             float _tempoBPM_scale);
 void synth_control_set_repeats(float repeats_param);
 int synth_control_get_recordState(void);
 int synth_control_get_schedulerState(void);
@@ -214,5 +232,16 @@ int synth_control_get_feedbackState(void);
 void synth_control_set_offset(float offset_param);
 void synth_control_set_ampLastEcho(float gain_param);
 void synth_control_reset_param_sets(NoteParamSet *param_sets, int size);
+float synth_control_get_tempoBPM(void);
+float synth_control_get_tempoBPM_coarse(void);
+float synth_control_get_tempoBPM_fine(void);
+float synth_control_get_tempoBPM_scale(void);
+void synth_control_update_tempo_coarse(float param);
+void synth_control_update_tempo_fine(float param);
+void synth_control_update_tempo_scale(float param);
+void synth_control_set_tempo_coarse_norm(float param);
+void synth_control_set_tempo_fine_norm(float param);
+void synth_control_set_tempo_scale_norm(float param);
+void synth_control_set_tempoBPM_absolute(float _tempoBPM);
 
 #endif /* SYNTH_CONTROL_H */

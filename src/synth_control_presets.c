@@ -86,7 +86,7 @@ void sc_presets_store(int npreset)
 {
     memcpy(scpresets[npreset].noteParamSets,noteParamSets,
             sizeof(NoteParamSet)*NUM_NOTE_PARAM_SETS);
-    scpresets[npreset].tempoBPM = tempoBPM; 
+    scpresets[npreset].tempoBPM = synth_control_get_tempoBPM(); 
     /* Store every time, because program could be terminated at any moment */
     presets_lowlevel_write(scpresets_handle,(void*)scpresets,
             sizeof(scpresets),NULL);
@@ -98,6 +98,6 @@ void sc_presets_recall(int npreset)
     memcpy(noteParamSets,scpresets[npreset].noteParamSets,sizeof(NoteParamSet)*NUM_NOTE_PARAM_SETS);
     if (schedulerState == 0) {
         /* Only recall tempo if sequencer not playing */
-        tempoBPM = scpresets[npreset].tempoBPM; 
+        synth_control_set_tempoBPM_absolute(scpresets[npreset].tempoBPM); 
     }
 }
