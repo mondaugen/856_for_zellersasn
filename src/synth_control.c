@@ -726,6 +726,7 @@ void synth_control_setup(void)
     deltaButtonMode     = SynthControlDeltaButtonMode_EVENT_DELTA_FREE;
     recMode             = SynthControlRecMode_NORMAL;
     pitchMode           = SynthControlPitchMode_CHROM;
+    gainMode            = SynthControlGainMode_WET;
     feedbackState       = 0;
     scheduleRecording   = 0;
     schedulerState      = 0;

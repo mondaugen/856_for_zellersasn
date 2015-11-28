@@ -89,8 +89,8 @@ SYNTH_SWITCH_SETUP(SynthControlPresetNumber,
         SW5);
 SYNTH_SWITCH_CONTROL(SynthControlPosMode,
         synth_control_set_posMode,
-        SynthControlPosMode_ABSOLUTE,
         SynthControlPosMode_STRIDE,
+        SynthControlPosMode_ABSOLUTE,
         SynthControlPosMode_UNKNOWN);
 SYNTH_SWITCH_SETUP(SynthControlPosMode,SW1);
 SYNTH_SWITCH_CONTROL(SynthControlDeltaButtonMode,

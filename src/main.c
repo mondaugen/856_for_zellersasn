@@ -34,20 +34,20 @@ int main (void)
     if (midi_setup(NULL)) {
         THROW_ERR("Error setting up MIDI.");
     }
+    SampleTable_init();
+    signal_chain_setup();
+    synth_control_setup();
+    scheduler_setup();
     leds_setup();
     timers_setup();
     switches_setup();
     adc_setup_dma_scan();
     adc_channel_setup();
     synth_adc_control_setup();
-    SampleTable_init();
     /* Preset init must be before switch control setup so that switch toggling
      * to recall default presets doesn't screw up the synth switch control. */
     sc_presets_init();
     synth_switch_control_setup();
-    signal_chain_setup();
-    synth_control_setup();
-    scheduler_setup();
     audio_start();
 #if defined(TIMER_EVENT_TEST) || defined(TIMER_TEST)
     timers_enable();

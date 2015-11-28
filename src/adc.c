@@ -8,6 +8,15 @@ uint16_t volatile *adc_data_starts[TOTAL_NUM_ADC_CHANNELS];
 
 void __attribute__((optimize("O0"))) adc_setup_dma_scan(void)
 {
+    /* Clear data buffers */
+    uint32_t _n;
+    for (_n = 0; _n < ADC1_DMA_NUM_VALS_TRANS; _n++) {
+        adc1_values[_n] = 0;
+    }
+    for (_n = 0; _n < ADC3_DMA_NUM_VALS_TRANS; _n++) {
+        adc3_values[_n] = 0;
+    }
+
     /* Enable ADC 1 and 3 Clock */
     RCC->APB2ENR |= RCC_APB2ENR_ADC3EN | RCC_APB2ENR_ADC1EN;
     /* Set clock prescalar to 4 */

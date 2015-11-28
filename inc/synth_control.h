@@ -48,7 +48,7 @@
    is advanced each time it is scheduled (if
    stride enabled) */
 /* The fade rate of notes other than the first note is not 0 */
-#define SYNTH_CONTROL_DEFAULT_FADERATE_AUXNOTE 1
+#define SYNTH_CONTROL_DEFAULT_FADERATE_AUXNOTE 1.
 #define SYNTH_CONTROL_DEFAULT_POSITIONSTRIDE 0      
 #define SYNTH_CONTROL_DEFAULT_TEMPOBPM_COARSE 120 
 #define SYNTH_CONTROL_DEFAULT_TEMPOBPM_FINE   0 
@@ -67,8 +67,8 @@
     { 1./4., 1./3., 1./2., 1. }
 #define SYNTH_CONTROL_TEMPOBPM_SCALE_TABLE_LENGTH 4 
 #define SYNTH_CONTROL_EVENTDELTA_QUANT_TABLE\
-    { 1/8., 1./6., 0.25, 1./3., 0.5, 1. }
-#define SYNTH_CONTROL_EVENTDELTA_QUANT_TABLE_LENGTH 6 
+    { 1./16., 1./12., 1/8., 1./6., 1./4., 1./3., 1./2., 3./4. }
+#define SYNTH_CONTROL_EVENTDELTA_QUANT_TABLE_LENGTH 8
 
 typedef uint32_t SynthControlEditingWhichParamsIndex;
 /* The number of sets of note parameters */
