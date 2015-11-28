@@ -27,6 +27,8 @@ struct __NoteOnEvent {
     MMSample currentPosition; /* a value between 0 and 1 determining the
                                  starting point within the valid range of the
                                  buffer */
+    MMSample currentPitch;   /* A pitch value s.t. 0 means no transposition, 7
+                               means transpose up a 5th etc. */
 };
 
 /* Event that schedules other notes to play. */
@@ -68,7 +70,8 @@ NoteOnEvent *NoteOnEvent_new(int active,
         int numRepeats,
         int repeatIndex,
         MMSample currentFade,
-        MMSample currentPosition)
+        MMSample currentPosition,
+        MMSample currentPitch)
 {
     NoteOnEvent *ev = (NoteOnEvent*)malloc(sizeof(NoteOnEvent));
     if (!ev) {
@@ -81,6 +84,7 @@ NoteOnEvent *NoteOnEvent_new(int active,
     ev->repeatIndex = repeatIndex;
     ev->currentFade = currentFade;
     ev->currentPosition = currentPosition;
+    ev->currentPitch = currentPitch;
     return ev;
 }
 
@@ -135,6 +139,13 @@ static void NoteOnEvent_happen(MMEvent *event)
         /* If numRepeats greater than 0, schedule the note to occur again. The
          * number of repeats should never be greater than 0 for an event of note
          * 0 */
+        MMSample _next_pitch;
+        int _next_repeat_idx, _cur_param_set, _next_pitch_idx;
+        _cur_param_set = ((NoteOnEvent*)event)->parameterSet;
+        _next_repeat_idx = ((NoteOnEvent*)event)->repeatIndex + 1;
+        _next_pitch_idx = _next_repeat_idx % SYNTH_CONTROL_PITCH_TABLE_SIZE;
+        _next_pitch =  ((NoteOnEvent*)event)->currentPitch 
+            + noteParamSets[_cur_param_set].pitches[_next_pitch_idx];
         if (((NoteOnEvent*)event)->numRepeats > 0) {
             schedule_noteOn_event(
                     noteParamSets[((NoteOnEvent*)event)->parameterSet].eventDeltaBeats
@@ -142,7 +153,7 @@ static void NoteOnEvent_happen(MMEvent *event)
                     NoteOnEvent_new(1,
                         ((NoteOnEvent*)event)->parameterSet,
                         ((NoteOnEvent*)event)->numRepeats - 1,
-                        ((NoteOnEvent*)event)->repeatIndex + 1,
+                        _next_repeat_idx,
                         ((NoteOnEvent*)event)->currentFade 
                             * noteParamSets[((NoteOnEvent*)event)->parameterSet].fadeRate,
                         /* If stride enabled, increment the previous current
@@ -153,7 +164,8 @@ static void NoteOnEvent_happen(MMEvent *event)
                             MM_fwrap(((NoteOnEvent*)event)->currentPosition
                                 + noteParamSets[((NoteOnEvent*)event)->parameterSet].positionStride,
                                 0,1) :
-                            noteParamSets[((NoteOnEvent*)event)->parameterSet].startPoint));
+                            noteParamSets[((NoteOnEvent*)event)->parameterSet].startPoint,
+                         _next_pitch));
         }
         MMSample voiceNum = pm_get_next_free_voice_number();
         noteOnEventCount[((NoteOnEvent*)event)->parameterSet] = 0;
@@ -203,11 +215,11 @@ static void NoteOnEvent_happen(MMEvent *event)
                 * noteParamSets[((NoteOnEvent*)event)->parameterSet].releaseTime;
 #endif
             no.samples = theSound.wavtab;
-            /* 9 is added because MMCC_et12_rate considers pitch 69 to be a note of no
-             * transposition. In this we consider middle C to be a note of no
-             * transposition, so we add 9 (middle C is note 60) */
+            /* 69 is added because MMCC_et12_rate considers pitch 69 to be a note of no
+             * transposition. In this we consider 0 to be a note of no
+             * transposition, so we add 69 */
             no.rate = MMCC_et12_rate(
-                    noteParamSets[((NoteOnEvent*)event)->parameterSet].pitch + 9);
+                    ((NoteOnEvent*)event)->currentPitch + 69);
             MMTrapEnvedSamplePlayer_noteOn_Rate(
                     &spsps[(int)voiceNum], &no);
         }
@@ -234,7 +246,8 @@ static void NoteSchedEvent_happen(MMEvent *event)
                             noteParamSets[n].numRepeats,
                             0,
                             1,
-                            noteParamSets[n].startPoint));
+                            noteParamSets[n].startPoint,
+                            noteParamSets[n].pitches[0]));
             } else {
                 noteOnEventCount[n] += 1;
             }

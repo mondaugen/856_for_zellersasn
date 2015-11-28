@@ -31,7 +31,6 @@ static const float          eventDelta_quant_table[] =
                                 SYNTH_CONTROL_EVENTDELTA_QUANT_TABLE;
 SynthControlPosMode         posMode;
 SynthControlDeltaButtonMode deltaButtonMode;
-SynthControlPitchMode       pitchMode;
 SynthControlGainMode        gainMode;
 SynthControlRecMode         recMode;
 
@@ -42,6 +41,7 @@ int                         currentPreset;
 int                         feedbackState;
 int                         scheduleRecording;
 int                         firstScheduledRecording;
+int                         editing_which_pitch;
 /* Is the scheduler on or off ? */
 int                         schedulerState;
 /* What preset would be recalled/stored. First preset is numbered 0. */
@@ -212,8 +212,8 @@ void synth_control_set_repeats(float repeats_param)
  * precision of pitch_param */
 void synth_control_set_pitch_chrom(float pitch_param)
 {
-    noteParamSets[editingWhichParams].pitch
-        = 48. + (72. - 48.) * pitch_param;
+    noteParamSets[editingWhichParams].pitches[editing_which_pitch]
+        = -12 + 24 * pitch_param;
 }
 
 void synth_control_set_pitch_4ths5ths(float pitch_param)
@@ -224,14 +224,14 @@ void synth_control_set_pitch_4ths5ths(float pitch_param)
     pitch_param = pitch_param * 2. - 1.;
     uint32_t idx = (uint32_t)((int32_t)n_ivals
             + (int32_t)((float)n_ivals*pitch_param));
-    noteParamSets[editingWhichParams].pitch
-        = 60. + (float)ivals[idx];
+    noteParamSets[editingWhichParams].pitches[editing_which_pitch]
+        = (float)ivals[idx];
 }
 
 void synth_control_set_pitch_arp(float pitch_param)
 {
     /* Not yet capable of supporting this, just set to middle C */
-    noteParamSets[editingWhichParams].pitch = 60.;
+    noteParamSets[editingWhichParams].pitches[editing_which_pitch] = 0;
 }
 
 void synth_control_pitch_control(void *data_, float pitch_param)
@@ -396,7 +396,7 @@ void synth_control_record_stop_helper(void)
         if (feedbackState == 1) {
             int n;
             noteParamSets[0].eventDeltaBeats = 1;
-            noteParamSets[0].pitch = 60.;
+            noteParamSets[0].pitches[0] = 0.;
             noteParamSets[0].amplitude = 1.;
             for (n = 1; n < NUM_NOTE_PARAM_SETS; n++) {
                 noteParamSets[n].amplitude = 0;
@@ -679,38 +679,39 @@ void synth_control_presetRecall_tog(void)
 
 void synth_control_reset_param_sets(NoteParamSet *param_sets, int size)
 {
-    param_sets[0] = (NoteParamSet) {
-        .attackTime = SYNTH_CONTROL_DEFAULT_ATTACKTIME,     
-        .sustainTime  = SYNTH_CONTROL_DEFAULT_SUSTAINTIME, 
-        .releaseTime = SYNTH_CONTROL_DEFAULT_RELEASETIME, 
-        .eventDeltaBeats = SYNTH_CONTROL_DEFAULT_EVENTDELTABEATS,   
-        .pitch = SYNTH_CONTROL_DEFAULT_PITCH,
-        .amplitude = SYNTH_CONTROL_DEFAULT_AMPLITUDE,
-        .startPoint = SYNTH_CONTROL_DEFAULT_STARTPOINT,
-        .numRepeats = SYNTH_CONTROL_DEFAULT_NUMREPEATS,
-        .offsetBeats = SYNTH_CONTROL_DEFAULT_OFFSETBEATS,
-        .intermittency = SYNTH_CONTROL_DEFAULT_INTERMITTENCY,
-        .fadeRate      = SYNTH_CONTROL_DEFAULT_FADERATE,
-        .positionStride = SYNTH_CONTROL_DEFAULT_POSITIONSTRIDE
-    };
-    while (size-- > 1) {
-        param_sets[size] = (NoteParamSet) {
-            .attackTime = SYNTH_CONTROL_DEFAULT_ATTACKTIME,     
-            .sustainTime  = SYNTH_CONTROL_DEFAULT_SUSTAINTIME, 
-            .releaseTime = SYNTH_CONTROL_DEFAULT_RELEASETIME, 
-            .eventDeltaBeats = SYNTH_CONTROL_DEFAULT_EVENTDELTABEATS,   
-            .pitch = SYNTH_CONTROL_DEFAULT_PITCH,            
-            .amplitude = 0,
-            .startPoint = SYNTH_CONTROL_DEFAULT_STARTPOINT,
-            .numRepeats = SYNTH_CONTROL_DEFAULT_NUMREPEATS,
-            .offsetBeats = SYNTH_CONTROL_DEFAULT_OFFSETBEATS,
-            .intermittency = SYNTH_CONTROL_DEFAULT_INTERMITTENCY,
-            .fadeRate      = SYNTH_CONTROL_DEFAULT_FADERATE_AUXNOTE,
-            .positionStride = SYNTH_CONTROL_DEFAULT_POSITIONSTRIDE
-        };
+
+    param_sets[0].attackTime = SYNTH_CONTROL_DEFAULT_ATTACKTIME;
+    param_sets[0].sustainTime  = SYNTH_CONTROL_DEFAULT_SUSTAINTIME; 
+    param_sets[0].releaseTime = SYNTH_CONTROL_DEFAULT_RELEASETIME; 
+    param_sets[0].eventDeltaBeats = SYNTH_CONTROL_DEFAULT_EVENTDELTABEATS;   
+    param_sets[0].amplitude = SYNTH_CONTROL_DEFAULT_AMPLITUDE;
+    param_sets[0].startPoint = SYNTH_CONTROL_DEFAULT_STARTPOINT;
+    param_sets[0].numRepeats = SYNTH_CONTROL_DEFAULT_NUMREPEATS;
+    param_sets[0].offsetBeats = SYNTH_CONTROL_DEFAULT_OFFSETBEATS;
+    param_sets[0].intermittency = SYNTH_CONTROL_DEFAULT_INTERMITTENCY;
+    param_sets[0].fadeRate      = SYNTH_CONTROL_DEFAULT_FADERATE;
+    param_sets[0].positionStride = SYNTH_CONTROL_DEFAULT_POSITIONSTRIDE;
+    uint32_t _n;
+    for (_n = 0; _n < SYNTH_CONTROL_PITCH_TABLE_SIZE; _n++) {
+        param_sets[0].pitches[_n] = SYNTH_CONTROL_DEFAULT_PITCH;
     }
+    while (size-- > 1) {
+        param_sets[size].attackTime = SYNTH_CONTROL_DEFAULT_ATTACKTIME;     
+        param_sets[size].sustainTime  = SYNTH_CONTROL_DEFAULT_SUSTAINTIME; 
+        param_sets[size].releaseTime = SYNTH_CONTROL_DEFAULT_RELEASETIME; 
+        param_sets[size].eventDeltaBeats = SYNTH_CONTROL_DEFAULT_EVENTDELTABEATS;   
+        param_sets[size].amplitude = 0;
+        param_sets[size].startPoint = SYNTH_CONTROL_DEFAULT_STARTPOINT;
+        param_sets[size].numRepeats = SYNTH_CONTROL_DEFAULT_NUMREPEATS;
+        param_sets[size].offsetBeats = SYNTH_CONTROL_DEFAULT_OFFSETBEATS;
+        param_sets[size].intermittency = SYNTH_CONTROL_DEFAULT_INTERMITTENCY;
+        param_sets[size].fadeRate      = SYNTH_CONTROL_DEFAULT_FADERATE_AUXNOTE;
+        param_sets[size].positionStride = SYNTH_CONTROL_DEFAULT_POSITIONSTRIDE;
+        for (_n = 0; _n < SYNTH_CONTROL_PITCH_TABLE_SIZE; _n++) {
+            param_sets[0].pitches[_n] = SYNTH_CONTROL_DEFAULT_PITCH;
+        }
+    };
 }
-    
 
 void synth_control_setup(void)
 {
@@ -725,11 +726,11 @@ void synth_control_setup(void)
     posMode             = SynthControlPosMode_ABSOLUTE;
     deltaButtonMode     = SynthControlDeltaButtonMode_EVENT_DELTA_FREE;
     recMode             = SynthControlRecMode_NORMAL;
-    pitchMode           = SynthControlPitchMode_CHROM;
     gainMode            = SynthControlGainMode_WET;
     feedbackState       = 0;
     scheduleRecording   = 0;
     schedulerState      = 0;
+    editing_which_pitch = 0;
     /* The recorder trigger requires the zero crossing search be initialized */
     HannWindowTable_init(REC_LOOP_FADE_TIME_S * 2.);
 }
@@ -776,16 +777,6 @@ void synth_control_set_recMode(SynthControlRecMode recMode_param)
 SynthControlRecMode synth_control_get_recMode(void)
 {
     return recMode;
-}
-
-void synth_control_set_pitchMode(SynthControlPitchMode pitchMode_param)
-{
-    pitchMode = pitchMode_param;
-}
-
-SynthControlPitchMode synth_control_get_pitchMode(void)
-{
-    return pitchMode;
 }
 
 void synth_control_set_posMode(SynthControlPosMode posMode_param)
@@ -866,4 +857,23 @@ float synth_control_get_tempoBPM_fine(void)
 float synth_control_get_tempoBPM_scale(void)
 {
     return tempoBPM_scale;
+}
+
+void synth_control_set_editing_which_pitch(int _param)
+{
+    editing_which_pitch = _param;
+}
+
+int synth_control_get_editing_which_pitch(void)
+{
+    return editing_which_pitch;
+}
+
+void synth_control_pitch_reset_tog(void)
+{
+    uint32_t _m, _n;
+    _n = synth_control_get_editingWhichParams();
+    for (_m = 0; _m < SYNTH_CONTROL_PITCH_TABLE_SIZE; _m++) {
+        noteParamSets[_n].pitches[_m] = 0;
+    }
 }

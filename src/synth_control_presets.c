@@ -11,7 +11,6 @@ typedef struct __SCPreset {
     MMSample                     tempoBPM; 
     SynthControlPosMode          posMode;
     SynthControlDeltaButtonMode  deltaButtonMode;
-    SynthControlPitchMode        pitchMode;
     SynthControlGainMode         gainMode;
 } SCPreset;
 

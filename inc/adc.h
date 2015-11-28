@@ -2,7 +2,7 @@
 #define ADC_H 
 #include <stdint.h> 
 #define ADC_MAX 4096
-#define ADC_AVG_SIZE 8 
+#define ADC_AVG_SIZE 16
 /* There are 4 ADC channels per ADC */
 #define NUM_CHANNELS_PER_ADC 4 
 #define TOTAL_NUM_ADC_CHANNELS 8

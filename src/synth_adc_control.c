@@ -94,20 +94,8 @@ SYNTH_ADC_SETUP(eventDelta,SYNTH_ADC_EVENTDELTA_IDX,
 static void synth_adc_pitch_control(adc_channel_t *chan,
                                     adc_channel_do_data_t *data)
 {
-    switch (synth_control_get_pitchMode()) {
-        case SynthControlPitchMode_CHROM:
-            synth_control_set_pitch_chrom(
-                    ((float)chan->cur_val)/((float)ADC_MAX));
-            break;
-        case SynthControlPitchMode_4TH5TH:
-             synth_control_set_pitch_4ths5ths(
-                    ((float)chan->cur_val)/((float)ADC_MAX));
-            break;
-        case SynthControlPitchMode_ARP:
-            synth_control_set_pitch_arp(
-                    ((float)chan->cur_val)/((float)ADC_MAX));
-            break;
-    }
+    synth_control_set_pitch_chrom(
+            ((float)chan->cur_val)/((float)ADC_MAX));
 }
 
 SYNTH_ADC_SETUP(pitch,SYNTH_ADC_PITCH_IDX,synth_adc_pitch_control);

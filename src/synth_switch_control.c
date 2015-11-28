@@ -91,7 +91,7 @@ SYNTH_SWITCH_CONTROL(SynthControlPosMode,
         synth_control_set_posMode,
         SynthControlPosMode_STRIDE,
         SynthControlPosMode_ABSOLUTE,
-        SynthControlPosMode_UNKNOWN);
+        SynthControlPosMode_ABSOLUTE);
 SYNTH_SWITCH_SETUP(SynthControlPosMode,SW1);
 SYNTH_SWITCH_CONTROL(SynthControlDeltaButtonMode,
         synth_control_set_deltaButtonMode,
@@ -100,10 +100,10 @@ SYNTH_SWITCH_CONTROL(SynthControlDeltaButtonMode,
         SynthControlDeltaButtonMode_INTERMITTENCY);
 SYNTH_SWITCH_SETUP(SynthControlDeltaButtonMode,SW4);
 SYNTH_SWITCH_CONTROL(SynthControlPitchMode,
-        synth_control_set_pitchMode,
-        SynthControlPitchMode_CHROM,
-        SynthControlPitchMode_4TH5TH,
-        SynthControlPitchMode_ARP);
+        synth_control_set_editing_which_pitch,
+        0,
+        1,
+        2);
 SYNTH_SWITCH_SETUP(SynthControlPitchMode,SW8);
 SYNTH_SWITCH_CONTROL(SynthControlRecMode,
         synth_control_set_recMode,
@@ -129,6 +129,8 @@ SYNTH_SWITCH_CONTROL_TOG(presetStore);
 SYNTH_SWITCH_SETUP_TOG(presetStore,MSW3_BTM);
 SYNTH_SWITCH_CONTROL_TOG(feedback);
 SYNTH_SWITCH_SETUP_TOG(feedback,MSW7_TOP);
+SYNTH_SWITCH_CONTROL_TOG(pitch_reset);
+SYNTH_SWITCH_SETUP_TOG(pitch_reset,MSW1_TOP);
 
 void synth_switch_control_setup(void)
 {
@@ -144,4 +146,5 @@ void synth_switch_control_setup(void)
     SYNTH_SWITCH_SETUP_TOG_CALL(presetRecall);
     SYNTH_SWITCH_SETUP_TOG_CALL(presetStore);
     SYNTH_SWITCH_SETUP_TOG_CALL(feedback);
+    SYNTH_SWITCH_SETUP_TOG_CALL(pitch_reset);
 }

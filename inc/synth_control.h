@@ -29,7 +29,7 @@
 #define SYNTH_CONTROL_DEFAULT_SUSTAINTIME  1 
 #define SYNTH_CONTROL_DEFAULT_RELEASETIME 0.01
 #define SYNTH_CONTROL_DEFAULT_EVENTDELTABEATS 1
-#define SYNTH_CONTROL_DEFAULT_PITCH 60
+#define SYNTH_CONTROL_DEFAULT_PITCH 0
 #define SYNTH_CONTROL_DEFAULT_AMPLITUDE .5
 /* Other notes are off by default */
 #define SYNTH_CONTROL_DEFAULT_AMPLITUDE_AUXNOTE 0 
@@ -105,19 +105,7 @@ typedef enum {
 } SynthControlDeltaButtonMode;
 #define SYNTH_CONTROL_DELTA_BUTTON_MODE_N_MODES 3 
 
-typedef enum {
-    /* The pitches chosen are quantized to the chromatic notes -12 to 12 where 0
-     * will play the soundfile at a speed of 0. Or perhaps free, limited by
-     * precision of input. */
-    SynthControlPitchMode_CHROM,
-    /* Pitches chosen are quantized to ... -7, -5, 0, 5, 7 ... for some yet
-     * undetermined range. */
-    SynthControlPitchMode_4TH5TH,
-    /* Pitches change according to some sequence, starting at the pitch given by
-     * CHROM or 4TH5TH. The sequences have yet to be determined. */
-    SynthControlPitchMode_ARP
-} SynthControlPitchMode;
-#define SYNTH_CONTROL_PITCH_MODE_N_MODES 3 
+#define SYNTH_CONTROL_PITCH_TABLE_SIZE 3 
 
 typedef enum {
     /* Control the fade amount for repeated notes. */
@@ -147,7 +135,7 @@ typedef struct __NoteParamSet {
     MMSample releaseTime;
     /* The time between two scheduled events */
     MMSample eventDeltaBeats; /* The amount of time between repeats */
-    MMSample pitch;
+    MMSample pitches[SYNTH_CONTROL_PITCH_TABLE_SIZE];
     MMSample amplitude;
     MMSample startPoint; /* between 0 and 1 */
     int numRepeats;      /* The number of times repeated */
@@ -172,7 +160,6 @@ typedef struct __NoteParamSet {
 extern NoteParamSet                 noteParamSets[];
 extern SynthControlPosMode          posMode;
 extern SynthControlDeltaButtonMode  deltaButtonMode;
-extern SynthControlPitchMode        pitchMode;
 extern SynthControlGainMode         gainMode;
 extern SynthControlRecMode          recMode;
 extern int                          schedulerState;
@@ -200,8 +187,6 @@ void synth_control_set_deltaButtonMode(SynthControlDeltaButtonMode
 SynthControlDeltaButtonMode synth_control_get_deltaButtonMode(void);
 void synth_control_set_recMode(SynthControlRecMode recMode_param);
 SynthControlRecMode synth_control_get_recMode(void);
-void synth_control_set_pitchMode(SynthControlPitchMode pitchMode_param);
-SynthControlPitchMode synth_control_get_pitchMode(void);
 void synth_control_set_posMode(SynthControlPosMode posMode_param);
 SynthControlPosMode synth_control_get_posMode(void);
 void synth_control_set_gainMode(SynthControlGainMode gainMode_param);
@@ -243,5 +228,8 @@ void synth_control_set_tempo_coarse_norm(float param);
 void synth_control_set_tempo_fine_norm(float param);
 void synth_control_set_tempo_scale_norm(float param);
 void synth_control_set_tempoBPM_absolute(float _tempoBPM);
+void synth_control_set_editing_which_pitch(int _param);
+int synth_control_get_editing_which_pitch(void);
+void synth_control_pitch_reset_tog(void);
 
 #endif /* SYNTH_CONTROL_H */
