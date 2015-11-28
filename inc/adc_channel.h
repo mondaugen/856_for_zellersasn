@@ -34,7 +34,15 @@ typedef enum {
     /* Calls the function on the adc value if the current value is different
      * enough from the last value (according to the threshold parameter in the
      * data). */
-    adc_channel_do_style_CHANGED
+    adc_channel_do_style_CHANGED,
+    /* Set to this value at initialization of an adc_channel_do_data struct that
+     * should only function when changed. This will use the first call to the
+     * function to check the value first fed to it (like the position a knob is
+     * sitting at) to get the initial value to which it will compare subsequent
+     * values. Otherwise, we will always call the function the first time as the
+     * ADC reading is almost always different from the intial value assigned to
+     * the prev_val */
+    adc_channel_do_style_CHANGED_INIT
 } adc_channel_do_style_t;
 
 /* Implementations can subclass this to pass more data to the adc_channel_do*

@@ -80,6 +80,9 @@ void adc_channel_do(adc_channel_t *chan,
                     adc_channel_do_func_t what)
 {
     switch (data->style) {
+        case adc_channel_do_style_CHANGED_INIT:
+            data->prev_val = chan->cur_val;
+            data->style = adc_channel_do_style_CHANGED;
         case adc_channel_do_style_CHANGED:
             if (abs(chan->cur_val - data->prev_val) < data->threshold) {
                 /* Not enough change since last time something was done */

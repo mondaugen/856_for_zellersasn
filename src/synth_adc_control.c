@@ -9,7 +9,7 @@
         static adc_channel_do_set_t do_set;\
         static adc_channel_do_data_t channel_data;\
         adc_channel_do_data_init(&channel_data,\
-                                 adc_channel_do_style_CHANGED,\
+                                 adc_channel_do_style_CHANGED_INIT,\
                                  32,\
                                  0);\
         adc_channel_init(&channel,\
