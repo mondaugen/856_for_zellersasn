@@ -95,6 +95,9 @@ void sc_presets_recall(int npreset)
 {
     /* No need to load from file, this is done only on initialization */
     memcpy(noteParamSets,scpresets[npreset].noteParamSets,sizeof(NoteParamSet)*NUM_NOTE_PARAM_SETS);
+    /* Reset event counts so intermittency off all notes always has same phase
+     * */
+    synth_control_reset_noteOnEventCounts();
     if (schedulerState == 0) {
         /* Only recall tempo if sequencer not playing */
         synth_control_set_tempoBPM_absolute(scpresets[npreset].tempoBPM); 

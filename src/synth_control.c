@@ -17,6 +17,11 @@
  #include <assert.h>
 #endif  
 
+/* Keeps track of how many times a note has been played. If the number of times
+ * is divisible by the note-parameter set's intermittency value, this count gets
+ * reset */
+int noteOnEventCount[NUM_NOTE_PARAM_SETS];
+
 /* Stuff that could be saved */
 NoteParamSet                noteParamSets[NUM_NOTE_PARAM_SETS];
 /* The tempo, calculated as (tempoBPM_coarse + tempoBPM_fine) * tempoBPM_scale
@@ -29,6 +34,8 @@ static const float          tempoBPM_scale_table[] =
                                 SYNTH_CONTROL_TEMPOBPM_SCALE_TABLE;
 static const float          eventDelta_quant_table[] = 
                                 SYNTH_CONTROL_EVENTDELTA_QUANT_TABLE;
+static const int            intermittency_table[] =
+                                SYNTH_CONTROL_INTERMITTENCY_TABLE;
 SynthControlPosMode         posMode;
 SynthControlDeltaButtonMode deltaButtonMode;
 SynthControlGainMode        gainMode;
@@ -281,10 +288,22 @@ void synth_control_set_eventDelta_free(float eventDeltaBeats_param)
         = powf(2.,-6.*(1 - eventDeltaBeats_param));
 }
 
+void synth_control_reset_noteOnEventCounts(void)
+{
+    uint32_t _idx;
+    for (_idx = 0; _idx < NUM_NOTE_PARAM_SETS; _idx++) {
+        noteOnEventCount[_idx] = 0;
+    }
+}
+
 void synth_control_set_intermittency(float intermittency_param)
 {
-    noteParamSets[editingWhichParams].intermittency =
-        0 + (int)(3. * intermittency_param);
+    uint32_t _idx = (uint32_t)((float)SYNTH_CONTROL_INTERMITTENCY_TABLE_LENGTH 
+            * intermittency_param);
+    noteParamSets[editingWhichParams].intermittency = intermittency_table[_idx];
+    /* Reset all events' event count so that all sequences has same phase, no matter when
+     * intermittency was set */
+    synth_control_reset_noteOnEventCounts(void);
 }
 
 void synth_control_eventDeltaBeats_control(void *data_, float eventDeltaBeats_param)

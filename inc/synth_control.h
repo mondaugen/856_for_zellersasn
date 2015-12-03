@@ -69,6 +69,9 @@
 #define SYNTH_CONTROL_EVENTDELTA_QUANT_TABLE\
     { 1./16., 1./12., 1/8., 1./6., 1./4., 1./3., 1./2., 3./4. }
 #define SYNTH_CONTROL_EVENTDELTA_QUANT_TABLE_LENGTH 8
+#define SYNTH_CONTROL_INTERMITTENCY_TABLE_LENGTH 3
+#define SYNTH_CONTROL_INTERMITTENCY_TABLE\
+    { 0, 1, 3 } 
 
 typedef uint32_t SynthControlEditingWhichParamsIndex;
 /* The number of sets of note parameters */
@@ -168,6 +171,7 @@ extern int16_t  dryGain;
 /* The amount the scheduler is incremented each block */
 extern int                         scheduleRecording;
 extern int                         firstScheduledRecording;
+extern int noteOnEventCount[];
 
 void synth_control_setup(void);
 void autorelease_on_done(MMEnvedSamplePlayer * esp);
@@ -231,5 +235,7 @@ void synth_control_set_tempoBPM_absolute(float _tempoBPM);
 void synth_control_set_editing_which_pitch(int _param);
 int synth_control_get_editing_which_pitch(void);
 void synth_control_pitch_reset_tog(void);
+void synth_control_reset_noteOnEventCounts(void);
+
 
 #endif /* SYNTH_CONTROL_H */

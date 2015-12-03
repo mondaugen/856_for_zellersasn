@@ -42,11 +42,6 @@ MMSeq *sequence;
 NoteOnEventListNode noteOnEventListHead[NUM_NOTE_PARAM_SETS];
 NoteSchedEventListNode noteSchedEventListHead;
 
-/* Keeps track of how many times a note has been played. If the number of times
- * is divisible by the note-parameter set's intermittency value, this count gets
- * reset */
-int noteOnEventCount[NUM_NOTE_PARAM_SETS];
-
 static void NoteOnEvent_happen(MMEvent *event);
 static void NoteSchedEvent_happen(MMEvent *event);
 
