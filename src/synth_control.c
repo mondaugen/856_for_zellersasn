@@ -172,10 +172,10 @@ void synth_control_set_tempoBPM_absolute(float _tempoBPM)
 void synth_control_set_tempo_coarse_norm(float param)
 {
     float _tmp;
-    _tmp = floor((SYNTH_CONTROL_TEMPOBPM_COARSE_MAX 
+    _tmp = floor(((SYNTH_CONTROL_TEMPOBPM_COARSE_MAX 
                     - SYNTH_CONTROL_TEMPOBPM_COARSE_MIN)
                 / SYNTH_CONTROL_TEMPOBPM_COARSE_QUANT) 
-            * param
+            * param)
             * SYNTH_CONTROL_TEMPOBPM_COARSE_QUANT 
             + SYNTH_CONTROL_TEMPOBPM_COARSE_MIN;
     synth_control_update_tempo_coarse(_tmp);
@@ -185,10 +185,10 @@ void synth_control_set_tempo_coarse_norm(float param)
 void synth_control_set_tempo_fine_norm(float param)
 {
     float _tmp;
-    _tmp = floor((SYNTH_CONTROL_TEMPOBPM_FINE_MAX 
+    _tmp = floor(((SYNTH_CONTROL_TEMPOBPM_FINE_MAX 
                     - SYNTH_CONTROL_TEMPOBPM_FINE_MIN)
                 / SYNTH_CONTROL_TEMPOBPM_FINE_QUANT) 
-            * param
+            * param)
             * SYNTH_CONTROL_TEMPOBPM_FINE_QUANT 
             + SYNTH_CONTROL_TEMPOBPM_FINE_MIN;
     synth_control_update_tempo_fine(_tmp);
@@ -199,6 +199,9 @@ void synth_control_set_tempo_scale_norm(float param)
 {
     int _tmp = (int)floor(SYNTH_CONTROL_TEMPOBPM_SCALE_TABLE_LENGTH
                             * param);
+    if (_tmp == SYNTH_CONTROL_TEMPOBPM_SCALE_TABLE_LENGTH) {
+        _tmp--;
+    }
     synth_control_update_tempo_scale(tempoBPM_scale_table[_tmp]);
 }
 
@@ -221,6 +224,20 @@ void synth_control_set_pitch_chrom(float pitch_param)
 {
     noteParamSets[editingWhichParams].pitches[editing_which_pitch]
         = -12 + 24 * pitch_param;
+}
+
+/* Set pitch to a midi note. Rounds according to quantization parameters. */
+void synth_control_set_pitch_chrom_quant(float param)
+{
+    float _tmp;
+    _tmp = floor(((SYNTH_CONTROL_PITCH_CHROM_MAX 
+                    - SYNTH_CONTROL_PITCH_CHROM_MIN)
+                / SYNTH_CONTROL_PITCH_CHROM_QUANT) 
+            * param)
+            * SYNTH_CONTROL_PITCH_CHROM_QUANT 
+            + SYNTH_CONTROL_PITCH_CHROM_MIN;
+    noteParamSets[editingWhichParams].pitches[editing_which_pitch]
+        = _tmp;
 }
 
 void synth_control_set_pitch_4ths5ths(float pitch_param)
@@ -276,6 +293,9 @@ void synth_control_set_eventDelta_quant(float eventDeltaBeats_param)
     int _tmp;
     _tmp = (int)floor(SYNTH_CONTROL_EVENTDELTA_QUANT_TABLE_LENGTH 
             * eventDeltaBeats_param);
+    if (_tmp == SYNTH_CONTROL_EVENTDELTA_QUANT_TABLE_LENGTH) {
+        _tmp--;
+    }
     noteParamSets[editingWhichParams].eventDeltaBeats
         = eventDelta_quant_table[_tmp];
 
@@ -301,9 +321,9 @@ void synth_control_set_intermittency(float intermittency_param)
     uint32_t _idx = (uint32_t)((float)SYNTH_CONTROL_INTERMITTENCY_TABLE_LENGTH 
             * intermittency_param);
     noteParamSets[editingWhichParams].intermittency = intermittency_table[_idx];
-    /* Reset all events' event count so that all sequences has same phase, no matter when
-     * intermittency was set */
-    synth_control_reset_noteOnEventCounts(void);
+    /* Reset all events' event count so that all sequences has same phase, no
+     * matter when intermittency was set */
+    synth_control_reset_noteOnEventCounts();
 }
 
 void synth_control_eventDeltaBeats_control(void *data_, float eventDeltaBeats_param)

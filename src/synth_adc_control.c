@@ -94,7 +94,7 @@ SYNTH_ADC_SETUP(eventDelta,SYNTH_ADC_EVENTDELTA_IDX,
 static void synth_adc_pitch_control(adc_channel_t *chan,
                                     adc_channel_do_data_t *data)
 {
-    synth_control_set_pitch_chrom(
+    synth_control_set_pitch_chrom_quant(
             ((float)chan->cur_val)/((float)ADC_MAX));
 }
 

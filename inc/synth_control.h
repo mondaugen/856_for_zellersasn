@@ -69,9 +69,12 @@
 #define SYNTH_CONTROL_EVENTDELTA_QUANT_TABLE\
     { 1./16., 1./12., 1/8., 1./6., 1./4., 1./3., 1./2., 3./4. }
 #define SYNTH_CONTROL_EVENTDELTA_QUANT_TABLE_LENGTH 8
-#define SYNTH_CONTROL_INTERMITTENCY_TABLE_LENGTH 3
+#define SYNTH_CONTROL_INTERMITTENCY_TABLE_LENGTH 4
 #define SYNTH_CONTROL_INTERMITTENCY_TABLE\
-    { 0, 1, 3 } 
+    { 0, 1, 2, 3 } 
+#define SYNTH_CONTROL_PITCH_CHROM_MIN -13
+#define SYNTH_CONTROL_PITCH_CHROM_MAX  13
+#define SYNTH_CONTROL_PITCH_CHROM_QUANT 1 
 
 typedef uint32_t SynthControlEditingWhichParamsIndex;
 /* The number of sets of note parameters */
@@ -236,6 +239,7 @@ void synth_control_set_editing_which_pitch(int _param);
 int synth_control_get_editing_which_pitch(void);
 void synth_control_pitch_reset_tog(void);
 void synth_control_reset_noteOnEventCounts(void);
+void synth_control_set_pitch_chrom_quant(float param);
 
 
 #endif /* SYNTH_CONTROL_H */
