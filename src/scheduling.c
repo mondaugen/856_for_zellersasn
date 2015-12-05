@@ -206,7 +206,6 @@ static void NoteOnEvent_happen(MMEvent *event)
                          _next_pitch));
         }
         MMSample voiceNum = pm_get_next_free_voice_number();
-        noteOnEventCount[((NoteOnEvent*)event)->parameterSet] = 0;
         if (voiceNum != -1 && 
                 ((noteParamSets[((NoteOnEvent*)event)->parameterSet].amplitude
                     * ((NoteOnEvent*)event)->currentFade) > SCHEDULING_AMP_FLOOR)) { 
