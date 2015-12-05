@@ -3,14 +3,23 @@
 #include "mm_seq.h"
 #include "mm_dllist.h" 
 #include "mm_sample.h" 
+#include "leds.h" 
 
 /* Amplitude below which playback is not triggered */
 #define SCHEDULING_AMP_FLOOR 3.05E-5 /* ~ 2^-15 */
 
+#define MEASURE_LED_SET() led7_set()
+#define MEASURE_LED_RESET() led7_reset()
+/* The fraction of the measure from the beginning of the measure at which time
+ * the LED will be turned off. 4 is quarter of the measure, 3 is third, etc. */
+#define MEASURE_LED_LENGTH_SCALAR (16ULL)
+
 typedef struct __NoteOnEvent NoteOnEvent;
 typedef struct __NoteSchedEvent NoteSchedEvent;
+typedef struct __MeasureLEDOffEvent MeasureLEDOffEvent;
 typedef struct __NoteOnEventListNode NoteOnEventListNode;
 typedef struct __NoteSchedEventListNode NoteSchedEventListNode;
+typedef struct __MeasureLEDOffEventListNode MeasureLEDOffEventListNode;
 
 struct __NoteOnEventListNode {
     MMDLList head;
@@ -22,9 +31,15 @@ struct __NoteSchedEventListNode {
     NoteSchedEvent *child;
 };
 
+struct __MeasureLEDOffEventListNode {
+    MMDLList head;
+    MeasureLEDOffEvent *child;
+};
+
 extern MMSeq *sequence;
 extern NoteOnEventListNode noteOnEventListHead[];
 extern NoteSchedEventListNode noteSchedEventListHead;
+extern MeasureLEDOffEventListNode measureLEDOffEventListHead;
 extern int noteOnEventCount[];
 void scheduler_setup(void);
 void schedule_noteOn_event(MMTime timeFromNow, NoteOnEvent *ev);
@@ -33,6 +48,7 @@ void set_noteOnEvents_active(NoteOnEventListNode *head);
 void set_noteOnEvents_inactive(NoteOnEventListNode *head);
 void set_noteSchedEvents_active(NoteSchedEventListNode *head);
 void set_noteSchedEvents_inactive(NoteSchedEventListNode *head);
+void set_measureLEDOffEvents_inactive(MeasureLEDOffEventListNode *head);
 void schedule_noteSched_event(uint64_t timeFromNow, NoteSchedEvent *ev);
 NoteSchedEvent *NoteSchedEvent_new(int active);
 NoteOnEvent *NoteOnEvent_new(int active,

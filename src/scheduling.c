@@ -38,12 +38,21 @@ struct __NoteSchedEvent {
     int active;
 };
 
+/* Event that turns off LED indicating measure pulse */
+struct __MeasureLEDOffEvent {
+    MMEvent head;
+    MeasureLEDOffEventListNode *parent;
+    int active;
+};
+
 MMSeq *sequence;
 NoteOnEventListNode noteOnEventListHead[NUM_NOTE_PARAM_SETS];
 NoteSchedEventListNode noteSchedEventListHead;
+MeasureLEDOffEventListNode measureLEDOffEventListHead;
 
 static void NoteOnEvent_happen(MMEvent *event);
 static void NoteSchedEvent_happen(MMEvent *event);
+static void MeasureLEDOffEvent_happen(MMEvent *event);
 
 void scheduler_setup(void)
 {
@@ -80,6 +89,7 @@ NoteOnEvent *NoteOnEvent_new(int active,
     ev->currentFade = currentFade;
     ev->currentPosition = currentPosition;
     ev->currentPitch = currentPitch;
+    ev->parent = NULL;
     return ev;
 }
 
@@ -91,7 +101,38 @@ NoteSchedEvent *NoteSchedEvent_new(int active)
     }
     ((MMEvent*)ev)->happen = NoteSchedEvent_happen;
     ev->active = active;
+    ev->parent = NULL;
     return ev;
+}
+
+MeasureLEDOffEvent *MeasureLEDOffEvent_new(int active)
+{
+    MeasureLEDOffEvent *ev = (MeasureLEDOffEvent*)malloc(sizeof(MeasureLEDOffEvent));
+    if (!ev) {
+        return NULL;
+    }
+    ((MMEvent*)ev)->happen = MeasureLEDOffEvent_happen;
+    ev->active = active;
+    ev->parent = NULL;
+    return ev;
+}
+
+void schedule_measureLEDOff_event(uint64_t timeFromNow, MeasureLEDOffEvent *ev)
+{
+    if (!ev) {
+        return;
+    }
+    ev->parent = (MeasureLEDOffEventListNode*)malloc(sizeof(MeasureLEDOffEventListNode));
+    if (!ev->parent) {
+        free(ev);
+        return;
+    }
+    MMDLList_init(ev->parent);
+    ev->parent->child = ev;
+    MMDLList_insertAfter((MMDLList*)&measureLEDOffEventListHead,
+            (MMDLList*)ev->parent);
+    MMSeq_scheduleEvent(sequence, (MMEvent*)ev,
+            MMSeq_getCurrentTime(sequence) + timeFromNow);
 }
 
 void schedule_noteOn_event(uint64_t timeFromNow, NoteOnEvent *ev)
@@ -104,6 +145,7 @@ void schedule_noteOn_event(uint64_t timeFromNow, NoteOnEvent *ev)
         free(ev);
         return;
     }
+    MMDLList_init(ev->parent);
     ev->parent->child = ev;
     MMDLList_insertAfter((MMDLList*)&noteOnEventListHead[ev->parameterSet],
             (MMDLList*)ev->parent);
@@ -121,6 +163,7 @@ void schedule_noteSched_event(uint64_t timeFromNow, NoteSchedEvent *ev)
         free(ev);
         return;
     }
+    MMDLList_init(ev->parent);
     ev->parent->child = ev;
     MMDLList_insertAfter((MMDLList*)&noteSchedEventListHead,(MMDLList*)ev->parent);
     MMSeq_scheduleEvent(sequence, (MMEvent*)ev,
@@ -251,6 +294,13 @@ static void NoteSchedEvent_happen(MMEvent *event)
         schedule_noteSched_event(noteParamSets[0].eventDeltaBeats
                 * 0xffffffffULL,
                 NoteSchedEvent_new(1));
+        /* Turn on LED */
+        MEASURE_LED_SET();
+        /* Schedule measure LED off event to turn off the measure indicating LED
+         * */
+        schedule_measureLEDOff_event(noteParamSets[0].eventDeltaBeats
+                * 0xffffffffULL / MEASURE_LED_LENGTH_SCALAR,
+                MeasureLEDOffEvent_new(1));
         /* If scheduled recording enabled, stop the previous recording and start
          * a new one. It is always okay to stop the recording, because the
          * scheduleRecording flag is set when recording is turned off in the
@@ -263,6 +313,16 @@ static void NoteSchedEvent_happen(MMEvent *event)
     }
     MMDLList_remove((MMDLList*)((NoteSchedEvent*)event)->parent);
     free(((NoteSchedEvent*)event)->parent);
+    free(event);
+}
+
+static void MeasureLEDOffEvent_happen(MMEvent *event)
+{
+    if (((MeasureLEDOffEvent*)event)->active == 1) {
+       MEASURE_LED_RESET();
+    } 
+    MMDLList_remove((MMDLList*)((MeasureLEDOffEvent*)event)->parent);
+    free(((MeasureLEDOffEvent*)event)->parent);
     free(event);
 }
 
@@ -314,5 +374,14 @@ void set_noteSchedEvents_inactive(NoteSchedEventListNode *head)
     while (head) {
         head->child->active = 0;
         head = (NoteSchedEventListNode*)((MMDLList*)head)->next;
+    }
+}
+
+/* See set_noteSchedEvents_active for tips. */
+void set_measureLEDOffEvents_inactive(MeasureLEDOffEventListNode *head)
+{
+    while (head) {
+        head->child->active = 0;
+        head = (MeasureLEDOffEventListNode*)((MMDLList*)head)->next;
     }
 }

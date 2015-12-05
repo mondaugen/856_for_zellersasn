@@ -556,6 +556,11 @@ static void schedulerState_off_helper(void *data)
     /* Disactivate the noteSchedEvents */
     set_noteSchedEvents_inactive(
             (NoteSchedEventListNode*)MMDLList_getNext(&noteSchedEventListHead));
+    /* Disactivate measure LED off events */
+    set_measureLEDOffEvents_inactive(
+            (MeasureLEDOffEventListNode*)MMDLList_getNext(&measureLEDOffEventListHead));
+    /* Turn off LED */
+    MEASURE_LED_RESET();
     /* Turn off all playing notes */
     pm_do_for_each_busy_voice(&voiceAllocator,free_playing_spsp_voice);
     schedulerState = 0;
