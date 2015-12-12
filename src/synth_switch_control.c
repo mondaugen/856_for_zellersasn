@@ -82,7 +82,6 @@ typedef struct __synth_switch_control_t {
 SYNTH_SWITCH_CONTROL(SynthControlEditingWhichParamsIndex,
         synth_control_set_editingWhichParams,0,1,2);
 SYNTH_SWITCH_SETUP(SynthControlEditingWhichParamsIndex,SW2);
-
 SYNTH_SWITCH_CONTROL(SynthControlPresetNumber,
         synth_control_set_presetNumber,0,1,2);
 SYNTH_SWITCH_SETUP(SynthControlPresetNumber,

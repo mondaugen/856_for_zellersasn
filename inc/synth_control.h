@@ -75,6 +75,9 @@
 #define SYNTH_CONTROL_PITCH_CHROM_MIN -13
 #define SYNTH_CONTROL_PITCH_CHROM_MAX  13
 #define SYNTH_CONTROL_PITCH_CHROM_QUANT 1 
+#define SYNTH_CONTROL_PITCH_FINE_MIN -0.5
+#define SYNTH_CONTROL_PITCH_FINE_MAX  0.5
+#define SYNTH_CONTROL_PITCH_FINE_QUANT 0.01
 
 typedef uint32_t SynthControlEditingWhichParamsIndex;
 /* The number of sets of note parameters */

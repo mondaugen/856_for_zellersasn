@@ -240,6 +240,21 @@ void synth_control_set_pitch_chrom_quant(float param)
         = _tmp;
 }
 
+void synth_control_set_pitch_fine_quant(float param, 
+                                        int note_param_idx,
+                                        int pitch_idx)
+{
+    float _tmp;
+    _tmp = floor(((SYNTH_CONTROL_PITCH_FINE_MAX 
+                    - SYNTH_CONTROL_PITCH_FINE_MIN)
+                / SYNTH_CONTROL_PITCH_FINE_QUANT) 
+            * param)
+            * SYNTH_CONTROL_PITCH_FINE_QUANT 
+            + SYNTH_CONTROL_PITCH_FINE_MIN;
+    noteParamSets[note_param_idx].pitches[pitch_idx]
+        += _tmp;
+}
+
 void synth_control_set_pitch_4ths5ths(float pitch_param)
 {
     static int32_t ivals[] = {-19,-17,-12,-7,-5,0,5,7,12,17,19};
@@ -806,6 +821,13 @@ SynthControlDeltaButtonMode synth_control_get_deltaButtonMode(void)
 
 void synth_control_set_recMode(SynthControlRecMode recMode_param)
 {
+    /* Only do the following if recMode_param different from last recMode_param
+     * that this function was called with. */
+    static SynthControlRecMode last_recMode_param = SynthControlRecMode_REC_LEN_1_BEAT;
+    if (recMode_param == last_recMode_param) {
+        return;
+    }
+    last_recMode_param = recMode_param;
     SynthControlRecMode _recMode = synth_control_get_recMode();
     if (_recMode != recMode_param) {
         recMode = recMode_param;
@@ -825,6 +847,12 @@ SynthControlRecMode synth_control_get_recMode(void)
 
 void synth_control_set_posMode(SynthControlPosMode posMode_param)
 {
+    /* Only set if mode being set different from last mode set */
+    static SynthControlPosMode last_posMode_param = SynthControlPosMode_ABSOLUTE;
+    if (last_posMode_param == posMode_param) {
+        return;
+    }
+    last_posMode_param = posMode_param;
     posMode = (SynthControlPosMode)posMode_param;
 }
 
