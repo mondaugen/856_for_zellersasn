@@ -9,9 +9,6 @@
 typedef struct __SCPreset {
     NoteParamSet                 noteParamSets[NUM_NOTE_PARAM_SETS];
     MMSample                     tempoBPM; 
-    SynthControlPosMode          posMode;
-    SynthControlDeltaButtonMode  deltaButtonMode;
-    SynthControlGainMode         gainMode;
 } SCPreset;
 
 static presets_lowlevel_handle_t *scpresets_handle;

@@ -179,11 +179,13 @@ static void NoteOnEvent_happen(MMEvent *event)
          * 0 */
         MMSample _next_pitch;
         int _next_repeat_idx, _cur_param_set, _next_pitch_idx;
+        SynthControlPosMode _posMode;
         _cur_param_set = ((NoteOnEvent*)event)->parameterSet;
         _next_repeat_idx = ((NoteOnEvent*)event)->repeatIndex + 1;
         _next_pitch_idx = _next_repeat_idx % SYNTH_CONTROL_PITCH_TABLE_SIZE;
         _next_pitch =  ((NoteOnEvent*)event)->currentPitch 
             + noteParamSets[_cur_param_set].pitches[_next_pitch_idx];
+        _posMode = noteParamSets[_cur_param_set].posMode;
         if (((NoteOnEvent*)event)->numRepeats > 0) {
             schedule_noteOn_event(
                     noteParamSets[((NoteOnEvent*)event)->parameterSet].eventDeltaBeats
@@ -198,7 +200,7 @@ static void NoteOnEvent_happen(MMEvent *event)
                          * position by the stride amount, wrapping between 0 and
                          * 1, otherwise just put the position as dictated by the
                          * parameter set */
-                        (posMode == SynthControlPosMode_STRIDE) ?
+                        (_posMode == SynthControlPosMode_STRIDE) ?
                             MM_fwrap(((NoteOnEvent*)event)->currentPosition
                                 + noteParamSets[((NoteOnEvent*)event)->parameterSet].positionStride,
                                 0,1) :

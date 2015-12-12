@@ -23,6 +23,19 @@ typedef struct __synth_switch_control_t {
         }\
     }
 
+#define SYNTH_SWITCH_CONTROL_ONCHANGE(type,fun,c0,c1,c2,init_state)\
+    static void synth_switch_control_ ## type ## _control(switch_control_t *sc)\
+    {\
+        static type _last_param = init_state;
+        if (!switch_control_get_state(sc)) {\
+            fun(c0,&_last_param);\
+        } else if (!switch_control_get_state((synth_switch_control_t*)sc)) {\
+            fun(c2,&_last_param);\
+        } else {\
+            fun(c1,&_last_param);\
+        }\
+    }
+
 #define SYNTH_SWITCH_SETUP(type,sw)\
     static void synth_switch_control_ ## type ## _setup(void)\
     {\
@@ -86,9 +99,10 @@ SYNTH_SWITCH_CONTROL(SynthControlPresetNumber,
         synth_control_set_presetNumber,0,1,2);
 SYNTH_SWITCH_SETUP(SynthControlPresetNumber,
         SW5);
-SYNTH_SWITCH_CONTROL(SynthControlPosMode,
-        synth_control_set_posMode,
+SYNTH_SWITCH_CONTROL_ONCHANGE(SynthControlPosMode,
+        synth_control_set_posMode_onChange_curParams,
         SynthControlPosMode_STRIDE,
+        SynthControlPosMode_ABSOLUTE,
         SynthControlPosMode_ABSOLUTE,
         SynthControlPosMode_ABSOLUTE);
 SYNTH_SWITCH_SETUP(SynthControlPosMode,SW1);
@@ -104,11 +118,12 @@ SYNTH_SWITCH_CONTROL(SynthControlPitchMode,
         1,
         2);
 SYNTH_SWITCH_SETUP(SynthControlPitchMode,SW8);
-SYNTH_SWITCH_CONTROL(SynthControlRecMode,
-        synth_control_set_recMode,
+SYNTH_SWITCH_CONTROL_ONCHANGE(SynthControlRecMode,
+        synth_control_set_recMode_onChange,
         SynthControlRecMode_NORMAL,
         SynthControlRecMode_REC_LEN_1_BEAT,
-        SynthControlRecMode_REC_LEN_1_BEAT_REC_SCHED);
+        SynthControlRecMode_REC_LEN_1_BEAT_REC_SCHED,
+        SynthControlRecMode_REC_LEN_1_BEAT);
 SYNTH_SWITCH_SETUP(SynthControlRecMode,SW6);
         /* Incase the switch gets caught down momentarily when toggling the
          * feedback, the gain mode will stay in wet mode. */

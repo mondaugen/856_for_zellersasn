@@ -750,6 +750,7 @@ void synth_control_reset_param_sets(NoteParamSet *param_sets, int size)
     param_sets[0].intermittency = SYNTH_CONTROL_DEFAULT_INTERMITTENCY;
     param_sets[0].fadeRate      = SYNTH_CONTROL_DEFAULT_FADERATE;
     param_sets[0].positionStride = SYNTH_CONTROL_DEFAULT_POSITIONSTRIDE;
+    param_sets[0].posMode = SYNTH_CONTROL_DEFAULT_POSMODE;
     uint32_t _n;
     for (_n = 0; _n < SYNTH_CONTROL_PITCH_TABLE_SIZE; _n++) {
         param_sets[0].pitches[_n] = SYNTH_CONTROL_DEFAULT_PITCH;
@@ -766,15 +767,15 @@ void synth_control_reset_param_sets(NoteParamSet *param_sets, int size)
         param_sets[size].intermittency = SYNTH_CONTROL_DEFAULT_INTERMITTENCY;
         param_sets[size].fadeRate      = SYNTH_CONTROL_DEFAULT_FADERATE_AUXNOTE;
         param_sets[size].positionStride = SYNTH_CONTROL_DEFAULT_POSITIONSTRIDE;
+        param_sets[size].posMode = SYNTH_CONTROL_DEFAULT_POSMODE;
         for (_n = 0; _n < SYNTH_CONTROL_PITCH_TABLE_SIZE; _n++) {
             param_sets[0].pitches[_n] = SYNTH_CONTROL_DEFAULT_PITCH;
         }
     };
 }
 
-void synth_control_setup(void)
+void synth_control_reset_global_params(void)
 {
-    synth_control_reset_param_sets(noteParamSets,NUM_NOTE_PARAM_SETS);
     noteDeltaFromBuffer = 0;
     dryGain             = 0;
     editingWhichParams  = 0;
@@ -782,7 +783,6 @@ void synth_control_setup(void)
     tempoBPM_fine       = SYNTH_CONTROL_DEFAULT_TEMPOBPM_FINE;
     tempoBPM_scale      = SYNTH_CONTROL_DEFAULT_TEMPOBPM_SCALE;
     tempoBPM            = SYNTH_CONTROL_DEFAULT_TEMPOBPM;
-    posMode             = SynthControlPosMode_ABSOLUTE;
     deltaButtonMode     = SynthControlDeltaButtonMode_EVENT_DELTA_FREE;
     recMode             = SynthControlRecMode_NORMAL;
     gainMode            = SynthControlGainMode_WET;
@@ -790,7 +790,12 @@ void synth_control_setup(void)
     scheduleRecording   = 0;
     schedulerState      = 0;
     editing_which_pitch = 0;
-    /* The recorder trigger requires the zero crossing search be initialized */
+}
+
+void synth_control_setup(void)
+{
+    synth_control_reset_param_sets(noteParamSets,NUM_NOTE_PARAM_SETS);
+    synth_control_reset_global_params();
     HannWindowTable_init(REC_LOOP_FADE_TIME_S * 2.);
 }
 
@@ -821,13 +826,6 @@ SynthControlDeltaButtonMode synth_control_get_deltaButtonMode(void)
 
 void synth_control_set_recMode(SynthControlRecMode recMode_param)
 {
-    /* Only do the following if recMode_param different from last recMode_param
-     * that this function was called with. */
-    static SynthControlRecMode last_recMode_param = SynthControlRecMode_REC_LEN_1_BEAT;
-    if (recMode_param == last_recMode_param) {
-        return;
-    }
-    last_recMode_param = recMode_param;
     SynthControlRecMode _recMode = synth_control_get_recMode();
     if (_recMode != recMode_param) {
         recMode = recMode_param;
@@ -840,20 +838,50 @@ void synth_control_set_recMode(SynthControlRecMode recMode_param)
     }
 }
 
+/* Only set if mode being set different from last mode set */
+void synth_control_set_recMode_onChange(SynthControlRecMode recMode_param,
+                               SynthControlRecMode *last_recMode_param)
+{
+    /* Only do the following if recMode_param different from last recMode_param
+     * that this function was called with. */
+    if (recMode_param == *last_recMode_param) {
+        return;
+    }
+    *last_recMode_param = recMode_param;
+    synth_control_set_recMode(recMode_param);
+}
+
 SynthControlRecMode synth_control_get_recMode(void)
 {
     return recMode;
 }
 
-void synth_control_set_posMode(SynthControlPosMode posMode_param)
+void synth_control_set_posMode(SynthControlPosMode posMode_param,
+                               int which_params)
 {
-    /* Only set if mode being set different from last mode set */
-    static SynthControlPosMode last_posMode_param = SynthControlPosMode_ABSOLUTE;
-    if (last_posMode_param == posMode_param) {
+    noteParamSets[which_params].posMode = (SynthControlPosMode)posMode_param;
+}
+
+/* Only set if mode being set different from last mode set */
+void synth_control_set_posMode_onChange(SynthControlPosMode posMode_param,
+                                        SynthControlPosMode *last_posMode_param,
+                                        int which_params)
+{
+    if (*last_posMode_param == posMode_param) {
         return;
     }
-    last_posMode_param = posMode_param;
-    posMode = (SynthControlPosMode)posMode_param;
+    *last_posMode_param = posMode_param;
+    synth_control_set_posMode(posMode_param,which_params);
+}
+
+/* Only set if mode being set different from last mode set */
+void synth_control_set_posMode_onChange_curParams(SynthControlPosMode posMode_param,
+                                        SynthControlPosMode *last_posMode_param)
+{
+    int _which_params = synth_control_get_editingWhichParams();
+    synth_control_set_posMode_onChange(posMode_param,
+                                       last_posMode_params,
+                                       _which_params);
 }
 
 SynthControlPosMode synth_control_get_posMode(void)

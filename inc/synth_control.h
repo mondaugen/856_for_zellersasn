@@ -5,86 +5,6 @@
 #include <stdint.h> 
 #include "synth_control_presets.h" 
 
-/* The amount of fade at the end of the recording in seconds */
-#define REC_LOOP_FADE_TIME_S 0.010
-/* Envelope parameters */
-#define SYNTH_CONTROL_MIN_ATTACK_TIME 0.001 
-#define SYNTH_CONTROL_MAX_ATTACK_TIME 0.5
-#define SYNTH_CONTROL_MIN_RELEASE_TIME 0.001
-#define SYNTH_CONTROL_MAX_RELEASE_TIME 0.5
-
-/* Gain parameters */
-#define SYNTH_CONTROL_MAX_GAIN 0
-#define SYNTH_CONTROL_MIN_GAIN -35
-/* gains below this are effectively 0 */
-#define SYNTH_CONTROL_GAIN_THRESH -30
-
-/* Repeat parameters */
-#define SYNTH_CONTROL_MAX_NUM_REPEATS 16
-/* The minimum amplitude for the last repeat */
-#define SYNTH_CONTROL_ECHO_MIN 1.E-3 /* -60dB */
-#define SYNTH_CONTROL_ECHO_MAX 4.    /* 12 dB */
-
-#define SYNTH_CONTROL_DEFAULT_ATTACKTIME 0.01     
-#define SYNTH_CONTROL_DEFAULT_SUSTAINTIME  1 
-#define SYNTH_CONTROL_DEFAULT_RELEASETIME 0.01
-#define SYNTH_CONTROL_DEFAULT_EVENTDELTABEATS 1
-#define SYNTH_CONTROL_DEFAULT_PITCH 0
-#define SYNTH_CONTROL_DEFAULT_AMPLITUDE .5
-/* Other notes are off by default */
-#define SYNTH_CONTROL_DEFAULT_AMPLITUDE_AUXNOTE 0 
-#define SYNTH_CONTROL_DEFAULT_STARTPOINT 0
-#define SYNTH_CONTROL_DEFAULT_NUMREPEATS 0
-/* The amount of beats offset from the beginning
-   of the bar */
-#define SYNTH_CONTROL_DEFAULT_OFFSETBEATS 0       
-/* Canonically the number of repeats that are
-   ignored */
-#define SYNTH_CONTROL_DEFAULT_INTERMITTENCY 0      
-/* Fade rate doesn't apply to the first
-   parameter set */
-#define SYNTH_CONTROL_DEFAULT_FADERATE      0      
-/* The amount the starting point in the sample
-   is advanced each time it is scheduled (if
-   stride enabled) */
-/* The fade rate of notes other than the first note is not 0 */
-#define SYNTH_CONTROL_DEFAULT_FADERATE_AUXNOTE 1.
-#define SYNTH_CONTROL_DEFAULT_POSITIONSTRIDE 0      
-#define SYNTH_CONTROL_DEFAULT_TEMPOBPM_COARSE 120 
-#define SYNTH_CONTROL_DEFAULT_TEMPOBPM_FINE   0 
-#define SYNTH_CONTROL_DEFAULT_TEMPOBPM_SCALE  1. 
-#define SYNTH_CONTROL_DEFAULT_TEMPOBPM\
-   ((SYNTH_CONTROL_DEFAULT_TEMPOBPM_COARSE\
-    + SYNTH_CONTROL_DEFAULT_TEMPOBPM_FINE)\
-    * SYNTH_CONTROL_DEFAULT_TEMPOBPM_SCALE)
-#define SYNTH_CONTROL_TEMPOBPM_COARSE_MIN     40.
-#define SYNTH_CONTROL_TEMPOBPM_COARSE_MAX     240.
-#define SYNTH_CONTROL_TEMPOBPM_COARSE_QUANT   10.
-#define SYNTH_CONTROL_TEMPOBPM_FINE_MIN       -10.
-#define SYNTH_CONTROL_TEMPOBPM_FINE_MAX       10.
-#define SYNTH_CONTROL_TEMPOBPM_FINE_QUANT     0.1
-#define SYNTH_CONTROL_TEMPOBPM_SCALE_TABLE\
-    { 1./4., 1./3., 1./2., 1. }
-#define SYNTH_CONTROL_TEMPOBPM_SCALE_TABLE_LENGTH 4 
-#define SYNTH_CONTROL_EVENTDELTA_QUANT_TABLE\
-    { 1./16., 1./12., 1/8., 1./6., 1./4., 1./3., 1./2., 3./4. }
-#define SYNTH_CONTROL_EVENTDELTA_QUANT_TABLE_LENGTH 8
-#define SYNTH_CONTROL_INTERMITTENCY_TABLE_LENGTH 4
-#define SYNTH_CONTROL_INTERMITTENCY_TABLE\
-    { 0, 1, 2, 3 } 
-#define SYNTH_CONTROL_PITCH_CHROM_MIN -13
-#define SYNTH_CONTROL_PITCH_CHROM_MAX  13
-#define SYNTH_CONTROL_PITCH_CHROM_QUANT 1 
-#define SYNTH_CONTROL_PITCH_FINE_MIN -0.5
-#define SYNTH_CONTROL_PITCH_FINE_MAX  0.5
-#define SYNTH_CONTROL_PITCH_FINE_QUANT 0.01
-
-typedef uint32_t SynthControlEditingWhichParamsIndex;
-/* The number of sets of note parameters */
-#define NUM_NOTE_PARAM_SETS 3 
-typedef uint32_t SynthControlPresetNumber;
-
-
 typedef enum {
     /* Control the absolute starting point in the sound file */
     SynthControlPosMode_ABSOLUTE,
@@ -96,13 +16,6 @@ typedef enum {
     SynthControlPosMode_UNKNOWN
 } SynthControlPosMode;
 #define SYNTH_CONTROL_POS_MODE_N_MODES 3
-
-/*
-typedef enum {
-    SynthControlEventDeltaMode_FREE,
-    SynthControlEventDeltaMode_QUANT
-} SynthControlEventDeltaMode;
-*/
 
 typedef enum {
     /* Adjust the event delta freely */
@@ -163,11 +76,93 @@ typedef struct __NoteParamSet {
                              repeats */
     MMSample fadeRate;
     MMSample positionStride; /* If stride enabled, how much the position head is advanced each playback */
+    SynthControlPosMode posMode; /* Whether there is stride or the position stays absolute */
 } NoteParamSet;
+
+/* The amount of fade at the end of the recording in seconds */
+#define REC_LOOP_FADE_TIME_S 0.010
+/* Envelope parameters */
+#define SYNTH_CONTROL_MIN_ATTACK_TIME 0.001 
+#define SYNTH_CONTROL_MAX_ATTACK_TIME 0.5
+#define SYNTH_CONTROL_MIN_RELEASE_TIME 0.001
+#define SYNTH_CONTROL_MAX_RELEASE_TIME 0.5
+
+/* Gain parameters */
+#define SYNTH_CONTROL_MAX_GAIN 0
+#define SYNTH_CONTROL_MIN_GAIN -35
+/* gains below this are effectively 0 */
+#define SYNTH_CONTROL_GAIN_THRESH -30
+
+/* Repeat parameters */
+#define SYNTH_CONTROL_MAX_NUM_REPEATS 16
+/* The minimum amplitude for the last repeat */
+#define SYNTH_CONTROL_ECHO_MIN 1.E-3 /* -60dB */
+#define SYNTH_CONTROL_ECHO_MAX 4.    /* 12 dB */
+
+#define SYNTH_CONTROL_DEFAULT_ATTACKTIME 0.01     
+#define SYNTH_CONTROL_DEFAULT_SUSTAINTIME  1 
+#define SYNTH_CONTROL_DEFAULT_RELEASETIME 0.01
+#define SYNTH_CONTROL_DEFAULT_EVENTDELTABEATS 1
+#define SYNTH_CONTROL_DEFAULT_PITCH 0
+#define SYNTH_CONTROL_DEFAULT_AMPLITUDE .5
+/* Other notes are off by default */
+#define SYNTH_CONTROL_DEFAULT_AMPLITUDE_AUXNOTE 0 
+#define SYNTH_CONTROL_DEFAULT_STARTPOINT 0
+#define SYNTH_CONTROL_DEFAULT_NUMREPEATS 0
+/* The amount of beats offset from the beginning
+   of the bar */
+#define SYNTH_CONTROL_DEFAULT_OFFSETBEATS 0       
+/* Canonically the number of repeats that are
+   ignored */
+#define SYNTH_CONTROL_DEFAULT_INTERMITTENCY 0      
+/* Fade rate doesn't apply to the first
+   parameter set */
+#define SYNTH_CONTROL_DEFAULT_FADERATE      0      
+/* The amount the starting point in the sample
+   is advanced each time it is scheduled (if
+   stride enabled) */
+/* The fade rate of notes other than the first note is not 0 */
+#define SYNTH_CONTROL_DEFAULT_FADERATE_AUXNOTE 1.
+#define SYNTH_CONTROL_DEFAULT_POSITIONSTRIDE 0      
+#define SYNTH_CONTROL_DEFAULT_POSMODE  SynthControlPosMode_ABSOLUTE     
+#define SYNTH_CONTROL_DEFAULT_TEMPOBPM_COARSE 120 
+#define SYNTH_CONTROL_DEFAULT_TEMPOBPM_FINE   0 
+#define SYNTH_CONTROL_DEFAULT_TEMPOBPM_SCALE  1. 
+#define SYNTH_CONTROL_DEFAULT_TEMPOBPM\
+   ((SYNTH_CONTROL_DEFAULT_TEMPOBPM_COARSE\
+    + SYNTH_CONTROL_DEFAULT_TEMPOBPM_FINE)\
+    * SYNTH_CONTROL_DEFAULT_TEMPOBPM_SCALE)
+#define SYNTH_CONTROL_TEMPOBPM_COARSE_MIN     40.
+#define SYNTH_CONTROL_TEMPOBPM_COARSE_MAX     240.
+#define SYNTH_CONTROL_TEMPOBPM_COARSE_QUANT   10.
+#define SYNTH_CONTROL_TEMPOBPM_FINE_MIN       -10.
+#define SYNTH_CONTROL_TEMPOBPM_FINE_MAX       10.
+#define SYNTH_CONTROL_TEMPOBPM_FINE_QUANT     0.1
+#define SYNTH_CONTROL_TEMPOBPM_SCALE_TABLE\
+    { 1./4., 1./3., 1./2., 1. }
+#define SYNTH_CONTROL_TEMPOBPM_SCALE_TABLE_LENGTH 4 
+#define SYNTH_CONTROL_EVENTDELTA_QUANT_TABLE\
+    { 1./16., 1./12., 1/8., 1./6., 1./4., 1./3., 1./2., 3./4. }
+#define SYNTH_CONTROL_EVENTDELTA_QUANT_TABLE_LENGTH 8
+#define SYNTH_CONTROL_INTERMITTENCY_TABLE_LENGTH 4
+#define SYNTH_CONTROL_INTERMITTENCY_TABLE\
+    { 0, 1, 2, 3 } 
+#define SYNTH_CONTROL_PITCH_CHROM_MIN -13
+#define SYNTH_CONTROL_PITCH_CHROM_MAX  13
+#define SYNTH_CONTROL_PITCH_CHROM_QUANT 1 
+#define SYNTH_CONTROL_PITCH_FINE_MIN -0.5
+#define SYNTH_CONTROL_PITCH_FINE_MAX  0.5
+#define SYNTH_CONTROL_PITCH_FINE_QUANT 0.01
+
+typedef uint32_t SynthControlEditingWhichParamsIndex;
+/* The number of sets of note parameters */
+#define NUM_NOTE_PARAM_SETS 3 
+typedef uint32_t SynthControlPresetNumber;
+
+
 
 /* Stuff that could be saved in a preset */
 extern NoteParamSet                 noteParamSets[];
-extern SynthControlPosMode          posMode;
 extern SynthControlDeltaButtonMode  deltaButtonMode;
 extern SynthControlGainMode         gainMode;
 extern SynthControlRecMode          recMode;
@@ -243,6 +238,11 @@ int synth_control_get_editing_which_pitch(void);
 void synth_control_pitch_reset_tog(void);
 void synth_control_reset_noteOnEventCounts(void);
 void synth_control_set_pitch_chrom_quant(float param);
+void synth_control_set_posMode_onChange_curParams(SynthControlPosMode posMode_param,
+                                        SynthControlPosMode *last_posMode_param);
+void synth_control_set_posMode_onChange(SynthControlPosMode posMode_param,
+                                        SynthControlPosMode *last_posMode_param,
+                                        int which_params);
 
 
 #endif /* SYNTH_CONTROL_H */
