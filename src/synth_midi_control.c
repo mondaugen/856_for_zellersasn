@@ -1,9 +1,11 @@
 #include "midi_setup.h"
 #include "synth_control.h" 
 
-#define SYNTH_MIDI_NUM_NOTE_PARAMS 15
+#define SYNTH_MIDI_NUM_NOTE_PARAMS 17
 typedef enum {
-    synth_midi_cc_type_t_PITCH_FINE = 0,
+    synth_midi_cc_type_t_PITCH_FINE1 = 0,
+    synth_midi_cc_type_t_PITCH_FINE2,
+    synth_midi_cc_type_t_PITCH_FINE3,
     synth_midi_cc_type_t_ENV,
     synth_midi_cc_type_t_SUS,
     synth_midi_cc_type_t_PITCH1,
@@ -31,91 +33,132 @@ typedef enum {
     synth_midi_cc_type_t_FBK_STATE
 } synth_midi_cc_type_t;
 
-typedef struct __synth_midi_cc_pitch_fine_control_t {
+static void synth_midi_note_param_indices_init(int *indices, size_t len)
+{
+    while (len--) {
+        indices[len] = len;
+    }
+}
+
+typedef struct __synth_midi_cc_pitch_control_t {
     int note;
     int pitch;
-} synth_midi_cc_pitch_fine_control_t;
+} synth_midi_cc_pitch_control_t;
 
 
 void synth_midi_cc_pitch_fine_control(void *data, MIDIMsg *msg)
 {
-    synth_midi_cc_pitch_fine_control_t *params =
-        (synth_midi_cc_pitch_fine_control_t*)data;
+    synth_midi_cc_pitch_control_t *params =
+        (synth_midi_cc_pitch_control_t*)data;
     synth_control_set_pitch_fine_quant((float)msg->data[2] 
             / (float)MIDI_MSG_DATA_BYTE_MAX,
             params->note,
             params->pitch);
 }
 
-static void synth_midi_cc_pitch_fine_control_t_init(
+static void synth_midi_cc_pitch_control_t_init(
         MIDI_Router_Standard *router,
         int midi_channel,
-        synth_midi_cc_pitch_fine_control_t *controls,
+        synth_midi_cc_pitch_control_t *controls,
         size_t num_params,
-        size_t num_pitches)
+        size_t num_pitches,
+        void (**funcs)(void*,MIDIMsg*),
+        synth_midi_cc_type_t *types)
 {
     size_t n, m;
     for (n = 0; n < num_params; n++) {
         for (m = 0; m < num_pitches; m++) {
             controls[n*num_pitches + m].note = n;
             controls[n*num_pitches + m].pitch = m;
-            MIDI_CC_CB_Router_addCB(&router->cbRouters[midi_channel],
-                    /* cc number */
-                    n * SYNTH_MIDI_NUM_NOTE_PARAMS 
-                        + synth_midi_cc_type_t_PITCH1
+            while (*funcs != NULL) {
+                MIDI_CC_CB_Router_addCB(&router->cbRouters[midi_channel],
+                        /* cc number */
+                        n * SYNTH_MIDI_NUM_NOTE_PARAMS 
+                        + *types
                         + m,
-                    synth_midi_cc_pitch_fine_control,
-                    &controls[n*num_pitches + m]);
+                        *funcs,
+                        &controls[n*num_pitches + m]);
+                funcs++;
+                types++;
+            }
         }
     }
 }
 
 void synth_midi_cc_env_control(void *data, MIDIMsg *msg)
 {
+    int *note = (int*)data;
+    synth_control_set_envelopeTime(
+            (float)msg->data[2]/(float)MIDI_MSG_DATA_BYTE_MAX,
+            note);
 }
 
 void synth_midi_cc_sus_control(void *data, MIDIMsg *msg)
 {
+    int *note = (int*)data;
+    synth_control_set_sustainTime(
+            (float)msg->data[2]/(float)MIDI_MSG_DATA_BYTE_MAX,
+            note);
 }
 
-void synth_midi_cc_pitch1_control(void *data, MIDIMsg *msg)
-{
-}
-
-void synth_midi_cc_pitch2_control(void *data, MIDIMsg *msg)
-{
-}
-
-void synth_midi_cc_pitch3_control(void *data, MIDIMsg *msg)
+void synth_midi_cc_pitch_control(void *data, MIDIMsg *msg)
 {
 }
 
 void synth_midi_cc_gain_control(void *data, MIDIMsg *msg)
 {
+    int *note = (int*)data;
+    synth_control_set_wet(
+            (float)msg->data[2]/(float)MIDI_MSG_DATA_BYTE_MAX,
+            note);
 }
 
 void synth_midi_cc_pos_control(void *data, MIDIMsg *msg)
 {
+    int *note = (int*)data;
+    synth_control_set_startPoint(
+            (float)msg->data[2]/(float)MIDI_MSG_DATA_BYTE_MAX,
+            note);
 }
 
 void synth_midi_cc_stride_control(void *data, MIDIMsg *msg)
 {
+    int *note = (int*)data;
+    synth_control_set_positionStride(
+            (float)msg->data[2]/(float)MIDI_MSG_DATA_BYTE_MAX,
+            note);
 }
 
 void synth_midi_cc_offset_control(void *data, MIDIMsg *msg)
 {
+    int *note = (int*)data;
+    synth_control_set_offset(
+            (float)msg->data[2]/(float)MIDI_MSG_DATA_BYTE_MAX,
+            note);
 }
 
 void synth_midi_cc_fbk_rate_control(void *data, MIDIMsg *msg)
 {
+    int *note = (int*)data;
+    synth_control_set_ampLastEcho(
+            (float)msg->data[2]/(float)MIDI_MSG_DATA_BYTE_MAX,
+            note);
 }
 
 void synth_midi_cc_event_delta_control(void *data, MIDIMsg *msg)
 {
+    int *note = (int*)data;
+    synth_control_set_eventDelta_free(
+            (float)msg->data[2]/(float)MIDI_MSG_DATA_BYTE_MAX,
+            note);
 }
 
 void synth_midi_cc_num_reps_control(void *data, MIDIMsg *msg)
 {
+    int *note = (int*)data;
+    synth_control_set_repeats(
+            (float)msg->data[2]/(float)MIDI_MSG_DATA_BYTE_MAX,
+            note);
 }
 
 typedef struct __synth_midi_cc_stride_state_control {
@@ -156,6 +199,10 @@ synth_midi_cc_stride_state_control_t_init(
 
 void synth_midi_cc_interm_control(void *data, MIDIMsg *msg)
 {
+    int *note = (int*)data;
+    synth_control_set_intermittency(
+            (float)msg->data[2]/(float)MIDI_MSG_DATA_BYTE_MAX,
+            note);
 }
 
 void synth_midi_cc_tempo_coarse_control(void *data, MIDIMsg *msg)
@@ -198,20 +245,54 @@ void synth_midi_cc_fbk_state_control(void *data, MIDIMsg *msg)
 {
 }
 
+static void synth_midi_cc_note_funcs_init(
+        MIDI_Router_Standard *router,
+        int midi_channel,
+        void (**funcs)(void*,MIDIMsg*),
+        synth_midi_cc_type_t *types,
+        int *param_set_indices,
+        int num_param_sets)
+{
+    int n;
+    while (*funcs != NULL) {
+        for (n = 0; n < num_param_sets; n++) {
+            MIDI_CC_CB_Router_addCB(&router->cbRouters[midi_channel],
+                    /* cc number */
+                    n * SYNTH_MIDI_NUM_NOTE_PARAMS 
+                        + *types,
+                    *funcs,
+                    &param_set_indices[n]);
+        }
+        funcs++;
+        types++;
+    }
+}
+
 void synth_midi_control_setup(void)
 {
     int midi_channel;
     midi_channel = SYNTH_MIDI_CONTROL_DEFAULT_CHANNEL;
     /* could set custom channel here ... */
-    static synth_midi_cc_pitch_fine_control_t 
-        fine_pitch_params[NUM_NOTE_PARAM_SETS 
+    void (*midi_cc_pitch_funcs[])(void*,MIDIMsg*) = {
+        synth_midi_cc_pitch_control,
+        synth_midi_cc_pitch_fine_control,
+        NULL
+    };
+    synth_midi_cc_type_t midi_cc_pitch_types[] = {
+        synth_midi_cc_type_t_PITCH1,
+        synth_midi_cc_type_t_PITCH_FINE1
+    };
+    static synth_midi_cc_pitch_control_t 
+        pitch_params[NUM_NOTE_PARAM_SETS 
             * SYNTH_CONTROL_PITCH_TABLE_SIZE];
     synth_midi_cc_pitch_fine_control_t_init(
             &midiRouter,
             midi_channel,
-            fine_pitch_params,
+            pitch_params,
             NUM_NOTE_PARAM_SETS,
-            SYNTH_CONTROL_PITCH_TABLE_SIZE);
+            SYNTH_CONTROL_PITCH_TABLE_SIZE,
+            midi_cc_pitch_funcs,
+            midi_cc_pitch_types);
     static synth_midi_cc_stride_state_control_t
         stride_state_params[NUM_NOTE_PARAM_SETS];
     synth_midi_cc_stride_state_control_t_init(
@@ -219,4 +300,39 @@ void synth_midi_control_setup(void)
             midi_channel,
             stride_state_params,
             NUM_NOTE_PARAM_SETS);
+    static int note_param_indices[NUM_NOTE_PARAM_SETS];
+    synth_midi_note_param_indices_init(note_param_indices,
+            NUM_NOTE_PARAM_SETS);
+    void (*midi_cc_funcs[])(void*,MIDIMsg*) = {
+            synth_midi_cc_env_control,
+            synth_midi_cc_sus_control,
+            synth_midi_cc_gain_control,
+            synth_midi_cc_pos_control,
+            synth_midi_cc_stride_control,
+            synth_midi_cc_offset_control,
+            synth_midi_cc_fbk_rate_control,
+            synth_midi_cc_event_delta_control,
+            synth_midi_cc_num_reps_control,
+            synth_midi_cc_interm_control,
+            NULL
+    }
+    synth_midi_cc_type_t midi_cc_types[] = {
+            synth_midi_cc_ENV,
+            synth_midi_cc_SUS,
+            synth_midi_cc_GAIN,
+            synth_midi_cc_POS,
+            synth_midi_cc_STRIDE,
+            synth_midi_cc_OFFSET,
+            synth_midi_cc_FBK_RATE,
+            synth_midi_cc_EVENT_DELTA,
+            synth_midi_cc_NUM_REPS,
+            synth_midi_cc_INTERM,
+    }
+    synth_midi_cc_note_funcs_init(
+        &midiRouter,
+        midi_channel,
+        midi_cc_funcs,
+        midi_cc_types,
+        note_param_indices, 
+        NUM_NOTE_PARAM_SETS);
 }

@@ -54,9 +54,6 @@ int                         schedulerState;
 /* What preset would be recalled/stored. First preset is numbered 0. */
 SynthControlPresetNumber    presetNumber;
 
-/* Stuff that might not make it into the final application */
-int16_t                     dryGain;
-
 static void schedulerState_off_helper(void *data);
 static void schedulerState_on_helper(void);
 
@@ -66,11 +63,12 @@ void autorelease_on_done(MMEnvedSamplePlayer * esp)
             (void *)&(MMEnvedSamplePlayer_getSamplePlayerSigProc(esp).note));
 }
 
-void synth_control_set_envelopeTime(float envelopeTime_param)
+void synth_control_set_envelopeTime(float envelopeTime_param,
+                                    int note_param_idx)
 {
     env_map_attack_release_f(
-            &noteParamSets[editingWhichParams].attackTime,
-            &noteParamSets[editingWhichParams].releaseTime,
+            &noteParamSets[note_param_idx].attackTime,
+            &noteParamSets[note_param_idx].releaseTime,
             envelopeTime_param,
             SYNTH_CONTROL_MIN_ATTACK_TIME,
             SYNTH_CONTROL_MAX_ATTACK_TIME,
@@ -78,23 +76,36 @@ void synth_control_set_envelopeTime(float envelopeTime_param)
             SYNTH_CONTROL_MAX_RELEASE_TIME);
 }
 
-void synth_control_envelopeTime_control(void *data_, float envelopeTime_param)
+void synth_control_set_envelopeTime_curParams(float envelopeTime_param)
 {
-    synth_control_set_envelopeTime(envelopeTime_param);
+    synth_control_set_envelopeTime(envelopeTime_param,
+            synth_control_get_editingWhichParams());
 }
 
-void synth_control_set_sustainTime(float sustainTime_param)
+void synth_control_envelopeTime_control(void *data_, float envelopeTime_param)
+{
+    synth_control_set_envelopeTime_curParams(envelopeTime_param);
+}
+
+void synth_control_set_sustainTime(float sustainTime_param,
+                                    int note_param_idx)
 {
     /* Sustain time is relative to length of recording, so here just 0-1.
      * It is scaled this way so that the length selection is more precise for
      * short lengths and less precise for longer ones */
-    noteParamSets[editingWhichParams].sustainTime
+    noteParamSets[note_param_idx].sustainTime
         = powf(2.,-7.*(1 - sustainTime_param));
+}
+
+void synth_control_set_sustainTime_curParams(float sustainTime_param)
+{
+    synth_control_set_sustainTime(sustainTime_param,
+            synth_control_get_editingWhichParams());
 }
 
 void synth_control_sustainTime_control(void *data_, float sustainTime_param)
 {
-    synth_control_set_sustainTime(sustainTime_param);
+    synth_control_set_sustainTime_curParams(sustainTime_param);
 }
 
 void synth_control_tempoNudge(float tempoNudge_param)
@@ -205,29 +216,47 @@ void synth_control_set_tempo_scale_norm(float param)
     synth_control_update_tempo_scale(tempoBPM_scale_table[_tmp]);
 }
 
-void synth_control_set_numRepeats(int numRepeats_param)
+void synth_control_set_numRepeats(int numRepeats_param, int note_params_idx)
 {
-    noteParamSets[editingWhichParams].numRepeats = numRepeats_param;
-    synth_control_set_fade(noteParamSets[editingWhichParams].ampLastEcho,
-                           noteParamSets[editingWhichParams].numRepeats);
+    noteParamSets[note_params_idx].numRepeats = numRepeats_param;
+    synth_control_set_fade(noteParamSets[note_params_idx].ampLastEcho,
+                           noteParamSets[note_params_idx].numRepeats,
+                          note_params_idx); 
+}
+
+void synth_control_set_numRepeats_curParams(int numRepeats_param)
+{
+    void synth_control_set_numRepeats(numRepeats_param,
+            synth_control_get_editingWhichParams());
 }
 
 void synth_control_set_repeats(float repeats_param)
 {
-    synth_control_set_numRepeats((int)(
+    synth_control_set_numRepeats_curParams((int)(
                 ((float)SYNTH_CONTROL_MAX_NUM_REPEATS) * repeats_param));        
 }
 
 /* Set the pitch to any pitch between midi note 48 and 72, limited by the
  * precision of pitch_param */
-void synth_control_set_pitch_chrom(float pitch_param)
+void synth_control_set_pitch_chrom(float pitch_param,
+                                   int which_pitch,
+                                   int note_params_idx)
 {
-    noteParamSets[editingWhichParams].pitches[editing_which_pitch]
+    noteParamSets[note_params_idx].pitches[which_pitch]
         = -12 + 24 * pitch_param;
 }
 
+void synth_control_set_pitch_chrom_curParams(float pitch_param)
+{
+    synth_control_set_pitch_chrom(pitch_param,
+            synth_control_get_editing_which_pitch(),
+            synth_control_get_editingWhichParams());
+}
+
 /* Set pitch to a midi note. Rounds according to quantization parameters. */
-void synth_control_set_pitch_chrom_quant(float param)
+void synth_control_set_pitch_chrom_quant(float param,
+                                         int which_pitch,
+                                         int note_params_idx)
 {
     float _tmp;
     _tmp = floor(((SYNTH_CONTROL_PITCH_CHROM_MAX 
@@ -236,13 +265,20 @@ void synth_control_set_pitch_chrom_quant(float param)
             * param)
             * SYNTH_CONTROL_PITCH_CHROM_QUANT 
             + SYNTH_CONTROL_PITCH_CHROM_MIN;
-    noteParamSets[editingWhichParams].pitches[editing_which_pitch]
+    noteParamSets[note_params_idx].pitches[which_pitch]
         = _tmp;
 }
 
+void synth_control_set_pitch_chrom_quant_curParams(float param)
+{
+    synth_control_set_pitch_chrom_quant(param,
+            synth_control_get_editing_which_pitch(),
+            synth_control_get_editingWhichParams());
+}
+
 void synth_control_set_pitch_fine_quant(float param, 
-                                        int note_param_idx,
-                                        int pitch_idx)
+                                        int which_pitch,
+                                        int note_param_idx)
 {
     float _tmp;
     _tmp = floor(((SYNTH_CONTROL_PITCH_FINE_MAX 
@@ -251,59 +287,60 @@ void synth_control_set_pitch_fine_quant(float param,
             * param)
             * SYNTH_CONTROL_PITCH_FINE_QUANT 
             + SYNTH_CONTROL_PITCH_FINE_MIN;
-    noteParamSets[note_param_idx].pitches[pitch_idx]
+    noteParamSets[note_param_idx].pitches[which_pitch]
         += _tmp;
 }
 
-void synth_control_set_pitch_4ths5ths(float pitch_param)
+void synth_control_set_pitch_pitch_fine_curParams(float param)
 {
-    static int32_t ivals[] = {-19,-17,-12,-7,-5,0,5,7,12,17,19};
-    /* Half the total number of intervals that aren't 0 */
-    static uint32_t n_ivals = 5; 
-    pitch_param = pitch_param * 2. - 1.;
-    uint32_t idx = (uint32_t)((int32_t)n_ivals
-            + (int32_t)((float)n_ivals*pitch_param));
-    noteParamSets[editingWhichParams].pitches[editing_which_pitch]
-        = (float)ivals[idx];
-}
-
-void synth_control_set_pitch_arp(float pitch_param)
-{
-    /* Not yet capable of supporting this, just set to middle C */
-    noteParamSets[editingWhichParams].pitches[editing_which_pitch] = 0;
+    synth_control_set_pitch_pitch_fine(param,
+            synth_control_get_editing_which_pitch(),
+            synth_control_get_editingWhichParams());
 }
 
 void synth_control_pitch_control(void *data_, float pitch_param)
 {
-    synth_control_set_pitch_chrom(pitch_param);
+    synth_control_set_pitch_chrom_curParams(pitch_param);
 }
 
-void synth_control_set_startPoint(float startPoint_param)
+void synth_control_set_startPoint(float startPoint_param, int note_params_idx)
 {
-    noteParamSets[editingWhichParams].startPoint
+    noteParamSets[note_params_idx].startPoint
         = startPoint_param;
 }
 
-void synth_control_set_positionStride(float positionStride_param)
+void synth_control_set_startPoint_curParams(float startPoint_param)
 {
-            noteParamSets[editingWhichParams].positionStride
+    synth_control_set_startPoint(startPoint_param,
+            synth_control_get_editingWhichParams());
+}
+
+void synth_control_set_positionStride(float positionStride_param, int note_params_idx)
+{
+            noteParamSets[note_params_idx].positionStride
                 = positionStride_param * 0.2 - 0.1;
+}
+
+void synth_control_set_positionStride_curParams(float positionStride_param)
+{
+    synth_control_set_positionStride(positionStride_param,
+            synth_control_get_editingWhichParams());
 }
 
 void synth_control_startPoint_control(void *data_, float startPoint_param)
 {
     switch (posMode) {
         case SynthControlPosMode_ABSOLUTE:
-            synth_control_set_startPoint(startPoint_param);
+            synth_control_set_startPoint_curParams(startPoint_param);
             break;
         case SynthControlPosMode_UNKNOWN:
         case SynthControlPosMode_STRIDE:
-            synth_control_set_positionStride(startPoint_param);
+            synth_control_set_positionStride_curParams(startPoint_param);
             break;
     }
 }
 
-void synth_control_set_eventDelta_quant(float eventDeltaBeats_param)
+void synth_control_set_eventDelta_quant(float eventDeltaBeats_param, int note_params_idx)
 {
     int _tmp;
     _tmp = (int)floor(SYNTH_CONTROL_EVENTDELTA_QUANT_TABLE_LENGTH 
@@ -311,16 +348,26 @@ void synth_control_set_eventDelta_quant(float eventDeltaBeats_param)
     if (_tmp == SYNTH_CONTROL_EVENTDELTA_QUANT_TABLE_LENGTH) {
         _tmp--;
     }
-    noteParamSets[editingWhichParams].eventDeltaBeats
+    noteParamSets[note_params_idx].eventDeltaBeats
         = eventDelta_quant_table[_tmp];
-
-//        = (MMSample)(1 + (int)(3. * (MMSample)eventDeltaBeats_param));
 }
 
-void synth_control_set_eventDelta_free(float eventDeltaBeats_param)
+void synth_control_set_eventDelta_quant_curParams(float eventDeltaBeats_param)
 {
-    noteParamSets[editingWhichParams].eventDeltaBeats
+    synth_control_set_eventDelta_quant(eventDeltaBeats_param,
+            synth_control_get_editingWhichParams());
+}
+
+void synth_control_set_eventDelta_free(float eventDeltaBeats_param, int note_params_idx)
+{
+    noteParamSets[note_params_idx].eventDeltaBeats
         = powf(2.,-6.*(1 - eventDeltaBeats_param));
+}
+
+void synth_control_set_eventDelta_free_curParams(float eventDeltaBeats_param)
+{
+    synth_control_set_eventDelta_free(eventDeltaBeats_param,
+            synth_control_get_editingWhichParams());
 }
 
 void synth_control_reset_noteOnEventCounts(void)
@@ -331,54 +378,56 @@ void synth_control_reset_noteOnEventCounts(void)
     }
 }
 
-void synth_control_set_intermittency(float intermittency_param)
+void synth_control_set_intermittency(float intermittency_param, int note_params_idx)
 {
     uint32_t _idx = (uint32_t)((float)SYNTH_CONTROL_INTERMITTENCY_TABLE_LENGTH 
             * intermittency_param);
-    noteParamSets[editingWhichParams].intermittency = intermittency_table[_idx];
+    noteParamSets[note_params_idx].intermittency = intermittency_table[_idx];
     /* Reset all events' event count so that all sequences has same phase, no
      * matter when intermittency was set */
     synth_control_reset_noteOnEventCounts();
+}
+
+void synth_control_set_intermittency_curParams(float intermittency_param)
+{
+    synth_control_set_intermittency(intermittency_param,
+            synth_control_get_editingWhichParams());
 }
 
 void synth_control_eventDeltaBeats_control(void *data_, float eventDeltaBeats_param)
 {
     switch (deltaButtonMode) {
         case SynthControlDeltaButtonMode_EVENT_DELTA_QUANT:
-            synth_control_set_eventDelta_quant(eventDeltaBeats_param);
+            synth_control_set_eventDelta_quant_curParams(
+                    eventDeltaBeats_param);
         case SynthControlDeltaButtonMode_EVENT_DELTA_FREE:
-            synth_control_set_eventDelta_free(eventDeltaBeats_param);
+            synth_control_set_eventDelta_free_curParams(
+                    eventDeltaBeats_param);
             break;
         case SynthControlDeltaButtonMode_INTERMITTENCY:
-            synth_control_set_intermittency(eventDeltaBeats_param);
+            synth_control_set_intermittency_curParams(
+                    eventDeltaBeats_param);
             break;
     }
 }
 
-void synth_control_set_offset(float offset_param)
+void synth_control_set_offset(float offset_param, int note_params_idx)
 {
-    if (editingWhichParams == 0) {
-        noteParamSets[editingWhichParams].offsetBeats
+    if (note_params_idx == 0) {
+        noteParamSets[note_params_idx].offsetBeats
             = offset_param + 0.001;
     } else {
         /* The offset is relative to the total event delta of the note event
          * with parameterSet 0 */
-        noteParamSets[editingWhichParams].offsetBeats
+        noteParamSets[note_params_idx].offsetBeats
             = noteParamSets[0].eventDeltaBeats * offset_param;
     }
 }
 
-void synth_control_offsetBeats_control(void *data_, float offsetBeats_param)
+void synth_control_set_offset_curParams(float offset_param)
 {
-    if (editingWhichParams == 0) {
-        noteParamSets[editingWhichParams].offsetBeats
-            = offsetBeats_param + 0.001;
-    } else {
-        /* The offset is relative to the total event delta of the note event
-         * with parameterSet 0 */
-        noteParamSets[editingWhichParams].offsetBeats
-            = noteParamSets[0].eventDeltaBeats * offsetBeats_param;
-    }
+    synth_control_set_offset(offset_param,
+            synth_control_get_editingWhichParams());
 }
 
 void synth_control_noteDeltaFromBuffer_control(void *data_,
@@ -545,11 +594,6 @@ void synth_control_feedback_tog(void)
     }
 }
 
-void synth_control_dryGain_control(void *data_, float dryGain_param)
-{
-    dryGain = (int16_t)(dryGain_param * 127.);
-}
-
 static void free_playing_spsp_voice(void *voice_number)
 {
     MMEnvelope_startRelease(
@@ -656,27 +700,40 @@ void synth_control_gainMode_control(void *data_,
     gainMode = (SynthControlGainMode)gainMode_param;
 }
 
-void synth_control_set_wet(float gain_param)
+void synth_control_set_wet(float gain_param, int note_params_idx)
 {
     /* Gain in dB */
     gain_param = SYNTH_CONTROL_MIN_GAIN 
         + (SYNTH_CONTROL_MAX_GAIN - SYNTH_CONTROL_MIN_GAIN)*gain_param;
     if (gain_param < SYNTH_CONTROL_GAIN_THRESH) {
-        noteParamSets[editingWhichParams].amplitude = 0.;
+        noteParamSets[note_params_idx].amplitude = 0.;
     } else {
-        noteParamSets[editingWhichParams].amplitude =
+        noteParamSets[note_params_idx].amplitude =
             powf(10.,gain_param / 20.);
     }
 }
 
-void synth_control_set_fade(float gain_param, int num_repeats)
+void synth_control_set_wet_curParams(float gain_param)
+{
+    synth_control_set_wet(gain_param,
+            synth_control_get_editingWhichParams());
+}
+
+void synth_control_set_fade(float gain_param, int num_repeats, int note_params_idx)
 {
     /* This sets the amplitude scaling at the last repeat */
     gain_param = powf(gain_param,1./((float)(num_repeats+1)));
-    noteParamSets[editingWhichParams].fadeRate = gain_param;
+    noteParamSets[note_params_idx].fadeRate = gain_param;
 }
 
-void synth_control_set_ampLastEcho(float gain_param)
+void synth_control_set_fade_curParams(float gain_param, int num_repeats)
+{
+    synth_control_set_fade(gain_param,
+            num_repeats,
+            synth_control_get_editingWhichParams());
+}
+
+void synth_control_set_ampLastEcho(float gain_param, int note_params_idx)
 {
     if (gain_param <= 0.5) {
         gain_param *= 2.;
@@ -686,19 +743,26 @@ void synth_control_set_ampLastEcho(float gain_param)
         gain_param = (gain_param - 0.5) * 2.;
         gain_param =  (SYNTH_CONTROL_ECHO_MAX - 1.) * gain_param + 1.;
     }
-    noteParamSets[editingWhichParams].ampLastEcho = gain_param;
-    synth_control_set_fade(noteParamSets[editingWhichParams].ampLastEcho,
-                           noteParamSets[editingWhichParams].numRepeats);
+    noteParamSets[note_params_idx].ampLastEcho = gain_param;
+    synth_control_set_fade(noteParamSets[note_params_idx].ampLastEcho,
+                           noteParamSets[note_params_idx].numRepeats,
+                           note_params_idx);
+}
+
+void synth_control_set_ampLastEcho_curParams(float gain_param)
+{
+    synth_control_set_ampLastEcho(gain_param,
+            synth_control_get_editingWhichParams());
 }
 
 void synth_control_gain_control(void *data_, float gain_param)
 {
     switch (gainMode) {
         case SynthControlGainMode_WET:
-            synth_control_set_wet(gain_param);
+            synth_control_set_wet_curParams(gain_param);
             break;
         case SynthControlGainMode_FADE:
-            synth_control_set_ampLastEcho(gain_param);
+            synth_control_set_ampLastEcho_curParams(gain_param);
             break;
     }
 }

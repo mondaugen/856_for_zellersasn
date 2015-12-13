@@ -43,11 +43,11 @@ static void synth_adc_pos_control(adc_channel_t *chan,
 {
     switch (synth_control_get_posMode()) {
         case SynthControlPosMode_ABSOLUTE:
-            synth_control_set_startPoint(((float)chan->cur_val)/((float)ADC_MAX));
+            synth_control_set_startPoint_curParams(((float)chan->cur_val)/((float)ADC_MAX));
             break;
         case SynthControlPosMode_UNKNOWN:
         case SynthControlPosMode_STRIDE:
-            synth_control_set_positionStride(
+            synth_control_set_positionStride_curParams(
                     ((float)chan->cur_val)/((float)ADC_MAX));
             break;
     }
@@ -66,7 +66,7 @@ static void synth_adc_eventDelta_control(adc_channel_t *chan,
                     ((float)chan->cur_val)/((float)ADC_MAX));
             } else {
                 /* Otherwise it controls the event delta in a quantized way */
-                synth_control_set_eventDelta_quant(
+                synth_control_set_eventDelta_quant_curParams(
                     ((float)chan->cur_val)/((float)ADC_MAX));
             }
             break;
@@ -77,12 +77,12 @@ static void synth_adc_eventDelta_control(adc_channel_t *chan,
                     ((float)chan->cur_val)/((float)ADC_MAX));
             } else {
                 /* Otherwise freely controls event delta (no quantization) */
-                synth_control_set_eventDelta_free(
+                synth_control_set_eventDelta_free_curParams(
                         ((float)chan->cur_val)/((float)ADC_MAX));
             }
             break;
         case SynthControlDeltaButtonMode_INTERMITTENCY:
-            synth_control_set_intermittency(
+            synth_control_set_intermittency_curParams(
                     ((float)chan->cur_val)/((float)ADC_MAX));
             break;
     }
@@ -94,7 +94,7 @@ SYNTH_ADC_SETUP(eventDelta,SYNTH_ADC_EVENTDELTA_IDX,
 static void synth_adc_pitch_control(adc_channel_t *chan,
                                     adc_channel_do_data_t *data)
 {
-    synth_control_set_pitch_chrom_quant(
+    synth_control_set_pitch_chrom_quant_curParams(
             ((float)chan->cur_val)/((float)ADC_MAX));
 }
 
@@ -105,11 +105,11 @@ static void synth_adc_gain_control(adc_channel_t *chan,
 {
     switch (synth_control_get_gainMode()) {
         case SynthControlGainMode_FADE:
-            synth_control_set_ampLastEcho(
+            synth_control_set_ampLastEcho_curParams(
                     ((float)chan->cur_val)/((float)ADC_MAX));
             break;
         case SynthControlGainMode_WET:
-            synth_control_set_wet(
+            synth_control_set_wet_curParams(
                     ((float)chan->cur_val)/((float)ADC_MAX));
             break;
     }

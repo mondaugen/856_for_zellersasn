@@ -198,29 +198,14 @@ void synth_control_set_gainMode(SynthControlGainMode gainMode_param);
 SynthControlGainMode synth_control_get_gainMode(void);
 void synth_control_set_presetNumber(SynthControlPresetNumber presetNumber_param);
 SynthControlPresetNumber synth_control_get_presetNumber(void);
-void synth_control_set_envelopeTime(float envelopeTime_param);
-void synth_control_set_sustainTime(float sustainTime_param);
-void synth_control_set_startPoint(float startPoint_param);
-void synth_control_set_positionStride(float positionStride_param);
-void synth_control_set_eventDelta_quant(float eventDeltaBeats_param);
-void synth_control_set_eventDelta_free(float eventDeltaBeats_param);
-void synth_control_set_intermittency(float intermittency_param);
-void synth_control_set_pitch_chrom(float pitch_param);
-void synth_control_set_pitch_4ths5ths(float pitch_param);
-void synth_control_set_pitch_arp(float pitch_param);
-void synth_control_set_wet(float gain_param);
-void synth_control_set_fade(float gain_param, int num_repeats);
 int synth_control_get_noteDeltaFromBuffer(void);
 void synth_control_tempoNudge(float tempoNudge_param);
 void synth_control_set_tempo(float _tempoBPM_coarse,
                              float _tempoBPM_fine,
                              float _tempoBPM_scale);
-void synth_control_set_repeats(float repeats_param);
 int synth_control_get_recordState(void);
 int synth_control_get_schedulerState(void);
 int synth_control_get_feedbackState(void);
-void synth_control_set_offset(float offset_param);
-void synth_control_set_ampLastEcho(float gain_param);
 void synth_control_reset_param_sets(NoteParamSet *param_sets, int size);
 float synth_control_get_tempoBPM(void);
 float synth_control_get_tempoBPM_coarse(void);
@@ -237,12 +222,61 @@ void synth_control_set_editing_which_pitch(int _param);
 int synth_control_get_editing_which_pitch(void);
 void synth_control_pitch_reset_tog(void);
 void synth_control_reset_noteOnEventCounts(void);
-void synth_control_set_pitch_chrom_quant(float param);
 void synth_control_set_posMode_onChange_curParams(SynthControlPosMode posMode_param,
                                         SynthControlPosMode *last_posMode_param);
 void synth_control_set_posMode_onChange(SynthControlPosMode posMode_param,
                                         SynthControlPosMode *last_posMode_param,
                                         int which_params);
 
+void synth_control_set_envelopeTime(float envelopeTime_param,
+                                    int note_param_idx);
+void synth_control_set_envelopeTime_curParams(float envelopeTime_param);
+void synth_control_set_sustainTime(float sustainTime_param,
+                                    int note_param_idx);
+void synth_control_set_sustainTime_curParams(float sustainTime_param);
+void synth_control_set_numRepeats(int numRepeats_param, int note_params_idx);
+void synth_control_set_numRepeats_curParams(int numRepeats_param);
+void synth_control_set_repeats(float repeats_param);
+void synth_control_set_pitch_chrom(float pitch_param,
+                                   int which_pitch,
+                                   int note_params_idx);
+void synth_control_set_pitch_chrom_curParams(float pitch_param);
+void synth_control_set_pitch_chrom_quant(float param,
+                                         int which_pitch,
+                                         int note_params_idx);
+void synth_control_set_pitch_chrom_quant_curParams(float param);
+void synth_control_set_pitch_fine_quant(float param, 
+                                        int which_pitch,
+                                        int note_param_idx);
+void synth_control_set_pitch_pitch_fine_curParams(float param);
+void synth_control_set_startPoint(float startPoint_param,
+                                  int note_params_idx);
+void synth_control_set_startPoint_curParams(float startPoint_param);
+void synth_control_set_positionStride(float positionStride_param,
+                                      int note_params_idx);
+void synth_control_set_positionStride_curParams(float positionStride_param);
+void synth_control_set_eventDelta_quant(float eventDeltaBeats_param,
+                                        int note_params_idx);
+void synth_control_set_eventDelta_quant_curParams(float eventDeltaBeats_param);
+void synth_control_set_eventDelta_free(float eventDeltaBeats_param,
+                                       int note_params_idx);
+void synth_control_set_eventDelta_free_curParams(float eventDeltaBeats_param);
+void synth_control_set_intermittency(float intermittency_param,
+                                     int note_params_idx);
+void synth_control_set_intermittency_curParams(float intermittency_param);
+void synth_control_set_offset(float offset_param,
+                              int note_params_idx);
+void synth_control_set_offset_curParams(float offset_param);
+void synth_control_set_wet(float gain_param,
+                           int note_params_idx);
+void synth_control_set_wet_curParams(float gain_param);
+void synth_control_set_fade(float gain_param,
+                            int num_repeats,
+                            int note_params_idx);
+void synth_control_set_fade_curParams(float gain_param,
+                                      int num_repeats);
+void synth_control_set_ampLastEcho(float gain_param,
+                                   int note_params_idx);
+void synth_control_set_ampLastEcho_curParams(float gain_param);
 
 #endif /* SYNTH_CONTROL_H */
