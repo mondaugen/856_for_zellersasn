@@ -1067,3 +1067,62 @@ void synth_control_pitch_reset_tog(void)
         noteParamSets[_n].pitches[_m] = 0;
     }
 }
+
+void synth_control_note_on(int parameterSet,
+                           MMSample pitch,
+                           MMSample amplitude)
+{
+    if (parameterSet < 0) {
+        parameterSet = 0;
+    }
+    if (parameterSet >= NUM_NOTE_PARAM_SETS) {
+        parameterSet = NUM_NOTE_PARAM_SETS - 1;
+    }
+    MMSample voiceNum = pm_get_next_free_voice_number();
+    if (voiceNum != -1 && 
+            (noteParamSets[parameterSet].amplitude > SCHEDULING_AMP_FLOOR)) { 
+        /* there is a voice free */
+        pm_claim_params_from_allocator((void*)&voiceAllocator,
+                (void*)&voiceNum);
+        ((MMEnvedSamplePlayer*)&spsps[(int)voiceNum])->onDone =
+            autorelease_on_done;
+        MMTrapEnvedSamplePlayer_noteOnStruct no;
+        no.note = voiceNum;
+        no.amplitude = amplitude;
+        no.index = noteParamSets[parameterSet].startPoint
+            * MMArray_get_length(theSound.wavtab);
+        /* sustainTime is the length of the audio, times
+         * noteParamSets[parameterSet].sustainTime *
+         * length_of_sound_seconds * (1 -
+         * noteParamSets[parameterSet].attackTime -
+         * noteParamSets[parametersSet].releaseTime) */
+        no.sustainTime =
+            noteParamSets[parameterSet].sustainTime
+            * (MMSample)MMArray_get_length(theSound.wavtab)
+            / (MMSample)audio_hw_get_sample_rate(NULL)
+            * (1. - noteParamSets[parameterSet].attackTime
+                  - noteParamSets[parameterSet].releaseTime);
+#ifdef SIG_CHAIN_FILL_BUF_ONES
+        no.attackTime = 0;
+        no.releaseTime = 0;
+#else
+        no.attackTime = 
+            noteParamSets[parameterSet].sustainTime
+            * (MMSample)MMArray_get_length(theSound.wavtab)
+            / (MMSample)audio_hw_get_sample_rate(NULL)
+            * noteParamSets[parameterSet].attackTime;
+        no.releaseTime = 
+            noteParamSets[parameterSet].sustainTime
+            * (MMSample)MMArray_get_length(theSound.wavtab)
+            / (MMSample)audio_hw_get_sample_rate(NULL)
+            * noteParamSets[parameterSet].releaseTime;
+#endif
+        no.samples = theSound.wavtab;
+        /* 69 is added because MMCC_et12_rate considers pitch 69 to be a note of no
+         * transposition. In this we consider 0 to be a note of no
+         * transposition, so we add 69 */
+        no.rate = MMCC_et12_rate(pitch + 69);
+        MMTrapEnvedSamplePlayer_noteOn_Rate(
+                &spsps[(int)voiceNum], &no);
+    }
+}

@@ -285,4 +285,8 @@ void synth_control_record_stop(void);
 void synth_control_record_start(void);
 void synth_control_schedulerState_on(void);
 void synth_control_schedulerState_off(void);
+void synth_control_note_on(int parameterSet,
+                           MMSample pitch,
+                           MMSample amplitude);
+
 #endif /* SYNTH_CONTROL_H */

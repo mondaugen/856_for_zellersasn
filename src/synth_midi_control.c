@@ -281,6 +281,15 @@ void synth_midi_cc_fbk_state_control(void *data, MIDIMsg *msg)
     synth_control_feedback_control(msg->data[2]);
 }
 
+/* Parameter set chosen by channel */
+void synth_midi_note_on_control(void *data, MIDIMsg *msg)
+{
+    int *base_channel = (int*)data;
+    synth_control_note_on(MIDIMSG_GET_CHANNEL(msg->data[0]) - *base_channel,
+                          MMSample pitch,
+                          MMSample amplitude);
+}
+
 static void synth_midi_cc_note_funcs_init(
         MIDI_Router_Standard *router,
         int midi_channel,
@@ -318,6 +327,24 @@ static void synth_midi_cc_global_funcs_init(
                 NULL);
         funcs++;
         types++;
+    }
+}
+
+/* Assigns to 3 channels, above and including midi_channel, wrapping around if
+ * the channel exceeds the max MIDI channel */
+static void synth_midi_note_on_init(
+        MIDI_Router_Standard *router,
+        int midi_channel,
+        void (*func)(void*,MIDIMsg*),
+        int *base_channel)
+{
+    int n;
+    for (n = 0; n < NUM_NOTE_PARAM_SETS; n++) {
+        MIDI_Router_addCB(&router.router,
+                MIDIMSG_NOTE_ON,
+                (midi_channel + n) % MIDIMSG_NCHANNELS,
+                func,
+                base_channel);
     }
 }
 
@@ -422,4 +449,10 @@ void synth_midi_control_setup(void)
         midi_channel,
         midi_cc_funcs,
         midi_cc_types);
+    static int base_channel = midi_channel;
+    synth_midi_note_on_init(
+        &midiRouter,
+        midi_channel,
+        synth_midi_note_on_control,
+        &base_channel);
 }
