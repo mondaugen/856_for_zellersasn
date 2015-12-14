@@ -38,8 +38,9 @@ typedef enum {
 #define SYNTH_CONTROL_GAIN_MODE_N_MODES 2 
 
 typedef enum {
+    SynthControlRecMode_START__ = 0,
     /* The length of the recording does not influence the scheduler tempo. */
-    SynthControlRecMode_NORMAL,
+    SynthControlRecMode_NORMAL = SynthControlRecMode_START__,
     /* The length of the recording is used to adjust the tempo of the scheduler
      * so that its length is equal to 1 beat. */
     SynthControlRecMode_REC_LEN_1_BEAT,
@@ -47,9 +48,9 @@ typedef enum {
      * SynthControlRecMode_REC_LEN_1_BEAT but after the first recording, new
      * recordings are automatically scheduled which will have the same duration
      * as the first recording. */
-    SynthControlRecMode_REC_LEN_1_BEAT_REC_SCHED
+    SynthControlRecMode_REC_LEN_1_BEAT_REC_SCHED,
+    SynthControlRecMode_END__ = SynthControlRecMode_REC_LEN_1_BEAT_REC_SCHED
 } SynthControlRecMode;
-#define SYNTH_CONTROL_REC_MODE_N_MODES 2
 
 typedef struct __NoteParamSet {
     MMSample attackTime;
@@ -182,6 +183,7 @@ void synth_control_record_tog(void);
 void synth_control_schedulerState_tog(void);
 void synth_control_presetStore_tog(void);
 void synth_control_presetRecall_tog(void);
+void synth_control_feedback_control(uint32_t feedback_param);
 void synth_control_feedback_tog(void);
 
 SynthControlEditingWhichParamsIndex synth_control_get_editingWhichParams(void);
@@ -279,4 +281,8 @@ void synth_control_set_ampLastEcho(float gain_param,
                                    int note_params_idx);
 void synth_control_set_ampLastEcho_curParams(float gain_param);
 
+void synth_control_record_stop(void);
+void synth_control_record_start(void);
+void synth_control_schedulerState_on(void);
+void synth_control_schedulerState_off(void);
 #endif /* SYNTH_CONTROL_H */

@@ -80,6 +80,12 @@ void sc_presets_init(void)
 
 void sc_presets_store(int npreset)
 {
+    if (npreset < 0) {
+        npreset = 0;
+    }
+    if (npreset > NUM_SYNTH_CONTROL_PRESETS) {
+        npreset = NUM_SYNTH_CONTROL_PRESETS - 1;
+    }
     memcpy(scpresets[npreset].noteParamSets,noteParamSets,
             sizeof(NoteParamSet)*NUM_NOTE_PARAM_SETS);
     scpresets[npreset].tempoBPM = synth_control_get_tempoBPM(); 
@@ -90,6 +96,12 @@ void sc_presets_store(int npreset)
 
 void sc_presets_recall(int npreset)
 {
+    if (npreset < 0) {
+        npreset = 0;
+    }
+    if (npreset > NUM_SYNTH_CONTROL_PRESETS) {
+        npreset = NUM_SYNTH_CONTROL_PRESETS - 1;
+    }
     /* No need to load from file, this is done only on initialization */
     memcpy(noteParamSets,scpresets[npreset].noteParamSets,sizeof(NoteParamSet)*NUM_NOTE_PARAM_SETS);
     /* Reset event counts so intermittency off all notes always has same phase

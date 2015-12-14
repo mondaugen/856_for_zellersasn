@@ -528,6 +528,38 @@ void synth_control_record_start_helper(void)
     wtr.state = MMWavTabRecorderState_RECORDING;
 }
 
+void synth_control_record_stop(void)
+{
+    if (scheduleRecording == 1) {
+        /* Turn off scheduleRecording so the recording is not stopped
+         * prematurely when an event that does that is called by the
+         * scheduler. when an event that does that is called by the
+         * scheduler. */
+        scheduleRecording = 0;
+        synth_control_record_start_helper();
+    } else {
+        if (schedulerState == 1) {
+            schedulerState_off_helper((void*)noteOnEventListHead);
+        }
+        SynthControlRecMode _recMode = synth_control_get_recMode();
+        if (_recMode == SynthControlRecMode_REC_LEN_1_BEAT_REC_SCHED) {
+            /* Recording will be stopped by event in scheduler */
+            scheduleRecording = 1;
+        } else {
+            synth_control_record_stop_helper();
+        }
+        schedulerState_on_helper();
+    }
+}
+
+void synth_control_record_start(void)
+{
+#ifdef DEBUG
+       assert(scheduleRecording == 0);
+#endif  
+       synth_control_record_start_helper();
+}
+
 /* If record switch pressed, recording on-going and record scheduling off, turn
  * off the current recording and use the "record stop helper".
  * If record switch pressed, recording on-going but record scheduling on,
@@ -539,35 +571,13 @@ void synth_control_record_start_helper(void)
 void synth_control_record_tog(void)
 {
     if (wtr.state == MMWavTabRecorderState_RECORDING) {
-        if (scheduleRecording == 1) {
-            /* Turn off scheduleRecording so the recording is not stopped
-             * prematurely when an event that does that is called by the
-             * scheduler. when an event that does that is called by the
-             * scheduler. */
-            scheduleRecording = 0;
-            synth_control_record_start_helper();
-        } else {
-            if (schedulerState == 1) {
-                schedulerState_off_helper((void*)noteOnEventListHead);
-            }
-            SynthControlRecMode _recMode = synth_control_get_recMode();
-            if (_recMode == SynthControlRecMode_REC_LEN_1_BEAT_REC_SCHED) {
-                /* Recording will be stopped by event in scheduler */
-                scheduleRecording = 1;
-            } else {
-                synth_control_record_stop_helper();
-            }
-            schedulerState_on_helper();
-        }
+        synth_control_record_stop();
     } else if (wtr.state == MMWavTabRecorderState_STOPPED) {
-#ifdef DEBUG
-       assert(scheduleRecording == 0);
-#endif  
-       synth_control_record_start_helper();
+        synth_control_record_start();
     }
 }
 
-void synth_control_feedback_control(void *data_, uint32_t feedback_param)
+void synth_control_feedback_control(uint32_t feedback_param)
 {
     if (feedback_param > 0) {
         /* Move fbBusSplitter to onNode */
@@ -588,9 +598,9 @@ void synth_control_feedback_control(void *data_, uint32_t feedback_param)
 void synth_control_feedback_tog(void)
 {
     if (feedbackState) {
-        synth_control_feedback_control(NULL,0);
+        synth_control_feedback_control(0);
     } else {
-        synth_control_feedback_control(NULL,1);
+        synth_control_feedback_control(1);
     }
 }
 
@@ -641,17 +651,27 @@ void synth_control_schedulerState_control(void *data_, uint32_t schedulerState_p
     }
 }
 
+void synth_control_schedulerState_on(void)
+{
+    schedulerState_on_helper();
+}
+
+void synth_control_schedulerState_off(void)
+{
+    /* If record scheduling on, it is turned off when the scheduler is
+     * turned off. */
+    if (scheduleRecording == 1) {
+        synth_control_autoRecord_stop_helper();
+    }
+    schedulerState_off_helper(&noteOnEventListHead);
+}
+
 void synth_control_schedulerState_tog(void)
 {
     if (schedulerState) {
-        /* If record scheduling on, it is turned off when the scheduler is
-         * turned off. */
-        if (scheduleRecording == 1) {
-            synth_control_autoRecord_stop_helper();
-        }
-        schedulerState_off_helper(&noteOnEventListHead);
+        synth_control_schedulerState_off();
     } else {
-        schedulerState_on_helper();
+        synth_control_scheduler_state_on();
     }
 }
 
@@ -890,6 +910,12 @@ SynthControlDeltaButtonMode synth_control_get_deltaButtonMode(void)
 
 void synth_control_set_recMode(SynthControlRecMode recMode_param)
 {
+    if (recMode_param < SynthControlRecMode_START__) {
+        recMode_param = SynthControlRecMode_START__;
+    }
+    if (recMode_param > SynthControlRecMode_END__) {
+        recMode_param = SynthControlRecMode_END__;
+    }
     SynthControlRecMode _recMode = synth_control_get_recMode();
     if (_recMode != recMode_param) {
         recMode = recMode_param;
