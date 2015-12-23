@@ -226,7 +226,7 @@ void synth_control_set_numRepeats(int numRepeats_param, int note_params_idx)
 
 void synth_control_set_numRepeats_curParams(int numRepeats_param)
 {
-    void synth_control_set_numRepeats(numRepeats_param,
+    synth_control_set_numRepeats(numRepeats_param,
             synth_control_get_editingWhichParams());
 }
 
@@ -291,9 +291,9 @@ void synth_control_set_pitch_fine_quant(float param,
         += _tmp;
 }
 
-void synth_control_set_pitch_pitch_fine_curParams(float param)
+void synth_control_set_pitch_fine_curParams(float param)
 {
-    synth_control_set_pitch_pitch_fine(param,
+    synth_control_set_pitch_fine_quant(param,
             synth_control_get_editing_which_pitch(),
             synth_control_get_editingWhichParams());
 }
@@ -671,7 +671,7 @@ void synth_control_schedulerState_tog(void)
     if (schedulerState) {
         synth_control_schedulerState_off();
     } else {
-        synth_control_scheduler_state_on();
+        synth_control_schedulerState_on();
     }
 }
 
@@ -970,7 +970,7 @@ void synth_control_set_posMode_onChange_curParams(SynthControlPosMode posMode_pa
 {
     int _which_params = synth_control_get_editingWhichParams();
     synth_control_set_posMode_onChange(posMode_param,
-                                       last_posMode_params,
+                                       last_posMode_param,
                                        _which_params);
 }
 

@@ -1,3 +1,4 @@
+#include "synth_midi_control.h" 
 #include "midi_setup.h"
 #include "synth_control.h" 
 
@@ -51,7 +52,7 @@ void synth_midi_cc_pitch_fine_control(void *data, MIDIMsg *msg)
     synth_midi_cc_pitch_control_t *params =
         (synth_midi_cc_pitch_control_t*)data;
     synth_control_set_pitch_fine_quant((float)msg->data[2] 
-            / (float)MIDI_MSG_DATA_BYTE_MAX,
+            / (float)MIDIMSG_DATA_BYTE_MAX,
             params->note,
             params->pitch);
 }
@@ -89,16 +90,16 @@ void synth_midi_cc_env_control(void *data, MIDIMsg *msg)
 {
     int *note = (int*)data;
     synth_control_set_envelopeTime(
-            (float)msg->data[2]/(float)MIDI_MSG_DATA_BYTE_MAX,
-            note);
+            (float)msg->data[2]/(float)MIDIMSG_DATA_BYTE_MAX,
+            *note);
 }
 
 void synth_midi_cc_sus_control(void *data, MIDIMsg *msg)
 {
     int *note = (int*)data;
     synth_control_set_sustainTime(
-            (float)msg->data[2]/(float)MIDI_MSG_DATA_BYTE_MAX,
-            note);
+            (float)msg->data[2]/(float)MIDIMSG_DATA_BYTE_MAX,
+            *note);
 }
 
 void synth_midi_cc_pitch_control(void *data, MIDIMsg *msg)
@@ -109,56 +110,56 @@ void synth_midi_cc_gain_control(void *data, MIDIMsg *msg)
 {
     int *note = (int*)data;
     synth_control_set_wet(
-            (float)msg->data[2]/(float)MIDI_MSG_DATA_BYTE_MAX,
-            note);
+            (float)msg->data[2]/(float)MIDIMSG_DATA_BYTE_MAX,
+            *note);
 }
 
 void synth_midi_cc_pos_control(void *data, MIDIMsg *msg)
 {
     int *note = (int*)data;
     synth_control_set_startPoint(
-            (float)msg->data[2]/(float)MIDI_MSG_DATA_BYTE_MAX,
-            note);
+            (float)msg->data[2]/(float)MIDIMSG_DATA_BYTE_MAX,
+            *note);
 }
 
 void synth_midi_cc_stride_control(void *data, MIDIMsg *msg)
 {
     int *note = (int*)data;
     synth_control_set_positionStride(
-            (float)msg->data[2]/(float)MIDI_MSG_DATA_BYTE_MAX,
-            note);
+            (float)msg->data[2]/(float)MIDIMSG_DATA_BYTE_MAX,
+            *note);
 }
 
 void synth_midi_cc_offset_control(void *data, MIDIMsg *msg)
 {
     int *note = (int*)data;
     synth_control_set_offset(
-            (float)msg->data[2]/(float)MIDI_MSG_DATA_BYTE_MAX,
-            note);
+            (float)msg->data[2]/(float)MIDIMSG_DATA_BYTE_MAX,
+            *note);
 }
 
 void synth_midi_cc_fbk_rate_control(void *data, MIDIMsg *msg)
 {
     int *note = (int*)data;
     synth_control_set_ampLastEcho(
-            (float)msg->data[2]/(float)MIDI_MSG_DATA_BYTE_MAX,
-            note);
+            (float)msg->data[2]/(float)MIDIMSG_DATA_BYTE_MAX,
+            *note);
 }
 
 void synth_midi_cc_event_delta_control(void *data, MIDIMsg *msg)
 {
     int *note = (int*)data;
     synth_control_set_eventDelta_free(
-            (float)msg->data[2]/(float)MIDI_MSG_DATA_BYTE_MAX,
-            note);
+            (float)msg->data[2]/(float)MIDIMSG_DATA_BYTE_MAX,
+            *note);
 }
 
 void synth_midi_cc_num_reps_control(void *data, MIDIMsg *msg)
 {
     int *note = (int*)data;
-    synth_control_set_repeats(
-            (float)msg->data[2]/(float)MIDI_MSG_DATA_BYTE_MAX,
-            note);
+    synth_control_set_numRepeats(
+            (float)msg->data[2]/(float)MIDIMSG_DATA_BYTE_MAX,
+            *note);
 }
 
 typedef struct __synth_midi_cc_stride_state_control {
@@ -168,7 +169,7 @@ typedef struct __synth_midi_cc_stride_state_control {
 
 void synth_midi_cc_stride_state_control(void *data, MIDIMsg *msg)
 {
-    synth_midi_cc_stride_state_control_t _params;
+    synth_midi_cc_stride_state_control_t *_params;
     _params = (synth_midi_cc_stride_state_control_t*)data;
     SynthControlPosMode _posMode = (msg->data[2] > 0) 
         ? SynthControlPosMode_STRIDE
@@ -178,7 +179,7 @@ void synth_midi_cc_stride_state_control(void *data, MIDIMsg *msg)
             _params->note);
 }
 
-synth_midi_cc_stride_state_control_t_init(
+void synth_midi_cc_stride_state_control_t_init(
         MIDI_Router_Standard *router,
         int midi_channel,
         synth_midi_cc_stride_state_control_t *controls,
@@ -201,28 +202,28 @@ void synth_midi_cc_interm_control(void *data, MIDIMsg *msg)
 {
     int *note = (int*)data;
     synth_control_set_intermittency(
-            (float)msg->data[2]/(float)MIDI_MSG_DATA_BYTE_MAX,
-            note);
+            (float)msg->data[2]/(float)MIDIMSG_DATA_BYTE_MAX,
+            *note);
 }
 
 void synth_midi_cc_tempo_coarse_control(void *data, MIDIMsg *msg)
 {
-    synth_control_update_tempo_coarse_norm((float)msg->data[2] / (float)MIDI_MSG_DATA_BYTE_MAX);
+    synth_control_set_tempo_coarse_norm((float)msg->data[2] / (float)MIDIMSG_DATA_BYTE_MAX);
 }
 
 void synth_midi_cc_tempo_fine_control(void *data, MIDIMsg *msg)
 {
-    synth_control_update_tempo_fine_norm((float)msg->data[2] / (float)MIDI_MSG_DATA_BYTE_MAX);
+    synth_control_set_tempo_fine_norm((float)msg->data[2] / (float)MIDIMSG_DATA_BYTE_MAX);
 }
 
 void synth_midi_cc_tempo_scale_control(void *data, MIDIMsg *msg)
 {
-    synth_control_set_tempo_scale_norm((float)msg->data[2] / (float)MIDI_MSG_DATA_BYTE_MAX);
+    synth_control_set_tempo_scale_norm((float)msg->data[2] / (float)MIDIMSG_DATA_BYTE_MAX);
 }
 
 void synth_midi_cc_tempo_nudge_control(void *data, MIDIMsg *msg)
 {
-    synth_control_tempoNudge((float)msg->data[2] / (float)MIDI_MSG_DATA_BYTE_MAX);
+    synth_control_tempoNudge((float)msg->data[2] / (float)MIDIMSG_DATA_BYTE_MAX);
 }
 
 void synth_midi_cc_preset_store_control(void *data, MIDIMsg *msg)
@@ -253,6 +254,8 @@ void synth_midi_cc_play_control(void *data, MIDIMsg *msg)
     }
 }
 
+typedef SynthControlRecMode synth_midi_cc_rec_mode_control_t;
+
 void synth_midi_cc_rec_mode_control(void *data, MIDIMsg *msg)
 {
     synth_midi_cc_rec_mode_control_t *last_recMode_param = 
@@ -261,9 +264,7 @@ void synth_midi_cc_rec_mode_control(void *data, MIDIMsg *msg)
                                        last_recMode_param);
 }
 
-typedef SynthControlRecMode synth_midi_cc_rec_mode_control_t;
-
-synth_midi_cc_rec_mode_control_t_init(
+void synth_midi_cc_rec_mode_control_t_init(
         MIDI_Router_Standard *router,
         int midi_channel,
         synth_midi_cc_rec_mode_control_t *control)
@@ -273,7 +274,6 @@ synth_midi_cc_rec_mode_control_t_init(
             synth_midi_cc_type_t_REC_MODE,
             synth_midi_cc_rec_mode_control,
             control);
-    }
 }
 
 void synth_midi_cc_fbk_state_control(void *data, MIDIMsg *msg)
@@ -285,9 +285,13 @@ void synth_midi_cc_fbk_state_control(void *data, MIDIMsg *msg)
 void synth_midi_note_on_control(void *data, MIDIMsg *msg)
 {
     int *base_channel = (int*)data;
+    float pitch, amplitude;
+    pitch = msg->data[1] - SYNTH_CONTROL_PITCH_UNISON;
+    /* TODO: use dB scale for more "natural" amplitude variation */
+    amplitude = (float)msg->data[2] / (float)MIDIMSG_DATA_BYTE_MAX;
     synth_control_note_on(MIDIMSG_GET_CHANNEL(msg->data[0]) - *base_channel,
-                          MMSample pitch,
-                          MMSample amplitude);
+                          pitch,
+                          amplitude);
 }
 
 static void synth_midi_cc_note_funcs_init(
@@ -340,7 +344,7 @@ static void synth_midi_note_on_init(
 {
     int n;
     for (n = 0; n < NUM_NOTE_PARAM_SETS; n++) {
-        MIDI_Router_addCB(&router.router,
+        MIDI_Router_addCB(&router->router,
                 MIDIMSG_NOTE_ON,
                 (midi_channel + n) % MIDIMSG_NCHANNELS,
                 func,
@@ -350,8 +354,8 @@ static void synth_midi_note_on_init(
 
 void synth_midi_control_setup(void)
 {
-    int midi_channel;
-    midi_channel = SYNTH_MIDI_CONTROL_DEFAULT_CHANNEL;
+    int midi_channel = SYNTH_MIDI_CONTROL_DEFAULT_CHANNEL;
+    static int base_channel = SYNTH_MIDI_CONTROL_DEFAULT_CHANNEL;
     /* could set custom channel here ... */
     void (*midi_cc_pitch_funcs[])(void*,MIDIMsg*) = {
         synth_midi_cc_pitch_control,
@@ -365,7 +369,7 @@ void synth_midi_control_setup(void)
     static synth_midi_cc_pitch_control_t 
         pitch_params[NUM_NOTE_PARAM_SETS 
             * SYNTH_CONTROL_PITCH_TABLE_SIZE];
-    synth_midi_cc_pitch_fine_control_t_init(
+    synth_midi_cc_pitch_control_t_init(
             &midiRouter,
             midi_channel,
             pitch_params,
@@ -401,19 +405,19 @@ void synth_midi_control_setup(void)
             synth_midi_cc_num_reps_control,
             synth_midi_cc_interm_control,
             NULL
-    }
+    };
     synth_midi_cc_type_t midi_cc_note_types[] = {
-            synth_midi_cc_ENV,
-            synth_midi_cc_SUS,
-            synth_midi_cc_GAIN,
-            synth_midi_cc_POS,
-            synth_midi_cc_STRIDE,
-            synth_midi_cc_OFFSET,
-            synth_midi_cc_FBK_RATE,
-            synth_midi_cc_EVENT_DELTA,
-            synth_midi_cc_NUM_REPS,
-            synth_midi_cc_INTERM,
-    }
+            synth_midi_cc_type_t_ENV,
+            synth_midi_cc_type_t_SUS,
+            synth_midi_cc_type_t_GAIN,
+            synth_midi_cc_type_t_POS,
+            synth_midi_cc_type_t_STRIDE,
+            synth_midi_cc_type_t_OFFSET,
+            synth_midi_cc_type_t_FBK_RATE,
+            synth_midi_cc_type_t_EVENT_DELTA,
+            synth_midi_cc_type_t_NUM_REPS,
+            synth_midi_cc_type_t_INTERM,
+    };
     synth_midi_cc_note_funcs_init(
         &midiRouter,
         midi_channel,
@@ -432,24 +436,23 @@ void synth_midi_control_setup(void)
         synth_midi_cc_play_control,
         synth_midi_cc_fbk_state_control,
         NULL
-    }
+    };
     synth_midi_cc_type_t midi_cc_types[] = {
-        synth_midi_cc_TEMPO_COARSE,
-        synth_midi_cc_TEMPO_FINE,
-        synth_midi_cc_TEMPO_SCALE,
-        synth_midi_cc_TEMPO_NUDGE,
-        synth_midi_cc_PRESET_STORE,
-        synth_midi_cc_PRESET_RECALL,
-        synth_midi_cc_REC,
-        synth_midi_cc_PLAY,
-        synth_midi_cc_FBK_STATE
-    }
+        synth_midi_cc_type_t_TEMPO_COARSE,
+        synth_midi_cc_type_t_TEMPO_FINE,
+        synth_midi_cc_type_t_TEMPO_SCALE,
+        synth_midi_cc_type_t_TEMPO_NUDGE,
+        synth_midi_cc_type_t_PRESET_STORE,
+        synth_midi_cc_type_t_PRESET_RECALL,
+        synth_midi_cc_type_t_REC,
+        synth_midi_cc_type_t_PLAY,
+        synth_midi_cc_type_t_FBK_STATE
+    };
     synth_midi_cc_global_funcs_init(
         &midiRouter,
         midi_channel,
         midi_cc_funcs,
         midi_cc_types);
-    static int base_channel = midi_channel;
     synth_midi_note_on_init(
         &midiRouter,
         midi_channel,

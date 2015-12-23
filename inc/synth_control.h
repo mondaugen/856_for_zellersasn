@@ -154,6 +154,8 @@ typedef struct __NoteParamSet {
 #define SYNTH_CONTROL_PITCH_FINE_MIN -0.5
 #define SYNTH_CONTROL_PITCH_FINE_MAX  0.5
 #define SYNTH_CONTROL_PITCH_FINE_QUANT 0.01
+/* The MIDI pitch that plays at a rate of 1 */
+#define SYNTH_CONTROL_PITCH_UNISON  60 
 
 typedef uint32_t SynthControlEditingWhichParamsIndex;
 /* The number of sets of note parameters */
@@ -193,8 +195,11 @@ void synth_control_set_deltaButtonMode(SynthControlDeltaButtonMode
         deltaButtonMode_param);
 SynthControlDeltaButtonMode synth_control_get_deltaButtonMode(void);
 void synth_control_set_recMode(SynthControlRecMode recMode_param);
+void synth_control_set_recMode_onChange(SynthControlRecMode recMode_param,
+                               SynthControlRecMode *last_recMode_param);
 SynthControlRecMode synth_control_get_recMode(void);
-void synth_control_set_posMode(SynthControlPosMode posMode_param);
+void synth_control_set_posMode(SynthControlPosMode posMode_param,
+                               int which_params);
 SynthControlPosMode synth_control_get_posMode(void);
 void synth_control_set_gainMode(SynthControlGainMode gainMode_param);
 SynthControlGainMode synth_control_get_gainMode(void);
@@ -250,7 +255,7 @@ void synth_control_set_pitch_chrom_quant_curParams(float param);
 void synth_control_set_pitch_fine_quant(float param, 
                                         int which_pitch,
                                         int note_param_idx);
-void synth_control_set_pitch_pitch_fine_curParams(float param);
+void synth_control_set_pitch_fine_curParams(float param);
 void synth_control_set_startPoint(float startPoint_param,
                                   int note_params_idx);
 void synth_control_set_startPoint_curParams(float startPoint_param);

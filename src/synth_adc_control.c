@@ -31,14 +31,14 @@
     }
 
 
-SYNTH_ADC_CONTROL_FLOAT(envelopeTime);
-SYNTH_ADC_SETUP(envelopeTime,SYNTH_ADC_ENV_IDX,synth_adc_envelopeTime_control);
-SYNTH_ADC_CONTROL_FLOAT(sustainTime);
-SYNTH_ADC_SETUP(sustainTime,SYNTH_ADC_SUS_IDX,synth_adc_sustainTime_control);
-SYNTH_ADC_CONTROL_FLOAT(offset);
-SYNTH_ADC_SETUP(offset,SYNTH_ADC_OFFSET_IDX,synth_adc_offset_control);
+SYNTH_ADC_CONTROL_FLOAT(envelopeTime_curParams);
+SYNTH_ADC_SETUP(envelopeTime_curParams,SYNTH_ADC_ENV_IDX,synth_adc_envelopeTime_curParams_control);
+SYNTH_ADC_CONTROL_FLOAT(sustainTime_curParams);
+SYNTH_ADC_SETUP(sustainTime_curParams,SYNTH_ADC_SUS_IDX,synth_adc_sustainTime_curParams_control);
+SYNTH_ADC_CONTROL_FLOAT(offset_curParams);
+SYNTH_ADC_SETUP(offset_curParams,SYNTH_ADC_OFFSET_IDX,synth_adc_offset_curParams_control);
 
-static void synth_adc_pos_control(adc_channel_t *chan,
+static void synth_adc_pos_curParams_control(adc_channel_t *chan,
                                   adc_channel_do_data_t *data)
 {
     switch (synth_control_get_posMode()) {
@@ -53,9 +53,9 @@ static void synth_adc_pos_control(adc_channel_t *chan,
     }
 }
 
-SYNTH_ADC_SETUP(pos,SYNTH_ADC_POS_IDX,synth_adc_pos_control);
+SYNTH_ADC_SETUP(pos_curParams,SYNTH_ADC_POS_IDX,synth_adc_pos_curParams_control);
 
-static void synth_adc_eventDelta_control(adc_channel_t *chan,
+static void synth_adc_eventDelta_curParams_control(adc_channel_t *chan,
                                          adc_channel_do_data_t *data)
 {
     switch (synth_control_get_deltaButtonMode()) {
@@ -88,19 +88,19 @@ static void synth_adc_eventDelta_control(adc_channel_t *chan,
     }
 }
 
-SYNTH_ADC_SETUP(eventDelta,SYNTH_ADC_EVENTDELTA_IDX,
-        synth_adc_eventDelta_control);
+SYNTH_ADC_SETUP(eventDelta_curParams,SYNTH_ADC_EVENTDELTA_IDX,
+        synth_adc_eventDelta_curParams_control);
 
-static void synth_adc_pitch_control(adc_channel_t *chan,
+static void synth_adc_pitch_curParams_control(adc_channel_t *chan,
                                     adc_channel_do_data_t *data)
 {
     synth_control_set_pitch_chrom_quant_curParams(
             ((float)chan->cur_val)/((float)ADC_MAX));
 }
 
-SYNTH_ADC_SETUP(pitch,SYNTH_ADC_PITCH_IDX,synth_adc_pitch_control);
+SYNTH_ADC_SETUP(pitch_curParams,SYNTH_ADC_PITCH_IDX,synth_adc_pitch_curParams_control);
 
-static void synth_adc_gain_control(adc_channel_t *chan,
+static void synth_adc_gain_curParams_control(adc_channel_t *chan,
                                    adc_channel_do_data_t *data)
 {
     switch (synth_control_get_gainMode()) {
@@ -115,7 +115,7 @@ static void synth_adc_gain_control(adc_channel_t *chan,
     }
 }
 
-SYNTH_ADC_SETUP(gain,SYNTH_ADC_GAIN_IDX,synth_adc_gain_control);
+SYNTH_ADC_SETUP(gain_curParams,SYNTH_ADC_GAIN_IDX,synth_adc_gain_curParams_control);
 
 static void synth_adc_tempo_control(adc_channel_t *chan,
                                    adc_channel_do_data_t *data)
@@ -139,13 +139,13 @@ SYNTH_ADC_SETUP(tempo,SYNTH_ADC_TEMPO_IDX,synth_adc_tempo_control);
 void synth_adc_control_setup(void)
 {
     adc_channel_setup();
-    synth_adc_envelopeTime_control_setup();
-    synth_adc_sustainTime_control_setup();
-    synth_adc_offset_control_setup();
-    synth_adc_pos_control_setup();
-    synth_adc_eventDelta_control_setup();
-    synth_adc_pitch_control_setup();
-    synth_adc_gain_control_setup();
+    synth_adc_envelopeTime_curParams_control_setup();
+    synth_adc_sustainTime_curParams_control_setup();
+    synth_adc_offset_curParams_control_setup();
+    synth_adc_pos_curParams_control_setup();
+    synth_adc_eventDelta_curParams_control_setup();
+    synth_adc_pitch_curParams_control_setup();
+    synth_adc_gain_curParams_control_setup();
     synth_adc_tempo_control_setup();
 }
 
