@@ -39,10 +39,15 @@ LDFLAGS				     += -lm -lmm_dsp -lmm_primitives \
 OBJSDIR					 = objs
 OBJS					 = $(addprefix $(OBJSDIR)/,\
 						   	$(addsuffix .o, $(basename $(SRC))))
+TESTDIR					 = test
+TESTSRC					 = $(notdir $(wildcard $(TESTDIR)/*.c))
+TESTS					 = $(addprefix $(TESTDIR)/,\
+						    $(addsuffix .o, $(basename $(TESTSRC))))
+VPATH				    += :test
 CC 						 = arm-none-eabi-gcc
 OCD 		   = sudo openocd -f /usr/local/share/openocd/scripts/board/stm32f429discovery.cfg
 
-all: $(OBJSDIR) $(OBJS) $(BIN)
+all: $(OBJSDIR) $(OBJS) $(BIN) $(TESTS)
 
 $(OBJSDIR):
 	if [ ! -d "$(OBJSDIR)" ]; then mkdir $(OBJSDIR); fi
@@ -52,6 +57,9 @@ $(OBJS) : $(OBJSDIR)/%.o: %.c $(DEP)
 
 $(BIN) : $(OBJS) $(LIBDEP)
 	$(CC) $(filter %.o, $^) -o $@ $(CFLAGS) $(LDFLAGS)
+
+$(TESTS) : $(TESTDIR)/%.o: %.c $(DEP)
+	$(CC) -c $(CFLAGS) $< -o $@
 
 flash: $(BIN)
 	$(OCD) -c init \
@@ -64,7 +72,7 @@ reset: $(BIN)
 	$(OCD) -c init -c "reset run" -c shutdown
 
 clean:
-	rm objs/*.o
+	rm objs/*.o test/*.o
 
 tags:
 	ctags -R . \

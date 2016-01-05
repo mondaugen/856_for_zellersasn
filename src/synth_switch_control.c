@@ -26,7 +26,7 @@ typedef struct __synth_switch_control_t {
 #define SYNTH_SWITCH_CONTROL_ONCHANGE(type,fun,c0,c1,c2,init_state)\
     static void synth_switch_control_ ## type ## _control(switch_control_t *sc)\
     {\
-        static type _last_param = init_state;
+        static type _last_param = init_state;\
         if (!switch_control_get_state(sc)) {\
             fun(c0,&_last_param);\
         } else if (!switch_control_get_state((synth_switch_control_t*)sc)) {\

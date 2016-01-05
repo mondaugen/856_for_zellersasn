@@ -861,7 +861,6 @@ void synth_control_reset_param_sets(NoteParamSet *param_sets, int size)
 void synth_control_reset_global_params(void)
 {
     noteDeltaFromBuffer = 0;
-    dryGain             = 0;
     editingWhichParams  = 0;
     tempoBPM_coarse     = SYNTH_CONTROL_DEFAULT_TEMPOBPM_COARSE;
     tempoBPM_fine       = SYNTH_CONTROL_DEFAULT_TEMPOBPM_FINE;

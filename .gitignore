@@ -4,3 +4,4 @@ tags
 data
 tmp
 octave-workspace
+test/*.o

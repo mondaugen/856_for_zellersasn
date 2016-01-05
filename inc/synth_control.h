@@ -171,7 +171,6 @@ extern SynthControlGainMode         gainMode;
 extern SynthControlRecMode          recMode;
 extern int                          schedulerState;
 
-extern int16_t  dryGain;
 /* The amount the scheduler is incremented each block */
 extern int                         scheduleRecording;
 extern int                         firstScheduledRecording;

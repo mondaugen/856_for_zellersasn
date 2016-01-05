@@ -1,0 +1,36 @@
+#! /bin/bash
+# Script for testing MIDI functionality on 856
+
+MIDIDEV=hw:2,0,0
+
+MIDI_CHANNEL=0
+CCS_NOTE=(
+    pitch_fine1
+    pitch_fine2
+    pitch_fine3
+    env
+    sus
+    pitch1
+    pitch2
+    pitch3
+    gain
+    pos
+    stride
+    offset
+    fbk_rate
+    event_delta
+    num_reps
+    stride_state
+    interm
+)
+NUM_CCS_NOTE=17
+NUM_CCS_ALL_NOTES=51
+NUM_CCS_GLOBAL=10
+OFFSET_CCS_GLOBAL=51
+TOT_NUM_FUNS=$((NUM_CCS_ALL_NOTES+NUM_CCS_GLOBAL))
+
+for cc in `seq 0 $((TOT_NUM_FUNS-1))`
+do
+    amidi -p $MIDIDEV -S `printf "b%x %02x 40" $MIDI_CHANNEL $cc`  
+    sleep 0.25
+done
