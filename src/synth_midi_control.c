@@ -2,6 +2,7 @@
 
 #ifdef DEBUG 
 #include <assert.h> 
+static int synth_midi_check_index = 0;
 static void synth_midi_check_msg(MIDIMsg *msg,void (*fun)(void *,MIDIMsg *));
 #endif  
 
@@ -44,18 +45,20 @@ static void synth_midi_cc_pitch_control_t_init(
     size_t n, m;
     for (n = 0; n < num_params; n++) {
         for (m = 0; m < num_pitches; m++) {
+            void (**t_funcs)(void*,MIDIMsg*) = funcs;
+            synth_midi_cc_type_t * t_types = types;
             controls[n*num_pitches + m].note = n;
             controls[n*num_pitches + m].pitch = m;
-            while (*funcs != NULL) {
+            while (*t_funcs != NULL) {
                 MIDI_CC_CB_Router_addCB(&router->cbRouters[midi_channel],
                         /* cc number */
                         n * SYNTH_MIDI_NUM_NOTE_PARAMS 
-                        + *types
+                        + *t_types
                         + m,
-                        *funcs,
+                        *t_funcs,
                         &controls[n*num_pitches + m]);
-                funcs++;
-                types++;
+                t_funcs++;
+                t_types++;
             }
         }
     }
@@ -557,7 +560,6 @@ void (*midi_note_param_funs[])(void*,MIDIMsg*) = {
     synth_midi_cc_num_reps_control,
     synth_midi_cc_stride_state_control,
     synth_midi_cc_interm_control,
-
     synth_midi_cc_tempo_coarse_control,
     synth_midi_cc_tempo_fine_control,
     synth_midi_cc_tempo_scale_control,
@@ -572,8 +574,7 @@ void (*midi_note_param_funs[])(void*,MIDIMsg*) = {
 
 static void synth_midi_check_msg(MIDIMsg *msg,void (*fun)(void *,MIDIMsg *))
 {
-    static int index = 0;
-    assert(midi_note_param_funs[index] == fun);
-    index += 1;
+//    assert(midi_note_param_funs[synth_midi_check_index] == fun);
+    synth_midi_check_index += 1;
 }
 #endif

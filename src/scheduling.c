@@ -71,6 +71,7 @@ void scheduler_setup(void)
         MMDLList_init(&noteOnEventListHead[n]);
     }
     MMDLList_init(&noteSchedEventListHead);
+    MMDLList_init(&measureLEDOffEventListHead);
 }
 
 NoteOnEvent *NoteOnEvent_new(int active,
