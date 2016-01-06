@@ -47,55 +47,52 @@ a={
         Rect(0,0,slider_width,(slider_width + gui_element_gap)*tot_num_ccs)
     ),
         sliders = List(),
-        text_boxes = List();
-    //num_note_param_sets.do({
-    //    |n|
-    //    midi_note_commands.do({|x,m|
-    //        var idx = (n*num_ccs_note + m),
-    //        sliders.add(
-    //            Slider.new(win,Rect(x1,y1,wi,he)));
-    //    });
-    //});
-    //midi_global_commands.do({
-    //    |x,m|
-    //    var idx = (tot_num_ccs_note + m),
-    //    sliders.add(
-    //        Slider.new(win,Rect(x1,y1,wi,he)));
-    //});
-    var text_test, text_test2;
-    midi_note_commands.sort.reverse.at(1).postln;
+        text_boxes = List(),
+        all_midi_commands = List();
+    var longest_cc_name,
+        font_pixel_size = 10,
+        text_width,
+        text_height = font_pixel_size,
+        text_font = Font("Monospace",font_pixel_size),
+        test_button;
+    // MIDI setup stuff
+    var midi_device_name;
     num_note_param_sets.do({
         |n|
-        midi_note_commands.do({|x,m|
-            var idx = (n*num_ccs_note + m),
-                y1 = (idx % row_height) * (slider_height + gui_element_gap),
-                x1 = (idx / row_height).floor * (slider_width + gui_element_gap),
-                he = (slider_height + gui_element_gap),
-                wi = slider_width;
-            sliders.add(
-                Slider.new(win,Rect(x1,y1,wi,he)));
-        });
+        all_midi_commands.addAll(midi_note_commands);
     });
-    midi_global_commands.do({
+    all_midi_commands.addAll(midi_global_commands);
+    longest_cc_name = all_midi_commands.asSortedList.reverse.at(1).postln;
+    text_width = longest_cc_name.size * font_pixel_size;
+    all_midi_commands.postln;
+    all_midi_commands.do({
         |x,m|
-        var idx = (tot_num_ccs_note + m),
-            y1 = (idx % row_height) * (slider_height + gui_element_gap),
-            x1 = (idx / row_height).floor * (slider_width + gui_element_gap),
+        var idx = m,
             he = (slider_height + gui_element_gap),
-            wi = slider_width;
+            wi = slider_width,
+            text_y1 = (idx % row_height) * (slider_height + gui_element_gap),
+            text_x1 = ((idx / row_height).floor 
+                    * (slider_width + gui_element_gap + text_width)),
+            y1 = text_y1,
+            x1 = text_x1 + text_width;
         sliders.add(
             Slider.new(win,Rect(x1,y1,wi,he)));
+        text_boxes.add(
+            StaticText(win,
+                Rect(
+                    text_x1,
+                    text_y1,
+                    text_width,
+                    text_height)).string_(x).font_(text_font)
+            );
     });
     win.bounds = Rect(
         0,
         0,
-        ((tot_num_ccs / row_height).floor + 1) * (slider_width + gui_element_gap),
+        ((tot_num_ccs / row_height).floor + 1) * (slider_width + gui_element_gap + text_width),
         (row_height) * (slider_height + gui_element_gap));
-    text_test = StaticText(win,Rect(10,10,10,10)).string_("hello").font_(
-                    Font("Monaco",10));
-    text_test2= StaticText(win,Rect(10,10,20,20)).string_("hello").font_(
-                    Font("Monaco",10));
     win.onClose = { 0.exit };
+    test_button = Button(win,Rect(10,10,10,10));
     win.front;
 };
 a.();
