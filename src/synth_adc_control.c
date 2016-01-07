@@ -2,6 +2,8 @@
 #include "synth_adc_control.h" 
 #include "synth_control.h"
 
+static float synth_adc_scale_thresh(float x);
+
 #define SYNTH_ADC_SETUP(name,data_start_idx,func)\
     static void synth_adc_ ## name ## _control_setup(void)\
     {\
@@ -27,7 +29,7 @@
    static void synth_adc_ ## name ## _control(adc_channel_t *chan,\
                                                adc_channel_do_data_t *data)\
     {\
-         synth_control_set_ ## name (((float)chan->cur_val)/((float)ADC_MAX));\
+         synth_control_set_ ## name (synth_adc_scale_thresh(chan->cur_val));\
     }
 
 
@@ -38,17 +40,31 @@ SYNTH_ADC_SETUP(sustainTime_curParams,SYNTH_ADC_SUS_IDX,synth_adc_sustainTime_cu
 SYNTH_ADC_CONTROL_FLOAT(offset_curParams);
 SYNTH_ADC_SETUP(offset_curParams,SYNTH_ADC_OFFSET_IDX,synth_adc_offset_curParams_control);
 
+static float synth_adc_scale_thresh(float x)
+{
+    float result;
+    result = (x/((float)(ADC_MAX)) - SYNTH_ADC_LOWER_THRESH);
+    result /= (SYNTH_ADC_UPPER_THRESH - SYNTH_ADC_LOWER_THRESH);
+    if (result < 0.) {
+        return 0.;
+    }
+    if (result > 1.) {
+        return 1.;
+    }
+    return result;
+}
+
 static void synth_adc_pos_curParams_control(adc_channel_t *chan,
                                   adc_channel_do_data_t *data)
 {
     switch (synth_control_get_posMode()) {
         case SynthControlPosMode_ABSOLUTE:
-            synth_control_set_startPoint_curParams(((float)chan->cur_val)/((float)ADC_MAX));
+            synth_control_set_startPoint_curParams(synth_adc_scale_thresh(chan->cur_val));
             break;
         case SynthControlPosMode_UNKNOWN:
         case SynthControlPosMode_STRIDE:
             synth_control_set_positionStride_curParams(
-                    ((float)chan->cur_val)/((float)ADC_MAX));
+                    synth_adc_scale_thresh(chan->cur_val));
             break;
     }
 }
@@ -63,27 +79,27 @@ static void synth_adc_eventDelta_curParams_control(adc_channel_t *chan,
             if (synth_control_get_editingWhichParams() == 0) {
                 /* If editing 0th params, note delta controls tempo scaling */
                 synth_control_set_tempo_scale_norm(
-                    ((float)chan->cur_val)/((float)ADC_MAX));
+                    synth_adc_scale_thresh(chan->cur_val));
             } else {
                 /* Otherwise it controls the event delta in a quantized way */
                 synth_control_set_eventDelta_quant_curParams(
-                    ((float)chan->cur_val)/((float)ADC_MAX));
+                    synth_adc_scale_thresh(chan->cur_val));
             }
             break;
         case SynthControlDeltaButtonMode_EVENT_DELTA_FREE:
             if (synth_control_get_editingWhichParams() == 0) {
                 /* Controls fine tempo control */
                 synth_control_set_tempo_fine_norm(
-                    ((float)chan->cur_val)/((float)ADC_MAX));
+                    synth_adc_scale_thresh(chan->cur_val));
             } else {
                 /* Otherwise freely controls event delta (no quantization) */
                 synth_control_set_eventDelta_free_curParams(
-                        ((float)chan->cur_val)/((float)ADC_MAX));
+                        synth_adc_scale_thresh(chan->cur_val));
             }
             break;
         case SynthControlDeltaButtonMode_INTERMITTENCY:
             synth_control_set_intermittency_curParams(
-                    ((float)chan->cur_val)/((float)ADC_MAX));
+                    synth_adc_scale_thresh(chan->cur_val));
             break;
     }
 }
@@ -95,7 +111,7 @@ static void synth_adc_pitch_curParams_control(adc_channel_t *chan,
                                     adc_channel_do_data_t *data)
 {
     synth_control_set_pitch_chrom_quant_curParams(
-            ((float)chan->cur_val)/((float)ADC_MAX));
+            synth_adc_scale_thresh(chan->cur_val));
 }
 
 SYNTH_ADC_SETUP(pitch_curParams,SYNTH_ADC_PITCH_IDX,synth_adc_pitch_curParams_control);
@@ -106,11 +122,11 @@ static void synth_adc_gain_curParams_control(adc_channel_t *chan,
     switch (synth_control_get_gainMode()) {
         case SynthControlGainMode_FADE:
             synth_control_set_ampLastEcho_curParams(
-                    ((float)chan->cur_val)/((float)ADC_MAX));
+                    synth_adc_scale_thresh(chan->cur_val));
             break;
         case SynthControlGainMode_WET:
             synth_control_set_wet_curParams(
-                    ((float)chan->cur_val)/((float)ADC_MAX));
+                    synth_adc_scale_thresh(chan->cur_val));
             break;
     }
 }
@@ -124,13 +140,13 @@ static void synth_adc_tempo_control(adc_channel_t *chan,
         SynthControlRecMode _recMode = synth_control_get_recMode();
         if ((_recMode == SynthControlRecMode_REC_LEN_1_BEAT_REC_SCHED)
                 || (_recMode == SynthControlRecMode_REC_LEN_1_BEAT)) {
-            synth_control_tempoNudge(((float)chan->cur_val)/((float)ADC_MAX));
+            synth_control_tempoNudge(synth_adc_scale_thresh(chan->cur_val));
         } else {
             synth_control_set_tempo_coarse_norm(
-                    ((float)chan->cur_val)/((float)ADC_MAX));
+                    synth_adc_scale_thresh(chan->cur_val));
         }
     } else {
-        synth_control_set_repeats(((float)chan->cur_val)/((float)ADC_MAX));
+        synth_control_set_repeats(synth_adc_scale_thresh(chan->cur_val));
     }
 }
 

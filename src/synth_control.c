@@ -236,6 +236,22 @@ void synth_control_set_repeats(float repeats_param)
                 ((float)SYNTH_CONTROL_MAX_NUM_REPEATS) * repeats_param));        
 }
 
+/* Set absolute pitch according to MIDI notes (60 == no transposition) */
+void synth_control_set_pitch(float pitch_param,
+                             int which_pitch,
+                             int note_params_idx)
+{
+    noteParamSets[note_params_idx].pitches[which_pitch]
+        = pitch_param - 60;
+}
+
+void synth_control_set_pitch_curParams(float pitch_param)
+{
+    synth_control_set_pitch(pitch_param,
+                            synth_control_get_editing_which_pitch(),
+                            synth_control_get_editingWhichParams());
+}
+
 /* Set the pitch to any pitch between midi note 48 and 72, limited by the
  * precision of pitch_param */
 void synth_control_set_pitch_chrom(float pitch_param,
@@ -580,18 +596,22 @@ void synth_control_record_tog(void)
 void synth_control_feedback_control(uint32_t feedback_param)
 {
     if (feedback_param > 0) {
-        /* Move fbBusSplitter to onNode */
-        MMSigProc_insertAfter(fbOnNode,&fbBusSplitter);
-        feedbackState = 1;
+        if (feedbackState == 0) {
+            /* Move fbBusSplitter to onNode */
+            MMSigProc_insertAfter(fbOnNode,&fbBusSplitter);
+            feedbackState = 1;
+        }
     } else {
-        /* Move fbBusSplitter to offNode */
-        MMSigProc_remove(&fbBusSplitter);
-        /* Zero the feedback bus */
-        memset(fbBusSplitter.destBus->data,0,
-                sizeof(MMSample)
-                * fbBusSplitter.destBus->size
-                * fbBusSplitter.destBus->channels);
-        feedbackState = 0;
+        if (feedbackState == 1) {
+            /* Move fbBusSplitter to offNode */
+            MMSigProc_remove(&fbBusSplitter);
+            /* Zero the feedback bus */
+            memset(fbBusSplitter.destBus->data,0,
+                    sizeof(MMSample)
+                    * fbBusSplitter.destBus->size
+                    * fbBusSplitter.destBus->channels);
+            feedbackState = 0;
+        }
     }
 }
 

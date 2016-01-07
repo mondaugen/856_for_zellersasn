@@ -243,6 +243,10 @@ void synth_control_set_sustainTime_curParams(float sustainTime_param);
 void synth_control_set_numRepeats(int numRepeats_param, int note_params_idx);
 void synth_control_set_numRepeats_curParams(int numRepeats_param);
 void synth_control_set_repeats(float repeats_param);
+void synth_control_set_pitch(float pitch_param,
+                             int which_pitch,
+                             int note_params_idx);
+void synth_control_set_pitch_curParams(float pitch_param);
 void synth_control_set_pitch_chrom(float pitch_param,
                                    int which_pitch,
                                    int note_params_idx);

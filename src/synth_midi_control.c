@@ -91,6 +91,11 @@ void synth_midi_cc_pitch_control(void *data, MIDIMsg *msg)
     #ifdef DEBUG
 	synth_midi_check_msg(msg,synth_midi_cc_pitch_control);
 	#endif
+    synth_midi_cc_pitch_control_t *params =
+        (synth_midi_cc_pitch_control_t*)data;
+    synth_control_set_pitch((float)msg->data[2],
+            params->pitch,
+            params->note);
 }
 
 void synth_midi_cc_gain_control(void *data, MIDIMsg *msg)
@@ -166,7 +171,7 @@ void synth_midi_cc_num_reps_control(void *data, MIDIMsg *msg)
 	#endif
     int *note = (int*)data;
     synth_control_set_numRepeats(
-            (float)msg->data[2]/(float)MIDIMSG_DATA_BYTE_MAX,
+            (float)msg->data[2]/(float)MIDIMSG_DATA_BYTE_MAX * (float)SYNTH_CONTROL_MAX_NUM_REPEATS,
             *note);
 }
 

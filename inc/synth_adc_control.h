@@ -11,5 +11,8 @@
 #define SYNTH_ADC_EVENTDELTA_IDX    6
 #define SYNTH_ADC_GAIN_IDX          7
 
+#define SYNTH_ADC_LOWER_THRESH      0.1
+#define SYNTH_ADC_UPPER_THRESH      0.9
+
 void synth_adc_control_setup(void);
 #endif /* SYNTH_ADC_CONTROL_H */
