@@ -112,12 +112,12 @@ SYNTH_SWITCH_CONTROL(SynthControlDeltaButtonMode,
         SynthControlDeltaButtonMode_EVENT_DELTA_QUANT,
         SynthControlDeltaButtonMode_INTERMITTENCY);
 SYNTH_SWITCH_SETUP(SynthControlDeltaButtonMode,SW4);
-SYNTH_SWITCH_CONTROL(SynthControlPitchMode,
+SYNTH_SWITCH_CONTROL(SynthControlPitchIndex,
         synth_control_set_editing_which_pitch,
         0,
         1,
         2);
-SYNTH_SWITCH_SETUP(SynthControlPitchMode,SW8);
+SYNTH_SWITCH_SETUP(SynthControlPitchIndex,SW8);
 SYNTH_SWITCH_CONTROL_ONCHANGE(SynthControlRecMode,
         synth_control_set_recMode_onChange,
         SynthControlRecMode_NORMAL,
@@ -152,7 +152,7 @@ void synth_switch_control_setup(void)
     SYNTH_SWITCH_SETUP_CALL(SynthControlPresetNumber);
     SYNTH_SWITCH_SETUP_CALL(SynthControlPosMode);
     SYNTH_SWITCH_SETUP_CALL(SynthControlDeltaButtonMode);
-    SYNTH_SWITCH_SETUP_CALL(SynthControlPitchMode);
+    SYNTH_SWITCH_SETUP_CALL(SynthControlPitchIndex);
     SYNTH_SWITCH_SETUP_CALL(SynthControlRecMode);
     SYNTH_SWITCH_SETUP_CALL(SynthControlGainMode);
     SYNTH_SWITCH_SETUP_TOG_CALL(record);

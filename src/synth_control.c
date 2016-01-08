@@ -36,10 +36,10 @@ static const float          eventDelta_quant_table[] =
                                 SYNTH_CONTROL_EVENTDELTA_QUANT_TABLE;
 static const int            intermittency_table[] =
                                 SYNTH_CONTROL_INTERMITTENCY_TABLE;
-SynthControlPosMode         posMode;
 SynthControlDeltaButtonMode deltaButtonMode;
 SynthControlGainMode        gainMode;
 SynthControlRecMode         recMode;
+SynthControlPitchMode       pitchMode;
 
 /* Stuff that shouldn't really be saved */
 int                         noteDeltaFromBuffer;
@@ -210,8 +210,11 @@ void synth_control_set_tempo_scale_norm(float param)
 {
     int _tmp = (int)floor(SYNTH_CONTROL_TEMPOBPM_SCALE_TABLE_LENGTH
                             * param);
-    if (_tmp == SYNTH_CONTROL_TEMPOBPM_SCALE_TABLE_LENGTH) {
-        _tmp--;
+    if (_tmp >= SYNTH_CONTROL_TEMPOBPM_SCALE_TABLE_LENGTH) {
+        _tmp = SYNTH_CONTROL_TEMPOBPM_SCALE_TABLE_LENGTH - 1;
+    }
+    if (_tmp < 0) {
+        _tmp = 0;
     }
     synth_control_update_tempo_scale(tempoBPM_scale_table[_tmp]);
 }
@@ -253,7 +256,7 @@ void synth_control_set_pitch_curParams(float pitch_param)
 }
 
 /* Set the pitch to any pitch between midi note 48 and 72, limited by the
- * precision of pitch_param */
+ * precision of pitch_param. Input can be [0,1]*/
 void synth_control_set_pitch_chrom(float pitch_param,
                                    int which_pitch,
                                    int note_params_idx)
@@ -303,8 +306,8 @@ void synth_control_set_pitch_fine_quant(float param,
             * param)
             * SYNTH_CONTROL_PITCH_FINE_QUANT 
             + SYNTH_CONTROL_PITCH_FINE_MIN;
-    noteParamSets[note_param_idx].pitches[which_pitch]
-        += _tmp;
+    noteParamSets[note_param_idx].fine_pitches[which_pitch]
+        = _tmp;
 }
 
 void synth_control_set_pitch_fine_curParams(float param)
@@ -343,26 +346,16 @@ void synth_control_set_positionStride_curParams(float positionStride_param)
             synth_control_get_editingWhichParams());
 }
 
-void synth_control_startPoint_control(void *data_, float startPoint_param)
-{
-    switch (posMode) {
-        case SynthControlPosMode_ABSOLUTE:
-            synth_control_set_startPoint_curParams(startPoint_param);
-            break;
-        case SynthControlPosMode_UNKNOWN:
-        case SynthControlPosMode_STRIDE:
-            synth_control_set_positionStride_curParams(startPoint_param);
-            break;
-    }
-}
-
 void synth_control_set_eventDelta_quant(float eventDeltaBeats_param, int note_params_idx)
 {
     int _tmp;
     _tmp = (int)floor(SYNTH_CONTROL_EVENTDELTA_QUANT_TABLE_LENGTH 
             * eventDeltaBeats_param);
-    if (_tmp == SYNTH_CONTROL_EVENTDELTA_QUANT_TABLE_LENGTH) {
-        _tmp--;
+    if (_tmp >= SYNTH_CONTROL_EVENTDELTA_QUANT_TABLE_LENGTH) {
+        _tmp = SYNTH_CONTROL_EVENTDELTA_QUANT_TABLE_LENGTH - 1;
+    }
+    if (_tmp < 0) {
+        _tmp = 0;
     }
     noteParamSets[note_params_idx].eventDeltaBeats
         = eventDelta_quant_table[_tmp];
@@ -398,6 +391,12 @@ void synth_control_set_intermittency(float intermittency_param, int note_params_
 {
     uint32_t _idx = (uint32_t)((float)SYNTH_CONTROL_INTERMITTENCY_TABLE_LENGTH 
             * intermittency_param);
+    if (_idx >= SYNTH_CONTROL_INTERMITTENCY_TABLE_LENGTH) {
+        _idx = SYNTH_CONTROL_INTERMITTENCY_TABLE_LENGTH - 1;
+    }
+    if (_idx < 0) {
+        _idx = 0;
+    }
     noteParamSets[note_params_idx].intermittency = intermittency_table[_idx];
     /* Reset all events' event count so that all sequences has same phase, no
      * matter when intermittency was set */
@@ -431,7 +430,7 @@ void synth_control_set_offset(float offset_param, int note_params_idx)
 {
     if (note_params_idx == 0) {
         noteParamSets[note_params_idx].offsetBeats
-            = offset_param + 0.001;
+            = offset_param;
     } else {
         /* The offset is relative to the total event delta of the note event
          * with parameterSet 0 */
@@ -516,6 +515,7 @@ void synth_control_record_stop_helper(void)
             int n;
             noteParamSets[0].eventDeltaBeats = 1;
             noteParamSets[0].pitches[0] = 0.;
+            noteParamSets[0].fine_pitches[0] = 0.;
             noteParamSets[0].amplitude = 1.;
             for (n = 1; n < NUM_NOTE_PARAM_SETS; n++) {
                 noteParamSets[n].amplitude = 0;
@@ -807,11 +807,6 @@ void synth_control_gain_control(void *data_, float gain_param)
     }
 }
 
-void synth_control_posMode_control(void *data_, uint32_t posMode_param)
-{
-    posMode = (SynthControlPosMode)posMode_param;
-}
-
 void synth_control_presetNumber_control(void *data_, uint32_t presetNumber_param)
 {
     if (presetNumber_param >= NUM_SYNTH_CONTROL_PRESETS) {
@@ -858,6 +853,7 @@ void synth_control_reset_param_sets(NoteParamSet *param_sets, int size)
     uint32_t _n;
     for (_n = 0; _n < SYNTH_CONTROL_PITCH_TABLE_SIZE; _n++) {
         param_sets[0].pitches[_n] = SYNTH_CONTROL_DEFAULT_PITCH;
+        param_sets[0].fine_pitches[_n] = SYNTH_CONTROL_DEFAULT_FINEPITCH;
     }
     while (size-- > 1) {
         param_sets[size].attackTime = SYNTH_CONTROL_DEFAULT_ATTACKTIME;     
@@ -874,6 +870,7 @@ void synth_control_reset_param_sets(NoteParamSet *param_sets, int size)
         param_sets[size].posMode = SYNTH_CONTROL_DEFAULT_POSMODE;
         for (_n = 0; _n < SYNTH_CONTROL_PITCH_TABLE_SIZE; _n++) {
             param_sets[0].pitches[_n] = SYNTH_CONTROL_DEFAULT_PITCH;
+            param_sets[0].fine_pitches[_n] = SYNTH_CONTROL_DEFAULT_FINEPITCH;
         }
     };
 }
@@ -893,6 +890,7 @@ void synth_control_reset_global_params(void)
     scheduleRecording   = 0;
     schedulerState      = 0;
     editing_which_pitch = 0;
+    pitchMode           = SYNTH_CONTROL_DEFAULT_PITCHMODE;
 }
 
 void synth_control_setup(void)
@@ -993,9 +991,10 @@ void synth_control_set_posMode_onChange_curParams(SynthControlPosMode posMode_pa
                                        _which_params);
 }
 
-SynthControlPosMode synth_control_get_posMode(void)
+SynthControlPosMode synth_control_get_posMode_curParams(void)
 {
-    return posMode;
+    int _which_params = synth_control_get_editingWhichParams();
+    return noteParamSets[_which_params].posMode;
 }
 
 void synth_control_set_gainMode(SynthControlGainMode gainMode_param)
@@ -1083,7 +1082,8 @@ void synth_control_pitch_reset_tog(void)
     uint32_t _m, _n;
     _n = synth_control_get_editingWhichParams();
     for (_m = 0; _m < SYNTH_CONTROL_PITCH_TABLE_SIZE; _m++) {
-        noteParamSets[_n].pitches[_m] = 0;
+        noteParamSets[_n].pitches[_m] = SYNTH_CONTROL_DEFAULT_PITCH;
+        noteParamSets[_n].fine_pitches[_m] = SYNTH_CONTROL_DEFAULT_FINEPITCH;
     }
 }
 

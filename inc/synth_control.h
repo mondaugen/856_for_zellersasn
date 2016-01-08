@@ -52,6 +52,11 @@ typedef enum {
     SynthControlRecMode_END__ = SynthControlRecMode_REC_LEN_1_BEAT_REC_SCHED
 } SynthControlRecMode;
 
+typedef enum __ {
+    SynthControlPitchMode_ABSOLUTE = 0,
+    SynthControlPitchMode_RELATIVE
+} SynthControlPitchMode;
+
 typedef struct __NoteParamSet {
     MMSample attackTime;
     MMSample sustainTime;
@@ -59,6 +64,7 @@ typedef struct __NoteParamSet {
     /* The time between two scheduled events */
     MMSample eventDeltaBeats; /* The amount of time between repeats */
     MMSample pitches[SYNTH_CONTROL_PITCH_TABLE_SIZE];
+    MMSample fine_pitches[SYNTH_CONTROL_PITCH_TABLE_SIZE];
     MMSample amplitude;
     MMSample startPoint; /* between 0 and 1 */
     int numRepeats;      /* The number of times repeated */
@@ -105,6 +111,7 @@ typedef struct __NoteParamSet {
 #define SYNTH_CONTROL_DEFAULT_RELEASETIME 0.01
 #define SYNTH_CONTROL_DEFAULT_EVENTDELTABEATS 1
 #define SYNTH_CONTROL_DEFAULT_PITCH 0
+#define SYNTH_CONTROL_DEFAULT_FINEPITCH 0.
 #define SYNTH_CONTROL_DEFAULT_AMPLITUDE .5
 /* Other notes are off by default */
 #define SYNTH_CONTROL_DEFAULT_AMPLITUDE_AUXNOTE 0 
@@ -148,14 +155,15 @@ typedef struct __NoteParamSet {
 #define SYNTH_CONTROL_INTERMITTENCY_TABLE_LENGTH 4
 #define SYNTH_CONTROL_INTERMITTENCY_TABLE\
     { 0, 1, 2, 3 } 
-#define SYNTH_CONTROL_PITCH_CHROM_MIN -13
-#define SYNTH_CONTROL_PITCH_CHROM_MAX  13
+#define SYNTH_CONTROL_PITCH_CHROM_MIN -12
+#define SYNTH_CONTROL_PITCH_CHROM_MAX  12
 #define SYNTH_CONTROL_PITCH_CHROM_QUANT 1 
 #define SYNTH_CONTROL_PITCH_FINE_MIN -0.5
 #define SYNTH_CONTROL_PITCH_FINE_MAX  0.5
 #define SYNTH_CONTROL_PITCH_FINE_QUANT 0.01
 /* The MIDI pitch that plays at a rate of 1 */
 #define SYNTH_CONTROL_PITCH_UNISON  60 
+#define SYNTH_CONTROL_DEFAULT_PITCHMODE SynthControlPitchMode_ABSOLUTE 
 
 typedef uint32_t SynthControlEditingWhichParamsIndex;
 /* The number of sets of note parameters */
@@ -169,6 +177,7 @@ extern NoteParamSet                 noteParamSets[];
 extern SynthControlDeltaButtonMode  deltaButtonMode;
 extern SynthControlGainMode         gainMode;
 extern SynthControlRecMode          recMode;
+extern SynthControlPitchMode        pitchMode;
 extern int                          schedulerState;
 
 /* The amount the scheduler is incremented each block */
@@ -199,7 +208,7 @@ void synth_control_set_recMode_onChange(SynthControlRecMode recMode_param,
 SynthControlRecMode synth_control_get_recMode(void);
 void synth_control_set_posMode(SynthControlPosMode posMode_param,
                                int which_params);
-SynthControlPosMode synth_control_get_posMode(void);
+SynthControlPosMode synth_control_get_posMode_curParams(void);
 void synth_control_set_gainMode(SynthControlGainMode gainMode_param);
 SynthControlGainMode synth_control_get_gainMode(void);
 void synth_control_set_presetNumber(SynthControlPresetNumber presetNumber_param);

@@ -187,9 +187,19 @@ static void NoteOnEvent_happen(MMEvent *event)
         SynthControlPosMode _posMode;
         _cur_param_set = ((NoteOnEvent*)event)->parameterSet;
         _next_repeat_idx = ((NoteOnEvent*)event)->repeatIndex + 1;
-        _next_pitch_idx = _next_repeat_idx % SYNTH_CONTROL_PITCH_TABLE_SIZE;
-        _next_pitch =  ((NoteOnEvent*)event)->currentPitch 
-            + noteParamSets[_cur_param_set].pitches[_next_pitch_idx];
+        switch (pitchMode) {
+            case SynthControlPitchMode_ABSOLUTE:
+                _next_pitch_idx = _next_repeat_idx % SYNTH_CONTROL_PITCH_TABLE_SIZE;
+                _next_pitch =  noteParamSets[_cur_param_set].pitches[_next_pitch_idx]
+                    + noteParamSets[_cur_param_set].fine_pitches[_next_pitch_idx];
+                break;
+            case SynthControlPitchMode_RELATIVE:
+                _next_pitch_idx = _next_repeat_idx % SYNTH_CONTROL_PITCH_TABLE_SIZE;
+                _next_pitch =  ((NoteOnEvent*)event)->currentPitch 
+                    + (noteParamSets[_cur_param_set].pitches[_next_pitch_idx]
+                        + noteParamSets[_cur_param_set].fine_pitches[_next_pitch_idx]);
+                break;
+        }
         _posMode = noteParamSets[_cur_param_set].posMode;
         if (((NoteOnEvent*)event)->numRepeats > 0) {
             schedule_noteOn_event(
@@ -291,7 +301,8 @@ static void NoteSchedEvent_happen(MMEvent *event)
                             0,
                             1,
                             noteParamSets[n].startPoint,
-                            noteParamSets[n].pitches[0]));
+                            noteParamSets[n].pitches[0]
+                                + noteParamSets[n].fine_pitches[0]));
             } else {
                 noteOnEventCount[n] += 1;
             }

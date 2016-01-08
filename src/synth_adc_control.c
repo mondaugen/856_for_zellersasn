@@ -12,7 +12,7 @@ static float synth_adc_scale_thresh(float x);
         static adc_channel_do_data_t channel_data;\
         adc_channel_do_data_init(&channel_data,\
                                  adc_channel_do_style_CHANGED_INIT,\
-                                 32,\
+                                 SYNTH_ADC_THRESHOLD,\
                                  0);\
         adc_channel_init(&channel,\
                          adc_data_starts[data_start_idx],\
@@ -57,7 +57,7 @@ static float synth_adc_scale_thresh(float x)
 static void synth_adc_pos_curParams_control(adc_channel_t *chan,
                                   adc_channel_do_data_t *data)
 {
-    switch (synth_control_get_posMode()) {
+    switch (synth_control_get_posMode_curParams()) {
         case SynthControlPosMode_ABSOLUTE:
             synth_control_set_startPoint_curParams(synth_adc_scale_thresh(chan->cur_val));
             break;

@@ -176,7 +176,17 @@ a={
             slider_width,
             slider_height
         )
-    ).step_(1.asFloat/(noteon_slider_num_steps - 1));
+    ).step_(
+        1.asFloat/(noteon_slider_num_steps - 1)
+    ).action_({
+        |x|
+        var datum = (x.value * (noteon_slider_num_steps - 1)).floor;
+        "CC: ".post;
+        m.post;
+        " Val: ".post;
+        datum.post;
+        "".postln;
+    });
     noteon_vel_slider = Slider.new(
         win,
         Rect( 
@@ -187,7 +197,17 @@ a={
             slider_width,
             slider_height
         )
-    ).step_(1.asFloat/(noteon_slider_num_steps - 1));
+    ).step_(
+        1.asFloat/(noteon_slider_num_steps - 1)
+    ).action_({
+        |x|
+        var datum = (x.value * (noteon_slider_num_steps - 1)).floor;
+        "CC: ".post;
+        m.post;
+        " Val: ".post;
+        datum.post;
+        "".postln;
+    });
     noteon_pitch_text  = StaticText(
         win,
         Rect(
