@@ -6,3 +6,4 @@ tmp
 octave-workspace
 test/*.o
 gdb.txt
+*.o
