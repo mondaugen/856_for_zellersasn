@@ -120,7 +120,9 @@ static void switch_control_debounce_func_b(switch_control_t *sc)
     if (sd->get_pin_state(sd)) {
         if (sd->get_req_state(sd)) {
             sd->reset_req_state(sd);
-            sd->n_ignores = sd->init_n_ignores;
+            if (!sd->primed) {
+                sd->n_ignores = sd->init_n_ignores;
+            }
         }
         /* Note that this rolls over, but won't get primed again for a long long
          * time. */
@@ -131,6 +133,7 @@ static void switch_control_debounce_func_b(switch_control_t *sc)
     } else {
         if (sd->primed) {
             sd->func(sd);
+            sd->primed = 0;
         }
         sd->reset_req_state(sd);
     }
