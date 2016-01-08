@@ -54,8 +54,13 @@ void switch_control_init(switch_control_t *sc,
  * when switch states are to be checked, usually in some periodic checking
  * function, like the callback that is called when the codec requests samples,
  * for instance).
+ *
+ * DEBOUNCE METHOD A
+ * This method takes into account any transition from low to high on the switch
+ * pin. This is problematic if the switch can give spurious low/high transitions
+ * of very short duration.
  */
-static void switch_control_debounce_func(switch_control_t *sc)
+static void switch_control_debounce_func_a(switch_control_t *sc)
 {
     switch_debouncer_t *sd = (switch_debouncer_t*)sc->data;
 #ifdef SWITCH_CONTROL_DEBUG 
@@ -97,7 +102,39 @@ static void switch_control_debounce_func(switch_control_t *sc)
         sd->n_ignores--;
     }
 }
-
+/* This ignores "sd->init_n_ignores - 1" readings of the switch line being low
+ * and then sets a primed variable. When primed, if the reading is high, the
+ * function "sd->fun" is called. This means that the switch must be low for at
+ * least (sd->init_n_ignores - 1)*time_between_checks (where time_between_checks
+ * is determined by how often a routine checks it, say the time of an audio
+ * buffer) before it is primed, so must be checked more often than the shortest
+ * recognizable switch high-low-high sequence.
+ *
+ * This is called
+ * DEBOUNCE METHOD B
+ * in the documentation.
+ */
+static void switch_control_debounce_func_b(switch_control_t *sc)
+{
+    switch_debouncer_t *sd = (switch_debouncer_t*)sc->data;
+    if (sd->get_pin_state(sd)) {
+        if (sd->get_req_state(sd)) {
+            sd->reset_req_state(sd);
+            sd->n_ignores = sd->init_n_ignores;
+        }
+        /* Note that this rolls over, but won't get primed again for a long long
+         * time. */
+        sd->n_ignores--;
+        if (sd->n_ignores == 0) {
+            sd->primed = 1;
+        }
+    } else {
+        if (sd->primed) {
+            sd->func(sd);
+        }
+        sd->reset_req_state(sd);
+    }
+}
 static uint32_t get_mom_req_state(switch_debouncer_t *sd)
 {
     mom_state_t* data = (mom_state_t*)sd->data;
@@ -138,6 +175,6 @@ void switch_control_debounce_init(switch_control_t *sc,
     switch_control_init(sc,
                         (volatile uint32_t*)NULL,
                         0,
-                        switch_control_debounce_func,
+                        switch_control_debounce_func_b,
                         (void*)sd);
 }
