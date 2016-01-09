@@ -35,7 +35,7 @@ typedef struct __switch_debouncer_t {
      * set number of ignores to 1, it will immediately be decremented, and
      * therefore no check will be ignored. So this number should be one more
      * than the number of checks you want to ignore. */
-    uint32_t init_n_ignores;
+    int32_t init_n_ignores;
     /* The number of request that are to be ignored from now on */
     int32_t n_ignores;
     uint32_t primed;
