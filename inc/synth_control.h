@@ -5,6 +5,8 @@
 #include <stdint.h> 
 #include "synth_control_presets.h" 
 
+typedef int SynthControlPitchIndex;
+
 typedef enum {
     /* Control the absolute starting point in the sound file */
     SynthControlPosMode_ABSOLUTE,

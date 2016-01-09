@@ -11,35 +11,55 @@ typedef struct __synth_switch_control_t {
     uint32_t port_bit;
 } synth_switch_control_t;
 
+static int switch_control_get_tristate(switch_control_t *sc)
+{
+        if (!switch_control_get_state(sc)) {
+            return 0;
+        } else if (!switch_control_get_state((synth_switch_control_t*)sc)) {
+            return 2;
+        } else {
+            return 1;
+        }
+}
+
 #define SYNTH_SWITCH_CONTROL(type,fun,c0,c1,c2)\
     static void synth_switch_control_ ## type ## _control(switch_control_t *sc)\
     {\
-        if (!switch_control_get_state(sc)) {\
-            fun(c0);\
-        } else if (!switch_control_get_state((synth_switch_control_t*)sc)) {\
-            fun(c2);\
-        } else {\
-            fun(c1);\
+        switch (switch_control_get_tristate(sc)) {\
+            case 0:\
+                fun(c0);\
+                break;\
+            case 2:\
+                fun(c2);\
+                break;\
+            case 1:\
+                fun(c1);\
+                break;\
         }\
     }
 
-#define SYNTH_SWITCH_CONTROL_ONCHANGE(type,fun,c0,c1,c2,init_state)\
+#define SYNTH_SWITCH_CONTROL_ONCHANGE(type,fun,c0,c1,c2)\
     static void synth_switch_control_ ## type ## _control(switch_control_t *sc)\
     {\
-        static type _last_param = init_state;\
-        if (!switch_control_get_state(sc)) {\
-            fun(c0,&_last_param);\
-        } else if (!switch_control_get_state((synth_switch_control_t*)sc)) {\
-            fun(c2,&_last_param);\
-        } else {\
-            fun(c1,&_last_param);\
+        /* sc->data contains the last state */\
+        switch (switch_control_get_tristate(sc)) {\
+            case 0:\
+                fun(c0,sc->data);\
+                break;\
+            case 2:\
+                fun(c2,sc->data);\
+                break;\
+            case 1:\
+                fun(c1,sc->data);\
+                break;\
         }\
     }
 
-#define SYNTH_SWITCH_SETUP(type,sw)\
+#define SYNTH_SWITCH_SETUP(type,sw,c0,c1,c2)\
     static void synth_switch_control_ ## type ## _setup(void)\
     {\
         static synth_switch_control_t _switch_control;\
+        static type _last_state;\
         volatile uint32_t *_sw_addrs[] = {\
             sw ## _TOP_ADDR,\
             sw ## _BTM_ADDR};\
@@ -57,6 +77,22 @@ typedef struct __synth_switch_control_t {
          * of the sub class! */\
         _switch_control.port_addr = _sw_addrs[0];\
         _switch_control.port_bit  = _sw_pins[0];\
+        /* Call sc->fun with NULL data, forces setting of current value */\
+        synth_switch_control_ ## type ## _control((switch_control_t*)&_switch_control);\
+        /* Now set sc-data to _last_state */\
+        ((switch_control_t*)&_switch_control)->data = (void*)_last_state;\
+        /* Initialize last_state with current state on pin */\
+        switch (switch_control_get_tristate((switch_control_t*)&_switch_control)) {\
+            case 0:\
+                _last_state = c0;\
+                break;\
+            case 2:\
+                _last_state = c2;\
+                break;\
+            case 1:\
+                _last_state = c1;\
+                break;\
+        }\
         switch_control_add((switch_control_t*)&_switch_control);\
     }
 
@@ -94,37 +130,47 @@ typedef struct __synth_switch_control_t {
 
 SYNTH_SWITCH_CONTROL(SynthControlEditingWhichParamsIndex,
         synth_control_set_editingWhichParams,0,1,2);
-SYNTH_SWITCH_SETUP(SynthControlEditingWhichParamsIndex,SW2);
+SYNTH_SWITCH_SETUP(SynthControlEditingWhichParamsIndex,SW2,0,1,2);
 SYNTH_SWITCH_CONTROL(SynthControlPresetNumber,
         synth_control_set_presetNumber,0,1,2);
 SYNTH_SWITCH_SETUP(SynthControlPresetNumber,
-        SW5);
+        SW5,0,1,2);
 SYNTH_SWITCH_CONTROL_ONCHANGE(SynthControlPosMode,
         synth_control_set_posMode_onChange_curParams,
         SynthControlPosMode_STRIDE,
         SynthControlPosMode_ABSOLUTE,
+        SynthControlPosMode_ABSOLUTE);
+SYNTH_SWITCH_SETUP(SynthControlPosMode,SW1,
+        SynthControlPosMode_STRIDE,
         SynthControlPosMode_ABSOLUTE,
         SynthControlPosMode_ABSOLUTE);
-SYNTH_SWITCH_SETUP(SynthControlPosMode,SW1);
 SYNTH_SWITCH_CONTROL(SynthControlDeltaButtonMode,
         synth_control_set_deltaButtonMode,
         SynthControlDeltaButtonMode_EVENT_DELTA_FREE,
         SynthControlDeltaButtonMode_EVENT_DELTA_QUANT,
         SynthControlDeltaButtonMode_INTERMITTENCY);
-SYNTH_SWITCH_SETUP(SynthControlDeltaButtonMode,SW4);
+SYNTH_SWITCH_SETUP(SynthControlDeltaButtonMode,SW4,
+        SynthControlDeltaButtonMode_EVENT_DELTA_FREE,
+        SynthControlDeltaButtonMode_EVENT_DELTA_QUANT,
+        SynthControlDeltaButtonMode_INTERMITTENCY);
 SYNTH_SWITCH_CONTROL(SynthControlPitchIndex,
         synth_control_set_editing_which_pitch,
         0,
         1,
         2);
-SYNTH_SWITCH_SETUP(SynthControlPitchIndex,SW8);
+SYNTH_SWITCH_SETUP(SynthControlPitchIndex,SW8,
+        0,
+        1,
+        2);
 SYNTH_SWITCH_CONTROL_ONCHANGE(SynthControlRecMode,
         synth_control_set_recMode_onChange,
         SynthControlRecMode_NORMAL,
         SynthControlRecMode_REC_LEN_1_BEAT,
-        SynthControlRecMode_REC_LEN_1_BEAT_REC_SCHED,
-        SynthControlRecMode_REC_LEN_1_BEAT);
-SYNTH_SWITCH_SETUP(SynthControlRecMode,SW6);
+        SynthControlRecMode_REC_LEN_1_BEAT_REC_SCHED);
+SYNTH_SWITCH_SETUP(SynthControlRecMode,SW6,
+        SynthControlRecMode_NORMAL,
+        SynthControlRecMode_REC_LEN_1_BEAT,
+        SynthControlRecMode_REC_LEN_1_BEAT_REC_SCHED);
         /* Incase the switch gets caught down momentarily when toggling the
          * feedback, the gain mode will stay in wet mode. */
 SYNTH_SWITCH_CONTROL(SynthControlGainMode,
@@ -132,7 +178,10 @@ SYNTH_SWITCH_CONTROL(SynthControlGainMode,
         SynthControlGainMode_FADE,
         SynthControlGainMode_WET,
         SynthControlGainMode_WET); 
-SYNTH_SWITCH_SETUP(SynthControlGainMode,SW7);
+SYNTH_SWITCH_SETUP(SynthControlGainMode,SW7,
+        SynthControlGainMode_FADE,
+        SynthControlGainMode_WET,
+        SynthControlGainMode_WET); 
 SYNTH_SWITCH_CONTROL_TOG(record);
 SYNTH_SWITCH_SETUP_TOG(record,FSW1);
 SYNTH_SWITCH_CONTROL_TOG(schedulerState);

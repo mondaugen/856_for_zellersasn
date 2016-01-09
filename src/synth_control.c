@@ -48,7 +48,7 @@ int                         currentPreset;
 int                         feedbackState;
 int                         scheduleRecording;
 int                         firstScheduledRecording;
-int                         editing_which_pitch;
+SynthControlPitchIndex      editing_which_pitch;
 /* Is the scheduler on or off ? */
 int                         schedulerState;
 /* What preset would be recalled/stored. First preset is numbered 0. */
@@ -945,16 +945,19 @@ void synth_control_set_recMode(SynthControlRecMode recMode_param)
     }
 }
 
-/* Only set if mode being set different from last mode set */
+/* Only set if mode being set different from last mode set.
+ * Second argument NULL pointer sets regardless. */
 void synth_control_set_recMode_onChange(SynthControlRecMode recMode_param,
                                SynthControlRecMode *last_recMode_param)
 {
     /* Only do the following if recMode_param different from last recMode_param
      * that this function was called with. */
-    if (recMode_param == *last_recMode_param) {
-        return;
+    if (last_recMode_param) {
+        if (recMode_param == *last_recMode_param) {
+            return;
+        }
+        *last_recMode_param = recMode_param;
     }
-    *last_recMode_param = recMode_param;
     synth_control_set_recMode(recMode_param);
 }
 
@@ -969,15 +972,18 @@ void synth_control_set_posMode(SynthControlPosMode posMode_param,
     noteParamSets[which_params].posMode = (SynthControlPosMode)posMode_param;
 }
 
-/* Only set if mode being set different from last mode set */
+/* Only set if mode being set different from last mode set.
+ * Second argument NULL pointer sets regardless. */
 void synth_control_set_posMode_onChange(SynthControlPosMode posMode_param,
                                         SynthControlPosMode *last_posMode_param,
                                         int which_params)
 {
-    if (*last_posMode_param == posMode_param) {
-        return;
+    if (last_posMode_param) {
+        if (*last_posMode_param == posMode_param) {
+            return;
+        }
+        *last_posMode_param = posMode_param;
     }
-    *last_posMode_param = posMode_param;
     synth_control_set_posMode(posMode_param,which_params);
 }
 
