@@ -124,9 +124,10 @@ static void switch_control_debounce_func_b(switch_control_t *sc)
                 sd->n_ignores = sd->init_n_ignores;
             }
         }
-        /* Note that this rolls over, but won't get primed again for a long long
-         * time. */
-        sd->n_ignores--;
+        /* If < 0, sits at -1 until reset to init_n_ignores. */
+        if (sd->n_ignores >= 0) {
+            sd->n_ignores--;
+        }
         if (sd->n_ignores == 0) {
             sd->primed = 1;
         }
