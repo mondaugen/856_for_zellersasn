@@ -128,11 +128,13 @@ typedef struct __NoteParamSet {
 /* Fade rate doesn't apply to the first
    parameter set */
 #define SYNTH_CONTROL_DEFAULT_FADERATE      0      
+#define SYNTH_CONTROL_DEFAULT_AMPLASTECHO   0      
 /* The amount the starting point in the sample
    is advanced each time it is scheduled (if
    stride enabled) */
 /* The fade rate of notes other than the first note is not 0 */
-#define SYNTH_CONTROL_DEFAULT_FADERATE_AUXNOTE 1.
+#define SYNTH_CONTROL_DEFAULT_FADERATE_AUXNOTE      1.
+#define SYNTH_CONTROL_DEFAULT_AMPLASTECHO_AUXNOTE   1.     
 #define SYNTH_CONTROL_DEFAULT_POSITIONSTRIDE 0      
 #define SYNTH_CONTROL_DEFAULT_POSMODE  SynthControlPosMode_ABSOLUTE     
 #define SYNTH_CONTROL_DEFAULT_TEMPOBPM_COARSE 120 

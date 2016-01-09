@@ -848,6 +848,7 @@ void synth_control_reset_param_sets(NoteParamSet *param_sets, int size)
     param_sets[0].offsetBeats = SYNTH_CONTROL_DEFAULT_OFFSETBEATS;
     param_sets[0].intermittency = SYNTH_CONTROL_DEFAULT_INTERMITTENCY;
     param_sets[0].fadeRate      = SYNTH_CONTROL_DEFAULT_FADERATE;
+    param_sets[0].ampLastEcho   = SYNTH_CONTROL_DEFAULT_AMPLASTECHO;
     param_sets[0].positionStride = SYNTH_CONTROL_DEFAULT_POSITIONSTRIDE;
     param_sets[0].posMode = SYNTH_CONTROL_DEFAULT_POSMODE;
     uint32_t _n;
@@ -866,11 +867,12 @@ void synth_control_reset_param_sets(NoteParamSet *param_sets, int size)
         param_sets[size].offsetBeats = SYNTH_CONTROL_DEFAULT_OFFSETBEATS;
         param_sets[size].intermittency = SYNTH_CONTROL_DEFAULT_INTERMITTENCY;
         param_sets[size].fadeRate      = SYNTH_CONTROL_DEFAULT_FADERATE_AUXNOTE;
+        param_sets[size].ampLastEcho   = SYNTH_CONTROL_DEFAULT_AMPLASTECHO_AUXNOTE;
         param_sets[size].positionStride = SYNTH_CONTROL_DEFAULT_POSITIONSTRIDE;
         param_sets[size].posMode = SYNTH_CONTROL_DEFAULT_POSMODE;
         for (_n = 0; _n < SYNTH_CONTROL_PITCH_TABLE_SIZE; _n++) {
-            param_sets[0].pitches[_n] = SYNTH_CONTROL_DEFAULT_PITCH;
-            param_sets[0].fine_pitches[_n] = SYNTH_CONTROL_DEFAULT_FINEPITCH;
+            param_sets[size].pitches[_n] = SYNTH_CONTROL_DEFAULT_PITCH;
+            param_sets[size].fine_pitches[_n] = SYNTH_CONTROL_DEFAULT_FINEPITCH;
         }
     };
 }

@@ -124,15 +124,19 @@ SYNTH_ADC_SETUP(pitch_curParams,SYNTH_ADC_PITCH_IDX,synth_adc_pitch_curParams_co
 static void synth_adc_gain_curParams_control(adc_channel_t *chan,
                                    adc_channel_do_data_t *data)
 {
-    switch (synth_control_get_gainMode()) {
-        case SynthControlGainMode_FADE:
-            synth_control_set_ampLastEcho_curParams(
-                    synth_adc_scale_thresh(chan->cur_val));
-            break;
-        case SynthControlGainMode_WET:
-            synth_control_set_wet_curParams(
-                    synth_adc_scale_thresh(chan->cur_val));
-            break;
+    if (synth_control_get_editingWhichParams() == 0) {
+        synth_control_set_wet(synth_adc_scale_thresh(chan->cur_val),0);
+    } else {
+        switch (synth_control_get_gainMode()) {
+            case SynthControlGainMode_FADE:
+                synth_control_set_ampLastEcho_curParams(
+                        synth_adc_scale_thresh(chan->cur_val));
+                break;
+            case SynthControlGainMode_WET:
+                synth_control_set_wet_curParams(
+                        synth_adc_scale_thresh(chan->cur_val));
+                break;
+        }
     }
 }
 
