@@ -168,6 +168,8 @@ typedef struct __NoteParamSet {
 /* The MIDI pitch that plays at a rate of 1 */
 #define SYNTH_CONTROL_PITCH_UNISON  60 
 #define SYNTH_CONTROL_DEFAULT_PITCHMODE SynthControlPitchMode_ABSOLUTE 
+#define SYNTH_CONTROL_PITCH_MIN     (0)
+#define SYNTH_CONTROL_PITCH_MAX     (127)
 
 typedef uint32_t SynthControlEditingWhichParamsIndex;
 /* The number of sets of note parameters */
@@ -309,5 +311,9 @@ void synth_control_schedulerState_off(void);
 void synth_control_note_on(int parameterSet,
                            MMSample pitch,
                            MMSample amplitude);
+void synth_control_one_shot(MMSample pitch,
+                            MMSample amplitude);
+
+MMSample synth_control_clip_valid_pitch(MMSample pitch);
 
 #endif /* SYNTH_CONTROL_H */

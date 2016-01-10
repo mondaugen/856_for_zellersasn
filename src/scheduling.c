@@ -33,6 +33,7 @@ struct __NoteOnEvent {
                                  buffer */
     MMSample currentPitch;   /* A pitch value s.t. 0 means no transposition, 7
                                means transpose up a 5th etc. */
+    MMSample pitchOffset;
 };
 
 /* Event that schedules other notes to play. */
@@ -40,6 +41,9 @@ struct __NoteSchedEvent {
     MMEvent head;
     NoteSchedEventListNode *parent;
     int active;
+    int one_shot;
+    MMSample pitch_offset;
+    MMSample amplitude_scalar;
 };
 
 /* Event that turns off LED indicating measure pulse */
@@ -80,7 +84,8 @@ NoteOnEvent *NoteOnEvent_new(int active,
         int repeatIndex,
         MMSample currentFade,
         MMSample currentPosition,
-        MMSample currentPitch)
+        MMSample currentPitch,
+        MMSample pitchOffset)
 {
     NoteOnEvent *ev = (NoteOnEvent*)malloc(sizeof(NoteOnEvent));
     if (!ev) {
@@ -94,6 +99,7 @@ NoteOnEvent *NoteOnEvent_new(int active,
     ev->currentFade = currentFade;
     ev->currentPosition = currentPosition;
     ev->currentPitch = currentPitch;
+    ev->pitchOffset = pitchOffset;
     ev->parent = NULL;
     return ev;
 }
@@ -107,7 +113,25 @@ NoteSchedEvent *NoteSchedEvent_new(int active)
     ((MMEvent*)ev)->happen = NoteSchedEvent_happen;
     ev->active = active;
     ev->parent = NULL;
+    ev->one_shot = 0;
+    ev->pitch_offset = 0.;
+    ev->amplitude_scalar = 1.;
     return ev;
+}
+
+void NoteSchedEvent_set_pitch_offset(NoteSchedEvent *nse, MMSample pitch)
+{
+    nse->pitch_offset = pitch;
+}
+
+void NoteSchedEvent_set_amplitude_scalar(NoteSchedEvent *nse, MMSample amp)
+{
+    nse->amplitude_scalar = amp;
+}
+
+void NoteSchedEvent_set_one_shot(NoteSchedEvent *nse, int one_shot)
+{
+    nse->one_shot = one_shot;
 }
 
 MeasureLEDOffEvent *MeasureLEDOffEvent_new(int active)
@@ -220,7 +244,8 @@ static void NoteOnEvent_happen(MMEvent *event)
                                 + noteParamSets[((NoteOnEvent*)event)->parameterSet].positionStride,
                                 0,1) :
                             noteParamSets[((NoteOnEvent*)event)->parameterSet].startPoint,
-                         _next_pitch));
+                         _next_pitch,
+                         ((NoteOnEvent*)event)->pitchOffset));
         }
         MMSample voiceNum = pm_get_next_free_voice_number();
         if (voiceNum != -1 && 
@@ -273,7 +298,10 @@ static void NoteOnEvent_happen(MMEvent *event)
              * transposition. In this we consider 0 to be a note of no
              * transposition, so we add 69 */
             no.rate = MMCC_et12_rate(
-                    ((NoteOnEvent*)event)->currentPitch + 69);
+                    synth_control_clip_valid_pitch(
+                        ((NoteOnEvent*)event)->currentPitch
+                        + 69
+                        + ((NoteOnEvent*)event)->pitchOffset));
             MMTrapEnvedSamplePlayer_noteOn_Rate(
                     &spsps[(int)voiceNum], &no);
         }
@@ -285,12 +313,14 @@ static void NoteOnEvent_happen(MMEvent *event)
 
 static void NoteSchedEvent_happen(MMEvent *event)
 {
-    if (((NoteSchedEvent*)event)->active == 1) {
+    NoteSchedEvent *nse = (NoteSchedEvent*)event;
+    if (nse->active == 1) {
         /* Schedule notes */
         int n;
         for (n = 0; n < NUM_NOTE_PARAM_SETS; n++) {
-            if (noteOnEventCount[n]
-                    >= noteParamSets[n].intermittency) {
+            if ((noteOnEventCount[n]
+                    >= noteParamSets[n].intermittency) 
+                || (nse->one_shot == 1)) {
                 noteOnEventCount[n] = 0;
                 schedule_noteOn_event(
                         noteParamSets[n].offsetBeats
@@ -299,33 +329,36 @@ static void NoteSchedEvent_happen(MMEvent *event)
                             n,
                             noteParamSets[n].numRepeats,
                             0,
-                            1,
+                            nse->amplitude_scalar,
                             noteParamSets[n].startPoint,
                             noteParamSets[n].pitches[0]
-                                + noteParamSets[n].fine_pitches[0]));
+                                + noteParamSets[n].fine_pitches[0],
+                            nse->pitch_offset));
             } else {
                 noteOnEventCount[n] += 1;
             }
         }
-        /* Schedule next noteSchedEvent using note 0's eventDeltaBeats */
-        schedule_noteSched_event(noteParamSets[0].eventDeltaBeats
-                * 0xffffffffULL,
-                NoteSchedEvent_new(1));
-        /* Turn on LED */
-        MEASURE_LED_SET();
-        /* Schedule measure LED off event to turn off the measure indicating LED
-         * */
-        schedule_measureLEDOff_event(noteParamSets[0].eventDeltaBeats
-                * 0xffffffffULL / MEASURE_LED_LENGTH_SCALAR,
-                MeasureLEDOffEvent_new(1));
-        /* If scheduled recording enabled, stop the previous recording and start
-         * a new one. It is always okay to stop the recording, because the
-         * scheduleRecording flag is set when recording is turned off in the
-         * SynthControlRecMode_REC_LEN_1_BEAT_REC_SCHED state, and actually not
-         * turned off at that point (as it is with SynthControlRecMode_REC_LEN_1_BEAT) */
-        if (scheduleRecording == 1) {
-            synth_control_record_stop_helper();
-            synth_control_record_start_helper();
+        if (nse->one_shot == 0) {
+            /* Schedule next noteSchedEvent using note 0's eventDeltaBeats */
+            schedule_noteSched_event(noteParamSets[0].eventDeltaBeats
+                    * 0xffffffffULL,
+                    NoteSchedEvent_new(1));
+            /* Turn on LED */
+            MEASURE_LED_SET();
+            /* Schedule measure LED off event to turn off the measure indicating LED
+             * */
+            schedule_measureLEDOff_event(noteParamSets[0].eventDeltaBeats
+                    * 0xffffffffULL / MEASURE_LED_LENGTH_SCALAR,
+                    MeasureLEDOffEvent_new(1));
+            /* If scheduled recording enabled, stop the previous recording and start
+             * a new one. It is always okay to stop the recording, because the
+             * scheduleRecording flag is set when recording is turned off in the
+             * SynthControlRecMode_REC_LEN_1_BEAT_REC_SCHED state, and actually not
+             * turned off at that point (as it is with SynthControlRecMode_REC_LEN_1_BEAT) */
+            if (scheduleRecording == 1) {
+                synth_control_record_stop_helper();
+                synth_control_record_start_helper();
+            }
         }
     }
     MMDLList_remove((MMDLList*)((NoteSchedEvent*)event)->parent);

@@ -336,14 +336,11 @@ void synth_midi_note_on_control(void *data, MIDIMsg *msg)
     #ifdef DEBUG
 	synth_midi_check_msg(msg,synth_midi_note_on_control);
 	#endif
-    int *base_channel = (int*)data;
     float pitch, amplitude;
     pitch = msg->data[1] - SYNTH_CONTROL_PITCH_UNISON;
     /* TODO: use dB scale for more "natural" amplitude variation */
     amplitude = (float)msg->data[2] / (float)MIDIMSG_DATA_BYTE_MAX;
-    synth_control_note_on(MIDIMSG_GET_CHANNEL(msg->data[0]) - *base_channel,
-                          pitch,
-                          amplitude);
+    synth_control_one_shot(pitch,amplitude);
 }
 
 static void synth_midi_cc_note_funcs_init(
@@ -386,28 +383,21 @@ static void synth_midi_cc_global_funcs_init(
     }
 }
 
-/* Assigns to 3 channels, above and including midi_channel, wrapping around if
- * the channel exceeds the max MIDI channel */
 static void synth_midi_note_on_init(
         MIDI_Router_Standard *router,
         int midi_channel,
-        void (*func)(void*,MIDIMsg*),
-        int *base_channel)
+        void (*func)(void*,MIDIMsg*))
 {
-    int n;
-    for (n = 0; n < NUM_NOTE_PARAM_SETS; n++) {
-        MIDI_Router_addCB(&router->router,
-                MIDIMSG_NOTE_ON,
-                (midi_channel + n) % MIDIMSG_NCHANNELS,
-                func,
-                base_channel);
-    }
+    MIDI_Router_addCB(&router->router,
+            MIDIMSG_NOTE_ON,
+            midi_channel,
+            func,
+            NULL);
 }
 
 void synth_midi_control_setup(void)
 {
     int midi_channel = SYNTH_MIDI_CONTROL_DEFAULT_CHANNEL;
-    static int base_channel = SYNTH_MIDI_CONTROL_DEFAULT_CHANNEL;
     /* could set custom channel here ... */
     void (*midi_cc_pitch_funcs[])(void*,MIDIMsg*) = {
         synth_midi_cc_pitch_control,
@@ -508,8 +498,7 @@ void synth_midi_control_setup(void)
     synth_midi_note_on_init(
         &midiRouter,
         midi_channel,
-        synth_midi_note_on_control,
-        &base_channel);
+        synth_midi_note_on_control);
 }
 
 #ifdef DEBUG 

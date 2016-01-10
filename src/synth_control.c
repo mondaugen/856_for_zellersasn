@@ -370,7 +370,8 @@ void synth_control_set_eventDelta_quant_curParams(float eventDeltaBeats_param)
 void synth_control_set_eventDelta_free(float eventDeltaBeats_param, int note_params_idx)
 {
     noteParamSets[note_params_idx].eventDeltaBeats
-        = powf(2.,-6.*(1 - eventDeltaBeats_param));
+        = powf(2.,-6.*(1 - eventDeltaBeats_param))
+            - powf(2.,-6.);
 }
 
 void synth_control_set_eventDelta_free_curParams(float eventDeltaBeats_param)
@@ -1095,6 +1096,21 @@ void synth_control_pitch_reset_tog(void)
     }
 }
 
+void synth_control_one_shot(MMSample pitch,
+                            MMSample amplitude)
+{
+    /* schedule 1st event which is initially active */
+    NoteSchedEvent *nse;
+    nse = NoteSchedEvent_new(1);
+    if (!nse) {
+        return;
+    }
+    NoteSchedEvent_set_pitch_offset(nse,pitch);
+    NoteSchedEvent_set_amplitude_scalar(nse,amplitude);
+    NoteSchedEvent_set_one_shot(nse,1);
+    schedule_noteSched_event(0,nse);
+}
+
 void synth_control_note_on(int parameterSet,
                            MMSample pitch,
                            MMSample amplitude)
@@ -1152,4 +1168,16 @@ void synth_control_note_on(int parameterSet,
         MMTrapEnvedSamplePlayer_noteOn_Rate(
                 &spsps[(int)voiceNum], &no);
     }
+}
+
+MMSample synth_control_clip_valid_pitch(MMSample pitch)
+{
+    if (pitch < SYNTH_CONTROL_PITCH_MIN)
+    {
+        pitch = SYNTH_CONTROL_PITCH_MIN;
+    }
+    if (pitch > SYNTH_CONTROL_PITCH_MAX) {
+        pitch = SYNTH_CONTROL_PITCH_MAX;
+    }
+    return pitch;
 }

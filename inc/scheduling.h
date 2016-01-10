@@ -57,6 +57,10 @@ NoteOnEvent *NoteOnEvent_new(int active,
         int repeatIndex,
         MMSample currentFade,
         MMSample currentPosition,
-        MMSample currentPitch);
+        MMSample currentPitch,
+        MMSample pitchOffset);
+void NoteSchedEvent_set_pitch_offset(NoteSchedEvent *nse, MMSample pitch);
+void NoteSchedEvent_set_amplitude_scalar(NoteSchedEvent *nse, MMSample amp);
+void NoteSchedEvent_set_one_shot(NoteSchedEvent *nse, int one_shot);
 
 #endif /* SCHEDULING_H */
