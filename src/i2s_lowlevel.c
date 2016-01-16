@@ -472,13 +472,13 @@ void SPI3_IRQHandler (void)
                 || (SPI3->I2SCFGR & SPI_I2SCFGR_I2SE));
         /* Reconfigure codec */
         codec_config_via_i2c();
-        /* Enable I2S master */
-        SPI3->I2SCFGR |= SPI_I2SCFGR_I2SE;
         /* Wait until correct level is detected on WS line (high for I2S mode)
          * for extended block which is running in slave mode */
         while (!(GPIOA->IDR & (1 << 15)));
         /* Enable I2S slave */
         I2S3ext->I2SCFGR |= SPI_I2SCFGR_I2SE;
+        /* Enable I2S master */
+        SPI3->I2SCFGR |= SPI_I2SCFGR_I2SE;
 #ifdef CODEC_DMA_TRIGGER_ON_I2S3_FRAME_ERR
         GPIOG->ODR &= ~(1 << 9);
 //        GPIOG->ODR &= ~(1 << 9);
