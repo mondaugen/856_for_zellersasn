@@ -5,6 +5,11 @@
 #include "audio_hw.h" 
 #include <string.h>
 
+#ifdef CODEC_DMA_TRIGGER_CORRECT_I2S_FRAME_ERROR
+#define  FRAME_ERROR_BLOCK_COUNT_TRIG 1000UL
+static uint32_t i2s_block_counter = 1;
+#endif  
+
 #define WM8778_CODEC_ADDR  ((uint8_t)0x34)
 #define CODEC_I2C_TIMEOUT       ((uint32_t)1000000) 
 
@@ -30,8 +35,11 @@ static audio_hw_io_t audiohwio;
 /* The sample rate */
 static unsigned int rate = 0;
 
+static unsigned int i2s_frame_error_flag = 0;
+
 static void codec_i2c_setup(void);
 static void codec_config_via_i2c(void);
+static void i2s_correct_frame_error(void);
 
 unsigned int audio_hw_get_sample_rate(void *data) {
     return rate;
@@ -47,25 +55,6 @@ unsigned int audio_hw_get_num_input_channels(void *data) {
 
 unsigned int audio_hw_get_num_output_channels(void *data) {
     return CODEC_NUM_CHANNELS;
-}
-
-static void __attribute__((optimize("O0"))) i2s_codec_config_pins_setup(void)
-{
-    /* Turn on clock for GPIOB and GPIOC pins */
-    RCC->AHB1ENR |= RCC_AHB1ENR_GPIOBEN | RCC_AHB1ENR_GPIOCEN;
-    /* Set pins to output mode */
-    GPIOB->MODER |= (1 << (10 * 2)) | (1 << (11 * 2));
-    GPIOC->MODER |= (1 << (13 * 2));
-    /* No pull-up or pull-down */
-    GPIOB->PUPDR &= ~((3 << (10 * 2)) | (3 << (11 * 2)));
-    GPIOC->PUPDR &= ~(3 << (13 * 2));
-    /* set PC13 to high to enable I2S on the codec */
-    GPIOC->ODR |= (1 << 13);
-    /* set PB10 and PB11 to low to set word size to 16-bits and turn off
-     * de-emphasis resp. */
-    GPIOB->ODR &= ~((1 << 10) | (1 << 11));
-
-    /* for debugging */
 }
 
 /* This assumes i2s is configured as master */
@@ -126,18 +115,8 @@ static void __attribute__((optimize("O0"))) i2s_error_setup(void)
     NVIC_EnableIRQ(SPI3_IRQn);
 }
 
-
-/* Pass a pointer to a uint32_t containing the desired sampling rate. */
-audio_hw_err_t audio_hw_setup(audio_hw_setup_t *params)
+static int i2s_peripherals_setup(uint32_t sr)
 {
-    uint32_t sr = *((uint32_t*)params);
-    /* Zero the buffers */
-    memset(codecDmaTxBuf,0,sizeof(int16_t)*CODEC_DMA_BUF_LEN*2);
-    memset(codecDmaRxBuf,0,sizeof(int16_t)*CODEC_DMA_BUF_LEN*2);
-
-    /* Configure codec */
-    i2s_codec_config_pins_setup();
-
     /* Turn on GPIO clock for I2S3 pins */
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN | RCC_AHB1ENR_GPIOCEN;
     /* Configure GPIO */
@@ -162,9 +141,11 @@ audio_hw_err_t audio_hw_setup(audio_hw_setup_t *params)
     /* C10,12, Alternate function 6, C11 alternate function 5 */
     GPIOC->AFR[1] &= ~((0xf << 8) | (0xf << 12) | (0xf << 16));
     GPIOC->AFR[1] |= ((0x6 << 8) | (0x5 << 12) | (0x6 << 16));
-
     /* Turn on DMA1 clock */
     RCC->AHB1ENR |= RCC_AHB1ENR_DMA1EN;
+    /* Reset DMA1 peripheral */
+    RCC->AHB1RSTR |= RCC_AHB1RSTR_DMA1RST;
+    RCC->AHB1RSTR &= ~RCC_AHB1RSTR_DMA1RST;
 
     /* Set up memory to peripheral DMA */
     /* Disable DMA peripheral */
@@ -223,6 +204,8 @@ audio_hw_err_t audio_hw_setup(audio_hw_setup_t *params)
     //DMA1_Stream7->CR |= DMA_SxCR_TCIE;
     ///* Enable interrupt on transfer half complete */
     //DMA1_Stream7->CR |= DMA_SxCR_HTIE;
+    /* clear possible Interrupt flags */
+    DMA1->HIFCR |= 0x0f400000;
     /* Interrupt on transfer error */
     DMA1_Stream7->CR |= DMA_SxCR_TEIE;
     /* Interrupt on direct mode error */
@@ -280,6 +263,8 @@ audio_hw_err_t audio_hw_setup(audio_hw_setup_t *params)
     /* DMA is the flow controller (DMA will keep transferring items from
      * peripheral to memory until disabled) */
     DMA1_Stream0->CR &= ~DMA_SxCR_PFCTRL;
+    /* clear possible Interrupt flags */
+    DMA1->LIFCR |= 0x0000003d;
     /* Enable interrupt on transfer complete */
     DMA1_Stream0->CR |= DMA_SxCR_TCIE;
     /* Enable interrupt on transfer half complete */
@@ -291,6 +276,9 @@ audio_hw_err_t audio_hw_setup(audio_hw_setup_t *params)
 
     /* Turn on I2S3 clock (SPI3) */
     RCC->APB1ENR |= RCC_APB1ENR_SPI3EN;
+    /* Reset I2S3 peripheral */
+    RCC->APB1RSTR |= RCC_APB1RSTR_SPI3RST;
+    RCC->APB1RSTR &= ~RCC_APB1RSTR_SPI3RST;
     /* set up clock dividers for desired sampling rate */
     if (i2s_clock_setup(sr)) {
         return -1;
@@ -316,25 +304,73 @@ audio_hw_err_t audio_hw_setup(audio_hw_setup_t *params)
     /* Enable the DMA peripherals */
     /* Set up I2C communication */
     codec_i2c_setup();
+
+    return 0;
+   
+}
+
+static void i2s_peripherals_disable(void)
+{
+    /* Disable DMA interrupts */
+    NVIC_DisableIRQ(DMA1_Stream7_IRQn);
+    NVIC_DisableIRQ(DMA1_Stream0_IRQn);
+    /* Disable SPI3 interrupt */
+    NVIC_DisableIRQ(SPI3_IRQn);
+
+    /* Clear pending IRQs */
+    NVIC_ClearPendingIRQ(DMA1_Stream7_IRQn);
+    NVIC_ClearPendingIRQ(DMA1_Stream0_IRQn);
+    NVIC_ClearPendingIRQ(SPI3_IRQn);
+
+    /* Disable I2S peripherals */
+    I2S3ext->I2SCFGR &= ~SPI_I2SCFGR_I2SE;
+    SPI3->I2SCFGR &= ~SPI_I2SCFGR_I2SE;
+
+    /* Disable I2S DMA streams */
+    DMA1_Stream7->CR &= ~DMA_SxCR_EN;
+    DMA1_Stream0->CR &= ~DMA_SxCR_EN;
+
+    /* Disable I2S Pins */
+    RCC->AHB1ENR &= ~(RCC_AHB1ENR_GPIOAEN | RCC_AHB1ENR_GPIOCEN);
+
+    /* Disable I2C stuff */
+    RCC->APB1ENR &= ~RCC_APB1ENR_I2C2EN;
+    RCC->AHB1ENR &= ~(RCC_AHB1ENR_GPIOBEN | RCC_AHB1ENR_GPIOCEN);
+
+    /* Disable DMA I2S and GPIO */
+    RCC->AHB1ENR &= ~RCC_AHB1ENR_DMA1EN;
+    RCC->APB1ENR &= ~RCC_APB1ENR_SPI3EN;
+    RCC->AHB1ENR &= ~(RCC_AHB1ENR_GPIOAEN | RCC_AHB1ENR_GPIOBEN | RCC_AHB1ENR_GPIOCEN);
+
+    /* Wait until disabled */
+    while ((RCC->APB1ENR & (RCC_APB1ENR_I2C2EN | RCC_APB1ENR_SPI3EN))
+            || (RCC->AHB1ENR & (RCC_AHB1ENR_GPIOAEN | RCC_AHB1ENR_GPIOCEN 
+                    | RCC_AHB1ENR_GPIOBEN | RCC_AHB1ENR_DMA1EN)));
+}
+
+/* Pass a pointer to a uint32_t containing the desired sampling rate. */
+audio_hw_err_t audio_hw_setup(audio_hw_setup_t *params)
+{
+    uint32_t sr = *((uint32_t*)params);
+    /* Zero the buffers */
+    memset(codecDmaTxBuf,0,sizeof(int16_t)*CODEC_DMA_BUF_LEN*2);
+    memset(codecDmaRxBuf,0,sizeof(int16_t)*CODEC_DMA_BUF_LEN*2);
+
+    return i2s_peripherals_setup(sr);
    
     /* Audio should now be configured but is not yet enabled (must call
      * audio_hw_start). */
-
-    return 0;
 }
 
-audio_hw_err_t audio_hw_start(audio_hw_setup_t *params)
+static void i2s_audio_start()
 {
-    audiohwio.length = audio_hw_get_block_size(NULL);
-    audiohwio.nchans_in = audio_hw_get_num_input_channels(NULL);
-    audiohwio.nchans_out = audio_hw_get_num_output_channels(NULL);
     codec_config_via_i2c();
 
     /* clear possible Interrupt flags */
-    DMA1->HIFCR |= 0x00000f80;
+//    DMA1->HIFCR |= 0x00000f40;
     DMA1_Stream7->CR |= DMA_SxCR_EN;
     /* clear possible Interrupt flags */
-    DMA1->LIFCR &= 0x0000001f;
+//    DMA1->LIFCR |= 0x0000003f;
     DMA1_Stream0->CR |= DMA_SxCR_EN;
 
     /* Enable DMA interrupts */
@@ -350,7 +386,14 @@ audio_hw_err_t audio_hw_start(audio_hw_setup_t *params)
 
     /* Wait for them to be enabled (to show they are ready) */
     while(!((DMA1_Stream7->CR & DMA_SxCR_EN) && (DMA1_Stream0->CR & DMA_SxCR_EN)));
+}
 
+audio_hw_err_t audio_hw_start(audio_hw_setup_t *params)
+{
+    audiohwio.length = audio_hw_get_block_size(NULL);
+    audiohwio.nchans_in = audio_hw_get_num_input_channels(NULL);
+    audiohwio.nchans_out = audio_hw_get_num_output_channels(NULL);
+    i2s_audio_start();
     return 0;
 }
 
@@ -390,6 +433,18 @@ void DMA1_Stream0_IRQHandler(void)
     }
     audiohwio.in = codecDmaRxPtr;
     audiohwio.out = codecDmaTxPtr;
+#ifdef CODEC_DMA_TRIGGER_CORRECT_I2S_FRAME_ERROR
+    if (i2s_block_counter == FRAME_ERROR_BLOCK_COUNT_TRIG) {
+        i2s_block_counter = 0;
+        i2s_correct_frame_error();
+    } else {
+        i2s_block_counter++;
+    }
+#endif  
+    if (i2s_frame_error_flag) {
+        i2s_frame_error_flag = 0;
+        i2s_correct_frame_error();
+    }
     audio_hw_io(&audiohwio);
 }
 
@@ -412,6 +467,20 @@ void DMA1_Stream7_IRQHandler(void)
         DMA1->HIFCR |= DMA_HIFCR_CDMEIF7;
     }
 
+}
+
+static void i2s_correct_frame_error(void)
+{
+#ifdef CODEC_DMA_TRIGGER_ON_I2S3_FRAME_ERR
+        GPIOG->ODR |= 1 << 9;
+#endif
+        i2s_peripherals_disable();
+//        i2s_peripherals_reset();
+        i2s_peripherals_setup(rate);
+        i2s_audio_start();
+#ifdef CODEC_DMA_TRIGGER_ON_I2S3_FRAME_ERR
+        GPIOG->ODR &= ~(1 << 9);
+#endif
 }
 
 void SPI3_IRQHandler (void)
@@ -460,29 +529,8 @@ void SPI3_IRQHandler (void)
 #ifdef CODEC_DMA_HARDFAULT_ON_I2S_ERR
         HardFault_Handler();
 #endif
-#ifdef CODEC_DMA_TRIGGER_ON_I2S3_FRAME_ERR
-        GPIOG->ODR |= 1 << 9;
-//        GPIOG->ODR &= ~(1 << 9);
-#endif
-        /* Disable I2S */
-        I2S3ext->I2SCFGR &= ~SPI_I2SCFGR_I2SE;
-        SPI3->I2SCFGR &= ~SPI_I2SCFGR_I2SE;
-        /* Wait until disabled */
-        while ((I2S3ext->I2SCFGR & SPI_I2SCFGR_I2SE) 
-                || (SPI3->I2SCFGR & SPI_I2SCFGR_I2SE));
-        /* Reconfigure codec */
-        codec_config_via_i2c();
-        /* Wait until correct level is detected on WS line (high for I2S mode)
-         * for extended block which is running in slave mode */
-        while (!(GPIOA->IDR & (1 << 15)));
-        /* Enable I2S slave */
-        I2S3ext->I2SCFGR |= SPI_I2SCFGR_I2SE;
-        /* Enable I2S master */
-        SPI3->I2SCFGR |= SPI_I2SCFGR_I2SE;
-#ifdef CODEC_DMA_TRIGGER_ON_I2S3_FRAME_ERR
-        GPIOG->ODR &= ~(1 << 9);
-//        GPIOG->ODR &= ~(1 << 9);
-#endif
+        i2s_frame_error_flag = 1;
+//        i2s_correct_frame_error();
     }
     /* Enable SPI interrupts */
     NVIC_EnableIRQ(SPI3_IRQn);
@@ -531,6 +579,8 @@ static void codec_prog_reg_i2c(uint8_t addr,
     while(!codec_i2c_check_flags(0x00800000));
     /* Send stop bit */
     I2C2->CR1 |= I2C_CR1_STOP;
+    /* Wait while I2C busy */
+    while(codec_i2c_check_flags(0x00000002));
 }
 
 static void codec_i2c_setup(void)
