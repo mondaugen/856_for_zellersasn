@@ -5,3 +5,4 @@ load
 monitor reset halt
 # import the methods defined in arm-debug-utils
 source scripts/arm-debug-utils
+source scripts/debug-utils-856

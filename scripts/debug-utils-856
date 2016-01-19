@@ -1,0 +1,12 @@
+define dump_adc_values
+    if $argc == 0
+        set $n=1000
+    else
+        set $n=$arg0
+    end
+    while $n > 0
+        append binary value /tmp/adc1.raw adc1_values
+        append binary value /tmp/adc3.raw adc3_values
+        set $n=$n-1
+    end
+end
