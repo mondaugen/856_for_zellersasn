@@ -125,10 +125,8 @@ typedef struct __NoteParamSet {
 /* Canonically the number of repeats that are
    ignored */
 #define SYNTH_CONTROL_DEFAULT_INTERMITTENCY 0      
-/* Fade rate doesn't apply to the first
-   parameter set */
-#define SYNTH_CONTROL_DEFAULT_FADERATE      0      
-#define SYNTH_CONTROL_DEFAULT_AMPLASTECHO   0      
+#define SYNTH_CONTROL_DEFAULT_FADERATE      1      
+#define SYNTH_CONTROL_DEFAULT_AMPLASTECHO   1      
 /* The amount the starting point in the sample
    is advanced each time it is scheduled (if
    stride enabled) */

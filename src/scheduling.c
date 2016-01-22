@@ -14,7 +14,7 @@
 /* The scheduler is set up so that the 32 LSB of the time are fractional part 
  * and the 32 MSB are the integer part of a beat index. So that this works, the
  * scheduler time is incremented 0xffffffff*tempoBPM beats per minute and events
- * are scheduled eventDeltaBeats*0xffffffff ticks apart. */
+ * are scheduled 0xffffffff ticks apart. */
 
 struct __NoteOnEvent {
     MMEvent head;
@@ -339,15 +339,14 @@ static void NoteSchedEvent_happen(MMEvent *event)
             }
         }
         if (nse->one_shot == 0) {
-            /* Schedule next noteSchedEvent using note 0's eventDeltaBeats */
-            schedule_noteSched_event(noteParamSets[0].eventDeltaBeats
+            schedule_noteSched_event(SYNTH_CONTROL_DEFAULT_EVENTDELTABEATS
                     * 0xffffffffULL,
                     NoteSchedEvent_new(1));
             /* Turn on LED */
             MEASURE_LED_SET();
             /* Schedule measure LED off event to turn off the measure indicating LED
              * */
-            schedule_measureLEDOff_event(noteParamSets[0].eventDeltaBeats
+            schedule_measureLEDOff_event(SYNTH_CONTROL_DEFAULT_EVENTDELTABEATS
                     * 0xffffffffULL / MEASURE_LED_LENGTH_SCALAR,
                     MeasureLEDOffEvent_new(1));
             /* If scheduled recording enabled, stop the previous recording and start

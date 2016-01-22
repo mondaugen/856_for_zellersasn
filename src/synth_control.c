@@ -538,7 +538,6 @@ void synth_control_record_stop_helper(void)
                 / (MMSample)((MMArray*)wtr.buffer)->length);
         if (feedbackState == 1) {
             int n;
-            noteParamSets[0].eventDeltaBeats = 1;
             noteParamSets[0].pitches[0] = 0.;
             noteParamSets[0].fine_pitches[0] = 0.;
             noteParamSets[0].amplitude = 1.;
