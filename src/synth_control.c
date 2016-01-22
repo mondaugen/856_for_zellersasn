@@ -185,10 +185,16 @@ void synth_control_set_tempo_coarse_norm(float param)
     float _tmp;
     _tmp = floor(((SYNTH_CONTROL_TEMPOBPM_COARSE_MAX 
                     - SYNTH_CONTROL_TEMPOBPM_COARSE_MIN)
-                / SYNTH_CONTROL_TEMPOBPM_COARSE_QUANT) 
+                / SYNTH_CONTROL_TEMPOBPM_COARSE_QUANT + 1) 
             * param)
             * SYNTH_CONTROL_TEMPOBPM_COARSE_QUANT 
             + SYNTH_CONTROL_TEMPOBPM_COARSE_MIN;
+    if (_tmp > SYNTH_CONTROL_TEMPOBPM_COARSE_MAX) {
+        _tmp = SYNTH_CONTROL_TEMPOBPM_COARSE_MAX;
+    }
+    if (_tmp < SYNTH_CONTROL_TEMPOBPM_COARSE_MIN) {
+       _tmp = SYNTH_CONTROL_TEMPOBPM_COARSE_MIN;
+    } 
     synth_control_update_tempo_coarse(_tmp);
 }
 
@@ -202,6 +208,12 @@ void synth_control_set_tempo_fine_norm(float param)
             * param)
             * SYNTH_CONTROL_TEMPOBPM_FINE_QUANT 
             + SYNTH_CONTROL_TEMPOBPM_FINE_MIN;
+    if (_tmp > SYNTH_CONTROL_TEMPOBPM_FINE_MAX) {
+        _tmp = SYNTH_CONTROL_TEMPOBPM_FINE_MAX;
+    }
+    if (_tmp < SYNTH_CONTROL_TEMPOBPM_FINE_MIN) {
+       _tmp = SYNTH_CONTROL_TEMPOBPM_FINE_MIN;
+    } 
     synth_control_update_tempo_fine(_tmp);
 }
 
@@ -280,10 +292,16 @@ void synth_control_set_pitch_chrom_quant(float param,
     float _tmp;
     _tmp = floor(((SYNTH_CONTROL_PITCH_CHROM_MAX 
                     - SYNTH_CONTROL_PITCH_CHROM_MIN)
-                / SYNTH_CONTROL_PITCH_CHROM_QUANT) 
+                / SYNTH_CONTROL_PITCH_CHROM_QUANT + 1) 
             * param)
             * SYNTH_CONTROL_PITCH_CHROM_QUANT 
             + SYNTH_CONTROL_PITCH_CHROM_MIN;
+    if (_tmp > SYNTH_CONTROL_PITCH_CHROM_MAX) {
+        _tmp = SYNTH_CONTROL_PITCH_CHROM_MAX;
+    }
+    if (_tmp < SYNTH_CONTROL_PITCH_CHROM_MIN) {
+        _tmp = SYNTH_CONTROL_PITCH_CHROM_MIN;
+    }
     noteParamSets[note_params_idx].pitches[which_pitch]
         = _tmp;
 }
@@ -302,10 +320,16 @@ void synth_control_set_pitch_fine_quant(float param,
     float _tmp;
     _tmp = floor(((SYNTH_CONTROL_PITCH_FINE_MAX 
                     - SYNTH_CONTROL_PITCH_FINE_MIN)
-                / SYNTH_CONTROL_PITCH_FINE_QUANT) 
+                / SYNTH_CONTROL_PITCH_FINE_QUANT + 1) 
             * param)
             * SYNTH_CONTROL_PITCH_FINE_QUANT 
             + SYNTH_CONTROL_PITCH_FINE_MIN;
+    if (_tmp > SYNTH_CONTROL_PITCH_FINE_MAX) {
+        _tmp = SYNTH_CONTROL_PITCH_FINE_MAX;
+    }
+    if (_tmp < SYNTH_CONTROL_PITCH_FINE_MIN) {
+        _tmp = SYNTH_CONTROL_PITCH_FINE_MIN;
+    }
     noteParamSets[note_param_idx].fine_pitches[which_pitch]
         = _tmp;
 }
