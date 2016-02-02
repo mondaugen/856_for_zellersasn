@@ -149,7 +149,7 @@ SYNTH_SWITCH_CONTROL(SynthControlDeltaButtonMode,
         SynthControlDeltaButtonMode_EVENT_DELTA_FREE,
         SynthControlDeltaButtonMode_EVENT_DELTA_QUANT,
         SynthControlDeltaButtonMode_INTERMITTENCY);
-SYNTH_SWITCH_SETUP(SynthControlDeltaButtonMode,SW4,
+SYNTH_SWITCH_SETUP(SynthControlDeltaButtonMode,SW6,
         SynthControlDeltaButtonMode_EVENT_DELTA_FREE,
         SynthControlDeltaButtonMode_EVENT_DELTA_QUANT,
         SynthControlDeltaButtonMode_INTERMITTENCY);
@@ -167,7 +167,7 @@ SYNTH_SWITCH_CONTROL_ONCHANGE(SynthControlRecMode,
         SynthControlRecMode_NORMAL,
         SynthControlRecMode_REC_LEN_1_BEAT,
         SynthControlRecMode_REC_LEN_1_BEAT_REC_SCHED);
-SYNTH_SWITCH_SETUP(SynthControlRecMode,SW6,
+SYNTH_SWITCH_SETUP(SynthControlRecMode,SW4,
         SynthControlRecMode_NORMAL,
         SynthControlRecMode_REC_LEN_1_BEAT,
         SynthControlRecMode_REC_LEN_1_BEAT_REC_SCHED);
