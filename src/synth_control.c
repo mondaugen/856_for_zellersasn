@@ -40,6 +40,7 @@ SynthControlDeltaButtonMode deltaButtonMode;
 SynthControlGainMode        gainMode;
 SynthControlRecMode         recMode;
 SynthControlPitchMode       pitchMode;
+static int                  pitches_changed = 0;
 
 /* Stuff that shouldn't really be saved */
 int                         noteDeltaFromBuffer;
@@ -1109,13 +1110,37 @@ int synth_control_get_editing_which_pitch(void)
     return editing_which_pitch;
 }
 
+int synth_control_get_pitches_changed(void)
+{
+    return pitches_changed;
+}
+
+void synth_control_set_pitches_changed(void)
+{
+    pitches_changed = 1;
+}
+
+void synth_control_reset_pitches_changed(void)
+{
+    pitches_changed = 0;
+}
+
+/* This checks to see if pitches were changed while the PosMode was
+ * SynthControlPosMode_PITCH_RESET. If it was, it will not reset the pitches.
+ * Otherwise it will. This means that it only works with a configuration where
+ * it is called when the switch returns to the rest position (not when it goes
+ * to the active position). */
 void synth_control_pitch_reset_tog(void)
 {
     uint32_t _m, _n;
-    _n = synth_control_get_editingWhichParams();
-    for (_m = 0; _m < SYNTH_CONTROL_PITCH_TABLE_SIZE; _m++) {
-        noteParamSets[_n].pitches[_m] = SYNTH_CONTROL_DEFAULT_PITCH;
-        noteParamSets[_n].fine_pitches[_m] = SYNTH_CONTROL_DEFAULT_FINEPITCH;
+    if (synth_control_get_pitches_changed()) {
+        synth_control_reset_pitches_changed();
+    } else {
+        _n = synth_control_get_editingWhichParams();
+        for (_m = 0; _m < SYNTH_CONTROL_PITCH_TABLE_SIZE; _m++) {
+            noteParamSets[_n].pitches[_m] = SYNTH_CONTROL_DEFAULT_PITCH;
+            noteParamSets[_n].fine_pitches[_m] = SYNTH_CONTROL_DEFAULT_FINEPITCH;
+        }
     }
 }
 

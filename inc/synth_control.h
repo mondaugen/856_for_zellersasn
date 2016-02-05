@@ -15,7 +15,7 @@ typedef enum {
      * when the initial note is played. */
     SynthControlPosMode_STRIDE,
     /* There is room for an additional mode here. */
-    SynthControlPosMode_UNKNOWN
+    SynthControlPosMode_PITCH_RESET
 } SynthControlPosMode;
 #define SYNTH_CONTROL_POS_MODE_N_MODES 3
 
@@ -313,5 +313,9 @@ void synth_control_one_shot(MMSample pitch,
                             MMSample amplitude);
 
 MMSample synth_control_clip_valid_pitch(MMSample pitch);
+
+int synth_control_get_pitches_changed(void);
+void synth_control_set_pitches_changed(void);
+void synth_control_reset_pitches_changed(void);
 
 #endif /* SYNTH_CONTROL_H */

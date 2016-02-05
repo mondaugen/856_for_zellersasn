@@ -139,11 +139,11 @@ SYNTH_SWITCH_CONTROL_ONCHANGE(SynthControlPosMode,
         synth_control_set_posMode_onChange_curParams,
         SynthControlPosMode_STRIDE,
         SynthControlPosMode_ABSOLUTE,
-        SynthControlPosMode_ABSOLUTE);
+        SynthControlPosMode_PITCH_RESET);
 SYNTH_SWITCH_SETUP(SynthControlPosMode,SW1,
         SynthControlPosMode_STRIDE,
         SynthControlPosMode_ABSOLUTE,
-        SynthControlPosMode_ABSOLUTE);
+        SynthControlPosMode_PITCH_RESET);
 SYNTH_SWITCH_CONTROL(SynthControlDeltaButtonMode,
         synth_control_set_deltaButtonMode,
         SynthControlDeltaButtonMode_EVENT_DELTA_FREE,
