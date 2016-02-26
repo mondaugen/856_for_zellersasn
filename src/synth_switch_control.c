@@ -139,11 +139,11 @@ SYNTH_SWITCH_CONTROL_ONCHANGE(SynthControlPosMode,
         synth_control_set_posMode_onChange_curParams,
         SynthControlPosMode_STRIDE,
         SynthControlPosMode_ABSOLUTE,
-        SynthControlPosMode_PITCH_RESET);
+        SynthControlPosMode_UNI);
 SYNTH_SWITCH_SETUP(SynthControlPosMode,SW1,
         SynthControlPosMode_STRIDE,
         SynthControlPosMode_ABSOLUTE,
-        SynthControlPosMode_PITCH_RESET);
+        SynthControlPosMode_UNI);
 SYNTH_SWITCH_CONTROL(SynthControlDeltaButtonMode,
         synth_control_set_deltaButtonMode,
         SynthControlDeltaButtonMode_EVENT_DELTA_FREE,
@@ -172,7 +172,7 @@ SYNTH_SWITCH_SETUP(SynthControlRecMode,SW4,
         SynthControlRecMode_REC_LEN_1_BEAT,
         SynthControlRecMode_REC_LEN_1_BEAT_REC_SCHED);
         /* Incase the switch gets caught down momentarily when toggling the
-         * feedback, the gain mode will stay in wet mode. */
+         * fbk, the gain mode will stay in wet mode. */
 SYNTH_SWITCH_CONTROL(SynthControlGainMode,
         synth_control_set_gainMode,
         SynthControlGainMode_FADE,
@@ -190,8 +190,8 @@ SYNTH_SWITCH_CONTROL_TOG(presetRecall);
 SYNTH_SWITCH_SETUP_TOG(presetRecall,MSW3_TOP);
 SYNTH_SWITCH_CONTROL_TOG(presetStore);
 SYNTH_SWITCH_SETUP_TOG(presetStore,MSW3_BTM);
-SYNTH_SWITCH_CONTROL_TOG(feedback);
-SYNTH_SWITCH_SETUP_TOG(feedback,MSW7_TOP);
+SYNTH_SWITCH_CONTROL_TOG(fbk);
+SYNTH_SWITCH_SETUP_TOG(fbk,MSW7_TOP);
 SYNTH_SWITCH_CONTROL_TOG(pitch_reset);
 SYNTH_SWITCH_SETUP_TOG(pitch_reset,MSW1_TOP);
 
@@ -208,6 +208,6 @@ void synth_switch_control_setup(void)
     SYNTH_SWITCH_SETUP_TOG_CALL(schedulerState);
     SYNTH_SWITCH_SETUP_TOG_CALL(presetRecall);
     SYNTH_SWITCH_SETUP_TOG_CALL(presetStore);
-    SYNTH_SWITCH_SETUP_TOG_CALL(feedback);
+    SYNTH_SWITCH_SETUP_TOG_CALL(fbk);
     SYNTH_SWITCH_SETUP_TOG_CALL(pitch_reset);
 }

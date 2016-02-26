@@ -61,7 +61,7 @@ static void synth_adc_pos_curParams_control(adc_channel_t *chan,
         case SynthControlPosMode_ABSOLUTE:
             synth_control_set_startPoint_curParams(synth_adc_scale_thresh(chan->cur_val));
             break;
-        case SynthControlPosMode_PITCH_RESET:
+        case SynthControlPosMode_UNI:
         case SynthControlPosMode_STRIDE:
             synth_control_set_positionStride_curParams(
                     synth_adc_scale_thresh(chan->cur_val));
@@ -114,8 +114,8 @@ static void synth_adc_pitch_curParams_control(adc_channel_t *chan,
         synth_control_set_pitch_chrom_quant(
                 synth_adc_scale_thresh(chan->cur_val),0,0);
     } else {
-        if (synth_control_get_posMode_curParams() == SynthControlPosMode_PITCH_RESET) {
-            synth_control_set_pitches_changed();
+        if (synth_control_get_posMode_curParams() == SynthControlPosMode_UNI) {
+            synth_control_set_uni_stuff_changed();
             int n;
             for (n = 0; n < SYNTH_CONTROL_PITCH_TABLE_SIZE; n++) {
                 synth_control_set_pitch_chrom_quant(

@@ -17,6 +17,17 @@
  #include <assert.h>
 #endif  
 
+typedef struct __uni_stuff_t uni_stuff_t;
+
+struct __uni_stuff_t {
+    uni_stuff_t *next;
+    void (*reset_cb)(void*); /* Function to call when uni_state reset */
+    void *data;           /* Data to pass to that function */
+};
+
+uni_stuff_t *uni_reset_items_head = NULL;
+static int num_fbk_presses = 0;
+
 /* Keeps track of how many times a note has been played. If the number of times
  * is divisible by the note-parameter set's intermittency value, this count gets
  * reset */
@@ -40,7 +51,7 @@ SynthControlDeltaButtonMode deltaButtonMode;
 SynthControlGainMode        gainMode;
 SynthControlRecMode         recMode;
 SynthControlPitchMode       pitchMode;
-static int                  pitches_changed = 0;
+static int                  uni_stuff_changed = 0;
 
 /* Stuff that shouldn't really be saved */
 int                         noteDeltaFromBuffer;
@@ -57,6 +68,8 @@ SynthControlPresetNumber    presetNumber;
 
 static void schedulerState_off_helper(void *data);
 static void schedulerState_on_helper(void);
+static void synth_control_fbk_tog_setup(void);
+static void synth_control_reset_aux_note_all_params(void);
 
 void autorelease_on_done(MMEnvedSamplePlayer * esp)
 {
@@ -649,6 +662,50 @@ void synth_control_feedback_tog(void)
     }
 }
 
+/* Calling this resets the gains of NOTE 2 and 3 to default (most likely 0, see
+ * the synth_control.h header). */
+static void synth_control_reset_aux_note_gains(void)
+{
+    int n;
+    for (n = 1; n < NUM_NOTE_PARAM_SETS; n++) {
+        noteParamSets[n].amplitude = SYNTH_CONTROL_DEFAULT_AMPLITUDE_AUXNOTE;
+    }
+}
+
+static void synth_control_fbk_reset_cb(void* data)
+{
+    int *_num_fbk_presses = (int*)data;
+    *_num_fbk_presses = 0;
+}
+
+static void synth_control_fbk_tog_setup(void)
+{
+    static uni_stuff_t fbk_uni_stuff;
+    fbk_uni_stuff.next = uni_reset_items_head;
+    fbk_uni_stuff.reset_cb = synth_control_fbk_reset_cb;
+    fbk_uni_stuff.data = &num_fbk_presses;
+    uni_reset_items_head = &fbk_uni_stuff;
+}
+
+/* Counts number of times fbk was pressed while in UNI mode. If first time,
+ * just resets gain of note 2 and 3. If second time, resets all parameters
+ * of note 2 and 3. */
+void synth_control_fbk_tog(void)
+{
+    SynthControlPosMode pm;
+    pm = synth_control_get_posMode_curParams();
+    if (pm == SynthControlPosMode_UNI){
+        if (num_fbk_presses == 0) {
+            synth_control_reset_aux_note_gains();
+            num_fbk_presses++;
+        } else if (num_fbk_presses == 1) {
+            synth_control_reset_aux_note_all_params();
+            num_fbk_presses++;
+        }
+        synth_control_set_uni_stuff_changed();
+    }
+}
+
 static void free_playing_spsp_voice(void *voice_number)
 {
     MMEnvelope_startRelease(
@@ -902,6 +959,34 @@ void synth_control_reset_param_sets(NoteParamSet *param_sets, int size)
     };
 }
 
+static void synth_control_reset_aux_note_all_params(void)
+{
+    synth_control_reset_param_sets(&noteParamSets,NUM_NOTE_PARAM_SETS);
+    /*
+    int size;
+    for (size = 1; size < NUM_NOTE_PARAM_SETS; size++) {
+        noteParamSets[size].attackTime = SYNTH_CONTROL_DEFAULT_ATTACKTIME;     
+        noteParamSets[size].sustainTime  = SYNTH_CONTROL_DEFAULT_SUSTAINTIME; 
+        noteParamSets[size].releaseTime = SYNTH_CONTROL_DEFAULT_RELEASETIME; 
+        noteParamSets[size].eventDeltaBeats = SYNTH_CONTROL_DEFAULT_EVENTDELTABEATS;   
+        noteParamSets[size].amplitude = 0;
+        noteParamSets[size].startPoint = SYNTH_CONTROL_DEFAULT_STARTPOINT;
+        noteParamSets[size].numRepeats = SYNTH_CONTROL_DEFAULT_NUMREPEATS;
+        noteParamSets[size].offsetBeats = SYNTH_CONTROL_DEFAULT_OFFSETBEATS;
+        noteParamSets[size].intermittency = SYNTH_CONTROL_DEFAULT_INTERMITTENCY;
+        noteParamSets[size].fadeRate      = SYNTH_CONTROL_DEFAULT_FADERATE_AUXNOTE;
+        noteParamSets[size].ampLastEcho   = SYNTH_CONTROL_DEFAULT_AMPLASTECHO_AUXNOTE;
+        noteParamSets[size].positionStride = SYNTH_CONTROL_DEFAULT_POSITIONSTRIDE;
+        noteParamSets[size].posMode = SYNTH_CONTROL_DEFAULT_POSMODE;
+        int _n;
+        for (_n = 0; _n < SYNTH_CONTROL_PITCH_TABLE_SIZE; _n++) {
+            noteParamSets[size].pitches[_n] = SYNTH_CONTROL_DEFAULT_PITCH;
+            noteParamSets[size].fine_pitches[_n] = SYNTH_CONTROL_DEFAULT_FINEPITCH;
+        }
+    };
+    */
+}
+
 void synth_control_reset_global_params(void)
 {
     noteDeltaFromBuffer = 0;
@@ -925,6 +1010,7 @@ void synth_control_setup(void)
     synth_control_reset_param_sets(noteParamSets,NUM_NOTE_PARAM_SETS);
     synth_control_reset_global_params();
     HannWindowTable_init(REC_LOOP_FADE_TIME_S * 2.);
+    synth_control_fbk_tog_setup();
 }
 
 SynthControlEditingWhichParamsIndex synth_control_get_editingWhichParams(void)
@@ -1110,31 +1196,39 @@ int synth_control_get_editing_which_pitch(void)
     return editing_which_pitch;
 }
 
-int synth_control_get_pitches_changed(void)
+int synth_control_get_uni_stuff_changed(void)
 {
-    return pitches_changed;
+    return uni_stuff_changed;
 }
 
-void synth_control_set_pitches_changed(void)
+void synth_control_set_uni_stuff_changed(void)
 {
-    pitches_changed = 1;
+    uni_stuff_changed = 1;
 }
 
-void synth_control_reset_pitches_changed(void)
+/* Sets uni_stuff_changed flag to zero. Will also called registered callbacks
+ * (so that things that triggered its change can also be reset). */
+void synth_control_reset_uni_stuff_changed(void)
 {
-    pitches_changed = 0;
+    uni_stuff_changed = 0;
+    uni_stuff_t *ptr;
+    ptr = uni_reset_items_head;
+    while (ptr) {
+        ptr->reset_cb(ptr->data);
+        ptr = ptr->next;
+    }
 }
 
-/* This checks to see if pitches were changed while the PosMode was
- * SynthControlPosMode_PITCH_RESET. If it was, it will not reset the pitches.
+/* This checks to see if stuff changed while the PosMode was
+ * SynthControlPosMode_UNI. If it was, it will not reset the pitches.
  * Otherwise it will. This means that it only works with a configuration where
  * it is called when the switch returns to the rest position (not when it goes
  * to the active position). */
 void synth_control_pitch_reset_tog(void)
 {
     uint32_t _m, _n;
-    if (synth_control_get_pitches_changed()) {
-        synth_control_reset_pitches_changed();
+    if (synth_control_get_uni_stuff_changed()) {
+        synth_control_reset_uni_stuff_changed();
     } else {
         _n = synth_control_get_editingWhichParams();
         for (_m = 0; _m < SYNTH_CONTROL_PITCH_TABLE_SIZE; _m++) {
@@ -1229,3 +1323,4 @@ MMSample synth_control_clip_valid_pitch(MMSample pitch)
     }
     return pitch;
 }
+
