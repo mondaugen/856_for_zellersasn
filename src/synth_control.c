@@ -574,7 +574,7 @@ void synth_control_record_start_helper(void)
 {
     /* Set to max length so it would be possible to record all the way to
      * the end of allocated space */
-    ((MMArray*)recordingSound.wavtab)->length = soundSampleMaxLength;
+    wtr.maxLength = soundSampleMaxLength;
     /* Set the area it is pointing to to the beginning of the allocated space */
     ((MMArray*)recordingSound.wavtab)->data = recordingSound.area;
     wtr.buffer = recordingSound.wavtab;
