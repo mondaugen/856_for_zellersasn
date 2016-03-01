@@ -703,7 +703,18 @@ void synth_control_fbk_tog(void)
         }
         synth_control_set_uni_stuff_changed();
     } else {
-        synth_control_feedback_tog();
+        SynthControlRecMode _recmode;
+        _recmode = synth_control_get_recMode();
+        if (_recmode == SynthControlRecMode_REC_LEN_1_BEAT_REC_SCHED) {
+            /* Turn back on record scheduling. Note that this will make record
+             * scheduling happen when the scheduler is turned back on, if it is
+             * not already on. */
+            if (scheduleRecording == 0) {
+                scheduleRecording = 1;
+            }
+        } else {
+            synth_control_feedback_tog();
+        }
     }
 }
 
@@ -1055,6 +1066,12 @@ void synth_control_set_recMode(SynthControlRecMode recMode_param)
          * we turn off auto record. */
         if (recMode != SynthControlRecMode_REC_LEN_1_BEAT_REC_SCHED) {
             synth_control_autoRecord_stop_helper();
+        }
+        /* This means we're entering
+         * SynthControlRecMode_REC_LEN_1_BEAT_REC_SCHED and when we do this we
+         * turn off feedback. */
+        if (recMode == SynthControlRecMode_REC_LEN_1_BEAT_REC_SCHED) {
+            synth_control_feedback_control(0);
         }
     }
 }
