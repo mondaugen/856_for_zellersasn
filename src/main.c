@@ -16,6 +16,7 @@
 #include "synth_adc_control.h" 
 #include "timers.h" 
 #include "synth_midi_control.h" 
+#include "startup_polling.h" 
 
 #define INITIAL_COUNT 1000000L 
 
@@ -45,11 +46,13 @@ int main (void)
     adc_setup_dma_scan();
     adc_channel_setup();
     synth_adc_control_setup();
-    /* Preset init must be before switch control setup so that switch toggling
-     * to recall default presets doesn't screw up the synth switch control. */
-    sc_presets_init();
+    int midi_channel = -1;
+    int reset_request = 0;
+    supo_get_midi_channel(&midi_channel);
+    supo_get_preset_reset_rqst(&reset_request);
+    sc_presets_init(reset_request,&midi_channel);
     synth_switch_control_setup();
-    synth_midi_control_setup();
+    synth_midi_control_setup(midi_channel);
     audio_start();
 #if defined(TIMER_EVENT_TEST) || defined(TIMER_TEST)
     timers_enable();

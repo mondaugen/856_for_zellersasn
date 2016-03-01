@@ -585,12 +585,11 @@ void synth_control_record_start_helper(void)
 void synth_control_record_stop(void)
 {
     if (scheduleRecording == 1) {
-        /* Turn off scheduleRecording so the recording is not stopped
-         * prematurely when an event that does that is called by the
-         * scheduler. when an event that does that is called by the
-         * scheduler. */
+        /* If recordings are being scheduled, when the user requests the
+         * recording to stop, we just stop recording but do not switch buffers
+         * or adjust the tempo. */
         scheduleRecording = 0;
-        synth_control_record_start_helper();
+        synth_control_autoRecord_stop_helper();
     } else {
         if (schedulerState == 1) {
             schedulerState_off_helper((void*)noteOnEventListHead);
@@ -703,6 +702,8 @@ void synth_control_fbk_tog(void)
             num_fbk_presses++;
         }
         synth_control_set_uni_stuff_changed();
+    } else {
+        synth_control_feedback_tog();
     }
 }
 
@@ -961,7 +962,7 @@ void synth_control_reset_param_sets(NoteParamSet *param_sets, int size)
 
 static void synth_control_reset_aux_note_all_params(void)
 {
-    synth_control_reset_param_sets(&noteParamSets,NUM_NOTE_PARAM_SETS);
+    synth_control_reset_param_sets(noteParamSets,NUM_NOTE_PARAM_SETS);
     /*
     int size;
     for (size = 1; size < NUM_NOTE_PARAM_SETS; size++) {

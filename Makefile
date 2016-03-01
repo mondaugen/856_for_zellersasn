@@ -68,6 +68,12 @@ flash: $(BIN)
 		-c "reset run" \
 	    -c shutdown
 
+erase_flash:
+	$(OCD) -c init \
+		-c "reset halt" \
+		-c "flash erase_address 0x08000000 0x00200000" \
+		-c shutdown
+
 reset: $(BIN)
 	$(OCD) -c init -c "reset run" -c shutdown
 

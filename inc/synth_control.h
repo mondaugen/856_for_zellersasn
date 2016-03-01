@@ -317,5 +317,6 @@ MMSample synth_control_clip_valid_pitch(MMSample pitch);
 int synth_control_get_uni_stuff_changed(void);
 void synth_control_set_uni_stuff_changed(void);
 void synth_control_reset_uni_stuff_changed(void);
+void synth_control_fbk_tog(void);
 
 #endif /* SYNTH_CONTROL_H */

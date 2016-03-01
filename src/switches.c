@@ -23,15 +23,15 @@ static uint32_t (*sw_get_state_funcs[]) (void) = {
     NULL
 };
 
-/* The footswitches are momentary. This pseudo-register is set when the
- * footswitch is pressed the first time, and reset the second time. It can be
- * passed to functions expecting a register. The bits that are set or reset are
- * defined in switches.h */
-volatile uint32_t fsw_toggle_states;
+/* This is for all momentary switches. The name fsw... is historical. This
+ * pseudo-register is set when a momentary switch is pressed the first time, and
+ * reset the second time. It can be passed to functions expecting a register.
+ * The bits that are set or reset are defined in switches.h */
+volatile uint32_t sw_toggle_states;
 
-void reset_fsw_toggle_states(void)
+void reset_sw_toggle_states(void)
 {
-    fsw_toggle_states = 0;
+    sw_toggle_states = 0;
 }
 
 void switches_setup(void)
@@ -118,7 +118,7 @@ void switches_setup(void)
         pin++;
     }
 
-    fsw_toggle_states = 0;
+    sw_toggle_states = 0;
     /* enable SYSCFG */
     RCC->APB2ENR        |= RCC_APB2ENR_SYSCFGEN;
     /* set up EXTI interrupts */
@@ -159,7 +159,7 @@ void FSW1_IRQ_HANDLER (void)
     NVIC_ClearPendingIRQ(FSW1_IRQ_N);
     if (FSW1_EXTI->PR & (0x1 << FSW1_PORT_PIN)) {
         FSW1_EXTI->PR |= 0x1 << FSW1_PORT_PIN;
-        fsw_toggle_states |= (0x1 << FSW1_TOG_PORT_PIN);
+        sw_toggle_states |= (0x1 << FSW1_TOG_PORT_PIN);
     }
 }
 
@@ -168,7 +168,7 @@ void FSW2_IRQ_HANDLER (void)
     NVIC_ClearPendingIRQ(FSW2_IRQ_N);
     if (FSW2_EXTI->PR & (0x1 << FSW2_PORT_PIN)) {
         FSW2_EXTI->PR |= 0x1 << FSW2_PORT_PIN;
-        fsw_toggle_states |= (0x1 << FSW2_TOG_PORT_PIN);
+        sw_toggle_states |= (0x1 << FSW2_TOG_PORT_PIN);
     }
 }
 
@@ -177,7 +177,7 @@ void MSW3_TOP_IRQ_HANDLER (void)
     NVIC_ClearPendingIRQ(MSW3_TOP_IRQ_N);
     if (MSW3_TOP_EXTI->PR & (0x1 << MSW3_TOP_PORT_PIN)) {
         MSW3_TOP_EXTI->PR |= 0x1 << MSW3_TOP_PORT_PIN;
-        fsw_toggle_states |= (0x1 << MSW3_TOP_TOG_PORT_PIN);
+        sw_toggle_states |= (0x1 << MSW3_TOP_TOG_PORT_PIN);
     }
 }
 
@@ -186,7 +186,7 @@ void MSW3_BTM_IRQ_HANDLER (void)
     NVIC_ClearPendingIRQ(MSW3_BTM_IRQ_N);
     if (MSW3_BTM_EXTI->PR & (0x1 << MSW3_BTM_PORT_PIN)) {
         MSW3_BTM_EXTI->PR |= 0x1 << MSW3_BTM_PORT_PIN;
-        fsw_toggle_states |= (0x1 << MSW3_BTM_TOG_PORT_PIN);
+        sw_toggle_states |= (0x1 << MSW3_BTM_TOG_PORT_PIN);
     }
 }
 
@@ -195,7 +195,7 @@ void MSW7_TOP_IRQ_HANDLER (void)
     NVIC_ClearPendingIRQ(MSW7_TOP_IRQ_N);
     if (MSW7_TOP_EXTI->PR & (0x1 << MSW7_TOP_PORT_PIN)) {
         MSW7_TOP_EXTI->PR |= 0x1 << MSW7_TOP_PORT_PIN;
-        fsw_toggle_states |= (0x1 << MSW7_TOP_TOG_PORT_PIN);
+        sw_toggle_states |= (0x1 << MSW7_TOP_TOG_PORT_PIN);
     }
 }
 
@@ -204,7 +204,7 @@ void MSW1_TOP_IRQ_HANDLER (void)
     NVIC_ClearPendingIRQ(MSW7_TOP_IRQ_N);
     if (MSW1_TOP_EXTI->PR & (0x1 << MSW1_TOP_PORT_PIN)) {
         MSW1_TOP_EXTI->PR |= 0x1 << MSW1_TOP_PORT_PIN;
-        fsw_toggle_states |= (0x1 << MSW1_TOP_TOG_PORT_PIN);
+        sw_toggle_states |= (0x1 << MSW1_TOP_TOG_PORT_PIN);
     }
 }
 

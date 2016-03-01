@@ -112,6 +112,9 @@ a={
     MIDIClient.destinations.at(midi_device_idx).name.postln;
     midi_out = MIDIOut(0);
     midi_out.connect(midi_device_idx);
+    if (thisProcess.argv.size >= 1,{
+        midi_channel=thisProcess.argv[0].asInteger;
+    });
 
     num_note_param_sets.do({
         |n|

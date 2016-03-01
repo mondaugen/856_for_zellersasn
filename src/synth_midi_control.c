@@ -395,9 +395,8 @@ static void synth_midi_note_on_init(
             NULL);
 }
 
-void synth_midi_control_setup(void)
+void synth_midi_control_setup(int midi_channel)
 {
-    int midi_channel = SYNTH_MIDI_CONTROL_DEFAULT_CHANNEL;
     /* could set custom channel here ... */
     void (*midi_cc_pitch_funcs[])(void*,MIDIMsg*) = {
         synth_midi_cc_pitch_control,

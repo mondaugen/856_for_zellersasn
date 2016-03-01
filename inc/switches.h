@@ -103,12 +103,12 @@
 #define MSW7_TOP_ADDR           SW7_TOP_ADDR 
 #define MSW1_TOP_ADDR           SW1_TOP_ADDR 
 
-#define FSW1_TOG_ADDR           (&fsw_toggle_states) 
-#define FSW2_TOG_ADDR           (&fsw_toggle_states)
-#define MSW3_TOP_TOG_ADDR       (&fsw_toggle_states)
-#define MSW3_BTM_TOG_ADDR       (&fsw_toggle_states) 
-#define MSW7_TOP_TOG_ADDR       (&fsw_toggle_states)
-#define MSW1_TOP_TOG_ADDR       (&fsw_toggle_states)
+#define FSW1_TOG_ADDR           (&sw_toggle_states) 
+#define FSW2_TOG_ADDR           (&sw_toggle_states)
+#define MSW3_TOP_TOG_ADDR       (&sw_toggle_states)
+#define MSW3_BTM_TOG_ADDR       (&sw_toggle_states) 
+#define MSW7_TOP_TOG_ADDR       (&sw_toggle_states)
+#define MSW1_TOP_TOG_ADDR       (&sw_toggle_states)
 
 #define FSW1_EXTICR             SYSCFG->EXTICR[1] 
 #define FSW2_EXTICR             SYSCFG->EXTICR[1] 
@@ -152,7 +152,7 @@
 #define MSW7_TOP_EXTI           EXTI
 #define MSW1_TOP_EXTI           EXTI
 
-extern volatile uint32_t fsw_toggle_states;
+extern volatile uint32_t sw_toggle_states;
 
 void switches_setup(void);
 uint32_t fsw1_get_state(void);
@@ -174,6 +174,6 @@ uint32_t sw7_btm_get_state(void);
 uint32_t sw8_top_get_state(void);
 uint32_t sw8_btm_get_state(void);
 void get_switch_states(uint32_t *states);
-void reset_fsw_toggle_states(void);
+void reset_sw_toggle_states(void);
 
 #endif /* SWITCHES_H */

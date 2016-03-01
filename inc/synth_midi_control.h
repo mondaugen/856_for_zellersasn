@@ -43,6 +43,6 @@ typedef enum {
     synth_midi_cc_type_t_FBK_STATE
 } synth_midi_cc_type_t;
 
-void synth_midi_control_setup(void);
+void synth_midi_control_setup(int midi_channel);
 
 #endif /* SYNTH_MIDI_CONTROL_H */

@@ -2,79 +2,69 @@
 #include "presets_lowlevel.h"
 #include "switches.h" 
 #include <string.h> 
-#include "timers.h" 
 #include "leds.h" 
-
+#include "synth_midi_control.h" 
 
 typedef struct __SCPreset {
     NoteParamSet                 noteParamSets[NUM_NOTE_PARAM_SETS];
     MMSample                     tempoBPM; 
 } SCPreset;
 
-static presets_lowlevel_handle_t *scpresets_handle;
-static SCPreset scpresets[NUM_SYNTH_CONTROL_PRESETS];
+typedef struct __SCStorage {
+    /* If not equal to a special keyword, flash was either corrupted or never written */
+    uint32_t first_read; 
+    SCPreset scpresets[NUM_SYNTH_CONTROL_PRESETS];
+    int midi_channel;
+} SCStorage;
 
-void sc_presets_debounce_on_timeout(timer_event_t *ev)
-{
-    ev->active = 0;
-    *((uint32_t*)ev->data) = 0;
-}
+static presets_lowlevel_handle_t *scpresets_handle;
+static SCStorage scstorage;
 
 /* File is a file in which to store presets. This will obviously depend on the
- * implementation. */
-void sc_presets_init(void)
+ * implementation.
+ * If reset_request is 1, then presets in SRAM overwritten with default
+ * values. The default values must be explicitly stored (e.g., by pressing the store
+ * button).
+ * If reset_request is 2, then presets are overwritten as with 1 but then also
+ * saved into flash .
+ * If midi_channel is non-negative, then this will be stored as the new default
+ * midi channel, otherwise the last default will be loaded. */
+void sc_presets_init(int reset_request, int *midi_channel)
 {
-    static volatile uint32_t debounce_wait_flag;
-    static timer_event_t debounce_event;
     /* (The flash implementation requires no initialization) */
     presets_lowlevel_init(&scpresets_handle,NULL);
+    presets_lowlevel_read(scpresets_handle,(void*)&scstorage,
+            sizeof(scstorage),NULL);
+    /* Check if keyword present, if not, flash is fresh and needs to be
+     * initialized. */
+    if (scstorage.first_read != SCP_FIRST_READ_KW) {
+        reset_request = 2;
+        scstorage.first_read = SCP_FIRST_READ_KW;
+        scstorage.midi_channel = SYNTH_MIDI_CONTROL_DEFAULT_CHANNEL;
+    }
+    if (*midi_channel >= 0) {
+        scstorage.midi_channel = *midi_channel;
+        /* Store new midi_channel */
+        if (reset_request != 2) {
+            presets_lowlevel_write(scpresets_handle,(void*)&scstorage,
+                    sizeof(scstorage),NULL);
+        }
+    } else {
+        *midi_channel = scstorage.midi_channel;
+    }
     /* If both footswitches down on startup, set presets to default values. This
      * doesn't overwrite what is in flash. That will only happen if the user
      * chooses to save the presets. */
-    if ((fsw1_get_state() == 0) && (fsw2_get_state() == 0)) {
+    if (reset_request > 0) {
         int n;
         for (n = 0; n < NUM_SYNTH_CONTROL_PRESETS; n++) {
-            synth_control_reset_param_sets(scpresets[n].noteParamSets,NUM_NOTE_PARAM_SETS);
-            scpresets[n].tempoBPM = SYNTH_CONTROL_DEFAULT_TEMPOBPM;
+            synth_control_reset_param_sets(scstorage.scpresets[n].noteParamSets,NUM_NOTE_PARAM_SETS);
+            scstorage.scpresets[n].tempoBPM = SYNTH_CONTROL_DEFAULT_TEMPOBPM;
         }
-        /* Wait for switches to go high before continuing */
-        while ((fsw1_get_state() == 0) || (fsw2_get_state() == 0));
-        /* Wait additional time to debounce. */
-        int _timstate = timers_get_state();
-        debounce_wait_flag = 1;
-        timer_event_init(&debounce_event);
-        debounce_event.data = (void*)&debounce_wait_flag;
-        debounce_event.time_rem = SCP_RESET_DEBOUNCE_TIME_MS;
-        debounce_event.active = 1;
-        debounce_event.on_timeout = sc_presets_debounce_on_timeout;
-        timer_events_add_event(&debounce_event);
-        if (_timstate == 0) {
-            timers_enable();
-        }
-        while (debounce_wait_flag);
-        /* flash leds to show it worked */
-        led1_set();
-        led3_set();
-        led5_set();
-        led7_set();
-        /* wait again */
-        debounce_event.time_rem = SCP_RESET_DEBOUNCE_TIME_MS;
-        debounce_event.active = 1;
-        debounce_wait_flag = 1;
-        while (debounce_wait_flag);
-        /* reset leds */
-        led1_reset();
-        led3_reset();
-        led5_reset();
-        led7_reset();
-        if (_timstate == 0) {
-            timers_disable();
-        }
-        /* reset toggle states to get rid of erroneous toggling */
-        reset_fsw_toggle_states();
-    } else {
-        presets_lowlevel_read(scpresets_handle,(void*)scpresets,
-            sizeof(scpresets),NULL);
+    }
+    if (reset_request == 2) {
+        presets_lowlevel_write(scpresets_handle,(void*)&scstorage,
+                sizeof(scstorage),NULL);
     }
 }
 
@@ -86,12 +76,12 @@ void sc_presets_store(int npreset)
     if (npreset > NUM_SYNTH_CONTROL_PRESETS) {
         npreset = NUM_SYNTH_CONTROL_PRESETS - 1;
     }
-    memcpy(scpresets[npreset].noteParamSets,noteParamSets,
+    memcpy(scstorage.scpresets[npreset].noteParamSets,noteParamSets,
             sizeof(NoteParamSet)*NUM_NOTE_PARAM_SETS);
-    scpresets[npreset].tempoBPM = synth_control_get_tempoBPM(); 
+    scstorage.scpresets[npreset].tempoBPM = synth_control_get_tempoBPM(); 
     /* Store every time, because program could be terminated at any moment */
-    presets_lowlevel_write(scpresets_handle,(void*)scpresets,
-            sizeof(scpresets),NULL);
+    presets_lowlevel_write(scpresets_handle,(void*)&scstorage,
+            sizeof(scstorage),NULL);
 }
 
 void sc_presets_recall(int npreset)
@@ -103,12 +93,12 @@ void sc_presets_recall(int npreset)
         npreset = NUM_SYNTH_CONTROL_PRESETS - 1;
     }
     /* No need to load from file, this is done only on initialization */
-    memcpy(noteParamSets,scpresets[npreset].noteParamSets,sizeof(NoteParamSet)*NUM_NOTE_PARAM_SETS);
+    memcpy(noteParamSets,scstorage.scpresets[npreset].noteParamSets,sizeof(NoteParamSet)*NUM_NOTE_PARAM_SETS);
     /* Reset event counts so intermittency off all notes always has same phase
      * */
     synth_control_reset_noteOnEventCounts();
     if (schedulerState == 0) {
         /* Only recall tempo if sequencer not playing */
-        synth_control_set_tempoBPM_absolute(scpresets[npreset].tempoBPM); 
+        synth_control_set_tempoBPM_absolute(scstorage.scpresets[npreset].tempoBPM); 
     }
 }
