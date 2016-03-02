@@ -354,9 +354,16 @@ static void NoteSchedEvent_happen(MMEvent *event)
              * a new one. It is always okay to stop the recording, because the
              * scheduleRecording flag is set when recording is turned off in the
              * SynthControlRecMode_REC_LEN_1_BEAT_REC_SCHED state, and actually not
-             * turned off at that point (as it is with SynthControlRecMode_REC_LEN_1_BEAT) */
-            if (scheduleRecording == 1) {
-                synth_control_record_stop_helper(scrsh_source_SCHEDULER);
+             * turned off at that point (as it is with SynthControlRecMode_REC_LEN_1_BEAT)
+             * If scheduleRecording is 2, then this means the recording was just
+             * scheduled by the user, if 1 it means the sequencer scheduled it. */
+            if (scheduleRecording > 0) {
+                if (scheduleRecording == 2) {
+                    scheduleRecording = 1;
+                    synth_control_record_stop_helper(scrsh_source_USER);
+                } else if (scheduleRecording == 1) {
+                    synth_control_record_stop_helper(scrsh_source_SCHEDULER);
+                }
                 synth_control_record_start_helper();
             }
         }

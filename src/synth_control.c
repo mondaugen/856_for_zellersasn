@@ -76,6 +76,8 @@ void autorelease_on_done(MMEnvedSamplePlayer * esp)
     MMWavTab_dec_n_players(esp->spsp.samples);
     pm_yield_params_to_allocator((void*)&voiceAllocator,
             (void *)&(MMEnvedSamplePlayer_getSamplePlayerSigProc(esp).note));
+    /* Remove callback from sample player */
+    esp->onDone = NULL;
 }
 
 void synth_control_set_envelopeTime(float envelopeTime_param,
@@ -592,7 +594,7 @@ void synth_control_record_start_helper(void)
 
 void synth_control_record_stop(void)
 {
-    if (scheduleRecording == 1) {
+    if (scheduleRecording > 0) {
         /* If recordings are being scheduled, when the user requests the
          * recording to stop, we just stop recording but do not switch buffers
          * or adjust the tempo. */
@@ -605,7 +607,7 @@ void synth_control_record_stop(void)
         SynthControlRecMode _recMode = synth_control_get_recMode();
         if (_recMode == SynthControlRecMode_REC_LEN_1_BEAT_REC_SCHED) {
             /* Recording will be stopped by event in scheduler */
-            scheduleRecording = 1;
+            scheduleRecording = 2;
         } else {
             synth_control_record_stop_helper(scrsh_source_USER);
         }
@@ -782,7 +784,7 @@ void synth_control_schedulerState_off(void)
 {
     /* If record scheduling on, it is turned off when the scheduler is
      * turned off. */
-    if (scheduleRecording == 1) {
+    if (scheduleRecording > 0) {
         synth_control_autoRecord_stop_helper();
     }
     schedulerState_off_helper(&noteOnEventListHead);
@@ -811,29 +813,6 @@ void synth_control_deltaButtonMode_control(void *data_,
 {
     deltaButtonMode =
         (SynthControlDeltaButtonMode)deltaButtonMode_param;
-}
-
-void synth_control_recordScheduling_control(void *data_,
-        uint32_t recordScheduling_param)
-{
-    if (recordScheduling_param) {
-        /* If recording in progress, stop it */
-        if (wtr.state == MMWavTabRecorderState_RECORDING) {
-            wtr.state = MMWavTabRecorderState_STOPPED;
-        }
-        scheduleRecording = 1;
-        /* Set first scheduled recording to true so that when the first
-         * scheduled recording happens, the buffers aren't swapped. This is
-         * because the buffer it swaps with might contain garbage. */
-        firstScheduledRecording = 1;
-    } else {
-        scheduleRecording = 0;
-        /* Stop recording (it will most likely be in progress) but don't swap
-         * the recording and playing sounds. We discard the most recent
-         * recording to give the user time to flip the switch if they like the
-         * previous recording */
-        wtr.state = MMWavTabRecorderState_STOPPED;
-    }
 }
 
 void synth_control_gainMode_control(void *data_,
