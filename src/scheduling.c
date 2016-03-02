@@ -265,7 +265,7 @@ static void NoteOnEvent_happen(MMEvent *event)
                     (noteParamSets[((NoteOnEvent*)event)->parameterSet].amplitude
                             * ((NoteOnEvent*)event)->currentFade);
             no.index = ((NoteOnEvent*)event)->currentPosition
-                        * MMArray_get_length(theSound.wavtab);
+                        * MMArray_get_length(theSound->wavtab);
             /* sustainTime is the length of the audio, times
              * noteParamSets[parameterSet].sustainTime *
              * length_of_sound_seconds * (1 -
@@ -273,7 +273,7 @@ static void NoteOnEvent_happen(MMEvent *event)
              * noteParamSets[parametersSet].releaseTime) */
             no.sustainTime =
                 noteParamSets[((NoteOnEvent*)event)->parameterSet].sustainTime
-                * (MMSample)MMArray_get_length(theSound.wavtab)
+                * (MMSample)MMArray_get_length(theSound->wavtab)
                 / (MMSample)audio_hw_get_sample_rate(NULL)
                 * (1.
                         - noteParamSets[((NoteOnEvent*)event)->parameterSet].attackTime
@@ -284,16 +284,17 @@ static void NoteOnEvent_happen(MMEvent *event)
 #else
             no.attackTime = 
                 noteParamSets[((NoteOnEvent*)event)->parameterSet].sustainTime
-                * (MMSample)MMArray_get_length(theSound.wavtab)
+                * (MMSample)MMArray_get_length(theSound->wavtab)
                 / (MMSample)audio_hw_get_sample_rate(NULL)
                 * noteParamSets[((NoteOnEvent*)event)->parameterSet].attackTime;
             no.releaseTime = 
                 noteParamSets[((NoteOnEvent*)event)->parameterSet].sustainTime
-                * (MMSample)MMArray_get_length(theSound.wavtab)
+                * (MMSample)MMArray_get_length(theSound->wavtab)
                 / (MMSample)audio_hw_get_sample_rate(NULL)
                 * noteParamSets[((NoteOnEvent*)event)->parameterSet].releaseTime;
 #endif
-            no.samples = theSound.wavtab;
+            no.samples = theSound->wavtab;
+            MMWavTab_inc_n_players(theSound->wavtab);
             /* 69 is added because MMCC_et12_rate considers pitch 69 to be a note of no
              * transposition. In this we consider 0 to be a note of no
              * transposition, so we add 69 */
@@ -355,7 +356,7 @@ static void NoteSchedEvent_happen(MMEvent *event)
              * SynthControlRecMode_REC_LEN_1_BEAT_REC_SCHED state, and actually not
              * turned off at that point (as it is with SynthControlRecMode_REC_LEN_1_BEAT) */
             if (scheduleRecording == 1) {
-                synth_control_record_stop_helper();
+                synth_control_record_stop_helper(scrsh_source_SCHEDULER);
                 synth_control_record_start_helper();
             }
         }

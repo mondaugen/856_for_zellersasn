@@ -73,6 +73,7 @@ static void synth_control_reset_aux_note_all_params(void);
 
 void autorelease_on_done(MMEnvedSamplePlayer * esp)
 {
+    MMWavTab_dec_n_players(esp->spsp.samples);
     pm_yield_params_to_allocator((void*)&voiceAllocator,
             (void *)&(MMEnvedSamplePlayer_getSamplePlayerSigProc(esp).note));
 }
@@ -129,7 +130,7 @@ void synth_control_tempoNudge(float tempoNudge_param)
      * K > 1 the tempo is faster */
     MMSample K =  1.05 - tempoNudge_param * 0.1;
     synth_control_update_tempo_coarse( 60. * (MMSample)audio_hw_get_sample_rate(NULL) 
-            / ((MMSample)((MMArray*)theSound.wavtab)->length * K));
+            / ((MMSample)((MMArray*)theSound->wavtab)->length * K));
 }
 
 static void synth_control_set_tempoBPM(float tempoBPM_param)
@@ -501,7 +502,7 @@ void synth_control_autoRecord_stop_helper(void)
     wtr.state = MMWavTabRecorderState_STOPPED;
 }
 
-void synth_control_record_stop_helper(void)
+void synth_control_record_stop_helper(scrsh_source_t origin)
 {
     /* Only do something if it was recording */
     if (wtr.state == MMWavTabRecorderState_STOPPED) {
@@ -547,9 +548,12 @@ void synth_control_record_stop_helper(void)
          *  - the offset of note 0 is set to 0
          *
          */
-        synth_control_set_tempoBPM_absolute(60. 
-                * (MMSample)audio_hw_get_sample_rate(NULL) 
-                / (MMSample)((MMArray*)wtr.buffer)->length);
+        if (origin == scrsh_source_USER) {
+            /* Only adjust the tempo if record stop was called by user */
+            synth_control_set_tempoBPM_absolute(60. 
+                    * (MMSample)audio_hw_get_sample_rate(NULL) 
+                    / (MMSample)((MMArray*)wtr.buffer)->length);
+        }
         if (feedbackState == 1) {
             int n;
             noteParamSets[0].pitches[0] = 0.;
@@ -565,19 +569,23 @@ void synth_control_record_stop_helper(void)
         }
     }
     /* Swap the playing and the recording sounds */
-    WavTabAreaPair tmp = recordingSound;
-    recordingSound = theSound;
-    theSound = tmp;
+    /* Advance the playing and recording sounds along the ring */
+    theSound = theSound->next;
+    recordingSound = recordingSound->next;
 }
 
 void synth_control_record_start_helper(void)
 {
+    /* Only allow recording if wavtable is not being played */
+    if (recordingSound->wavtab->n_players != 0) {
+        return;
+    }
     /* Set to max length so it would be possible to record all the way to
      * the end of allocated space */
     wtr.maxLength = soundSampleMaxLength;
     /* Set the area it is pointing to to the beginning of the allocated space */
-    ((MMArray*)recordingSound.wavtab)->data = recordingSound.area;
-    wtr.buffer = recordingSound.wavtab;
+    ((MMArray*)recordingSound->wavtab)->data = recordingSound->area;
+    wtr.buffer = recordingSound->wavtab;
     wtr.currentIndex = 0;
     wtr.state = MMWavTabRecorderState_RECORDING;
 }
@@ -599,7 +607,7 @@ void synth_control_record_stop(void)
             /* Recording will be stopped by event in scheduler */
             scheduleRecording = 1;
         } else {
-            synth_control_record_stop_helper();
+            synth_control_record_stop_helper(scrsh_source_USER);
         }
         schedulerState_on_helper();
     }
@@ -1293,7 +1301,7 @@ void synth_control_note_on(int parameterSet,
         no.note = voiceNum;
         no.amplitude = amplitude;
         no.index = noteParamSets[parameterSet].startPoint
-            * MMArray_get_length(theSound.wavtab);
+            * MMArray_get_length(theSound->wavtab);
         /* sustainTime is the length of the audio, times
          * noteParamSets[parameterSet].sustainTime *
          * length_of_sound_seconds * (1 -
@@ -1301,7 +1309,7 @@ void synth_control_note_on(int parameterSet,
          * noteParamSets[parametersSet].releaseTime) */
         no.sustainTime =
             noteParamSets[parameterSet].sustainTime
-            * (MMSample)MMArray_get_length(theSound.wavtab)
+            * (MMSample)MMArray_get_length(theSound->wavtab)
             / (MMSample)audio_hw_get_sample_rate(NULL)
             * (1. - noteParamSets[parameterSet].attackTime
                   - noteParamSets[parameterSet].releaseTime);
@@ -1311,16 +1319,17 @@ void synth_control_note_on(int parameterSet,
 #else
         no.attackTime = 
             noteParamSets[parameterSet].sustainTime
-            * (MMSample)MMArray_get_length(theSound.wavtab)
+            * (MMSample)MMArray_get_length(theSound->wavtab)
             / (MMSample)audio_hw_get_sample_rate(NULL)
             * noteParamSets[parameterSet].attackTime;
         no.releaseTime = 
             noteParamSets[parameterSet].sustainTime
-            * (MMSample)MMArray_get_length(theSound.wavtab)
+            * (MMSample)MMArray_get_length(theSound->wavtab)
             / (MMSample)audio_hw_get_sample_rate(NULL)
             * noteParamSets[parameterSet].releaseTime;
 #endif
-        no.samples = theSound.wavtab;
+        no.samples = theSound->wavtab;
+        MMWavTab_inc_n_players(theSound->wavtab);
         /* 69 is added because MMCC_et12_rate considers pitch 69 to be a note of no
          * transposition. In this we consider 0 to be a note of no
          * transposition, so we add 69 */

@@ -15,11 +15,12 @@ MMWavTab soundSample;
 MMSample *sampleTableAreas[NUM_SAMPLE_TABLES];
 MMWavTab    sampleTable[NUM_SAMPLE_TABLES];
 size_t      soundSampleMaxLength;
-WavTabAreaPair theSound;
-WavTabAreaPair recordingSound;
+WavTabAreaPair *theSound;
+WavTabAreaPair *recordingSound;
 MMSample     *hannWindowTable;
 size_t       hannWindowTableLength;
 size_t       zeroxSearchMaxLength;
+static WavTabAreaPair wtaps[NUM_SAMPLE_TABLES];
 #ifdef WAVETABLES_IN_SRAM
  #define SRAM_WAVETABLE_SIZE 32000/4
     MMSample sramSampleTableData[NUM_SAMPLE_TABLES*SRAM_WAVETABLE_SIZE]
@@ -29,26 +30,15 @@ size_t       zeroxSearchMaxLength;
 
 void SampleTable_init(void)
 {
-#ifdef WAVETABLES_IN_SRAM
     int n;
     for (n = 0; n < NUM_SAMPLE_TABLES; n++) {
         sampleTable[n].samplerate = audio_hw_get_sample_rate(NULL);
+        sampleTable[n].n_players  = 0;
+#ifdef WAVETABLES_IN_SRAM
         ((MMArray*)&sampleTable[n])->length = SRAM_WAVETABLE_SIZE;
         sampleTableAreas[n] = ((MMSample*)sramSampleTableData)
             + ((MMArray*)&sampleTable[n])->length*n;
-        ((MMArray*)&sampleTable[n])->data = sampleTableAreas[n];
-        memset(((MMArray*)&sampleTable[n])->data,0,
-                sizeof(MMSample) * ((MMArray*)&sampleTable[n])->length);
-    }
-    theSound.wavtab = &sampleTable[0];
-    theSound.area = sampleTableAreas[0];
-    recordingSound.wavtab = &sampleTable[1];
-    recordingSound.area   = sampleTableAreas[1];
-    soundSampleMaxLength = SRAM_WAVETABLE_SIZE;
 #else
-    int n;
-    for (n = 0; n < NUM_SAMPLE_TABLES; n++) {
-        sampleTable[n].samplerate = audio_hw_get_sample_rate(NULL);
         ((MMArray*)&sampleTable[n])->length = SAMPLE_TABLE_LENGTH_SEC 
             * sampleTable[n].samplerate;
         sampleTableAreas[n] = ((MMSample*)SDRAM_BANK_ADDR)
@@ -58,14 +48,24 @@ void SampleTable_init(void)
             > (SDRAM_BANK_ADDR + SDRAM_LENGTH)) {
             THROW_ERR("Sample tables do not fit in SDRAM.");
         }
+#endif /* WAVETABLES_IN_SRAM */
         ((MMArray*)&sampleTable[n])->data = sampleTableAreas[n];
         memset(((MMArray*)&sampleTable[n])->data,0,
                 sizeof(MMSample) * ((MMArray*)&sampleTable[n])->length);
+        /* Make ring of WavTabAreaPairs */
+        wtaps[n].wavtab = &sampleTable[n];
+        wtaps[n].area   = sampleTableAreas[n];
+        if (n < (NUM_SAMPLE_TABLES-1)) {
+            wtaps[n].next = &wtaps[n+1];
+        } else {
+            wtaps[n].next = &wtaps[0];
+        }
     }
-    theSound.wavtab = &sampleTable[0];
-    theSound.area = sampleTableAreas[0];
-    recordingSound.wavtab = &sampleTable[1];
-    recordingSound.area   = sampleTableAreas[1];
+    theSound = &wtaps[0];
+    recordingSound = wtaps[0].next;
+#ifdef WAVETABLES_IN_SRAM
+    soundSampleMaxLength = SRAM_WAVETABLE_SIZE;
+#else
     soundSampleMaxLength = SAMPLE_TABLE_LENGTH_SEC 
         * audio_hw_get_sample_rate(NULL);
 #endif /* WAVETABLES_IN_SRAM */

@@ -174,6 +174,11 @@ typedef uint32_t SynthControlEditingWhichParamsIndex;
 #define NUM_NOTE_PARAM_SETS 3 
 typedef uint32_t SynthControlPresetNumber;
 
+typedef enum {
+    scrsh_source_USER,
+    scrsh_source_SCHEDULER
+} scrsh_source_t;
+
 
 
 /* Stuff that could be saved in a preset */
@@ -191,7 +196,7 @@ extern int noteOnEventCount[];
 
 void synth_control_setup(void);
 void autorelease_on_done(MMEnvedSamplePlayer * esp);
-void synth_control_record_stop_helper(void);
+void synth_control_record_stop_helper(scrsh_source_t origin);
 void synth_control_record_start_helper(void);
 void synth_control_record_tog(void);
 void synth_control_schedulerState_tog(void);

@@ -67,7 +67,7 @@ void signal_chain_setup(void)
      * signal chain) */
     /* Make a recorder */
     MMWavTabRecorder_init(&wtr);
-    wtr.buffer = recordingSound.wavtab;
+    wtr.buffer = recordingSound->wavtab;
     wtr.inputBus = inBus;
     wtr.currentIndex = 0;
     wtr.state = MMWavTabRecorderState_STOPPED;

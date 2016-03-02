@@ -4,19 +4,20 @@
 #include "mm_wavtab.h" 
 
 #define SAMPLE_TABLE_LENGTH_SEC 20 
-#define NUM_SAMPLE_TABLES       2 
+#define NUM_SAMPLE_TABLES       3 
 
 typedef struct __WavTabAreaPair {
     MMWavTab *wavtab;
     MMSample *area;
+    struct __WavTabAreaPair *next;
 } WavTabAreaPair;
 
 extern MMWavTab     WaveTable;
 extern MMWavTab     soundSample;
 extern MMWavTab     sampleTable[];
 extern size_t       soundSampleMaxLength;
-extern WavTabAreaPair theSound;
-extern WavTabAreaPair recordingSound;
+extern WavTabAreaPair *theSound;
+extern WavTabAreaPair *recordingSound;
 extern MMSample     *hannWindowTable;
 extern size_t       hannWindowTableLength;
 extern size_t       zeroxSearchMaxLength;
