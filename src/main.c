@@ -43,9 +43,10 @@ int main (void)
     leds_setup();
     timers_setup();
     switches_setup();
-    adc_setup_dma_scan();
+    adc_setup_dma_scan(adc_mode_1SHOT);
     adc_channel_setup();
     synth_adc_control_setup();
+    adc_start_conversion();
     int midi_channel = -1;
     int reset_request = 0;
     supo_get_midi_channel(&midi_channel);

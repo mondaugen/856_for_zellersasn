@@ -568,6 +568,8 @@ void synth_control_record_stop_helper(scrsh_source_t origin)
             noteParamSets[0].intermittency = 0;
             noteParamSets[0].offsetBeats = 0;
             noteParamSets[0].startPoint = 0;
+            noteParamSets[0].attackTime = SYNTH_CONTROL_MIN_ATTACK_TIME;
+            noteParamSets[0].releaseTime = SYNTH_CONTROL_MIN_RELEASE_TIME;
         }
     }
     /* Swap the playing and the recording sounds */

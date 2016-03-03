@@ -5,8 +5,36 @@ static volatile uint16_t adc1_values[ADC1_DMA_NUM_VALS_TRANS];
 static volatile uint16_t adc3_values[ADC3_DMA_NUM_VALS_TRANS];
 /* Stores the address of the first datum converted on the ADC channels */
 uint16_t volatile *adc_data_starts[TOTAL_NUM_ADC_CHANNELS];
+/* Flag indicating whether ADC values are good to read. */
+static volatile uint32_t adc_ready_flg = 0;
 
-void __attribute__((optimize("O0"))) adc_setup_dma_scan(void)
+/* Set up the ADC. See the mode enumeration to see the meanings of the different
+ * modes.
+ * If in continuous mode, the ADC and DMA are set up as follows:
+ * - The DDS bit is set in ADC's configuration register so conversion continues
+ *   until DMA disabled.
+ * - The DMA is in circular mode so that when it reaches the end of the memory
+ *   space, it starts at the beginning of memory.
+ * - No interrupt is called when the memory space is full (just loops back around
+ *   to beginning as described above).
+ * If in one-shot mode:
+ * - DDS bit is reset to prevent DMA overruns, i.e., no more ADC conversions are
+ *   made when the DMA is disabled because the memory space has filled up.
+ * - DMA is not in circular mode. When it reaches the end of memory, transfers
+ *   stop.
+ * - An interrupt is called when the memory has been filled to indicate new
+ *   values are available for reading. When this interrupt is called, the ADC is
+ *   disabled. This is because it was observed that the DMA could become
+ *   misaligned if the ADC was not disabled and then re-enabled before calling
+ *   SWSTART, perhaps because an extra conversion was transferred to DMA, due to
+ *   the ADC's not having been turned off.
+ * - The application must call adc_start_conversion() to start the reading of
+ *   values and the writing of them to memory via DMA. When the transfer has
+ *   completed, a flag is set which the application can check to see if new
+ *   values are available. When the application wants new values, if must call
+ *   adc_start_conversion() again.
+ */
+void __attribute__((optimize("O0"))) adc_setup_dma_scan(adc_mode_t mode)
 {
     /* Clear data buffers */
     uint32_t _n;
@@ -129,8 +157,10 @@ void __attribute__((optimize("O0"))) adc_setup_dma_scan(void)
     ADC1->CR2 &= ~ADC_CR2_EOCS;
     /* Set continuous conversion */
     ADC1->CR2 |= ADC_CR2_CONT;
-    /* Continue requesting DMA as long as DMA enabled */
-    ADC1->CR2 |= ADC_CR2_DDS;
+    if (mode == adc_mode_CONT) {
+        /* Continue requesting DMA as long as DMA enabled */
+        ADC1->CR2 |= ADC_CR2_DDS;
+    }
     /* Set scan mode */
     ADC1->CR1 |= ADC_CR1_SCAN;
     /* Enable DMA */
@@ -143,8 +173,10 @@ void __attribute__((optimize("O0"))) adc_setup_dma_scan(void)
     ADC3->CR2 &= ~ADC_CR2_EOCS;
     /* Set continuous conversion */
     ADC3->CR2 |= ADC_CR2_CONT;
-    /* Continue requesting DMA as long as DMA enabled */
-    ADC3->CR2 |= ADC_CR2_DDS;
+    if (mode == adc_mode_CONT) {
+        /* Continue requesting DMA as long as DMA enabled */
+        ADC3->CR2 |= ADC_CR2_DDS;
+    }
     /* Set scan mode */
     ADC3->CR1 |= ADC_CR1_SCAN;
     /* Enable DMA */
@@ -162,31 +194,40 @@ void __attribute__((optimize("O0"))) adc_setup_dma_scan(void)
     /* Set to channel 0,
      * low priority,
      * memory and peripheral datum size 16-bits,
-//     * circular mode
      * transfer complete interrupt enable,
      * memory increment. */
-    DMA2_Stream4->CR |= (0 << 25)
-        | (0x0 << 16)
-        | (0x1 << 13)
-        | (0x1 << 11)
-        | (0x1 << 10)
-//        | (0x1 << 8)
-        | (0x1 << 4);
+    uint32_t tmpreg = 0;
+    tmpreg |= (0 << 25);
+    tmpreg |= (0x0 << 16);
+    tmpreg |= (0x1 << 13);
+    tmpreg |= (0x1 << 11);
+    tmpreg |= (0x1 << 10);
+    if (mode == adc_mode_CONT) {
+     /* circular mode */
+        tmpreg |= (0x1 << 8);
+    }
+    tmpreg |= (0x1 << 4);
+    DMA2_Stream4->CR = tmpreg;
+
     /* Set peripheral address to ADC1's data register */
     DMA2_Stream4->PAR = (uint32_t)&(ADC1->DR);
     /* Set memory address to first half of ADC values */
     DMA2_Stream4->M0AR = (uint32_t)adc1_values;
     /* Set number of items to transfer */
     DMA2_Stream4->NDTR = ADC1_DMA_NUM_VALS_TRANS;
-    
-    /* Enable DMA2_Stream4 interrupt */
-    NVIC_EnableIRQ(DMA2_Stream4_IRQn);
 
-    /* Enable DMA2, stream 4 */
-    DMA2_Stream4->CR |= DMA_SxCR_EN;
+    if (mode == adc_mode_1SHOT) {
+        /* Enable DMA2_Stream4 interrupt */
+        NVIC_EnableIRQ(DMA2_Stream4_IRQn);
+    }
 
-    /* Start conversion */
-    ADC1->CR2 |= ADC_CR2_SWSTART;
+    if (mode == adc_mode_CONT) {
+        /* Enable DMA2, stream 4 */
+        DMA2_Stream4->CR |= DMA_SxCR_EN;
+
+        /* Start conversion */
+        ADC1->CR2 |= ADC_CR2_SWSTART;
+    }
 
     /* ADC 3 DMA Setup */
     /* Reset control register */
@@ -194,16 +235,20 @@ void __attribute__((optimize("O0"))) adc_setup_dma_scan(void)
     /* Set to channel 2,
      * low priority,
      * memory and peripheral datum size 16-bits,
-//   * circular mode
      * transfer complete interrupt enable,
      * memory increment. */
-    DMA2_Stream0->CR |= (2 << 25)
-        | (0x0 << 16)
-        | (0x1 << 13)
-        | (0x1 << 11)
-        | (0x1 << 10)
-//        | (0x1 << 8)
-        | (0x1 << 4);
+    tmpreg = 0;
+    tmpreg |= (2 << 25);
+    tmpreg |= (0x0 << 16);
+    tmpreg |= (0x1 << 13);
+    tmpreg |= (0x1 << 11);
+    tmpreg |= (0x1 << 10);
+    if (mode == adc_mode_CONT) {
+     /* circular mode */
+        tmpreg |= (0x1 << 8);
+    }
+    tmpreg |= (0x1 << 4);
+    DMA2_Stream0->CR = tmpreg;
     /* Set peripheral address to ADC3's data register */
     DMA2_Stream0->PAR = (uint32_t)&(ADC3->DR);
     /* Set memory address to second half ADC values */
@@ -211,14 +256,59 @@ void __attribute__((optimize("O0"))) adc_setup_dma_scan(void)
     /* Set number of items to transfer */
     DMA2_Stream0->NDTR = ADC3_DMA_NUM_VALS_TRANS;
     
-    /* Enable DMA2_Stream0 interrupt */
-    NVIC_EnableIRQ(DMA2_Stream0_IRQn);
+    if (mode == adc_mode_1SHOT) {
+        /* Enable DMA2_Stream0 interrupt */
+        NVIC_EnableIRQ(DMA2_Stream0_IRQn);
+    }
 
-    /* Enable DMA2, stream 0 */
-    DMA2_Stream0->CR |= DMA_SxCR_EN;
+    if (mode == adc_mode_CONT) {
+        /* Enable DMA2, stream 0 */
+        DMA2_Stream0->CR |= DMA_SxCR_EN;
 
+        /* Start conversion */
+        ADC3->CR2 |= ADC_CR2_SWSTART;
+    }
+}
+
+static void start_adc3_conversion(void)
+{
+    /* Turn on ADC */
+    ADC3->CR2 |= ADC_CR2_ADON;
+    /* Reset DMA */
+    ADC3->CR2 &= ~ADC_CR2_DMA;
+    ADC3->CR2 |= ADC_CR2_DMA;
     /* Start conversion */
     ADC3->CR2 |= ADC_CR2_SWSTART;
+    /* Enable DMA2 */
+    DMA2_Stream0->CR |= DMA_SxCR_EN;
+}
+
+static void start_adc1_conversion(void)
+{
+    ADC1->CR2 |= ADC_CR2_ADON;
+    /* Reset DMA */
+    ADC1->CR2 &= ~ADC_CR2_DMA;
+    ADC1->CR2 |= ADC_CR2_DMA;
+    /* Start conversion */
+    ADC1->CR2 |= ADC_CR2_SWSTART;
+    /* Enable DMA2 */
+    DMA2_Stream4->CR |= DMA_SxCR_EN;
+}
+
+void adc_clear_adc_ready(void)
+{
+    adc_ready_flg = 0;
+}
+
+void adc_start_conversion(void)
+{
+    start_adc1_conversion();
+    start_adc3_conversion();
+}
+
+int adc_get_adc_ready(void)
+{
+    return adc_ready_flg == ADC_READY_MASK;
 }
 
 /* "ADC 3's" DMA handler */
@@ -228,13 +318,10 @@ void __attribute__((optimize("O0"))) DMA2_Stream0_IRQHandler(void)
     if (DMA2->LISR & DMA_LISR_TCIF0) {
         /* Clear interrupt */
         DMA2->LIFCR |= DMA_LIFCR_CTCIF0;
-        /* Enable DMA2 */
-        DMA2_Stream0->CR |= DMA_SxCR_EN;
-        /* Reset DMA */
-        ADC3->CR2 &= ~ADC_CR2_DMA;
-        ADC3->CR2 |= ADC_CR2_DMA;
-        /* Start conversion */
-        ADC3->CR2 |= ADC_CR2_SWSTART;
+        /* Turn off ADC */
+        ADC3->CR2 &= ~ADC_CR2_ADON;
+        /* Data are good to read, set ready bit */
+        adc_ready_flg |= (1 << ADC3_READY_BIT);
     }
 }
 
@@ -245,12 +332,9 @@ void __attribute__((optimize("O0"))) DMA2_Stream4_IRQHandler(void)
     if (DMA2->HISR & DMA_HISR_TCIF4) {
         /* Clear interrupt */
         DMA2->HIFCR |= DMA_HIFCR_CTCIF4;
-//        /* Enable DMA2 */
-//        DMA2_Stream4->CR |= DMA_SxCR_EN;
-//        /* Reset DMA */
-//        ADC1->CR2 &= ~ADC_CR2_DMA;
-//        ADC1->CR2 |= ADC_CR2_DMA;
-//        /* Start conversion */
-//        ADC1->CR2 |= ADC_CR2_SWSTART;
+        /* Turn off ADC */
+        ADC1->CR2 &= ~ADC_CR2_ADON;
+        /* Data are good to read, set ready bit */
+        adc_ready_flg |= (1 << ADC1_READY_BIT);
     }
 }

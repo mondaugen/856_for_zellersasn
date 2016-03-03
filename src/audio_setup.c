@@ -33,8 +33,12 @@ void audio_hw_io(audio_hw_io_t *params)
     /* Process switches. MIDI trumps switches if messages present */
     switch_control_do_all();
     /* Process knobs. MIDI trumps knobs if messages present. */
-    adc_channels_update();
-    adc_channel_do_all_sets();
+    if (adc_get_adc_ready()) {
+        adc_channels_update();
+        adc_channel_do_all_sets();
+        adc_clear_adc_ready();
+        adc_start_conversion();
+    }
     /* Process MIDI once every audioblock */
     midi_hw_process_input(NULL);
     /* Update LEDs */

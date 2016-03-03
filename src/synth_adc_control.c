@@ -174,7 +174,7 @@ SYNTH_ADC_SETUP(tempo,SYNTH_ADC_TEMPO_IDX,synth_adc_tempo_control);
 
 void synth_adc_control_setup(void)
 {
-    adc_channel_setup();
+    /* adc_channel_setup should have been called at some point before this */
     synth_adc_envelopeTime_curParams_control_setup();
     synth_adc_sustainTime_curParams_control_setup();
     synth_adc_offset_curParams_control_setup();
