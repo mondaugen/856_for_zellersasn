@@ -12,6 +12,18 @@
 #define NUM_ADC_VALUES (ADC_AVG_SIZE*TOTAL_NUM_ADC_CHANNELS)
 #define ADC1_DMA_NUM_VALS_TRANS (NUM_CHANNELS_PER_ADC*ADC_AVG_SIZE)
 #define ADC3_DMA_NUM_VALS_TRANS (NUM_CHANNELS_PER_ADC*ADC_AVG_SIZE) 
+
+typedef enum {
+    /* In continuous mode, the adc is always converting. The application can
+     * check the values whenever, but the conversion will always be running. */
+    adc_mode_CONT,
+    /* In one shot mode, the adc sets a flag when it is done converting, and
+     * pauses. The application must restart conversion. This is so the
+     * application can check the values knowing they will not change, and then
+     * request new values when it is done with them. */
+    adc_mode_1SHOT
+} adc_mode_t;
+
 extern uint16_t volatile *adc_data_starts[];
 void adc_setup_dma_scan(void);
 #endif /* ADC_H */

@@ -162,7 +162,7 @@ void __attribute__((optimize("O0"))) adc_setup_dma_scan(void)
     /* Set to channel 0,
      * low priority,
      * memory and peripheral datum size 16-bits,
-     * circular mode
+//     * circular mode
      * transfer complete interrupt enable,
      * memory increment. */
     DMA2_Stream4->CR |= (0 << 25)
@@ -170,7 +170,7 @@ void __attribute__((optimize("O0"))) adc_setup_dma_scan(void)
         | (0x1 << 13)
         | (0x1 << 11)
         | (0x1 << 10)
-        | (0x1 << 8)
+//        | (0x1 << 8)
         | (0x1 << 4);
     /* Set peripheral address to ADC1's data register */
     DMA2_Stream4->PAR = (uint32_t)&(ADC1->DR);
@@ -180,7 +180,7 @@ void __attribute__((optimize("O0"))) adc_setup_dma_scan(void)
     DMA2_Stream4->NDTR = ADC1_DMA_NUM_VALS_TRANS;
     
     /* Enable DMA2_Stream4 interrupt */
-//    NVIC_EnableIRQ(DMA2_Stream4_IRQn);
+    NVIC_EnableIRQ(DMA2_Stream4_IRQn);
 
     /* Enable DMA2, stream 4 */
     DMA2_Stream4->CR |= DMA_SxCR_EN;
@@ -194,7 +194,7 @@ void __attribute__((optimize("O0"))) adc_setup_dma_scan(void)
     /* Set to channel 2,
      * low priority,
      * memory and peripheral datum size 16-bits,
-     * circular mode
+//   * circular mode
      * transfer complete interrupt enable,
      * memory increment. */
     DMA2_Stream0->CR |= (2 << 25)
@@ -202,7 +202,7 @@ void __attribute__((optimize("O0"))) adc_setup_dma_scan(void)
         | (0x1 << 13)
         | (0x1 << 11)
         | (0x1 << 10)
-        | (0x1 << 8)
+//        | (0x1 << 8)
         | (0x1 << 4);
     /* Set peripheral address to ADC3's data register */
     DMA2_Stream0->PAR = (uint32_t)&(ADC3->DR);
@@ -212,7 +212,7 @@ void __attribute__((optimize("O0"))) adc_setup_dma_scan(void)
     DMA2_Stream0->NDTR = ADC3_DMA_NUM_VALS_TRANS;
     
     /* Enable DMA2_Stream0 interrupt */
-//    NVIC_EnableIRQ(DMA2_Stream0_IRQn);
+    NVIC_EnableIRQ(DMA2_Stream0_IRQn);
 
     /* Enable DMA2, stream 0 */
     DMA2_Stream0->CR |= DMA_SxCR_EN;
@@ -222,29 +222,29 @@ void __attribute__((optimize("O0"))) adc_setup_dma_scan(void)
 }
 
 /* "ADC 3's" DMA handler */
-//void __attribute__((optimize("O0"))) DMA2_Stream0_IRQHandler(void)
-//{
-//    NVIC_ClearPendingIRQ(DMA2_Stream0_IRQn);
-//    if (DMA2->LISR & DMA_LISR_TCIF0) {
-//        /* Clear interrupt */
-//        DMA2->LIFCR |= DMA_LIFCR_CTCIF0;
-//        /* Enable DMA2 */
-//        DMA2_Stream0->CR |= DMA_SxCR_EN;
-//        /* Reset DMA */
-//        ADC3->CR2 &= ~ADC_CR2_DMA;
-//        ADC3->CR2 |= ADC_CR2_DMA;
-//        /* Start conversion */
-//        ADC3->CR2 |= ADC_CR2_SWSTART;
-//    }
-//}
+void __attribute__((optimize("O0"))) DMA2_Stream0_IRQHandler(void)
+{
+    NVIC_ClearPendingIRQ(DMA2_Stream0_IRQn);
+    if (DMA2->LISR & DMA_LISR_TCIF0) {
+        /* Clear interrupt */
+        DMA2->LIFCR |= DMA_LIFCR_CTCIF0;
+        /* Enable DMA2 */
+        DMA2_Stream0->CR |= DMA_SxCR_EN;
+        /* Reset DMA */
+        ADC3->CR2 &= ~ADC_CR2_DMA;
+        ADC3->CR2 |= ADC_CR2_DMA;
+        /* Start conversion */
+        ADC3->CR2 |= ADC_CR2_SWSTART;
+    }
+}
 
 /* "ADC 1's" DMA Handler */
-//void __attribute__((optimize("O0"))) DMA2_Stream4_IRQHandler(void)
-//{
-//    NVIC_ClearPendingIRQ(DMA2_Stream4_IRQn);
-//    if (DMA2->HISR & DMA_HISR_TCIF4) {
-//        /* Clear interrupt */
-//        DMA2->HIFCR |= DMA_HIFCR_CTCIF4;
+void __attribute__((optimize("O0"))) DMA2_Stream4_IRQHandler(void)
+{
+    NVIC_ClearPendingIRQ(DMA2_Stream4_IRQn);
+    if (DMA2->HISR & DMA_HISR_TCIF4) {
+        /* Clear interrupt */
+        DMA2->HIFCR |= DMA_HIFCR_CTCIF4;
 //        /* Enable DMA2 */
 //        DMA2_Stream4->CR |= DMA_SxCR_EN;
 //        /* Reset DMA */
@@ -252,5 +252,5 @@ void __attribute__((optimize("O0"))) adc_setup_dma_scan(void)
 //        ADC1->CR2 |= ADC_CR2_DMA;
 //        /* Start conversion */
 //        ADC1->CR2 |= ADC_CR2_SWSTART;
-//    }
-//}
+    }
+}
