@@ -356,7 +356,10 @@ static void NoteSchedEvent_happen(MMEvent *event)
              * SynthControlRecMode_REC_LEN_1_BEAT_REC_SCHED state, and actually not
              * turned off at that point (as it is with SynthControlRecMode_REC_LEN_1_BEAT)
              * If scheduleRecording is 2, then this means the recording was just
-             * scheduled by the user, if 1 it means the sequencer scheduled it. */
+             * scheduled by the user, if 1 it means the sequencer scheduled it.
+             * It is also okay to stop recording, even if not currently
+             * recording, in this case, the request is ignored (see
+             * synth_contol_record_stop_helper*/
             if (scheduleRecording > 0) {
                 if (scheduleRecording == 2) {
                     scheduleRecording = 1;

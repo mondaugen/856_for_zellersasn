@@ -110,22 +110,22 @@ SYNTH_ADC_SETUP(eventDelta_curParams,SYNTH_ADC_EVENTDELTA_IDX,
 static void synth_adc_pitch_curParams_control(adc_channel_t *chan,
                                     adc_channel_do_data_t *data)
 {
-    if (synth_control_get_editingWhichParams() == 0) {
-        synth_control_set_pitch_chrom_quant(
-                synth_adc_scale_thresh(chan->cur_val),0,0);
-    } else {
-        if (synth_control_get_posMode_curParams() == SynthControlPosMode_UNI) {
-            synth_control_set_uni_stuff_changed();
-            int n;
-            for (n = 0; n < SYNTH_CONTROL_PITCH_TABLE_SIZE; n++) {
-                synth_control_set_pitch_chrom_quant(
+    if (synth_control_get_posMode_curParams() == SynthControlPosMode_UNI) {
+        synth_control_set_uni_stuff_changed();
+        int n;
+        for (n = 0; n < SYNTH_CONTROL_PITCH_TABLE_SIZE; n++) {
+            synth_control_set_pitch_chrom_quant(
                     synth_adc_scale_thresh(chan->cur_val),
                     n,
                     synth_control_get_editingWhichParams());
-            }
+        }
+    } else {
+        if (synth_control_get_editingWhichParams() == 0) {
+            synth_control_set_pitch_chrom_quant(
+                    synth_adc_scale_thresh(chan->cur_val),0,0);
         } else {
             synth_control_set_pitch_chrom_quant_curParams(
-                synth_adc_scale_thresh(chan->cur_val));
+                    synth_adc_scale_thresh(chan->cur_val));
         }
     }
 }

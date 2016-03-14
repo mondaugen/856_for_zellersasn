@@ -294,8 +294,6 @@ void synth_control_set_pitch_chrom(float pitch_param,
         = -12 + 24 * pitch_param;
 }
 
-void synth_control_set_pitch_chrom_curParams(float pitch_param)
-{
     synth_control_set_pitch_chrom(pitch_param,
             synth_control_get_editing_which_pitch(),
             synth_control_get_editingWhichParams());
@@ -504,6 +502,8 @@ void synth_control_autoRecord_stop_helper(void)
     wtr.state = MMWavTabRecorderState_STOPPED;
 }
 
+/* If the origin is USER, the tempo is adjusted in the REC_LEN_1_BEAT and
+ * REC_LEN_1_BEAT_REC_SCHED modes, otherwise it is not. */
 void synth_control_record_stop_helper(scrsh_source_t origin)
 {
     /* Only do something if it was recording */
@@ -613,7 +613,11 @@ void synth_control_record_stop(void)
         } else {
             synth_control_record_stop_helper(scrsh_source_USER);
         }
-        schedulerState_on_helper();
+        /* In FREE record mode, playback is not triggered */
+        if ((_recMode == SynthControlRecMode_REC_LEN_1_BEAT)
+                || (_recMode == SynthControlRecMode_REC_LEN_1_BEAT_REC_SCHED)) {
+            schedulerState_on_helper();
+        }
     }
 }
 
@@ -622,7 +626,21 @@ void synth_control_record_start(void)
 #ifdef DEBUG
        assert(scheduleRecording == 0);
 #endif  
-       synth_control_record_start_helper();
+       SynthControlRecMode _recMode =
+           synth_control_get_recMode();
+       if ((_recMode == SynthControlRecMode_REC_LEN_1_BEAT_REC_SCHED)
+              && (schedulerState == 1)) {
+           /* Turn back on record scheduling. Note that this will make record
+            * scheduling happen when the scheduler is turned back on, if it is
+            * not already on. */
+           if (scheduleRecording == 0) {
+               /* Set to 1 (and not 2) because we do not want tempo to be
+                * adjusted */
+               scheduleRecording = 1;
+           }
+       } else {
+           synth_control_record_start_helper();
+       }
 }
 
 /* If record switch pressed, recording on-going and record scheduling off, turn
@@ -718,12 +736,7 @@ void synth_control_fbk_tog(void)
         SynthControlRecMode _recmode;
         _recmode = synth_control_get_recMode();
         if (_recmode == SynthControlRecMode_REC_LEN_1_BEAT_REC_SCHED) {
-            /* Turn back on record scheduling. Note that this will make record
-             * scheduling happen when the scheduler is turned back on, if it is
-             * not already on. */
-            if (scheduleRecording == 0) {
-                scheduleRecording = 1;
-            }
+            /* Do NOTHING */
         } else {
             synth_control_feedback_tog();
         }
