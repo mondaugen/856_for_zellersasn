@@ -294,6 +294,8 @@ void synth_control_set_pitch_chrom(float pitch_param,
         = -12 + 24 * pitch_param;
 }
 
+void synth_control_set_pitch_chrom_curParams(float pitch_param)
+{
     synth_control_set_pitch_chrom(pitch_param,
             synth_control_get_editing_which_pitch(),
             synth_control_get_editingWhichParams());
