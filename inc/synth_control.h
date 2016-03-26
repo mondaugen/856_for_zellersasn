@@ -168,6 +168,11 @@ typedef struct __NoteParamSet {
 #define SYNTH_CONTROL_DEFAULT_PITCHMODE SynthControlPitchMode_ABSOLUTE 
 #define SYNTH_CONTROL_PITCH_MIN     (0)
 #define SYNTH_CONTROL_PITCH_MAX     (127)
+#define SYNTH_CONTROL_POS_STRIDE_SCALE 0.2
+#define SYNTH_CONTROL_POS_STRIDE_OFFSET 0.1 
+#define SYNTH_CONTROL_ABS_MIN_TEMPO_BPM (60. / SAMPLE_TABLE_LENGTH_SEC)
+#define SYNTH_CONTROL_ABS_MAX_TEMPO_BPM (60. / (float)(audio_hw_get_block_size(NULL) \
+                                        / (float)audio_hw_get_sample_rate(NULL)))
 
 typedef uint32_t SynthControlEditingWhichParamsIndex;
 /* The number of sets of note parameters */

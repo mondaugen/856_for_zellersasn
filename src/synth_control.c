@@ -188,7 +188,9 @@ void synth_control_update_tempo_scale(float _tempoBPM_scale)
     synth_control_update_tempo();
 }
 
-/* sets tempo and resets fine and scaling controls */
+/* sets tempo and resets fine and scaling controls.
+ * This does NOT check if the argument is a valid tempo. A valid tempo is one
+ * that is between the limits defined in this file's header and is a number. */
 void synth_control_set_tempoBPM_absolute(float _tempoBPM)
 {
     synth_control_set_tempo_fine(SYNTH_CONTROL_DEFAULT_TEMPOBPM_FINE);
@@ -377,8 +379,9 @@ void synth_control_set_startPoint_curParams(float startPoint_param)
 
 void synth_control_set_positionStride(float positionStride_param, int note_params_idx)
 {
-            noteParamSets[note_params_idx].positionStride
-                = positionStride_param * 0.2 - 0.1;
+    noteParamSets[note_params_idx].positionStride
+        = positionStride_param * SYNTH_CONTROL_POS_STRIDE_SCALE 
+            - SYNTH_CONTROL_POS_STRIDE_OFFSET;
 }
 
 void synth_control_set_positionStride_curParams(float positionStride_param)
@@ -554,9 +557,17 @@ void synth_control_record_stop_helper(scrsh_source_t origin)
          */
         if (origin == scrsh_source_USER) {
             /* Only adjust the tempo if record stop was called by user */
-            synth_control_set_tempoBPM_absolute(60. 
-                    * (MMSample)audio_hw_get_sample_rate(NULL) 
+            float _tmp;
+            if ((MMSample)((MMArray*)wtr.buffer)->length <= 0) {
+                _tmp = SYNTH_CONTROL_ABS_MAX_TEMPO_BPM;
+            } else if ((MMSample)((MMArray*)wtr.buffer)->length >
+                        (SAMPLE_TABLE_LENGTH_SEC*((float)audio_hw_get_sample_rate(NULL))))
+                _tmp = SYNTH_CONTROL_ABS_MIN_TEMPO_BPM;
+            else {
+                _tmp = (60. * (MMSample)audio_hw_get_sample_rate(NULL) 
                     / (MMSample)((MMArray*)wtr.buffer)->length);
+            }
+            synth_control_set_tempoBPM_absolute(_tmp);
         }
         if (feedbackState == 1) {
             int n;
