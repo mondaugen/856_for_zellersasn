@@ -338,8 +338,10 @@ void synth_midi_note_on_control(void *data, MIDIMsg *msg)
 	#endif
     float pitch, amplitude;
     pitch = msg->data[1] - SYNTH_CONTROL_PITCH_UNISON;
-    /* TODO: use dB scale for more "natural" amplitude variation */
     amplitude = (float)msg->data[2] / (float)MIDIMSG_DATA_BYTE_MAX;
+    amplitude = SYNTH_CONTROL_MIN_GAIN 
+        + (SYNTH_CONTROL_MAX_GAIN - SYNTH_CONTROL_MIN_GAIN)*amplitude;
+    amplitude = powf(10.,amplitude/20.);
     synth_control_one_shot(pitch,amplitude);
 }
 

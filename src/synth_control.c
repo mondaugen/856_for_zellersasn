@@ -676,7 +676,11 @@ void synth_control_record_tog(void)
 void synth_control_feedback_control(uint32_t feedback_param)
 {
     if (feedback_param > 0) {
-        if (feedbackState == 0) {
+        SynthControlRecMode _recmode;
+        _recmode = synth_control_get_recMode();
+        /* Feedback is unavailable in record scheduling mode. */
+        if ((feedbackState == 0)
+                && (_recmode != SynthControlRecMode_REC_LEN_1_BEAT_REC_SCHED)) {
             /* Move fbBusSplitter to onNode */
             MMSigProc_insertAfter(fbOnNode,&fbBusSplitter);
             feedbackState = 1;
@@ -737,7 +741,7 @@ void synth_control_fbk_tog(void)
     SynthControlPosMode pm;
     pm = synth_control_get_posMode_curParams();
     if (pm == SynthControlPosMode_UNI){
-        if (num_fbk_presses == 0) {
+       if (num_fbk_presses == 0) {
             synth_control_reset_aux_note_gains();
             num_fbk_presses++;
         } else if (num_fbk_presses == 1) {
