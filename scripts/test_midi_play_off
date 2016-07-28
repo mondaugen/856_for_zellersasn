@@ -1,0 +1,10 @@
+#! /bin/bash
+# Script for testing MIDI functionality of turning playback off on 856
+
+MIDIDEV=hw:1,0,0
+
+MIDI_CHANNEL=0
+CC=58
+
+
+amidi -p $MIDIDEV -S `printf "b%x %02x 00" $MIDI_CHANNEL $CC`  

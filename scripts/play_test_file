@@ -14,4 +14,4 @@ else
 fi
 export AUDIODEV=plughw:CARD=Pro,DEV=0
 sox --combine merge "|sox -n -r 48000 -c 1 -p synth sine 1 gain -200"\
-    "|sox ${SOUNDFILE} -r 48000 -c 1 -p repeat 1000000" -d $SOX_PROCS
+    "|sox ${SOUNDFILE} -r 48000 -c 1 -p repeat 1000000" -t alsa $SOX_PROCS
