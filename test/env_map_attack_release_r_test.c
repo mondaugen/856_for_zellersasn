@@ -1,3 +1,5 @@
+/* Copyright (c) 2016 Nicholas Esterer. All rights reserved. */
+
 #include <stdio.h> 
 #include <math.h> 
 #include "env_map.h"

@@ -1,3 +1,5 @@
+/* Copyright (c) 2016 Nicholas Esterer. All rights reserved. */
+
 /* Routines that check the states of input (e.g., switches) to get information
  * while starting up. */
 #include <stdint.h> 

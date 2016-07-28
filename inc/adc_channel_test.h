@@ -1,3 +1,5 @@
+/* Copyright (c) 2016 Nicholas Esterer. All rights reserved. */
+
 #ifndef ADC_CHANNEL_TEST_H
 #define ADC_CHANNEL_TEST_H 
 #include <stdint.h> 

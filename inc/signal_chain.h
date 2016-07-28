@@ -1,3 +1,5 @@
+/* Copyright (c) 2016 Nicholas Esterer. All rights reserved. */
+
 #ifndef SIGNAL_CHAIN_H
 #define SIGNAL_CHAIN_H 
 #include "mm_bus.h"

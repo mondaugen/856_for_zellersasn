@@ -1,3 +1,5 @@
+/* Copyright (c) 2016 Nicholas Esterer. All rights reserved. */
+
 #ifndef WAVETABLES_H
 #define WAVETABLES_H 
 #include "audio_setup.h" 

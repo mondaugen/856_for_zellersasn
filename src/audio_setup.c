@@ -1,3 +1,5 @@
+/* Copyright (c) 2016 Nicholas Esterer. All rights reserved. */
+
 #include "audio_setup.h" 
 #include "midi_setup.h" 
 #include "signal_chain.h" 

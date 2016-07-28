@@ -1,3 +1,5 @@
+/* Copyright (c) 2016 Nicholas Esterer. All rights reserved. */
+
 #ifndef AUDIO_SETUP_H
 #define AUDIO_SETUP_H 
 #include "i2s_lowlevel.h"

@@ -1,3 +1,5 @@
+/* Copyright (c) 2016 Nicholas Esterer. All rights reserved. */
+
 #ifndef LEDS_H
 #define LEDS_H 
 

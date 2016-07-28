@@ -1,3 +1,5 @@
+/* Copyright (c) 2016 Nicholas Esterer. All rights reserved. */
+
 #include "poly_management.h"
 #include "signal_chain.h" 
 

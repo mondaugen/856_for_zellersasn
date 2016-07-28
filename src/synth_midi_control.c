@@ -1,3 +1,5 @@
+/* Copyright (c) 2016 Nicholas Esterer. All rights reserved. */
+
 #include "synth_midi_control.h" 
 
 #ifdef DEBUG 

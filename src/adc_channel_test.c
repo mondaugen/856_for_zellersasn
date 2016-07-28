@@ -1,3 +1,5 @@
+/* Copyright (c) 2016 Nicholas Esterer. All rights reserved. */
+
 #include "adc.h"
 #include "adc_channel_test.h" 
 #include <stdint.h> 

@@ -1,3 +1,5 @@
+/* Copyright (c) 2016 Nicholas Esterer. All rights reserved. */
+
 #ifndef SYSTEM_INIT_H
 #define SYSTEM_INIT_H 
 #include <stdint.h> 

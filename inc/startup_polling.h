@@ -1,3 +1,5 @@
+/* Copyright (c) 2016 Nicholas Esterer. All rights reserved. */
+
 #ifndef STARTUP_POLLING_H
 #define STARTUP_POLLING_H 
 

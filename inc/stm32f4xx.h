@@ -1,3 +1,5 @@
+/* Copyright (c) 2016 Nicholas Esterer. All rights reserved. */
+
 /**
   ******************************************************************************
   * @file    stm32f4xx.h

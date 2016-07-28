@@ -1,3 +1,5 @@
+/* Copyright (c) 2016 Nicholas Esterer. All rights reserved. */
+
 /* Implementation of preset recalling when the standard i/o functionality is
  * available like fwrite fread etc. */
 #include "presets_lowlevel.h"

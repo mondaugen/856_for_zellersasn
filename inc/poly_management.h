@@ -1,3 +1,5 @@
+/* Copyright (c) 2016 Nicholas Esterer. All rights reserved. */
+
 #ifndef POLY_MANAGEMENT_H
 #define POLY_MANAGEMENT_H 
 

@@ -1,3 +1,5 @@
+/* Copyright (c) 2016 Nicholas Esterer. All rights reserved. */
+
 #include "adc_channel.h" 
 
 static adc_channel_do_set_t *_do_sets;

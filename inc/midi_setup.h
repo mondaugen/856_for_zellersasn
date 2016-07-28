@@ -1,3 +1,5 @@
+/* Copyright (c) 2016 Nicholas Esterer. All rights reserved. */
+
 #ifndef MIDI_SETUP_H
 #define MIDI_SETUP_H 
 #include "uart_midi_lowlevel.h"

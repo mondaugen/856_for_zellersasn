@@ -1,3 +1,5 @@
+/* Copyright (c) 2016 Nicholas Esterer. All rights reserved. */
+
 #ifndef UART_MIDI_LOWLEVEL_H
 #define UART_MIDI_LOWLEVEL_H 
 

@@ -1,3 +1,5 @@
+/* Copyright (c) 2016 Nicholas Esterer. All rights reserved. */
+
 #ifndef ENV_MAP_H
 #define ENV_MAP_H 
 #include "mm_sample.h" 

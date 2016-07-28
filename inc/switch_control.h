@@ -1,3 +1,5 @@
+/* Copyright (c) 2016 Nicholas Esterer. All rights reserved. */
+
 #ifndef SWITCH_CONTROL_H
 #define SWITCH_CONTROL_H 
 

@@ -1,3 +1,5 @@
+/* Copyright (c) 2016 Nicholas Esterer. All rights reserved. */
+
 /* Implementation based on test/pcm.c found in the alsa-lib repository. */
 
 #include "i2s_lowlevel.h" 

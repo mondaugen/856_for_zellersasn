@@ -1,3 +1,5 @@
+/* Copyright (c) 2016 Nicholas Esterer. All rights reserved. */
+
 #include "switches.h"
 #include "switch_control.h"
 #include "synth_control.h" 

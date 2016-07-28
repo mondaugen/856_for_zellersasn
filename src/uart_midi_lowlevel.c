@@ -1,3 +1,5 @@
+/* Copyright (c) 2016 Nicholas Esterer. All rights reserved. */
+
 #include "uart_midi_lowlevel.h"
 #include "system_init.h" 
 

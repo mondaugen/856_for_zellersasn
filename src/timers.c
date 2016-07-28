@@ -1,3 +1,5 @@
+/* Copyright (c) 2016 Nicholas Esterer. All rights reserved. */
+
 #include <stddef.h> 
 #include "stm32f4xx.h"
 #include "timers.h" 

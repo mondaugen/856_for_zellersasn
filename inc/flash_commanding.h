@@ -1,3 +1,5 @@
+/* Copyright (c) 2016 Nicholas Esterer. All rights reserved. */
+
 #ifndef FLASH_COMMANDING_H
 #define FLASH_COMMANDING_H 
 #include <stdint.h>

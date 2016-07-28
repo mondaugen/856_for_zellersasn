@@ -1,3 +1,5 @@
+/* Copyright (c) 2016 Nicholas Esterer. All rights reserved. */
+
 /* Tables of rational numbers */
 #include "quantization_tables.h" 
 

@@ -1,3 +1,5 @@
+/* Copyright (c) 2016 Nicholas Esterer. All rights reserved. */
+
 #include "adc_channel.h" 
 #include "synth_adc_control.h" 
 #include "synth_control.h"

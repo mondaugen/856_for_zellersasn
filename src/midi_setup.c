@@ -1,3 +1,5 @@
+/* Copyright (c) 2016 Nicholas Esterer. All rights reserved. */
+
 #include "midi_setup.h" 
 
 MIDI_Router_Standard midiRouter;

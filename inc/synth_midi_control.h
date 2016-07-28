@@ -1,3 +1,5 @@
+/* Copyright (c) 2016 Nicholas Esterer. All rights reserved. */
+
 #ifndef SYNTH_MIDI_CONTROL_H
 #define SYNTH_MIDI_CONTROL_H 
 #include "synth_control.h" 

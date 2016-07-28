@@ -1,3 +1,5 @@
+/* Copyright (c) 2016 Nicholas Esterer. All rights reserved. */
+
 #include <stdint.h>
 #include <stddef.h> 
 #include "switch_control_test.h" 

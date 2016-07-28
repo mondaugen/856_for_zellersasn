@@ -1,3 +1,5 @@
+/* Copyright (c) 2016 Nicholas Esterer. All rights reserved. */
+
 #ifndef TIMERS_H
 #define TIMERS_H 
 #include <stdint.h> 

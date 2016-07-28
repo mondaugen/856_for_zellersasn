@@ -1,3 +1,5 @@
+/* Copyright (c) 2016 Nicholas Esterer. All rights reserved. */
+
 #include <stdint.h> 
 
 static void __attribute__((optimize("O0")))

@@ -1,3 +1,5 @@
+/* Copyright (c) 2016 Nicholas Esterer. All rights reserved. */
+
 #ifndef PRESETS_LOWLEVEL_H
 #define PRESETS_LOWLEVEL_H 
 #include <stdint.h> 

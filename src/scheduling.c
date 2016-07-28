@@ -1,3 +1,5 @@
+/* Copyright (c) 2016 Nicholas Esterer. All rights reserved. */
+
 #include "scheduling.h" 
 #include "audio_setup.h" 
 #include "synth_control.h" 

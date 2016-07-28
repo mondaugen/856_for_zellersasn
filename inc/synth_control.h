@@ -1,3 +1,5 @@
+/* Copyright (c) 2016 Nicholas Esterer. All rights reserved. */
+
 #ifndef SYNTH_CONTROL_H
 #define SYNTH_CONTROL_H 
 #include "mm_time.h" 

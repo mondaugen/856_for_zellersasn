@@ -1,3 +1,5 @@
+/* Copyright (c) 2016 Nicholas Esterer. All rights reserved. */
+
 #ifndef SYNTH_CONTROL_PRESETS_H
 #define SYNTH_CONTROL_PRESETS_H 
 

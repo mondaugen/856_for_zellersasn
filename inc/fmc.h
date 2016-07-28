@@ -1,3 +1,5 @@
+/* Copyright (c) 2016 Nicholas Esterer. All rights reserved. */
+
 #ifndef FMC_H
 #define FMC_H 
 #include "stm32f4xx.h" 
