@@ -2,7 +2,7 @@
 
 MEMORY
 {
-    /* Progsram1s reside in bank 1, leaving bank 2 free to record into. */
+    /* Progsrams reside in bank 1, leaving bank 2 free to record into. */
     flash (rx) : ORIGIN = 0x08000000, LENGTH = 1M
     sram1 (rwx)  : ORIGIN = 0x20000000, LENGTH = 112K
     sram2 (rwx)  : ORIGIN = 0x2001c000, LENGTH = 16K
@@ -32,6 +32,7 @@ SECTIONS
     .text :
     {
         . = ALIGN(4);
+        *(.flash_comment_text)
         *(.text)
         *(.text*)
         . = ALIGN(4);

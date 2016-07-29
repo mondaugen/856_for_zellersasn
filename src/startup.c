@@ -548,3 +548,12 @@ void Reset_Handler(void)
     while(1);
 }
     
+__attribute__((section(".flash_comment_text")))
+char flash_comment_text[] = "856 for ZELLERSASN version 1.0. "
+                            "Copyright (c) 2016 Nicholas Esterer. "
+                            "All rights reserved. "
+                            "Special thanks to Scott Monk "
+                            "and all of Montreal Assembly. "
+                            "\"A ce petit bistrot-la, ils font "
+                            "du petit salé aux lentilles tous les jeudis.\"";
+
