@@ -41,6 +41,7 @@ void sc_presets_init(int reset_request, int *midi_channel)
      * initialized. */
     if (scstorage.first_read != SCP_FIRST_READ_KW) {
         reset_request = 2;
+        memset(&scstorage,0,sizeof(SCStorage));
         scstorage.first_read = SCP_FIRST_READ_KW;
         scstorage.midi_channel = SYNTH_MIDI_CONTROL_DEFAULT_CHANNEL;
     }
