@@ -1,0 +1,19 @@
+| Control change number | Description | Notes |
+| 0 | N1/Bar Pitch 1 control (fine) | Adjust pitch of 1st, 4th, ... notes in arpeggio from -100 cents to +100 cents (hundreths of a semitone) |
+| 1 | N1/Bar Pitch 2 control (fine) | Adjust pitch of 2nd, 5th, ... notes in arpeggio from -100 cents to +100 cents (hundreths of a semitone) |
+| 2 | N1/Bar Pitch 3 control (fine) | Adjust pitch of 3rd, 6th, ... notes in arpeggio from -100 cents to +100 cents (hundreths of a semitone) |
+| 3 | N1/Bar Envelope control | Control the amplitude envelope of the notes just as the ENV knob does |
+| 4 | N1/Bar Length control | Control the length of the notes just as the LEN knob does |
+| 5 | N1/Bar Pitch 1 control | Adjust pitch of 1st, 4th, ... notes in arpeggio from -12 semitones to +12 semitones|
+| 6 | N1/Bar Pitch 2 control | Adjust pitch of 2nd, 5th, ... notes in arpeggio from -12 semitones to +12 semitones|
+| 7 | N1/Bar Pitch 3 control | Adjust pitch of 3rd, 6th, ... notes in arpeggio from -12 semitones to +12 semitones|
+| 8 | N1/Bar Gain control | Control the gain just as the GAIN knob does with the FADE/GAIN/(FBK) switch in the middle posiiton |
+| 9 | N1/Bar Position control | Adjust the position just as the POS knob does with the STRIDE/ABS/(UNI) switch in the middle position |
+| 10 | N1/Bar Stride control | Adjust the position advancement just as the POS knob does with the STRIDE/ABS/(UNI) switch in the upward position |
+| 11 | N1/Bar Offset control | Adjust the playback offset just as the OFST knob does |
+| 12 | N1/Bar Fade control | Adjust the fade just as the GAIN knob does with the FADE/GAIN/(FBK) switch in the upward position |
+| 13 | N1/Bar Free &#x394; control | Adjust the time between notes just as the &#x394; knob does with the FREE/QUANT/SKIP switch in the upward position * |
+| 14 | N1/Bar Number of repeats control | Adjust the number of repeats (the number of notes in the arpeggio) just as the TMPO/REP knob does * |
+| 15 | N1/Bar Stride state | If non-zero (1-127), enables playback offset advancement, otherwise if 0, disable playback offset advancement |
+| 16 | N1/Bar skip | Control how often the arpeggio plays just like the &#x394; knob does with the FREE/QUANT/SKIP switch in the downward position |
+| 17 | 

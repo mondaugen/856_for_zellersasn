@@ -128,3 +128,173 @@ save the parameters by setting the PRE1/PRE2/PRE3 switch and clicking the
 STR-RCL switch upwards.
 
 <!-- ![Why no image?](/tmp/test.svg) -->
+
+## MIDI Control
+
+### Setting the MIDI channel
+
+Before you can control the device via MIDI messages it is necessary to set the
+channel of the MIDI messages it responds to. By default it responds to messages
+on channel 1. If you have a new device and you have never set up the MIDI
+channel and are content with the 856 only responding to messages transmitted on
+channel 1 then you can skip this step. Otherwise follow the following
+instructions:
+
+Turn off the 856 by unplugging it. Set the switches in the top row according to
+the MIDI channel you would like to set. See the following table for the
+settings:
+
+<table border="1">
+<tr>
+<td>Channel</td>
+<td>Switch 1 position</td>
+<td>Switch 2 position</td>
+<td>Switch 3 position</td>
+<td>Switch 4 position</td>
+</tr>
+<tr>
+<td>1</td>
+<td>middle/down</td>
+<td>middle/down</td>
+<td>middle/down</td>
+<td>middle/down</td>
+
+</tr>
+<tr>
+<td>2</td>
+<td>middle/down</td>
+<td>middle/down</td>
+<td>middle/down</td>
+<td>up</td>
+
+</tr>
+<tr>
+<td>3</td>
+<td>middle/down</td>
+<td>middle/down</td>
+<td>up</td>
+<td>middle/down</td>
+
+</tr>
+<tr>
+<td>4</td>
+<td>middle/down</td>
+<td>middle/down</td>
+<td>up</td>
+<td>up</td>
+
+</tr>
+<tr>
+<td>5</td>
+<td>middle/down</td>
+<td>up</td>
+<td>middle/down</td>
+<td>middle/down</td>
+
+</tr>
+<tr>
+<td>6</td>
+<td>middle/down</td>
+<td>up</td>
+<td>middle/down</td>
+<td>up</td>
+
+</tr>
+<tr>
+<td>7</td>
+<td>middle/down</td>
+<td>up</td>
+<td>up</td>
+<td>middle/down</td>
+
+</tr>
+<tr>
+<td>8</td>
+<td>middle/down</td>
+<td>up</td>
+<td>up</td>
+<td>up</td>
+
+</tr>
+<tr>
+<td>9</td>
+<td>up</td>
+<td>middle/down</td>
+<td>middle/down</td>
+<td>middle/down</td>
+
+</tr>
+<tr>
+<td>10</td>
+<td>up</td>
+<td>middle/down</td>
+<td>middle/down</td>
+<td>up</td>
+
+</tr>
+<tr>
+<td>11</td>
+<td>up</td>
+<td>middle/down</td>
+<td>up</td>
+<td>middle/down</td>
+
+</tr>
+<tr>
+<td>12</td>
+<td>up</td>
+<td>middle/down</td>
+<td>up</td>
+<td>up</td>
+
+</tr>
+<tr>
+<td>13</td>
+<td>up</td>
+<td>up</td>
+<td>middle/down</td>
+<td>middle/down</td>
+
+</tr>
+<tr>
+<td>14</td>
+<td>up</td>
+<td>up</td>
+<td>middle/down</td>
+<td>up</td>
+
+</tr>
+<tr>
+<td>15</td>
+<td>up</td>
+<td>up</td>
+<td>up</td>
+<td>middle/down</td>
+
+</tr>
+<tr>
+<td>16</td>
+<td>up</td>
+<td>up</td>
+<td>up</td>
+<td>up</td>
+
+</tr>
+
+</table>
+
+For example, if you would like the 856 to respond to MIDI messages transmitted
+on channel 10, set the top left-hand switch to the upward position, the top
+middle-left switch to the middle or downward position, the top middle-right switch to the middle
+or downward position and the top right-hand switch to the upward position.
+
+Now, while holding the (UNI) switch down, plug in the power to the back of the
+pedal. The MIDI channel you selected should display on the LEDs using the same
+pattern as in the table (the illumniated LEDs will correspond to switches in the
+upward position, the dark LEDs to those in the middle or downward position).
+When you release the (UNI) switch, the pedal will continue to power up normally.
+It should now respond to messages on the channel you chose.
+
+### MIDI control change messages
+
+
