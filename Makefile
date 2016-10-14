@@ -88,3 +88,8 @@ tags:
 		$(MM_PRIMITIVES_PATH)\
 		$(NE_DATASTRUCTURES_PATH)\
 		$(CMSIS_INCLUDES)\
+
+test_mem_read:
+	$(OCD) -c init \
+		-c "mdw 0x40021810" \
+		-c shutdown | awk '{print $$1}'
