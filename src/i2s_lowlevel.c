@@ -479,6 +479,7 @@ static void i2s_correct_frame_error(void)
         i2s_peripherals_disable();
 //        i2s_peripherals_reset();
         i2s_peripherals_setup(rate);
+        codec_config_via_i2c();
         i2s_audio_start();
 #ifdef CODEC_DMA_TRIGGER_ON_I2S3_FRAME_ERR
         GPIOG->ODR &= ~(1 << 9);
@@ -650,7 +651,7 @@ static void codec_config_via_i2c(void)
     codec_prog_reg_i2c(WM8778_CODEC_ADDR,0xb,0x0042);
 //    codec_prog_reg_i2c(WM8778_CODEC_ADDR,0x5,0x00ff);
     // TEST: Set output muted
-    codec_prog_reg_i2c(WM8778_CODEC_ADDR,0x5,0x0000);
+    codec_prog_reg_i2c(WM8778_CODEC_ADDR,0x5,0x0100);
     /* invert MCLK */
     /* That's it */
 }
