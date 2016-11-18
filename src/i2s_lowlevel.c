@@ -649,6 +649,8 @@ static void codec_config_via_i2c(void)
     codec_prog_reg_i2c(WM8778_CODEC_ADDR,0xa,0x0002);
     codec_prog_reg_i2c(WM8778_CODEC_ADDR,0xb,0x0042);
     codec_prog_reg_i2c(WM8778_CODEC_ADDR,0x5,0x00ff);
+    /* Mix analog and digital output */
+    codec_prog_reg_i2c(WM8778_CODEC_ADDR,0x16,0x5);
     /* invert MCLK */
     /* That's it */
 }
