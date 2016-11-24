@@ -2,6 +2,7 @@
 # from the binary and not read them from the running program as they are known
 # at load-time
 file ./main.elf
+set pagination off
 set logging file /tmp/switch_vals_addr.XXX
 set logging overwrite on
 set logging on 
