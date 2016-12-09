@@ -1,0 +1,18 @@
+#!/bin/bash
+
+trap on_sigint SIGINT
+
+on_sigint() { kill -n 9 $! ; }
+
+make flash
+make reset
+sleep 2
+sh scripts/test_switch.sh
+sh scripts/test_pot.sh
+sh scripts/test_led.sh
+trap - SIGINT
+# play_test_file seems to already trap sigint properly
+echo "Unplug USB."
+scripts/play_test_file
+scripts/test_midi_play_off
+
