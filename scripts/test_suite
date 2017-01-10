@@ -1,5 +1,16 @@
 #!/bin/bash
 
+if [ -z ${OPENOCD_INTERFACE} ]
+then
+    export OPENOCD_INTERFACE=interface/stlink-v2.cfg;
+fi
+
+if [ -z ${BOARD_VERSION} ]
+then
+    echo "Please define board version."
+    exit -1
+fi
+
 trap on_sigint SIGINT
 
 on_sigint() { kill -n 9 $! ; }

@@ -1,3 +1,4 @@
+OPENOCD_INTERFACE		?= interface/stlink-v2.cfg
 OPTIMIZE				 ?= -O0
 BIN 					 = main.elf
 MMMIDI_PATH				 = ../mmmidi
@@ -45,7 +46,7 @@ TESTS					 = $(addprefix $(TESTDIR)/,\
 						    $(addsuffix .o, $(basename $(TESTSRC))))
 VPATH				    += :test
 CC 						 = arm-none-eabi-gcc
-OCD 		   = sudo openocd -f /usr/local/share/openocd/scripts/board/stm32f429discovery.cfg -f interface/stlink-v2.cfg
+OCD 		   = sudo openocd -f /usr/local/share/openocd/scripts/board/stm32f429discovery.cfg -f $(OPENOCD_INTERFACE)
 
 all: $(OBJSDIR) $(OBJS) $(BIN) $(TESTS)
 

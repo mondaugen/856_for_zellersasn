@@ -11,6 +11,6 @@ cat inc/adc.h| grep "#define NUM_CHANNELS_PER_ADC" | awk '{ print $3 }' \
 
 OCD='sudo openocd \
     -f /usr/local/share/openocd/scripts/board/stm32f429discovery.cfg \
-    -f interface/stlink-v2-1.cfg';
+    -f '$OPENOCD_INTERFACE;
 
 eval "$OCD" "-f scripts/test_pot.tcl"
