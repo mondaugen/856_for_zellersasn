@@ -6,6 +6,10 @@
 #include <stdint.h> 
 #include "stm32f4xx.h"
 
+#if ((!defined(BOARD_V1)) & (!defined(BOARD_V2)))
+ #error("Please define board version.")
+#endif  
+
 #define NUM_SWITCHES            18
 
 #define FSW1_ENR                RCC_AHB1ENR_GPIOBEN
@@ -51,7 +55,11 @@
 #define FSW1_PORT_PIN           4
 #define FSW2_PORT_PIN           6
 
-#define SW1_TOP_PORT_PIN        2
+#if defined(BOARD_V1)
+ #define SW1_TOP_PORT_PIN        2
+#elif defined(BOARD_V2)
+ #define SW1_TOP_PORT_PIN        7
+#endif  
 #define SW1_BTM_PORT_PIN        3
 #define SW2_TOP_PORT_PIN        12
 #define SW2_BTM_PORT_PIN        13
@@ -117,42 +125,66 @@
 #define MSW3_TOP_EXTICR         SYSCFG->EXTICR[2] 
 #define MSW3_BTM_EXTICR         SYSCFG->EXTICR[0] 
 #define MSW7_TOP_EXTICR         SYSCFG->EXTICR[0] 
-#define MSW1_TOP_EXTICR         SYSCFG->EXTICR[0] 
+#if defined(BOARD_V1)
+ #define MSW1_TOP_EXTICR         SYSCFG->EXTICR[0] 
+#elif defined(BOARD_V2)
+ #define MSW1_TOP_EXTICR         SYSCFG->EXTICR[1] 
+#endif  
 
 #define FSW1_EXTI_PIN           SYSCFG_EXTICR2_EXTI4
 #define FSW2_EXTI_PIN           SYSCFG_EXTICR2_EXTI6
 #define MSW3_TOP_EXTI_PIN       SYSCFG_EXTICR3_EXTI11
 #define MSW3_BTM_EXTI_PIN       SYSCFG_EXTICR1_EXTI0
 #define MSW7_TOP_EXTI_PIN       SYSCFG_EXTICR1_EXTI3
-#define MSW1_TOP_EXTI_PIN       SYSCFG_EXTICR1_EXTI2
+#if defined(BOARD_V1)
+ #define MSW1_TOP_EXTI_PIN       SYSCFG_EXTICR1_EXTI2
+#elif defined(BOARD_V2)
+ #define MSW1_TOP_EXTI_PIN       SYSCFG_EXTICR2_EXTI7
+#endif  
 
 #define FSW1_EXTI_PIN_PORT      SYSCFG_EXTICR2_EXTI4_PB
 #define FSW2_EXTI_PIN_PORT      SYSCFG_EXTICR2_EXTI6_PE
 #define MSW3_TOP_EXTI_PIN_PORT  SYSCFG_EXTICR3_EXTI11_PD
 #define MSW3_BTM_EXTI_PIN_PORT  SYSCFG_EXTICR1_EXTI0_PB
 #define MSW7_TOP_EXTI_PIN_PORT  SYSCFG_EXTICR1_EXTI3_PD
-#define MSW1_TOP_EXTI_PIN_PORT  SYSCFG_EXTICR1_EXTI2_PG
+#if defined(BOARD_V1)
+ #define MSW1_TOP_EXTI_PIN_PORT  SYSCFG_EXTICR1_EXTI2_PG
+#elif defined(BOARD_V2)
+ #define MSW1_TOP_EXTI_PIN_PORT  SYSCFG_EXTICR2_EXTI7_PG
+#endif  
 
 #define FSW1_IRQ_HANDLER        EXTI4_IRQHandler 
-#define FSW2_IRQ_HANDLER        EXTI9_5_IRQHandler 
 #define MSW3_TOP_IRQ_HANDLER    EXTI15_10_IRQHandler 
 #define MSW3_BTM_IRQ_HANDLER    EXTI0_IRQHandler 
 #define MSW7_TOP_IRQ_HANDLER    EXTI3_IRQHandler 
-#define MSW1_TOP_IRQ_HANDLER    EXTI2_IRQHandler 
+#if defined(BOARD_V1)
+ #define FSW2_IRQ_HANDLER        EXTI9_5_IRQHandler 
+ #define MSW1_TOP_IRQ_HANDLER    EXTI2_IRQHandler 
+#elif defined(BOARD_V2)
+ #define MSW1_TOP_FSW2_IRQ_HANDLER EXTI9_5_IRQHandler 
+#endif  
 
 #define FSW1_IRQ_N              EXTI4_IRQn 
-#define FSW2_IRQ_N              EXTI9_5_IRQn 
 #define MSW3_TOP_IRQ_N          EXTI15_10_IRQn 
 #define MSW3_BTM_IRQ_N          EXTI0_IRQn 
 #define MSW7_TOP_IRQ_N          EXTI3_IRQn 
-#define MSW1_TOP_IRQ_N          EXTI2_IRQn 
+#if defined(BOARD_V1)
+ #define MSW1_TOP_IRQ_N         EXTI2_IRQn 
+ #define FSW2_IRQ_N             EXTI9_5_IRQn 
+#elif defined(BOARD_V2)
+ #define MSW1_TOP_FSW2_IRQ_N    EXTI9_5_IRQn 
+#endif  
 
 #define FSW1_EXTI               EXTI
-#define FSW2_EXTI               EXTI
 #define MSW3_TOP_EXTI           EXTI
 #define MSW3_BTM_EXTI           EXTI
 #define MSW7_TOP_EXTI           EXTI
-#define MSW1_TOP_EXTI           EXTI
+#if defined(BOARD_V1) 
+ #define FSW2_EXTI              EXTI
+ #define MSW1_TOP_EXTI          EXTI
+#elif defined(BOARD_V2)
+ #define MSW1_TOP_FSW2_EXTI     EXTI
+#endif  
 
 extern volatile uint32_t sw_toggle_states;
 

@@ -8,7 +8,12 @@ void leds_setup(void)
         | LED3_ENR 
         | LED5_ENR 
         | LED7_ENR 
+#ifdef BOARD_V1 
         | LED_DISCO_GREEN_ENR;
+#else
+        ;
+#endif  
+
     LED1_PORT->MODER &= ~(0x3 << LED1_PORT_PIN*2);
     LED1_PORT->MODER |= (0x1 << LED1_PORT_PIN*2);
     LED3_PORT->MODER &= ~(0x3 << LED3_PORT_PIN*2);
@@ -17,23 +22,31 @@ void leds_setup(void)
     LED5_PORT->MODER |= (0x1 << LED5_PORT_PIN*2);
     LED7_PORT->MODER &= ~(0x3 << LED7_PORT_PIN*2);
     LED7_PORT->MODER |= (0x1 << LED7_PORT_PIN*2);
+#ifdef BOARD_V1 
     LED_DISCO_GREEN_PORT->MODER &= ~(0x3 << LED_DISCO_GREEN_PORT_PIN*2);
     LED_DISCO_GREEN_PORT->MODER |= (0x1 << LED_DISCO_GREEN_PORT_PIN*2);
+#endif  
 }
 
 void led_disco_green_set(void)
 {
+#ifdef BOARD_V1 
     LED_DISCO_GREEN_PORT->ODR |= 0x1 << LED_DISCO_GREEN_PORT_PIN;
+#endif  
 }
 
 void led_disco_green_reset(void)
 {
+#ifdef BOARD_V1 
     LED_DISCO_GREEN_PORT->ODR &= ~(0x1 << LED_DISCO_GREEN_PORT_PIN);
+#endif  
 }
 
 void led_disco_green_tog(void)
 {
+#ifdef BOARD_V1 
     LED_DISCO_GREEN_PORT->ODR ^= 0x1 << LED_DISCO_GREEN_PORT_PIN;
+#endif  
 }
 
 void led1_set(void)

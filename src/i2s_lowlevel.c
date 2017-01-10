@@ -7,6 +7,16 @@
 #include "audio_hw.h" 
 #include <string.h>
 
+#if ((!defined(BOARD_V1)) & (!defined(BOARD_V2)))
+ #error("Please define board version.")
+#endif  
+
+#if defined(BOARD_V1)
+ #define CODEC_WM8778 
+#elif defined(BOARD_V2)
+ #define CODEC_CS4270
+#endif
+
 #ifdef CODEC_DMA_TRIGGER_CORRECT_I2S_FRAME_ERROR
 #define  FRAME_ERROR_BLOCK_COUNT_TRIG 1000UL
 static uint32_t i2s_block_counter = 1;

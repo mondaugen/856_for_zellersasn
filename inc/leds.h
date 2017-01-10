@@ -5,6 +5,8 @@
 
 #include "stm32f4xx.h"
 
+#if defined(BOARD_V1)
+
 #define LED1_ENR                    RCC_AHB1ENR_GPIOEEN 
 #define LED3_ENR                    RCC_AHB1ENR_GPIOEEN 
 #define LED5_ENR                    RCC_AHB1ENR_GPIOEEN 
@@ -22,6 +24,28 @@
 #define LED5_PORT_PIN               5 
 #define LED7_PORT_PIN               4 
 #define LED_DISCO_GREEN_PORT_PIN    13
+
+#elif defined(BOARD_V2)
+
+/* NOTE: LED3,5,7 called 2,3,4 on board schematic */
+
+#define LED1_ENR                    RCC_AHB1ENR_GPIOAEN 
+#define LED3_ENR                    RCC_AHB1ENR_GPIOCEN 
+#define LED5_ENR                    RCC_AHB1ENR_GPIOCEN 
+#define LED7_ENR                    RCC_AHB1ENR_GPIOAEN 
+
+#define LED1_PORT                   GPIOA
+#define LED3_PORT                   GPIOC
+#define LED5_PORT                   GPIOC
+#define LED7_PORT                   GPIOA
+
+#define LED1_PORT_PIN               2 
+#define LED3_PORT_PIN               5 
+#define LED5_PORT_PIN               4 
+#define LED7_PORT_PIN               7 
+
+#endif  
+
 
 void leds_setup(void);
 void led1_set(void);
