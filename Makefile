@@ -45,7 +45,7 @@ TESTS					 = $(addprefix $(TESTDIR)/,\
 						    $(addsuffix .o, $(basename $(TESTSRC))))
 VPATH				    += :test
 CC 						 = arm-none-eabi-gcc
-OCD 		   = sudo openocd -f /usr/local/share/openocd/scripts/board/stm32f429discovery.cfg -f interface/stlink-v2-1.cfg
+OCD 		   = sudo openocd -f /usr/local/share/openocd/scripts/board/stm32f429discovery.cfg -f interface/stlink-v2.cfg
 
 all: $(OBJSDIR) $(OBJS) $(BIN) $(TESTS)
 
