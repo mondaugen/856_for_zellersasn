@@ -342,12 +342,14 @@ static int i2s_peripherals_setup(uint32_t sr)
      * (Phillips), DATLEN = 00 (16-bit), CHLEN = 0 (16-bit) I2SCFGR = 10 (Master
      * transmit) */
     SPI3->I2SCFGR = 0xa00;
+
     /* TXDMAEN = 1 (Transmit buffer empty DMA request enable), other bits off */
     SPI3->CR2 = SPI_CR2_TXDMAEN ;
     /* Set up duplex instance the same as SPI3, except configure as slave
      * receive and trigger interrupt when receive buffer full */
     /* same as above but I2SCFG = 01 (slave receive) */
     I2S3ext->I2SCFGR = 0x900;
+
     /* RXDMAEN = 1 (Receive buffer not empty DMA request enable), other bits off */
     I2S3ext->CR2 = SPI_CR2_RXDMAEN ;
     
@@ -440,7 +442,7 @@ static void i2s_audio_start()
     /* Wait for them to be enabled (to show they are ready) */
     while(!((DMA1_Stream7->CR & DMA_SxCR_EN) && (DMA1_Stream0->CR & DMA_SxCR_EN)));
 
-#ifdef (CODEC_CS4270) 
+#if defined(CODEC_CS4270) 
     /* Reset DAC, ADC power down bits to start sound */
     codec_prog_reg_i2c(CS4270_CODEC_ADDR,0x02,0x00);
 #endif
