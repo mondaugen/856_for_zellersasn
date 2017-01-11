@@ -53,6 +53,9 @@ static unsigned int i2s_frame_error_flag = 0;
 static void codec_i2c_setup(void);
 static void codec_config_via_i2c(void);
 static void i2s_correct_frame_error(void);
+static void codec_prog_reg_i2c(uint8_t addr,
+                               uint8_t reg_addr,
+                               uint16_t reg_val);
 
 unsigned int audio_hw_get_sample_rate(void *data) {
     return rate;
@@ -436,6 +439,11 @@ static void i2s_audio_start()
 
     /* Wait for them to be enabled (to show they are ready) */
     while(!((DMA1_Stream7->CR & DMA_SxCR_EN) && (DMA1_Stream0->CR & DMA_SxCR_EN)));
+
+#ifdef (CODEC_CS4270) 
+    /* Reset DAC, ADC power down bits to start sound */
+    codec_prog_reg_i2c(CS4270_CODEC_ADDR,0x02,0x00);
+#endif
 }
 
 audio_hw_err_t audio_hw_start(audio_hw_setup_t *params)
@@ -623,7 +631,11 @@ static void codec_prog_reg_i2c(uint8_t addr,
     /* Wait for ADDR bit to be set */
     while (!codec_i2c_check_flags(0x00020000));
     uint32_t byte1, byte2;
+#if defined(CODEC_WM8778)
     byte1 = (reg_addr << 1) | ((reg_val >> 8) & (0x1));
+#elif defined(CODEC_CS4270)
+    byte1 = reg_addr;
+#endif
     byte2 = (uint8_t)(reg_val & 0xff);
     /* Wait for I2C to finish transmitting */
     while(!codec_i2c_check_flags(0x00800000));
@@ -637,6 +649,54 @@ static void codec_prog_reg_i2c(uint8_t addr,
     I2C2->CR1 |= I2C_CR1_STOP;
     /* Wait while I2C busy */
     while(codec_i2c_check_flags(0x00000002));
+}
+
+static void codec_read_reg_i2c(uint8_t addr,
+                               uint8_t reg_addr,
+                               uint16_t *reg_val)
+{
+    /* Write 1 byte (register address) */
+    /* Send start condition */
+    I2C2->CR1 |= I2C_CR1_START;
+    /* Wait for start condition */
+    while (!codec_i2c_check_flags(0x00010001));
+    /* Send address */
+    I2C2->DR = addr;
+    /* Wait for ADDR bit to be set */
+    while (!codec_i2c_check_flags(0x00020000));
+    uint32_t byte1;
+#if defined(CODEC_WM8778)
+ #warning("Register read not available on WM8778.")
+#elif defined(CODEC_CS4270)
+    byte1 = reg_addr;
+#endif
+    /* Wait for I2C to finish transmitting */
+    while(!codec_i2c_check_flags(0x00800000));
+    I2C2->DR = byte1;
+    /* Wait for I2C to finish transmitting */
+    while(!codec_i2c_check_flags(0x00800000));
+    /* Send stop bit */
+    I2C2->CR1 |= I2C_CR1_STOP;
+    /* Wait while I2C busy */
+    while(codec_i2c_check_flags(0x00000002));
+    // Enable acknowledge
+    I2C2->CR1 |= I2C_CR1_ACK;
+    /* Send start condition */
+    I2C2->CR1 |= I2C_CR1_START;
+    /* Wait for start condition */
+    while (!codec_i2c_check_flags(0x00010001));
+    /* Send address, set read bit */
+    I2C2->DR = addr | 0x1;
+    /* Wait for receive buffer not empty*/
+    while (!codec_i2c_check_flags(0x00400000));
+    /* Set ACK high */
+    I2C2->CR1 |= I2C_CR1_ACK;
+    /* Read in value */
+    *reg_val = (int16_t)(I2C2->DR);
+    /* Set ACK low */
+    I2C2->CR1 &= ~I2C_CR1_ACK;
+    /* Stop transmission */
+    I2C2->CR1 = (I2C2->CR1 | I2C_CR1_STOP);
 }
 
 static void codec_i2c_setup(void)
@@ -712,6 +772,11 @@ static void __attribute__((optimize("O0"))) codec_config_via_i2c(void)
     /* Wait */
     int j = 1000000;
     while (j--);
+    uint16_t reg;
+    /* Read register contents */
+    codec_read_reg_i2c(CS4270_CODEC_ADDR,0x01,&reg);
+    /* Check correct value */
+    while ((reg & 0xf0) != 0xc0);
     /* Reset power down bit, power down ADC, DAC */
     codec_prog_reg_i2c(CS4270_CODEC_ADDR,0x02,0x22);
     /* Set pop-suppression, slave mode */
@@ -722,8 +787,18 @@ static void __attribute__((optimize("O0"))) codec_config_via_i2c(void)
     codec_prog_reg_i2c(CS4270_CODEC_ADDR,0x05,0x80);
     /* Set DAC volume to 0dB (no attenuation) */
     codec_prog_reg_i2c(CS4270_CODEC_ADDR,0x07,0x00);
-    /* Reset DAC, ADC power down bits to start sound */
-    codec_prog_reg_i2c(CS4270_CODEC_ADDR,0x02,0x00);
+    /* Read register contents */
+    /* Check correct values */
+    codec_read_reg_i2c(CS4270_CODEC_ADDR,0x02,&reg);
+    while (reg != 0x22);
+    codec_read_reg_i2c(CS4270_CODEC_ADDR,0x03,&reg);
+    while (reg != 0x31);
+    codec_read_reg_i2c(CS4270_CODEC_ADDR,0x04,&reg);
+    while (reg != 0x09);
+    codec_read_reg_i2c(CS4270_CODEC_ADDR,0x05,&reg);
+    while (reg != 0x80);
+    codec_read_reg_i2c(CS4270_CODEC_ADDR,0x07,&reg);
+    while (reg != 0x00);
 #else
 #error("Please define codec model.")
 #endif  
