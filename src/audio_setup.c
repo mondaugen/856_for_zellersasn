@@ -27,10 +27,17 @@ void audio_hw_io(audio_hw_io_t *params)
 {
 #ifdef AUDIO_HW_TEST_THROUGHPUT
     int n;
+#if defined(BOARD_V1)
     for (n = 0; n < params->length; n++) {
         params->out[n*params->nchans_out] =
             params->in[n*params->nchans_in];
     }
+#elif defined(BOARD_V2)
+    for (n = 0; n < params->length; n++) {
+        params->out[n*params->nchans_out+1] =
+            params->in[n*params->nchans_in+1];
+    }
+#endif
 #else
     /* Process switches. MIDI trumps switches if messages present */
     switch_control_do_all();
@@ -58,11 +65,19 @@ void audio_hw_io(audio_hw_io_t *params)
             outBus->data[outBus->channels*n] = -1.;
         }
         /* Only the first channel is written/read */
+#if defined(BOARD_V1)
         params->out[n*params->nchans_out] =
             outBus->data[outBus->channels*n] * AUDIO_HW_SAMPLE_T_MAX;
         inBus->data[n*inBus->channels] = 
             ((MMSample)params->in[n*params->nchans_in])
             /AUDIO_HW_SAMPLE_T_MAX;
+#elif defined(BOARD_V2)
+        params->out[n*params->nchans_out + 1] =
+            outBus->data[outBus->channels*n] * AUDIO_HW_SAMPLE_T_MAX;
+        inBus->data[n*inBus->channels] = 
+            ((MMSample)params->in[n*params->nchans_in+1])
+            /AUDIO_HW_SAMPLE_T_MAX;
+#endif
     }
 #endif /* AUDIO_HW_TEST_THROUGHPUT */
 }
