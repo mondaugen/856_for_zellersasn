@@ -18,7 +18,7 @@ static float synth_adc_scale_thresh(float x);
                                  0);\
         adc_channel_init(&channel,\
                          adc_data_starts[data_start_idx],\
-                         NUM_CHANNELS_PER_ADC,\
+                         adc_raw_value_strides[data_start_idx],\
                          ADC_AVG_SIZE);\
         adc_channel_do_set_init(&do_set,\
                                 &channel,\
@@ -174,9 +174,22 @@ static void synth_adc_tempo_control(adc_channel_t *chan,
 
 SYNTH_ADC_SETUP(tempo,SYNTH_ADC_TEMPO_IDX,synth_adc_tempo_control);
 
+#if defined(BOARD_V2)
+
+static void __attribute__((optimize("O0"))) synth_adc_expr_control(adc_channel_t *chan,
+                                                                   adc_channel_do_data_t *data)
+{
+    /* Just to test */
+   adc_channel_datatype_t cur_val;
+   cur_val = chan->cur_val;
+}
+
+SYNTH_ADC_SETUP(expr,SYNTH_ADC_EXPR_IDX,synth_adc_expr_control);
+#endif
+
 void synth_adc_control_setup(void)
 {
-    /* adc_channel_setup should have been called at some point before this */
+    /* adc_setup_*... and adc_channel_setup should have been called at some point before this in that order */
     synth_adc_envelopeTime_curParams_control_setup();
     synth_adc_sustainTime_curParams_control_setup();
     synth_adc_offset_curParams_control_setup();
@@ -185,5 +198,8 @@ void synth_adc_control_setup(void)
     synth_adc_pitch_curParams_control_setup();
     synth_adc_gain_curParams_control_setup();
     synth_adc_tempo_control_setup();
+#if defined(BOARD_V2)
+    synth_adc_expr_control_setup();
+#endif
 }
 

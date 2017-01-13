@@ -13,6 +13,10 @@
 #define SYNTH_ADC_EVENTDELTA_IDX    6
 #define SYNTH_ADC_GAIN_IDX          7
 
+#if defined(BOARD_V2)
+ #define SYNTH_ADC_EXPR_IDX         8
+#endif
+
 #define SYNTH_ADC_LOWER_THRESH      0.
 #define SYNTH_ADC_UPPER_THRESH      1.
 

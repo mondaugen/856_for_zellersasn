@@ -7,6 +7,7 @@ static volatile uint16_t adc1_values[ADC1_DMA_NUM_VALS_TRANS];
 static volatile uint16_t adc3_values[ADC3_DMA_NUM_VALS_TRANS];
 /* Stores the address of the first datum converted on the ADC channels */
 uint16_t volatile *adc_data_starts[TOTAL_NUM_ADC_CHANNELS];
+uint32_t adc_raw_value_strides[TOTAL_NUM_ADC_CHANNELS];
 /* Flag indicating whether ADC values are good to read. */
 static volatile uint32_t adc_ready_flg = 0;
 
@@ -70,6 +71,11 @@ void __attribute__((optimize("O0"))) adc_setup_dma_scan(adc_mode_t mode)
     ADC1->SQR3 |= 6 << (0*5);
     /* First datum of this ADC goes at... */
     adc_data_starts[0] = &adc1_values[0];
+#if defined(BOARD_V1)
+    adc_raw_value_strides[0] = NUM_CHANNELS_PER_ADC;
+#elif defined(BOARD_V2)
+    adc_raw_value_strides[0] = NUM_CHANNELS_ADC1;
+#endif
 
     /* Knob 2 -> PA4  -> ADC1,2   Channel 4  */
     GPIOA->MODER &= ~GPIO_MODER_MODER4;
@@ -81,6 +87,11 @@ void __attribute__((optimize("O0"))) adc_setup_dma_scan(adc_mode_t mode)
     ADC1->SQR3 &= ~ADC_SQR3_SQ2;
     ADC1->SQR3 |= 4 << (1*5);
     adc_data_starts[1] = &adc1_values[1];
+#if defined(BOARD_V1)
+    adc_raw_value_strides[1] = NUM_CHANNELS_PER_ADC;
+#elif defined(BOARD_V2)
+    adc_raw_value_strides[1] = NUM_CHANNELS_ADC1;
+#endif
 
     /* Knob 3 -> PA5  -> ADC1,2   Channel 5  */
     GPIOA->MODER &= ~GPIO_MODER_MODER5;
@@ -92,6 +103,11 @@ void __attribute__((optimize("O0"))) adc_setup_dma_scan(adc_mode_t mode)
     ADC1->SQR3 &= ~ADC_SQR3_SQ3;
     ADC1->SQR3 |= 5 << (2*5);
     adc_data_starts[2] = &adc1_values[2];
+#if defined(BOARD_V1)
+    adc_raw_value_strides[2] = NUM_CHANNELS_PER_ADC;
+#elif defined(BOARD_V2)
+    adc_raw_value_strides[2] = NUM_CHANNELS_ADC1;
+#endif
 
     /* Knob 4 -> PA3  -> ADC1,2   Channel 3  */
     GPIOA->MODER &= ~GPIO_MODER_MODER3;
@@ -103,10 +119,21 @@ void __attribute__((optimize("O0"))) adc_setup_dma_scan(adc_mode_t mode)
     ADC1->SQR3 &= ~ADC_SQR3_SQ4;
     ADC1->SQR3 |= 3 << (3*5);
     adc_data_starts[3] = &adc1_values[3];
+#if defined(BOARD_V1)
+    adc_raw_value_strides[3] = NUM_CHANNELS_PER_ADC;
+#elif defined(BOARD_V2)
+    adc_raw_value_strides[3] = NUM_CHANNELS_ADC1;
+#endif
 
+#if defined(BOARD_V1)
     /* Set 4 conversions in conversion sequence on ADC 3*/
     ADC3->SQR1 &= ~ADC_SQR1_L;
     ADC3->SQR1 |= (3 << 20);
+#elif defined(BOARD_V2)
+    /* Set 5 conversions in conversion sequence on ADC 3*/
+    ADC3->SQR1 &= ~ADC_SQR1_L;
+    ADC3->SQR1 |= (4 << 20);
+#endif
 
     /* Knob 5 -> PC2  -> ADC1,2,3 Channel 12 */
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOCEN;
@@ -119,6 +146,11 @@ void __attribute__((optimize("O0"))) adc_setup_dma_scan(adc_mode_t mode)
     ADC3->SQR3 &= ~ADC_SQR3_SQ1;
     ADC3->SQR3 |= 12 << (0*5);
     adc_data_starts[4] = &adc3_values[0];
+#if defined(BOARD_V1)
+    adc_raw_value_strides[4] = NUM_CHANNELS_PER_ADC;
+#elif defined(BOARD_V2)
+    adc_raw_value_strides[4] = NUM_CHANNELS_ADC3;
+#endif
 
     /* Knob 6 -> PC3  -> ADC1,2,3 Channel 13 */
     GPIOC->MODER &= ~GPIO_MODER_MODER3;
@@ -130,6 +162,11 @@ void __attribute__((optimize("O0"))) adc_setup_dma_scan(adc_mode_t mode)
     ADC3->SQR3 &= ~ADC_SQR3_SQ2;
     ADC3->SQR3 |= 13 << (1*5);
     adc_data_starts[5] = &adc3_values[1];
+#if defined(BOARD_V1)
+    adc_raw_value_strides[5] = NUM_CHANNELS_PER_ADC;
+#elif defined(BOARD_V2)
+    adc_raw_value_strides[5] = NUM_CHANNELS_ADC3;
+#endif
 
     /* Knob 7 -> PF10 -> ADC3     Channel 8  */
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOFEN;
@@ -142,6 +179,11 @@ void __attribute__((optimize("O0"))) adc_setup_dma_scan(adc_mode_t mode)
     ADC3->SQR3 &= ~ADC_SQR3_SQ3;
     ADC3->SQR3 |= 8 << (2*5);
     adc_data_starts[6] = &adc3_values[2];
+#if defined(BOARD_V1)
+    adc_raw_value_strides[6] = NUM_CHANNELS_PER_ADC;
+#elif defined(BOARD_V2)
+    adc_raw_value_strides[6] = NUM_CHANNELS_ADC3;
+#endif
 
     /* Knob 8 -> PF6  -> ADC3     Channel 4  */
     GPIOF->MODER &= ~GPIO_MODER_MODER6;
@@ -153,6 +195,26 @@ void __attribute__((optimize("O0"))) adc_setup_dma_scan(adc_mode_t mode)
     ADC3->SQR3 &= ~ADC_SQR3_SQ4;
     ADC3->SQR3 |= 4 << (3*5);
     adc_data_starts[7] = &adc3_values[3];
+#if defined(BOARD_V1)
+    adc_raw_value_strides[7] = NUM_CHANNELS_PER_ADC;
+#elif defined(BOARD_V2)
+    adc_raw_value_strides[7] = NUM_CHANNELS_ADC3;
+#endif
+
+#if defined(BOARD_V2)
+    /* Expression pedal -> PF7 -> ADC3     Channel 5  */
+    GPIOF->MODER &= ~GPIO_MODER_MODER7;
+    GPIOF->MODER |= 0x3 << (7*2);
+    /* Set sample time to 480 cycles */
+    ADC3->SMPR2 &= ~ADC_SMPR2_SMP5;
+    ADC3->SMPR2 |= 0x7 << (5*3);
+    /* 5th conversion */
+    ADC3->SQR3 &= ~ADC_SQR3_SQ5;
+    ADC3->SQR3 |= 5 << (4*5);
+    adc_data_starts[8] = &adc3_values[4];
+    adc_raw_value_strides[8] = NUM_CHANNELS_ADC3;
+#endif
+
 
     /* ADC 1 */
     /* Don't set end of conversion flag after every conversion */

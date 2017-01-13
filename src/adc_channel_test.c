@@ -54,7 +54,7 @@ void adc_channel_test_setup(void)
         adc_channel_test_do_data_init(&adc_channel_values[n]);
         adc_channel_init(&adc_test_channels[n],
                          adc_data_starts[n],
-                         NUM_CHANNELS_PER_ADC,
+                         adc_raw_value_strides[n],
                          ADC_AVG_SIZE);
         adc_channel_do_set_init(&adc_channel_do_sets[n],
                                 &adc_test_channels[n],
