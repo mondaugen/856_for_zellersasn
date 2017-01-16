@@ -142,7 +142,7 @@ static void synth_adc_gain_curParams_control(adc_channel_t *chan,
     } else {
         switch (synth_control_get_gainMode()) {
             case SynthControlGainMode_FADE:
-                synth_control_set_ampLastEcho_curParams(
+                synth_control_set_fadeCtlVal_curParams(
                         synth_adc_scale_thresh(chan->cur_val));
                 break;
             case SynthControlGainMode_WET:

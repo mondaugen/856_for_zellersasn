@@ -255,9 +255,7 @@ void synth_control_set_tempo_scale_norm(float param)
 void synth_control_set_numRepeats(int numRepeats_param, int note_params_idx)
 {
     noteParamSets[note_params_idx].numRepeats = numRepeats_param;
-    synth_control_set_fade(noteParamSets[note_params_idx].ampLastEcho,
-                           noteParamSets[note_params_idx].numRepeats,
-                          note_params_idx); 
+    synth_control_set_fadeCtlVal(noteParamSets[note_params_idx].fadeCtlVal,note_params_idx);
 }
 
 void synth_control_set_numRepeats_curParams(int numRepeats_param)
@@ -578,6 +576,7 @@ void synth_control_record_stop_helper(scrsh_source_t origin)
             noteParamSets[0].amplitude = 1.;
             for (n = 1; n < NUM_NOTE_PARAM_SETS; n++) {
                 noteParamSets[n].amplitude = 0;
+                noteParamSets[n].fademin = 0;
             }
             noteParamSets[0].sustainTime = 1.;
             noteParamSets[0].intermittency = 0;
@@ -865,6 +864,7 @@ void synth_control_set_wet(float gain_param, int note_params_idx)
     } else {
         noteParamSets[note_params_idx].amplitude =
             powf(10.,gain_param / 20.);
+        synth_control_set_fadeCtlVal(noteParamSets[note_params_idx].fadeCtlVal,note_params_idx);
     }
 }
 
@@ -888,25 +888,36 @@ void synth_control_set_fade_curParams(float gain_param, int num_repeats)
             synth_control_get_editingWhichParams());
 }
 
-void synth_control_set_ampLastEcho(float gain_param, int note_params_idx)
+void synth_control_set_fadeCtlVal(float gain_param, int note_params_idx)
 {
-    if (gain_param <= 0.5) {
-        gain_param *= 2.;
-        gain_param = (1. - SYNTH_CONTROL_ECHO_MIN) * gain_param
-            + SYNTH_CONTROL_ECHO_MIN;
-    } else {
-        gain_param = (gain_param - 0.5) * 2.;
-        gain_param =  (SYNTH_CONTROL_ECHO_MAX - 1.) * gain_param + 1.;
+    noteParamSets[note_params_idx].fadeCtlVal = gain_param;
+    float fc, fademin;
+    if (noteParamSets[note_params_idx].amplitude > 0.) {
+        if (noteParamSets[note_params_idx].fadeCtlVal > 0.5) {
+            fademin = 1. - (noteParamSets[note_params_idx].fadeCtlVal - 0.5) * 2.;
+            fademin = SYNTH_CONTROL_ECHO_MIN + (1. - SYNTH_CONTROL_ECHO_MIN) * fademin;
+            fc = powf(noteParamSets[note_params_idx].amplitude/fademin,
+                    (1./(noteParamSets[note_params_idx].numRepeats + 1)));
+            noteParamSets[note_params_idx].fadeRate = fc;
+            noteParamSets[note_params_idx].fademin = fademin;
+        } else {
+            fademin = noteParamSets[note_params_idx].fadeCtlVal * 2.;
+            fademin = SYNTH_CONTROL_ECHO_MIN + (1. - SYNTH_CONTROL_ECHO_MIN) * fademin;
+            fc = powf(fademin/noteParamSets[note_params_idx].amplitude,
+                    (1./(noteParamSets[note_params_idx].numRepeats + 1)));
+            noteParamSets[note_params_idx].fadeRate = fc;
+            noteParamSets[note_params_idx].fademin = noteParamSets[note_params_idx].amplitude;
+        }
+    else {
+        noteParamSets[note_params_idx].fadeRate = 0;
+        noteParamSets[note_params_idx].fademin = 0;
     }
-    noteParamSets[note_params_idx].ampLastEcho = gain_param;
-    synth_control_set_fade(noteParamSets[note_params_idx].ampLastEcho,
-                           noteParamSets[note_params_idx].numRepeats,
-                           note_params_idx);
+
 }
 
-void synth_control_set_ampLastEcho_curParams(float gain_param)
+void synth_control_set_fadeCtlVal_curParams(float gain_param)
 {
-    synth_control_set_ampLastEcho(gain_param,
+    synth_control_set_fadeCtlVal(gain_param,
             synth_control_get_editingWhichParams());
 }
 
@@ -917,7 +928,7 @@ void synth_control_gain_control(void *data_, float gain_param)
             synth_control_set_wet_curParams(gain_param);
             break;
         case SynthControlGainMode_FADE:
-            synth_control_set_ampLastEcho_curParams(gain_param);
+            synth_control_set_fadeCtlVal_curParams(gain_param);
             break;
     }
 }
@@ -963,7 +974,8 @@ void synth_control_reset_param_sets(NoteParamSet *param_sets, int size)
     param_sets[0].offsetBeats = SYNTH_CONTROL_DEFAULT_OFFSETBEATS;
     param_sets[0].intermittency = SYNTH_CONTROL_DEFAULT_INTERMITTENCY;
     param_sets[0].fadeRate      = SYNTH_CONTROL_DEFAULT_FADERATE;
-    param_sets[0].ampLastEcho   = SYNTH_CONTROL_DEFAULT_AMPLASTECHO;
+    param_sets[0].fadeCtlVal = SYNTH_CONTROL_DEFAULT_FADECTLVAL;
+    param_sets[0].fademin = SYNTH_CONTROL_DEFAULT_AMPLITUDE;
     param_sets[0].positionStride = SYNTH_CONTROL_DEFAULT_POSITIONSTRIDE;
     param_sets[0].posMode = SYNTH_CONTROL_DEFAULT_POSMODE;
     uint32_t _n;
@@ -982,7 +994,8 @@ void synth_control_reset_param_sets(NoteParamSet *param_sets, int size)
         param_sets[size].offsetBeats = SYNTH_CONTROL_DEFAULT_OFFSETBEATS;
         param_sets[size].intermittency = SYNTH_CONTROL_DEFAULT_INTERMITTENCY;
         param_sets[size].fadeRate      = SYNTH_CONTROL_DEFAULT_FADERATE_AUXNOTE;
-        param_sets[size].ampLastEcho   = SYNTH_CONTROL_DEFAULT_AMPLASTECHO_AUXNOTE;
+        param_sets[size].fadeCtlVal = SYNTH_CONTROL_DEFAULT_FADECTLVAL_AUXNOTE;
+        param_sets[size].fademin = SYNTH_CONTROL_DEFAULT_AMPLITUDE_AUXNOTE;
         param_sets[size].positionStride = SYNTH_CONTROL_DEFAULT_POSITIONSTRIDE;
         param_sets[size].posMode = SYNTH_CONTROL_DEFAULT_POSMODE;
         for (_n = 0; _n < SYNTH_CONTROL_PITCH_TABLE_SIZE; _n++) {

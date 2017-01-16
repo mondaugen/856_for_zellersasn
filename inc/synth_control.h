@@ -82,9 +82,10 @@ typedef struct __NoteParamSet {
                             repeats (it will be played numRepeats/2 times).
                             Of course this number could later stand for some
                             more complicated pattern. */
-    MMSample ampLastEcho; /* The amplitude of the last echo, which is used to
-                             calculate the fade rate based on the number of
-                             repeats */
+    MMSample fadeCtlVal;  /* The raw fade control value which is used in tandem
+                             with amplitude and numRepeats to determine the
+                             fadeRate */
+    MMSample fademin;     /* The initial or final value of the fade depending on the faderate */
     MMSample fadeRate;
     MMSample positionStride; /* If stride enabled, how much the position head is advanced each playback */
     SynthControlPosMode posMode; /* Whether there is stride or the position stays absolute */
@@ -175,6 +176,8 @@ typedef struct __NoteParamSet {
 #define SYNTH_CONTROL_ABS_MIN_TEMPO_BPM (60. / SAMPLE_TABLE_LENGTH_SEC)
 #define SYNTH_CONTROL_ABS_MAX_TEMPO_BPM (60. / (float)(audio_hw_get_block_size(NULL) \
                                         / (float)audio_hw_get_sample_rate(NULL)))
+#define SYNTH_CONTROL_DEFAULT_FADECTLVAL 0.5 
+#define SYNTH_CONTROL_DEFAULT_FADECTLVAL_AUXNOTE 0.5 
 
 typedef uint32_t SynthControlEditingWhichParamsIndex;
 /* The number of sets of note parameters */
@@ -330,5 +333,7 @@ int synth_control_get_uni_stuff_changed(void);
 void synth_control_set_uni_stuff_changed(void);
 void synth_control_reset_uni_stuff_changed(void);
 void synth_control_fbk_tog(void);
+void synth_control_set_fadeCtlVal(float gain_param, int note_params_idx);
+void synth_control_set_fadeCtlVal_curParams(float gain_param);
 
 #endif /* SYNTH_CONTROL_H */

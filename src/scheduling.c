@@ -251,7 +251,7 @@ static void NoteOnEvent_happen(MMEvent *event)
         }
         MMSample voiceNum = pm_get_next_free_voice_number();
         if (voiceNum != -1 && 
-                ((noteParamSets[((NoteOnEvent*)event)->parameterSet].amplitude
+                ((noteParamSets[((NoteOnEvent*)event)->parameterSet].fademin
                     * ((NoteOnEvent*)event)->currentFade) > SCHEDULING_AMP_FLOOR)) { 
             /* there is a voice free */
             pm_claim_params_from_allocator((void*)&voiceAllocator,
@@ -261,10 +261,10 @@ static void NoteOnEvent_happen(MMEvent *event)
             MMTrapEnvedSamplePlayer_noteOnStruct no;
             no.note = voiceNum;
             no.amplitude =
-                (noteParamSets[((NoteOnEvent*)event)->parameterSet].amplitude
+                (noteParamSets[((NoteOnEvent*)event)->parameterSet].fademin
                     * ((NoteOnEvent*)event)->currentFade) > 1. ? 
                     1. :
-                    (noteParamSets[((NoteOnEvent*)event)->parameterSet].amplitude
+                    (noteParamSets[((NoteOnEvent*)event)->parameterSet].fademin
                             * ((NoteOnEvent*)event)->currentFade);
             no.index = ((NoteOnEvent*)event)->currentPosition
                         * MMArray_get_length(theSound->wavtab);

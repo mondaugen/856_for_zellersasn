@@ -150,7 +150,7 @@ void synth_midi_cc_fbk_rate_control(void *data, MIDIMsg *msg)
 	synth_midi_check_msg(msg,synth_midi_cc_fbk_rate_control);
 	#endif
     int *note = (int*)data;
-    synth_control_set_ampLastEcho(
+    synth_control_set_fadeCtlVal(
             (float)msg->data[2]/(float)MIDIMSG_DATA_BYTE_MAX,
             *note);
 }
