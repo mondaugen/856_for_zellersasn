@@ -6,6 +6,7 @@
 #include "mm_dllist.h" 
 #include "mm_sample.h" 
 #include "leds.h" 
+#include "synth_control.h" 
 
 /* Amplitude below which playback is not triggered */
 #define SCHEDULING_AMP_FLOOR 3.05E-5 /* ~ 2^-15 */
@@ -60,8 +61,10 @@ NoteOnEvent *NoteOnEvent_new(int active,
         MMSample currentFade,
         MMSample currentPosition,
         MMSample currentPitch,
-        MMSample pitchOffset);
+        MMSample pitchOffset,
+        int pitch_idx);
 void NoteSchedEvent_set_pitch_offset(NoteSchedEvent *nse, MMSample pitch);
+void NoteSchedEvent_set_pitch_mode(NoteSchedEvent *nse, SynthControlPitchMode pitch_mode);
 void NoteSchedEvent_set_amplitude_scalar(NoteSchedEvent *nse, MMSample amp);
 void NoteSchedEvent_set_one_shot(NoteSchedEvent *nse, int one_shot);
 

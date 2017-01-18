@@ -58,7 +58,9 @@ typedef enum {
 
 typedef enum __ {
     SynthControlPitchMode_ABSOLUTE = 0,
-    SynthControlPitchMode_RELATIVE
+    SynthControlPitchMode_RELATIVE,
+    SynthControlPitchMode_BUS /* Controlled by a value that can update between
+                                 signal processing ticks */
 } SynthControlPitchMode;
 
 typedef struct __NoteParamSet {
@@ -69,6 +71,9 @@ typedef struct __NoteParamSet {
     MMSample eventDeltaBeats; /* The amount of time between repeats */
     MMSample pitches[SYNTH_CONTROL_PITCH_TABLE_SIZE];
     MMSample fine_pitches[SYNTH_CONTROL_PITCH_TABLE_SIZE];
+    /* The "pitch busses" that are read between signal processing ticks to get
+     * the current rate */
+    mm_q8_24_t rate_busses[SYNTH_CONTROL_PITCH_TABLE_SIZE];
     MMSample amplitude;
     MMSample startPoint; /* between 0 and 1 */
     int numRepeats;      /* The number of times repeated */
@@ -114,7 +119,8 @@ typedef struct __NoteParamSet {
 #define SYNTH_CONTROL_DEFAULT_SUSTAINTIME  1 
 #define SYNTH_CONTROL_DEFAULT_RELEASETIME 0.01
 #define SYNTH_CONTROL_DEFAULT_EVENTDELTABEATS 1
-#define SYNTH_CONTROL_DEFAULT_PITCH 0
+#define SYNTH_CONTROL_PITCH_OFFSET 69
+#define SYNTH_CONTROL_DEFAULT_PITCH (0+SYNTH_CONTROL_PITCH_OFFSET)
 #define SYNTH_CONTROL_DEFAULT_FINEPITCH 0.
 #define SYNTH_CONTROL_DEFAULT_AMPLITUDE 1.
 /* Other notes are off by default */
@@ -165,9 +171,10 @@ typedef struct __NoteParamSet {
 #define SYNTH_CONTROL_PITCH_FINE_MIN -0.5
 #define SYNTH_CONTROL_PITCH_FINE_MAX  0.5
 #define SYNTH_CONTROL_PITCH_FINE_QUANT 0.01
+#define SYNTH_CONTROL_DEFAULT_RATEBUSRATE (1L << 24L) /* Rate of 1 in Q8_24 format */
 /* The MIDI pitch that plays at a rate of 1 */
 #define SYNTH_CONTROL_PITCH_UNISON  60 
-#define SYNTH_CONTROL_DEFAULT_PITCHMODE SynthControlPitchMode_ABSOLUTE 
+#define SYNTH_CONTROL_DEFAULT_PITCHMODE SynthControlPitchMode_BUS
 #define SYNTH_CONTROL_PITCH_MIN     (0)
 #define SYNTH_CONTROL_PITCH_MAX     (127)
 #define SYNTH_CONTROL_POS_STRIDE_SCALE 0.2
@@ -193,7 +200,6 @@ extern NoteParamSet                 noteParamSets[];
 extern SynthControlDeltaButtonMode  deltaButtonMode;
 extern SynthControlGainMode         gainMode;
 extern SynthControlRecMode          recMode;
-extern SynthControlPitchMode        pitchMode;
 extern int                          schedulerState;
 
 /* The amount the scheduler is incremented each block */

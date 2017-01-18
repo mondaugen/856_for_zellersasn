@@ -339,7 +339,7 @@ void synth_midi_note_on_control(void *data, MIDIMsg *msg)
 	synth_midi_check_msg(msg,synth_midi_note_on_control);
 	#endif
     float pitch, amplitude;
-    pitch = msg->data[1] - SYNTH_CONTROL_PITCH_UNISON;
+    pitch = msg->data[1] - SYNTH_CONTROL_PITCH_UNISON + SYNTH_CONTROL_PITCH_OFFSET;
     amplitude = (float)msg->data[2] / (float)MIDIMSG_DATA_BYTE_MAX;
     amplitude = SYNTH_CONTROL_MIN_GAIN 
         + (SYNTH_CONTROL_MAX_GAIN - SYNTH_CONTROL_MIN_GAIN)*amplitude;

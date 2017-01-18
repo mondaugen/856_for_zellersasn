@@ -2,7 +2,6 @@
 
 #include "scheduling.h" 
 #include "audio_setup.h" 
-#include "synth_control.h" 
 #include "wavetables.h" 
 #include "poly_management.h" 
 #include "signal_chain.h" 
@@ -36,6 +35,8 @@ struct __NoteOnEvent {
     MMSample currentPitch;   /* A pitch value s.t. 0 means no transposition, 7
                                means transpose up a 5th etc. */
     MMSample pitchOffset;
+    int pitch_idx;      /* The index in the pitch table. Used when busses specify the pitch. */
+    SynthControlPitchMode pitch_mode;
 };
 
 /* Event that schedules other notes to play. */
@@ -46,6 +47,7 @@ struct __NoteSchedEvent {
     int one_shot;
     MMSample pitch_offset;
     MMSample amplitude_scalar;
+    SynthControlPitchMode pitch_mode;
 };
 
 /* Event that turns off LED indicating measure pulse */
@@ -87,7 +89,8 @@ NoteOnEvent *NoteOnEvent_new(int active,
         MMSample currentFade,
         MMSample currentPosition,
         MMSample currentPitch,
-        MMSample pitchOffset)
+        MMSample pitchOffset,
+        int pitch_idx)
 {
     NoteOnEvent *ev = (NoteOnEvent*)malloc(sizeof(NoteOnEvent));
     if (!ev) {
@@ -102,7 +105,10 @@ NoteOnEvent *NoteOnEvent_new(int active,
     ev->currentPosition = currentPosition;
     ev->currentPitch = currentPitch;
     ev->pitchOffset = pitchOffset;
+    ev->pitch_idx = pitch_idx;
     ev->parent = NULL;
+    /* Default pitch mode is to look at the bus. */
+    ev->pitch_mode = SynthControlPitchMode_BUS;
     return ev;
 }
 
@@ -118,12 +124,19 @@ NoteSchedEvent *NoteSchedEvent_new(int active)
     ev->one_shot = 0;
     ev->pitch_offset = 0.;
     ev->amplitude_scalar = 1.;
+    /* Default pitch mode is to look at the bus. */
+    ev->pitch_mode = SynthControlPitchMode_BUS;
     return ev;
 }
 
 void NoteSchedEvent_set_pitch_offset(NoteSchedEvent *nse, MMSample pitch)
 {
     nse->pitch_offset = pitch;
+}
+
+void NoteSchedEvent_set_pitch_mode(NoteSchedEvent *nse, SynthControlPitchMode pitch_mode)
+{
+    nse->pitch_mode = pitch_mode;
 }
 
 void NoteSchedEvent_set_amplitude_scalar(NoteSchedEvent *nse, MMSample amp)
@@ -213,7 +226,7 @@ static void NoteOnEvent_happen(MMEvent *event)
         SynthControlPosMode _posMode;
         _cur_param_set = ((NoteOnEvent*)event)->parameterSet;
         _next_repeat_idx = ((NoteOnEvent*)event)->repeatIndex + 1;
-        switch (pitchMode) {
+        switch (((NoteOnEvent*)event)->pitch_mode) {
             case SynthControlPitchMode_ABSOLUTE:
                 _next_pitch_idx = _next_repeat_idx % SYNTH_CONTROL_PITCH_TABLE_SIZE;
                 _next_pitch =  noteParamSets[_cur_param_set].pitches[_next_pitch_idx]
@@ -224,6 +237,9 @@ static void NoteOnEvent_happen(MMEvent *event)
                 _next_pitch =  ((NoteOnEvent*)event)->currentPitch 
                     + (noteParamSets[_cur_param_set].pitches[_next_pitch_idx]
                         + noteParamSets[_cur_param_set].fine_pitches[_next_pitch_idx]);
+                break;
+            case SynthControlPitchMode_BUS:
+                _next_pitch_idx = _next_repeat_idx % SYNTH_CONTROL_PITCH_TABLE_SIZE;
                 break;
         }
         _posMode = noteParamSets[_cur_param_set].posMode;
@@ -247,7 +263,9 @@ static void NoteOnEvent_happen(MMEvent *event)
                                 0,1) :
                             noteParamSets[((NoteOnEvent*)event)->parameterSet].startPoint,
                          _next_pitch,
-                         ((NoteOnEvent*)event)->pitchOffset));
+                         ((NoteOnEvent*)event)->pitchOffset,
+                         _next_pitch_idx)
+                         );
         }
         MMSample voiceNum = pm_get_next_free_voice_number();
         if (voiceNum != -1 && 
@@ -297,16 +315,19 @@ static void NoteOnEvent_happen(MMEvent *event)
 #endif
             no.samples = theSound->wavtab;
             MMWavTab_inc_n_players(theSound->wavtab);
-            /* 69 is added because MMCC_et12_rate considers pitch 69 to be a note of no
-             * transposition. In this we consider 0 to be a note of no
-             * transposition, so we add 69 */
-            no.rate = MMCC_et12_rate(
-                    synth_control_clip_valid_pitch(
-                        ((NoteOnEvent*)event)->currentPitch
-                        + 69
-                        + ((NoteOnEvent*)event)->pitchOffset));
-            MMTrapEnvedSamplePlayer_noteOn_Rate(
-                    &spsps[(int)voiceNum], &no);
+            if (((NoteOnEvent*)event)->pitch_mode == SynthControlPitchMode_BUS) {
+                no.p_rate = &noteParamSets[((NoteOnEvent*)event)->parameterSet].rate_busses[
+                        ((NoteOnEvent*)event)->pitch_idx];
+                MMTrapEnvedSamplePlayer_noteOn_pRate(
+                        &spsps[(int)voiceNum], &no);
+            } else {
+                no.rate = MMCC_et12_rate(
+                        synth_control_clip_valid_pitch(
+                            ((NoteOnEvent*)event)->currentPitch
+                            + ((NoteOnEvent*)event)->pitchOffset));
+                MMTrapEnvedSamplePlayer_noteOn_Rate(
+                        &spsps[(int)voiceNum], &no);
+            }
         }
     }
     MMDLList_remove((MMDLList*)((NoteOnEvent*)event)->parent);
@@ -325,10 +346,7 @@ static void NoteSchedEvent_happen(MMEvent *event)
                     >= noteParamSets[n].intermittency) 
                 || (nse->one_shot == 1)) {
                 noteOnEventCount[n] = 0;
-                schedule_noteOn_event(
-                        noteParamSets[n].offsetBeats
-                        * 0xffffffffULL,
-                        NoteOnEvent_new(1,
+                NoteOnEvent *noe = NoteOnEvent_new(1,
                             n,
                             noteParamSets[n].numRepeats,
                             0,
@@ -336,7 +354,13 @@ static void NoteSchedEvent_happen(MMEvent *event)
                             noteParamSets[n].startPoint,
                             noteParamSets[n].pitches[0]
                                 + noteParamSets[n].fine_pitches[0],
-                            nse->pitch_offset));
+                            nse->pitch_offset,
+                            0);
+                noe->pitch_mode = nse->pitch_mode;
+                schedule_noteOn_event(
+                        noteParamSets[n].offsetBeats
+                        * 0xffffffffULL,
+                        noe);
             } else {
                 noteOnEventCount[n] += 1;
             }

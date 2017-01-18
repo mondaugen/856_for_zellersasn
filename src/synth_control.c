@@ -80,6 +80,8 @@ void autorelease_on_done(MMEnvedSamplePlayer * esp)
             (void *)&(MMEnvedSamplePlayer_getSamplePlayerSigProc(esp).note));
     /* Remove callback from sample player */
     esp->onDone = NULL;
+    /* Set samples to NULL and therefore cease it from playing */
+    esp->spsp.samples = NULL;
 }
 
 void synth_control_set_envelopeTime(float envelopeTime_param,
@@ -277,8 +279,10 @@ void synth_control_set_pitch(float pitch_param,
                              int which_pitch,
                              int note_params_idx)
 {
-    noteParamSets[note_params_idx].pitches[which_pitch]
-        = pitch_param - 60;
+    MMSample _tmp = pitch_param - 60 + SYNTH_CONTROL_PITCH_OFFSET;
+    noteParamSets[note_params_idx].pitches[which_pitch] = _tmp;
+    _tmp = MMCC_et12_rate(_tmp + noteParamSets[note_params_idx].fine_pitches[which_pitch]);
+    noteParamSets[note_params_idx].rate_busses[which_pitch] = mm_q8_24_t_from_MMSample(_tmp);
 }
 
 void synth_control_set_pitch_curParams(float pitch_param)
@@ -323,8 +327,12 @@ void synth_control_set_pitch_chrom_quant(float param,
     if (_tmp < SYNTH_CONTROL_PITCH_CHROM_MIN) {
         _tmp = SYNTH_CONTROL_PITCH_CHROM_MIN;
     }
+    _tmp += SYNTH_CONTROL_PITCH_OFFSET;
     noteParamSets[note_params_idx].pitches[which_pitch]
         = _tmp;
+    /* Compute Q8_24 value */
+    _tmp = MMCC_et12_rate(_tmp + noteParamSets[note_params_idx].fine_pitches[which_pitch]);
+    noteParamSets[note_params_idx].rate_busses[which_pitch] = mm_q8_24_t_from_MMSample(_tmp);
 }
 
 void synth_control_set_pitch_chrom_quant_curParams(float param)
@@ -353,6 +361,9 @@ void synth_control_set_pitch_fine_quant(float param,
     }
     noteParamSets[note_param_idx].fine_pitches[which_pitch]
         = _tmp;
+    /* Compute Q8_24 value */
+    _tmp = MMCC_et12_rate(_tmp + noteParamSets[note_param_idx].pitches[which_pitch]);
+    noteParamSets[note_param_idx].rate_busses[which_pitch] = mm_q8_24_t_from_MMSample(_tmp);
 }
 
 void synth_control_set_pitch_fine_curParams(float param)
@@ -573,8 +584,9 @@ void synth_control_record_stop_helper(scrsh_source_t origin)
         }
         if (feedbackState == 1) {
             int n;
-            noteParamSets[0].pitches[0] = 0.;
-            noteParamSets[0].fine_pitches[0] = 0.;
+            noteParamSets[0].pitches[0] = SYNTH_CONTROL_DEFAULT_PITCH;
+            noteParamSets[0].fine_pitches[0] = SYNTH_CONTROL_DEFAULT_FINEPITCH;
+            noteParamSets[0].rate_busses[0] = SYNTH_CONTROL_DEFAULT_RATEBUSRATE;
             noteParamSets[0].amplitude = 1.;
             for (n = 1; n < NUM_NOTE_PARAM_SETS; n++) {
                 noteParamSets[n].amplitude = 0;
@@ -970,6 +982,7 @@ void synth_control_reset_param_sets(NoteParamSet *param_sets, int size)
     for (_n = 0; _n < SYNTH_CONTROL_PITCH_TABLE_SIZE; _n++) {
         param_sets[0].pitches[_n] = SYNTH_CONTROL_DEFAULT_PITCH;
         param_sets[0].fine_pitches[_n] = SYNTH_CONTROL_DEFAULT_FINEPITCH;
+        param_sets[0].rate_busses[_n] = SYNTH_CONTROL_DEFAULT_RATEBUSRATE;
     }
     while (size-- > 1) {
         param_sets[size].attackTime = SYNTH_CONTROL_DEFAULT_ATTACKTIME;     
@@ -988,6 +1001,7 @@ void synth_control_reset_param_sets(NoteParamSet *param_sets, int size)
         for (_n = 0; _n < SYNTH_CONTROL_PITCH_TABLE_SIZE; _n++) {
             param_sets[size].pitches[_n] = SYNTH_CONTROL_DEFAULT_PITCH;
             param_sets[size].fine_pitches[_n] = SYNTH_CONTROL_DEFAULT_FINEPITCH;
+            param_sets[size].rate_busses[_n] = SYNTH_CONTROL_DEFAULT_RATEBUSRATE;
         }
     };
 }
@@ -1273,6 +1287,7 @@ void synth_control_pitch_reset_tog(void)
         for (_m = 0; _m < SYNTH_CONTROL_PITCH_TABLE_SIZE; _m++) {
             noteParamSets[_n].pitches[_m] = SYNTH_CONTROL_DEFAULT_PITCH;
             noteParamSets[_n].fine_pitches[_m] = SYNTH_CONTROL_DEFAULT_FINEPITCH;
+            noteParamSets[_n].rate_busses[_m] = SYNTH_CONTROL_DEFAULT_RATEBUSRATE;
         }
     }
 }
@@ -1287,6 +1302,7 @@ void synth_control_one_shot(MMSample pitch,
         return;
     }
     NoteSchedEvent_set_pitch_offset(nse,pitch);
+    NoteSchedEvent_set_pitch_mode(nse,SynthControlPitchMode_ABSOLUTE);
     NoteSchedEvent_set_amplitude_scalar(nse,amplitude);
     NoteSchedEvent_set_one_shot(nse,1);
     schedule_noteSched_event(0,nse);
