@@ -1,0 +1,29 @@
+#! /bin/bash
+# Script for testing MIDI functionality of turning playback off on 856
+
+if [ -z ${MIDIDEV} ]
+then
+    MIDIDEV=hw:1,0,0
+fi
+
+if [ -z ${MIDI_CHANNEL} ]
+then
+    MIDI_CHANNEL=0
+fi
+
+if [[ -z "$1" ]]
+then
+    PITCH=60
+else
+    PITCH=$1
+fi
+
+if [[ -z "$2" ]]
+then
+    VEL=100
+else
+    VEL=$2
+fi
+
+
+amidi -p $MIDIDEV -S `printf "9%x %02x %02x" $MIDI_CHANNEL $PITCH $VEL`  
