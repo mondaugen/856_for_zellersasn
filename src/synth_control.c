@@ -1302,7 +1302,8 @@ void synth_control_one_shot(MMSample pitch,
         return;
     }
     NoteSchedEvent_set_pitch_offset(nse,pitch);
-    NoteSchedEvent_set_pitch_mode(nse,SynthControlPitchMode_ABSOLUTE);
+//    NoteSchedEvent_set_pitch_mode(nse,SynthControlPitchMode_ABSOLUTE);
+    NoteSchedEvent_set_pitch_mode(nse,SynthControlPitchMode_BUS);
     NoteSchedEvent_set_amplitude_scalar(nse,amplitude);
     NoteSchedEvent_set_one_shot(nse,1);
     schedule_noteSched_event(0,nse);

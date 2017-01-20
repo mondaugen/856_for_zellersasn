@@ -216,17 +216,18 @@ void schedule_noteSched_event(uint64_t timeFromNow, NoteSchedEvent *ev)
 
 static void NoteOnEvent_happen(MMEvent *event)
 {
+    NoteOnEvent *noe = (NoteOnEvent*)event;
     /* only play if event is active */
-    if (((NoteOnEvent*)event)->active == 1) {
+    if (noe->active == 1) {
         /* If numRepeats greater than 0, schedule the note to occur again. The
          * number of repeats should never be greater than 0 for an event of note
          * 0 */
         MMSample _next_pitch;
         int _next_repeat_idx, _cur_param_set, _next_pitch_idx;
         SynthControlPosMode _posMode;
-        _cur_param_set = ((NoteOnEvent*)event)->parameterSet;
-        _next_repeat_idx = ((NoteOnEvent*)event)->repeatIndex + 1;
-        switch (((NoteOnEvent*)event)->pitch_mode) {
+        _cur_param_set = noe->parameterSet;
+        _next_repeat_idx = noe->repeatIndex + 1;
+        switch (noe->pitch_mode) {
             case SynthControlPitchMode_ABSOLUTE:
                 _next_pitch_idx = _next_repeat_idx % SYNTH_CONTROL_PITCH_TABLE_SIZE;
                 _next_pitch =  noteParamSets[_cur_param_set].pitches[_next_pitch_idx]
@@ -234,7 +235,7 @@ static void NoteOnEvent_happen(MMEvent *event)
                 break;
             case SynthControlPitchMode_RELATIVE:
                 _next_pitch_idx = _next_repeat_idx % SYNTH_CONTROL_PITCH_TABLE_SIZE;
-                _next_pitch =  ((NoteOnEvent*)event)->currentPitch 
+                _next_pitch =  noe->currentPitch 
                     + (noteParamSets[_cur_param_set].pitches[_next_pitch_idx]
                         + noteParamSets[_cur_param_set].fine_pitches[_next_pitch_idx]);
                 break;
@@ -243,34 +244,34 @@ static void NoteOnEvent_happen(MMEvent *event)
                 break;
         }
         _posMode = noteParamSets[_cur_param_set].posMode;
-        if (((NoteOnEvent*)event)->numRepeats > 0) {
+        if (noe->numRepeats > 0) {
             schedule_noteOn_event(
-                    noteParamSets[((NoteOnEvent*)event)->parameterSet].eventDeltaBeats
+                    noteParamSets[noe->parameterSet].eventDeltaBeats
                     * 0xffffffffULL,
                     NoteOnEvent_new(1,
-                        ((NoteOnEvent*)event)->parameterSet,
-                        ((NoteOnEvent*)event)->numRepeats - 1,
+                        noe->parameterSet,
+                        noe->numRepeats - 1,
                         _next_repeat_idx,
-                        ((NoteOnEvent*)event)->currentFade 
-                            * noteParamSets[((NoteOnEvent*)event)->parameterSet].fadeRate,
+                        noe->currentFade 
+                            * noteParamSets[noe->parameterSet].fadeRate,
                         /* If stride enabled, increment the previous current
                          * position by the stride amount, wrapping between 0 and
                          * 1, otherwise just put the position as dictated by the
                          * parameter set */
                         (_posMode == SynthControlPosMode_STRIDE) ?
-                            MM_fwrap(((NoteOnEvent*)event)->currentPosition
-                                + noteParamSets[((NoteOnEvent*)event)->parameterSet].positionStride,
+                            MM_fwrap(noe->currentPosition
+                                + noteParamSets[noe->parameterSet].positionStride,
                                 0,1) :
-                            noteParamSets[((NoteOnEvent*)event)->parameterSet].startPoint,
+                            noteParamSets[noe->parameterSet].startPoint,
                          _next_pitch,
-                         ((NoteOnEvent*)event)->pitchOffset,
+                         noe->pitchOffset,
                          _next_pitch_idx)
                          );
         }
         MMSample voiceNum = pm_get_next_free_voice_number();
         if (voiceNum != -1 && 
-                ((noteParamSets[((NoteOnEvent*)event)->parameterSet].amplitude
-                    * ((NoteOnEvent*)event)->currentFade) > SCHEDULING_AMP_FLOOR)) { 
+                ((noteParamSets[noe->parameterSet].amplitude
+                    * noe->currentFade) > SCHEDULING_AMP_FLOOR)) { 
             /* there is a voice free */
             pm_claim_params_from_allocator((void*)&voiceAllocator,
                     (void*)&voiceNum);
@@ -279,12 +280,12 @@ static void NoteOnEvent_happen(MMEvent *event)
             MMTrapEnvedSamplePlayer_noteOnStruct no;
             no.note = voiceNum;
             no.amplitude =
-                (noteParamSets[((NoteOnEvent*)event)->parameterSet].amplitude
-                    * ((NoteOnEvent*)event)->currentFade) > 1. ? 
+                (noteParamSets[noe->parameterSet].amplitude
+                    * noe->currentFade) > 1. ? 
                     1. :
-                    (noteParamSets[((NoteOnEvent*)event)->parameterSet].amplitude
-                            * ((NoteOnEvent*)event)->currentFade);
-            no.index = ((NoteOnEvent*)event)->currentPosition
+                    (noteParamSets[noe->parameterSet].amplitude
+                            * noe->currentFade);
+            no.index = noe->currentPosition
                         * MMArray_get_length(theSound->wavtab);
             /* sustainTime is the length of the audio, times
              * noteParamSets[parameterSet].sustainTime *
@@ -292,46 +293,48 @@ static void NoteOnEvent_happen(MMEvent *event)
              * noteParamSets[parameterSet].attackTime -
              * noteParamSets[parametersSet].releaseTime) */
             no.sustainTime =
-                noteParamSets[((NoteOnEvent*)event)->parameterSet].sustainTime
+                noteParamSets[noe->parameterSet].sustainTime
                 * (MMSample)MMArray_get_length(theSound->wavtab)
                 / (MMSample)audio_hw_get_sample_rate(NULL)
                 * (1.
-                        - noteParamSets[((NoteOnEvent*)event)->parameterSet].attackTime
-                        - noteParamSets[((NoteOnEvent*)event)->parameterSet].releaseTime);
+                        - noteParamSets[noe->parameterSet].attackTime
+                        - noteParamSets[noe->parameterSet].releaseTime);
 #ifdef SIG_CHAIN_FILL_BUF_ONES
             no.attackTime = 0;
             no.releaseTime = 0;
 #else
             no.attackTime = 
-                noteParamSets[((NoteOnEvent*)event)->parameterSet].sustainTime
+                noteParamSets[noe->parameterSet].sustainTime
                 * (MMSample)MMArray_get_length(theSound->wavtab)
                 / (MMSample)audio_hw_get_sample_rate(NULL)
-                * noteParamSets[((NoteOnEvent*)event)->parameterSet].attackTime;
+                * noteParamSets[noe->parameterSet].attackTime;
             no.releaseTime = 
-                noteParamSets[((NoteOnEvent*)event)->parameterSet].sustainTime
+                noteParamSets[noe->parameterSet].sustainTime
                 * (MMSample)MMArray_get_length(theSound->wavtab)
                 / (MMSample)audio_hw_get_sample_rate(NULL)
-                * noteParamSets[((NoteOnEvent*)event)->parameterSet].releaseTime;
+                * noteParamSets[noe->parameterSet].releaseTime;
 #endif
             no.samples = theSound->wavtab;
             MMWavTab_inc_n_players(theSound->wavtab);
-            if (((NoteOnEvent*)event)->pitch_mode == SynthControlPitchMode_BUS) {
-                no.p_rate = &noteParamSets[((NoteOnEvent*)event)->parameterSet].rate_busses[
-                        ((NoteOnEvent*)event)->pitch_idx];
+            if (noe->pitch_mode == SynthControlPitchMode_BUS) {
+                no.p_rate = &noteParamSets[noe->parameterSet].rate_busses[
+                        noe->pitch_idx];
+                no.rate = MMCC_et12_rate(noe->pitchOffset
+                        + SYNTH_CONTROL_PITCH_OFFSET);
                 MMTrapEnvedSamplePlayer_noteOn_pRate(
                         &spsps[(int)voiceNum], &no);
             } else {
                 no.rate = MMCC_et12_rate(
                         synth_control_clip_valid_pitch(
-                            ((NoteOnEvent*)event)->currentPitch
-                            + ((NoteOnEvent*)event)->pitchOffset));
+                            noe->currentPitch
+                            + noe->pitchOffset));
                 MMTrapEnvedSamplePlayer_noteOn_Rate(
                         &spsps[(int)voiceNum], &no);
             }
         }
     }
-    MMDLList_remove((MMDLList*)((NoteOnEvent*)event)->parent);
-    free(((NoteOnEvent*)event)->parent);
+    MMDLList_remove((MMDLList*)noe->parent);
+    free(noe->parent);
     free(event);
 }
 
