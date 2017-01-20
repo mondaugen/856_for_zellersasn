@@ -279,12 +279,14 @@ static void NoteOnEvent_happen(MMEvent *event)
                 autorelease_on_done;
             MMTrapEnvedSamplePlayer_noteOnStruct no;
             no.note = voiceNum;
-            no.amplitude =
-                (noteParamSets[noe->parameterSet].amplitude
-                    * noe->currentFade) > 1. ? 
-                    1. :
-                    (noteParamSets[noe->parameterSet].amplitude
-                            * noe->currentFade);
+//            no.amplitude =
+//                (noteParamSets[noe->parameterSet].amplitude
+//                    * noe->currentFade) > 1. ? 
+//                    1. :
+//                    (noteParamSets[noe->parameterSet].amplitude
+//                            * noe->currentFade);
+            no.amplitude = noe->currentFade;
+            no.p_gain = &noteParamSets[noe->parameterSet].amplitude; 
             no.index = noe->currentPosition
                         * MMArray_get_length(theSound->wavtab);
             /* sustainTime is the length of the audio, times
