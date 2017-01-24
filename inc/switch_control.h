@@ -20,6 +20,13 @@ typedef struct __switch_control_t {
     struct __switch_control_t *next;
 } switch_control_t;
 
+typedef enum {
+    switch_debouncer_state_WAIT_1ST_TRIG = 0,
+    switch_debouncer_state_WAIT_NTH_TRIG,
+    switch_debouncer_state_WAIT_RESET,
+    switch_debouncer_state_RESET_TIMEOUT
+} switch_debouncer_state_t;
+
 typedef struct __switch_debouncer_t {
     /* Should return 1 if request has been made */
     uint32_t (*get_req_state)(struct __switch_debouncer_t *);
@@ -41,6 +48,7 @@ typedef struct __switch_debouncer_t {
     /* The number of request that are to be ignored from now on */
     int32_t n_ignores;
     uint32_t primed;
+    switch_debouncer_state_t state;
     void     *data;
 } switch_debouncer_t;
 
@@ -58,8 +66,16 @@ void switch_control_init(switch_control_t *sc,
                          void (*func)(switch_control_t*),
                          void *data);
 void switch_control_add(switch_control_t *sc);
+
+typedef enum {
+    switch_debouncer_style_A = 0,
+    switch_debouncer_style_B,
+    switch_debouncer_style_C
+} switch_debouncer_style_t;
+
 void switch_control_debounce_init(switch_control_t *sc,
-                                  switch_debouncer_t *sd);
+                                  switch_debouncer_t *sd,
+                                  switch_debouncer_style_t sty);
 void switch_debouncer_init(switch_debouncer_t *sd,
                            void (*func)(switch_debouncer_t *),
                            uint32_t init_n_ignores,

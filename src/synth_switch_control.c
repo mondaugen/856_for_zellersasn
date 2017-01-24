@@ -107,7 +107,7 @@ static int switch_control_get_tristate(switch_control_t *sc)
         synth_control_ ## name ## _tog();\
     }
 
-#define SYNTH_SWITCH_SETUP_TOG(name,sw)\
+#define SYNTH_SWITCH_SETUP_TOG(name,sw,sty)\
     static void synth_switch_control_ ## name ## _tog_setup(void)\
     {\
         static mom_state_t mom_state = {\
@@ -122,7 +122,7 @@ static int switch_control_get_tristate(switch_control_t *sc)
                 synth_switch_control_ ## name ## _tog_func,\
                 2,\
                 &mom_state);\
-        switch_control_debounce_init(&control,&debouncer);\
+        switch_control_debounce_init(&control,&debouncer,sty);\
         switch_control_add(&control);\
     }
 
@@ -185,17 +185,19 @@ SYNTH_SWITCH_SETUP(SynthControlGainMode,SW7,
         SynthControlGainMode_WET,
         SynthControlGainMode_WET); 
 SYNTH_SWITCH_CONTROL_TOG(record);
-SYNTH_SWITCH_SETUP_TOG(record,FSW1);
+/* Footswitches use debounce method C */
+SYNTH_SWITCH_SETUP_TOG(record,FSW1,switch_debouncer_style_C);
 SYNTH_SWITCH_CONTROL_TOG(schedulerState);
-SYNTH_SWITCH_SETUP_TOG(schedulerState,FSW2);
+SYNTH_SWITCH_SETUP_TOG(schedulerState,FSW2,switch_debouncer_style_C);
+/* Otherwise use debounce method B */
 SYNTH_SWITCH_CONTROL_TOG(presetRecall);
-SYNTH_SWITCH_SETUP_TOG(presetRecall,MSW3_TOP);
+SYNTH_SWITCH_SETUP_TOG(presetRecall,MSW3_TOP,switch_debouncer_style_B);
 SYNTH_SWITCH_CONTROL_TOG(presetStore);
-SYNTH_SWITCH_SETUP_TOG(presetStore,MSW3_BTM);
+SYNTH_SWITCH_SETUP_TOG(presetStore,MSW3_BTM,switch_debouncer_style_B);
 SYNTH_SWITCH_CONTROL_TOG(fbk);
-SYNTH_SWITCH_SETUP_TOG(fbk,MSW7_TOP);
+SYNTH_SWITCH_SETUP_TOG(fbk,MSW7_TOP,switch_debouncer_style_B);
 SYNTH_SWITCH_CONTROL_TOG(pitch_reset);
-SYNTH_SWITCH_SETUP_TOG(pitch_reset,MSW1_TOP);
+SYNTH_SWITCH_SETUP_TOG(pitch_reset,MSW1_TOP,switch_debouncer_style_B);
 
 void synth_switch_control_setup(void)
 {

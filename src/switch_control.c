@@ -104,6 +104,7 @@ static void switch_control_debounce_func_a(switch_control_t *sc)
         sd->n_ignores--;
     }
 }
+
 /* This ignores "sd->init_n_ignores - 1" readings of the switch line being low
  * and then sets a primed variable. When primed, if the reading is high, the
  * function "sd->fun" is called. This means that the switch must be low for at
@@ -141,6 +142,57 @@ static void switch_control_debounce_func_b(switch_control_t *sc)
         sd->reset_req_state(sd);
     }
 }
+
+/* This ignores sd->init_n_ignores - 1 readings like DEBOUNCE METHOD B but
+ * instead of setting a primed variable, just calls the function. This is called
+ * DEBOUNCE METHOD C.
+ */
+static void switch_control_debounce_func_c(switch_control_t *sc)
+{
+    switch_debouncer_t *sd = (switch_debouncer_t*)sc->data;
+    // This method doesn't use interrupts and so sd->get_req_state(sd) is not
+    // called
+    if (sd->get_pin_state(sd) == 1) {
+        // switch is down
+        switch (sd->state) {
+            case switch_debouncer_state_WAIT_1ST_TRIG:
+                sd->n_ignores = sd->init_n_ignores;
+                sd->state = switch_debouncer_state_WAIT_NTH_TRIG;
+            case switch_debouncer_state_WAIT_NTH_TRIG:
+                if (sd->n_ignores == 0) {
+                    sd->func(sd);
+                    sd->state = switch_debouncer_state_WAIT_RESET;
+                } else {
+                    sd->n_ignores--;
+                }
+            case switch_debouncer_state_WAIT_RESET:
+            case switch_debouncer_state_RESET_TIMEOUT:
+                return;
+        }
+    } else {
+        // switch is up
+        switch (sd->state) {
+            case switch_debouncer_state_WAIT_RESET:
+                // Switch has now been reset
+                sd->n_ignores = sd->init_n_ignores;
+                sd->state = switch_debouncer_state_RESET_TIMEOUT;
+            case switch_debouncer_state_RESET_TIMEOUT:
+                // Must be down for n_ignore checks before active again
+                if (sd->n_ignores == 0) {
+                    sd->state = switch_debouncer_state_WAIT_1ST_TRIG;
+                } else {
+                    sd->n_ignores--;
+                }
+                return;
+            case switch_debouncer_state_WAIT_NTH_TRIG:
+                // Switch hasn't been down long enough
+                sd->state = switch_debouncer_state_WAIT_1ST_TRIG;
+            case switch_debouncer_state_WAIT_1ST_TRIG:
+                return;
+        }
+    }
+}
+
 static uint32_t get_mom_req_state(switch_debouncer_t *sd)
 {
     mom_state_t* data = (mom_state_t*)sd->data;
@@ -165,22 +217,35 @@ void switch_debouncer_init(switch_debouncer_t *sd,
                            uint32_t init_n_ignores,
                            mom_state_t *state)
 {
-        sd->get_req_state = get_mom_req_state;
-        sd->get_pin_state = get_mom_pin_state;
-        sd->reset_req_state = reset_mom_req_state;
-        sd->func = func;
-        sd->init_n_ignores = init_n_ignores;
-        sd->n_ignores = 0;
-        sd->primed = 0;
-        sd->data = (void*)state;
+    sd->get_req_state = get_mom_req_state;
+    sd->get_pin_state = get_mom_pin_state;
+    sd->reset_req_state = reset_mom_req_state;
+    sd->func = func;
+    sd->init_n_ignores = init_n_ignores;
+    sd->n_ignores = 0;
+    sd->primed = 0;
+    sd->data = (void*)state;
 }
 
 void switch_control_debounce_init(switch_control_t *sc,
-                                  switch_debouncer_t *sd)
+                                  switch_debouncer_t *sd,
+                                  switch_debouncer_style_t sty)
 {
+    void (*func) (switch_control_t *);
+    switch (sty) {
+        case switch_debouncer_style_A:
+            func = switch_control_debounce_func_a;
+            break;
+        case switch_debouncer_style_B:
+            func = switch_control_debounce_func_b;
+            break;
+        case switch_debouncer_style_C:
+            func = switch_control_debounce_func_c;
+            break;
+    }
     switch_control_init(sc,
                         (volatile uint32_t*)NULL,
                         0,
-                        switch_control_debounce_func_b,
+                        func,
                         (void*)sd);
 }
