@@ -25,6 +25,7 @@ VPATH				    += :$(MM_DSP_SCHABLONE_PATH)/src
 VPATH					+= :$(foreach path, $(INC), :$(path))
 VPATH					+= :$(foreach path, $(LIB), :$(path))
 DEP						 = $(foreach inc, $(INC), $(notdir $(wildcard $(inc)/*.h)))
+DEP						+= constants/tables.h
 LIBDEP					 = $(foreach lib, $(LIB), $(notdir $(wildcard $(lib)/*.a)))
 CFLAGS					+= $(foreach inc,$(INC),-I$(inc))
 CFLAGS					+= -ggdb3 $(OPTIMIZE) -DSTM32F429_439xx \
@@ -46,17 +47,25 @@ TESTS					 = $(addprefix $(TESTDIR)/,\
 						    $(addsuffix .o, $(basename $(TESTSRC))))
 VPATH				    += :test
 CC 						 = arm-none-eabi-gcc
-OCD 		   = sudo openocd -f /usr/local/share/openocd/scripts/board/stm32f429discovery.cfg -f $(OPENOCD_INTERFACE)
+OCD 		   			 = sudo openocd -f /usr/local/share/openocd/scripts/board/stm32f429discovery.cfg -f $(OPENOCD_INTERFACE)
+PYTHON					 = python
+CONST_OBJS				 = objs/tables.o
 
 all: $(OBJSDIR) $(OBJS) $(BIN) $(TESTS)
 
 $(OBJSDIR):
 	if [ ! -d "$(OBJSDIR)" ]; then mkdir $(OBJSDIR); fi
 
+constants/tables.c constants/tables.h : constants/tables.py
+	$(PYTHON) $<
+
+$(CONST_OBJS) : constants/tables.c constants/tables.h
+	$(CC) -c $(CFLAGS) $< -o $@
+
 $(OBJS) : $(OBJSDIR)/%.o: %.c $(DEP)
 	$(CC) -c $(CFLAGS) $< -o $@
 
-$(BIN) : $(OBJS) $(LIBDEP)
+$(BIN) : $(OBJS) $(CONST_OBJS) $(LIBDEP)
 	$(CC) $(filter %.o, $^) -o $@ $(CFLAGS) $(LDFLAGS)
 
 $(TESTS) : $(TESTDIR)/%.o: %.c $(DEP)
