@@ -7,3 +7,4 @@ octave-workspace
 test/*.o
 gdb.txt
 *.o
+constants/tables.{c,h}
