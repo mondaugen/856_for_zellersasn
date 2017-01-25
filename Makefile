@@ -20,6 +20,7 @@ INC					    += $(MM_PRIMITIVES_PATH)/inc
 INC					    += $(NE_DATASTRUCTURES_PATH)/inc
 INC						+= inc
 INC						+= $(CMSIS_INCLUDES)
+INC						+= constants
 VPATH				     = $(MMMIDI_PATH)/src:src
 VPATH				    += :$(MM_DSP_SCHABLONE_PATH)/src
 VPATH					+= :$(foreach path, $(INC), :$(path))

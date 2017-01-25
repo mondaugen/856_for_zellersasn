@@ -15,4 +15,6 @@ with open('constants/tables.c','w') as f:
 with open('constants/tables.h','w') as f:
     f.write("#ifndef TABLES_H\n#define TABLES_H\n")
     f.write("extern const float tables_delta_time_free[];\n")
+    f.write(("#define TABLES_DELTA_TIME_FREE_LEN "
+            + "%d\n" % (DELTA_TIME_FREE_TAB_LEN,)))
     f.write("#endif /* TABLES_H */\n")

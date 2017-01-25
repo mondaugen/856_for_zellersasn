@@ -14,6 +14,7 @@
 #include <string.h> 
 #include "mm_common_calcs.h" 
 #include "leds.h" 
+#include "tables.h"
 
 #ifdef DEBUG
  #include <assert.h>
@@ -426,9 +427,11 @@ void synth_control_set_eventDelta_quant_curParams(float eventDeltaBeats_param)
 
 void synth_control_set_eventDelta_free(float eventDeltaBeats_param, int note_params_idx)
 {
-    noteParamSets[note_params_idx].eventDeltaBeats
-        = powf(2.,-6.*(1 - eventDeltaBeats_param))
-            - powf(2.,-6.);
+    size_t idx = (size_t)(eventDeltaBeats_param * (float)TABLES_DELTA_TIME_FREE_LEN);
+    if (idx >= TABLES_DELTA_TIME_FREE_LEN) {
+        idx = TABLES_DELTA_TIME_FREE_LEN - 1;
+    }
+    noteParamSets[note_params_idx].eventDeltaBeats = tables_delta_time_free[idx];
 }
 
 void synth_control_set_eventDelta_free_curParams(float eventDeltaBeats_param)
