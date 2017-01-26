@@ -62,7 +62,8 @@ NoteOnEvent *NoteOnEvent_new(int active,
         MMSample currentPosition,
         MMSample currentPitch,
         MMSample pitchOffset,
-        int pitch_idx);
+        int pitch_idx,
+        int swing_idx);
 void NoteSchedEvent_set_pitch_offset(NoteSchedEvent *nse, MMSample pitch);
 void NoteSchedEvent_set_pitch_mode(NoteSchedEvent *nse, SynthControlPitchMode pitch_mode);
 void NoteSchedEvent_set_amplitude_scalar(NoteSchedEvent *nse, MMSample amp);

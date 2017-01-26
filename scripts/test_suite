@@ -19,7 +19,7 @@ make flash
 make reset
 sleep 2
 sh scripts/test_switch.sh
-sh scripts/test_pot.sh
+scripts/test_pot.sh
 sh scripts/test_led.sh
 trap - SIGINT
 # play_test_file seems to already trap sigint properly

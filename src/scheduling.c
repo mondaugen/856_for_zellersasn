@@ -36,6 +36,7 @@ struct __NoteOnEvent {
                                means transpose up a 5th etc. */
     MMSample pitchOffset;
     int pitch_idx;      /* The index in the pitch table. Used when busses specify the pitch. */
+    int swing_idx;      /* The index in the swing table. */
     SynthControlPitchMode pitch_mode;
 };
 
@@ -90,7 +91,8 @@ NoteOnEvent *NoteOnEvent_new(int active,
         MMSample currentPosition,
         MMSample currentPitch,
         MMSample pitchOffset,
-        int pitch_idx)
+        int pitch_idx,
+        int swing_idx)
 {
     NoteOnEvent *ev = (NoteOnEvent*)malloc(sizeof(NoteOnEvent));
     if (!ev) {
@@ -106,6 +108,7 @@ NoteOnEvent *NoteOnEvent_new(int active,
     ev->currentPitch = currentPitch;
     ev->pitchOffset = pitchOffset;
     ev->pitch_idx = pitch_idx;
+    ev->swing_idx = swing_idx;
     ev->parent = NULL;
     /* Default pitch mode is to look at the bus. */
     ev->pitch_mode = SynthControlPitchMode_BUS;
@@ -223,10 +226,11 @@ static void NoteOnEvent_happen(MMEvent *event)
          * number of repeats should never be greater than 0 for an event of note
          * 0 */
         MMSample _next_pitch;
-        int _next_repeat_idx, _cur_param_set, _next_pitch_idx;
+        int _next_repeat_idx, _cur_param_set, _next_pitch_idx, _next_swing_idx;
         SynthControlPosMode _posMode;
         _cur_param_set = noe->parameterSet;
         _next_repeat_idx = noe->repeatIndex + 1;
+        _next_swing_idx = (noe->swing_idx + 1) % SYNTH_CONTROL_SWING_TABLE_SIZE;
         switch (noe->pitch_mode) {
             case SynthControlPitchMode_ABSOLUTE:
                 _next_pitch_idx = _next_repeat_idx % SYNTH_CONTROL_PITCH_TABLE_SIZE;
@@ -246,8 +250,9 @@ static void NoteOnEvent_happen(MMEvent *event)
         _posMode = noteParamSets[_cur_param_set].posMode;
         if (noe->numRepeats > 0) {
             schedule_noteOn_event(
-                    noteParamSets[noe->parameterSet].eventDeltaBeats
-                    * 0xffffffffULL,
+                    (noteParamSets[noe->parameterSet].eventDeltaBeats
+                     * noteParamSets[noe->parameterSet].swing[_next_swing_idx])
+                     * 0xffffffffULL,
                     NoteOnEvent_new(1,
                         noe->parameterSet,
                         noe->numRepeats - 1,
@@ -265,7 +270,8 @@ static void NoteOnEvent_happen(MMEvent *event)
                             noteParamSets[noe->parameterSet].startPoint,
                          _next_pitch,
                          noe->pitchOffset,
-                         _next_pitch_idx)
+                         _next_pitch_idx,
+                         _next_swing_idx)
                          );
         }
         MMSample voiceNum = pm_get_next_free_voice_number();
@@ -360,6 +366,7 @@ static void NoteSchedEvent_happen(MMEvent *event)
                             noteParamSets[n].pitches[0]
                                 + noteParamSets[n].fine_pitches[0],
                             nse->pitch_offset,
+                            0,
                             0);
                 noe->pitch_mode = nse->pitch_mode;
                 schedule_noteOn_event(

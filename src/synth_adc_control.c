@@ -76,33 +76,42 @@ SYNTH_ADC_SETUP(pos_curParams,SYNTH_ADC_POS_IDX,synth_adc_pos_curParams_control)
 static void synth_adc_eventDelta_curParams_control(adc_channel_t *chan,
                                          adc_channel_do_data_t *data)
 {
-    switch (synth_control_get_deltaButtonMode()) {
-        case SynthControlDeltaButtonMode_EVENT_DELTA_QUANT:
-            if (synth_control_get_editingWhichParams() == 0) {
-                /* If editing 0th params, note delta controls tempo scaling */
-                synth_control_set_tempo_scale_norm(
+    if (synth_control_get_posMode_curParams() == SynthControlPosMode_UNI) {
+        /* Only do something on note 2 and 3 */
+        if (synth_control_get_editingWhichParams() != 0) {
+            synth_control_set_uni_stuff_changed();
+            synth_control_set_swing_curParams(
                     synth_adc_scale_thresh(chan->cur_val));
-            } else {
-                /* Otherwise it controls the event delta in a quantized way */
-                synth_control_set_eventDelta_quant_curParams(
-                    synth_adc_scale_thresh(chan->cur_val));
-            }
-            break;
-        case SynthControlDeltaButtonMode_EVENT_DELTA_FREE:
-            if (synth_control_get_editingWhichParams() == 0) {
-                /* Controls fine tempo control */
-                synth_control_set_tempo_fine_norm(
-                    synth_adc_scale_thresh(chan->cur_val));
-            } else {
-                /* Otherwise freely controls event delta (no quantization) */
-                synth_control_set_eventDelta_free_curParams(
+        }
+    } else {
+        switch (synth_control_get_deltaButtonMode()) {
+            case SynthControlDeltaButtonMode_EVENT_DELTA_QUANT:
+                if (synth_control_get_editingWhichParams() == 0) {
+                    /* If editing 0th params, note delta controls tempo scaling */
+                    synth_control_set_tempo_scale_norm(
                         synth_adc_scale_thresh(chan->cur_val));
-            }
-            break;
-        case SynthControlDeltaButtonMode_INTERMITTENCY:
-            synth_control_set_intermittency_curParams(
-                    synth_adc_scale_thresh(chan->cur_val));
-            break;
+                } else {
+                    /* Otherwise it controls the event delta in a quantized way */
+                    synth_control_set_eventDelta_quant_curParams(
+                        synth_adc_scale_thresh(chan->cur_val));
+                }
+                break;
+            case SynthControlDeltaButtonMode_EVENT_DELTA_FREE:
+                if (synth_control_get_editingWhichParams() == 0) {
+                    /* Controls fine tempo control */
+                    synth_control_set_tempo_fine_norm(
+                        synth_adc_scale_thresh(chan->cur_val));
+                } else {
+                    /* Otherwise freely controls event delta (no quantization) */
+                    synth_control_set_eventDelta_free_curParams(
+                            synth_adc_scale_thresh(chan->cur_val));
+                }
+                break;
+            case SynthControlDeltaButtonMode_INTERMITTENCY:
+                synth_control_set_intermittency_curParams(
+                        synth_adc_scale_thresh(chan->cur_val));
+                break;
+        }
     }
 }
 

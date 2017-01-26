@@ -6,6 +6,7 @@
 #include "signal_chain.h" 
 #include <stdint.h> 
 #include "synth_control_presets.h" 
+#include "tables.h"
 
 typedef int SynthControlPitchIndex;
 
@@ -63,6 +64,8 @@ typedef enum __ {
                                  signal processing ticks */
 } SynthControlPitchMode;
 
+#define SYNTH_CONTROL_SWING_TABLE_SIZE TABLES_SWING_SET_SIZE 
+
 typedef struct __NoteParamSet {
     MMSample attackTime;
     MMSample sustainTime;
@@ -93,6 +96,7 @@ typedef struct __NoteParamSet {
     MMSample fadeRate;
     MMSample positionStride; /* If stride enabled, how much the position head is advanced each playback */
     SynthControlPosMode posMode; /* Whether there is stride or the position stays absolute */
+    MMSample swing[SYNTH_CONTROL_SWING_TABLE_SIZE];
 } NoteParamSet;
 
 /* The amount of fade at the end of the recording in seconds */
@@ -182,6 +186,7 @@ typedef struct __NoteParamSet {
 #define SYNTH_CONTROL_ABS_MIN_TEMPO_BPM (60. / SAMPLE_TABLE_LENGTH_SEC)
 #define SYNTH_CONTROL_ABS_MAX_TEMPO_BPM (60. / (float)(audio_hw_get_block_size(NULL) \
                                         / (float)audio_hw_get_sample_rate(NULL)))
+#define SYNTH_CONTROL_DEFAULT_SWING 1. 
 
 typedef uint32_t SynthControlEditingWhichParamsIndex;
 /* The number of sets of note parameters */
@@ -336,5 +341,6 @@ int synth_control_get_uni_stuff_changed(void);
 void synth_control_set_uni_stuff_changed(void);
 void synth_control_reset_uni_stuff_changed(void);
 void synth_control_fbk_tog(void);
+void synth_control_set_swing_curParams(float param);
 
 #endif /* SYNTH_CONTROL_H */

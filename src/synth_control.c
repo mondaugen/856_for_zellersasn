@@ -14,7 +14,6 @@
 #include <string.h> 
 #include "mm_common_calcs.h" 
 #include "leds.h" 
-#include "tables.h"
 
 #ifdef DEBUG
  #include <assert.h>
@@ -987,6 +986,9 @@ void synth_control_reset_param_sets(NoteParamSet *param_sets, int size)
         param_sets[0].fine_pitches[_n] = SYNTH_CONTROL_DEFAULT_FINEPITCH;
         param_sets[0].rate_busses[_n] = SYNTH_CONTROL_DEFAULT_RATEBUSRATE;
     }
+    for (_n = 0 ; _n < SYNTH_CONTROL_SWING_TABLE_SIZE; _n++) {
+        param_sets[0].swing[_n] = SYNTH_CONTROL_DEFAULT_SWING;
+    }
     while (size-- > 1) {
         param_sets[size].attackTime = SYNTH_CONTROL_DEFAULT_ATTACKTIME;     
         param_sets[size].sustainTime  = SYNTH_CONTROL_DEFAULT_SUSTAINTIME; 
@@ -1005,6 +1007,9 @@ void synth_control_reset_param_sets(NoteParamSet *param_sets, int size)
             param_sets[size].pitches[_n] = SYNTH_CONTROL_DEFAULT_PITCH;
             param_sets[size].fine_pitches[_n] = SYNTH_CONTROL_DEFAULT_FINEPITCH;
             param_sets[size].rate_busses[_n] = SYNTH_CONTROL_DEFAULT_RATEBUSRATE;
+        }
+        for (_n = 0 ; _n < SYNTH_CONTROL_SWING_TABLE_SIZE; _n++) {
+            param_sets[size].swing[_n] = SYNTH_CONTROL_DEFAULT_SWING;
         }
     };
 }
@@ -1384,3 +1389,20 @@ MMSample synth_control_clip_valid_pitch(MMSample pitch)
     return pitch;
 }
 
+void synth_control_set_swing(float param,
+                             int idx)
+{
+    size_t n;
+    n = (size_t)(param * TABLES_N_SWING_SETS);
+    if (n >= TABLES_N_SWING_SETS) {
+        n = TABLES_N_SWING_SETS - 1;
+    }
+    TABLES_SWING_PTS_LOOKUP(n,
+                            &noteParamSets[idx].swing[0],
+                            &noteParamSets[idx].swing[1]);
+}
+
+void synth_control_set_swing_curParams(float param)
+{
+    synth_control_set_swing(param,synth_control_get_editingWhichParams());
+}

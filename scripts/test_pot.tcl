@@ -6,24 +6,40 @@ signal handle SIGINT
 set f [open "/tmp/adc_vals_addr"]
 set a1 [gets $f]
 set a2 [gets $f]
-set nchans [gets $f]
+puts $board_version
+set nchans1 0
+set nchans2 0
+if {[string compare $board_version "BOARD_V1"] == 0} {
+    set nchans1 [gets $f]
+    set nchans2 nchans1
+} elseif {[string compare $board_version "BOARD_V2"] == 0} {
+    set nchans1 [gets $f]
+    set nchans2 [gets $f]
+} else {
+    puts "Must specify BOARD_VERSION as BOARD_V1 or BOARD_V2"
+}
 
 close $f
 
 while {[catch -signal {
+        # for ADC1
+
+        # dsize_ is size in bytes
         set dsize_ [lindex $a1 1]
         set len_ [expr [lindex $a1 2] / $dsize_]
 
+        # mem2arry wants datum size in bits, therefore x8
         mem2array x [expr $dsize_ * 8] [lindex $a1 0] $len_
 
         set z [list]
 
-        foreach i [range 0 $nchans 1] {
+        # compute average
+        foreach i [range 0 $nchans1 1] {
             set z_ 0
-            foreach j [range $i $len_ $nchans] {
+            foreach j [range $i $len_ $nchans1] {
                 set z_ [expr $z_ + $x($j)]
             }
-            lappend z [expr $z_ / ($len_. / $nchans)]
+            lappend z [expr $z_ / ($len_. / $nchans1)]
         }
 
         # clear screen
@@ -32,10 +48,12 @@ while {[catch -signal {
         puts -nonewline "\033\x5b1;1H"
 
         puts "ADC1"
-        foreach i [range 0 $nchans 1] {
+        foreach i [range 0 $nchans1 1] {
             puts -nonewline [format "%4.0f " [lindex $z $i]]
         }
         puts ""
+
+        # for ADC2
 
         set dsize_ [lindex $a2 1]
         set len_ [expr [lindex $a2 2] / $dsize_]
@@ -44,16 +62,16 @@ while {[catch -signal {
 
         set z [list]
 
-        foreach i [range 0 $nchans 1] {
+        foreach i [range 0 $nchans2 1] {
             set z_ 0
-            foreach j [range $i $len_ $nchans] {
+            foreach j [range $i $len_ $nchans2] {
                 set z_ [expr $z_ + $x($j)]
             }
-            lappend z [expr $z_ / ($len_. / $nchans)]
+            lappend z [expr $z_ / ($len_. / $nchans2)]
         }
 
         puts "ADC2"
-        foreach i [range 0 $nchans 1] {
+        foreach i [range 0 $nchans2 1] {
             puts -nonewline [format "%4.0f " [lindex $z $i]]
         }
 
