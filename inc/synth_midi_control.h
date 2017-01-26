@@ -6,7 +6,7 @@
 #include "midi_setup.h"
 
 #define SYNTH_MIDI_CONTROL_DEFAULT_CHANNEL 0
-#define SYNTH_MIDI_NUM_NOTE_PARAMS 17
+#define SYNTH_MIDI_NUM_NOTE_PARAMS 18
 #define SYNTH_MIDI_NUM_GLOBAL_PARAMS 10
 #define SYNTH_MIDI_TOT_NUM_NOTE_FUNS (SYNTH_MIDI_NUM_NOTE_PARAMS \
                                 * NUM_NOTE_PARAM_SETS)
@@ -32,6 +32,7 @@ typedef enum {
     synth_midi_cc_type_t_NUM_REPS,
     synth_midi_cc_type_t_STRIDE_STATE,
     synth_midi_cc_type_t_INTERM,
+    synth_midi_cc_type_t_SWING,
     synth_midi_cc_type_t_TEMPO_COARSE 
         = (SYNTH_MIDI_NUM_NOTE_PARAMS * NUM_NOTE_PARAM_SETS),
     synth_midi_cc_type_t_TEMPO_FINE,

@@ -341,6 +341,8 @@ int synth_control_get_uni_stuff_changed(void);
 void synth_control_set_uni_stuff_changed(void);
 void synth_control_reset_uni_stuff_changed(void);
 void synth_control_fbk_tog(void);
+void synth_control_set_swing(float param,
+                             int idx);
 void synth_control_set_swing_curParams(float param);
 
 #endif /* SYNTH_CONTROL_H */

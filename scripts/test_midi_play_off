@@ -1,10 +1,20 @@
 #! /bin/bash
 # Script for testing MIDI functionality of turning playback off on 856
 
+rm -f /tmp/test_midi_play_off_nums.XXX
+
+ arm-none-eabi-gdb --batch-silent \
+    -ex 'file ./main.elf' \
+    -ex 'set pagination off' \
+    -ex 'set logging file /tmp/test_midi_play_off_nums.XXX' \
+    -ex 'set logging on' \
+    -ex 'printf "%d\n", (int)synth_midi_cc_type_t_PLAY' \
+    -ex 'set logging off' \
+    -ex 'quit'
+
 MIDIDEV=hw:1,0,0
 
 MIDI_CHANNEL=0
-CC=58
-
+CC=$(cat /tmp/test_midi_play_off_nums.XXX)
 
 amidi -p $MIDIDEV -S `printf "b%x %02x 00" $MIDI_CHANNEL $CC`  

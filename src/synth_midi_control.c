@@ -227,6 +227,16 @@ void synth_midi_cc_interm_control(void *data, MIDIMsg *msg)
             *note);
 }
 
+void synth_midi_cc_swing_control(void *data, MIDIMsg *msg)
+{
+    #ifdef DEBUG
+	synth_midi_check_msg(msg,synth_midi_cc_swing_control);
+	#endif
+    int *note = (int*)data;
+    synth_control_set_swing((float)msg->data[2]/(float)MIDIMSG_DATA_BYTE_MAX,
+                            *note);
+}
+
 void synth_midi_cc_tempo_coarse_control(void *data, MIDIMsg *msg)
 {
     #ifdef DEBUG
@@ -449,6 +459,7 @@ void synth_midi_control_setup(int midi_channel)
             synth_midi_cc_event_delta_control,
             synth_midi_cc_num_reps_control,
             synth_midi_cc_interm_control,
+            synth_midi_cc_swing_control,
             NULL
     };
     synth_midi_cc_type_t midi_cc_note_types[] = {
@@ -462,6 +473,7 @@ void synth_midi_control_setup(int midi_channel)
             synth_midi_cc_type_t_EVENT_DELTA,
             synth_midi_cc_type_t_NUM_REPS,
             synth_midi_cc_type_t_INTERM,
+            synth_midi_cc_type_t_SWING,
     };
     synth_midi_cc_note_funcs_init(
         &midiRouter,
@@ -523,6 +535,7 @@ void (*midi_note_param_funs[])(void*,MIDIMsg*) = {
     synth_midi_cc_num_reps_control,
     synth_midi_cc_stride_state_control,
     synth_midi_cc_interm_control,
+    synth_midi_cc_swing_control,
     synth_midi_cc_pitch_fine_control,
     synth_midi_cc_pitch_fine_control,
     synth_midi_cc_pitch_fine_control,
@@ -540,6 +553,7 @@ void (*midi_note_param_funs[])(void*,MIDIMsg*) = {
     synth_midi_cc_num_reps_control,
     synth_midi_cc_stride_state_control,
     synth_midi_cc_interm_control,
+    synth_midi_cc_swing_control,
     synth_midi_cc_pitch_fine_control,
     synth_midi_cc_pitch_fine_control,
     synth_midi_cc_pitch_fine_control,
@@ -557,6 +571,7 @@ void (*midi_note_param_funs[])(void*,MIDIMsg*) = {
     synth_midi_cc_num_reps_control,
     synth_midi_cc_stride_state_control,
     synth_midi_cc_interm_control,
+    synth_midi_cc_swing_control,
     synth_midi_cc_tempo_coarse_control,
     synth_midi_cc_tempo_fine_control,
     synth_midi_cc_tempo_scale_control,
