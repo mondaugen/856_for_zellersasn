@@ -93,12 +93,16 @@ void midi_hw_process_input(midi_hw_process_t *params)
 /* These do nothing as sysex is not implemented */
 void midi_hw_signal_sysex_start(char byte)
 {
+    /* Prevent from getting optimized away. */
+    asm("");
 }
 
 void midi_hw_send_sysex_byte(char byte)
 {
+    asm("");
 }
 
 void midi_hw_send_sysex_end(char byte)
 {
+    asm("");
 }

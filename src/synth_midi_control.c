@@ -409,6 +409,12 @@ static void synth_midi_note_on_init(
             NULL);
 }
 
+static void synth_midi_syscom_test(void *data,
+                                   MIDIMsg *msg)
+{
+    asm("");
+}
+
 void synth_midi_control_setup(int midi_channel)
 {
     /* could set custom channel here ... */
@@ -514,6 +520,10 @@ void synth_midi_control_setup(int midi_channel)
         &midiRouter,
         midi_channel,
         synth_midi_note_on_control);
+
+    /* Add system common test function */
+    (void) MIDI_Router_addCB(&midiRouter.router, 
+            MIDIMSG_SYS_COMMON, midi_channel, synth_midi_syscom_test, NULL);
 }
 
 #ifdef DEBUG 
