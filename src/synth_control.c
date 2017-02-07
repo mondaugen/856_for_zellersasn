@@ -840,10 +840,16 @@ void synth_control_schedulerState_off(void)
 
 void synth_control_schedulerState_tog(void)
 {
-    if (schedulerState) {
-        synth_control_schedulerState_off();
+    SynthControlPosMode pm;
+    pm = synth_control_get_posMode_curParams();
+    if (pm == SynthControlPosMode_UNI){
+        scheduler_advance_mode_cycle();
     } else {
-        synth_control_schedulerState_on();
+        if (schedulerState) {
+            synth_control_schedulerState_off();
+        } else {
+            synth_control_schedulerState_on();
+        }
     }
 }
 

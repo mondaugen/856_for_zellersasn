@@ -415,6 +415,12 @@ static void synth_midi_syscom_test(void *data,
     asm("");
 }
 
+static void synth_midi_syscom_control(void *data,
+                                      MIDIMsg *msg)
+{
+    scheduler_incTimeAndDoEvents_midiclock();
+}
+
 void synth_midi_control_setup(int midi_channel)
 {
     /* could set custom channel here ... */
@@ -523,7 +529,7 @@ void synth_midi_control_setup(int midi_channel)
 
     /* Add system common test function */
     (void) MIDI_Router_addCB(&midiRouter.router, 
-            MIDIMSG_SYS_COMMON, midi_channel, synth_midi_syscom_test, NULL);
+            MIDIMSG_SYS_COMMON, midi_channel, synth_midi_syscom_control, NULL);
 }
 
 #ifdef DEBUG 

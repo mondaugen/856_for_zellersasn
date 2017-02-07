@@ -67,6 +67,21 @@ static void NoteOnEvent_happen(MMEvent *event);
 static void NoteSchedEvent_happen(MMEvent *event);
 static void MeasureLEDOffEvent_happen(MMEvent *event);
 
+static sched_advance_mode_t sched_advance_mode = sched_advance_mode_INTERNAL;
+
+sched_advance_mode_t scheduler_get_advance_mode(void)
+{
+    return sched_advance_mode;
+}
+
+void scheduler_advance_mode_cycle(void)
+{
+    sched_advance_mode += 1;
+    if (sched_advance_mode == sched_advance_mode_END) {
+        sched_advance_mode = sched_advance_mode_INTERNAL;
+    }
+}
+
 void scheduler_setup(void)
 {
     sequence = MMSeq_new();
@@ -429,10 +444,25 @@ void scheduler_incTimeAndDoEvents(void)
 #ifdef DEBUG
     assert(sequence);
 #endif
-    MMSeq_incTime(sequence,(synth_control_get_tempoBPM() / 60.) 
-            / ((MMSample)audio_hw_get_sample_rate(NULL) 
-                / (MMSample)audio_hw_get_block_size(NULL)) * 0xffffffffULL);
-    MMSeq_doAllCurrentEvents(sequence);
+    if (scheduler_get_advance_mode() == sched_advance_mode_INTERNAL) {
+        MMSeq_incTime(sequence,(synth_control_get_tempoBPM() / 60.) 
+                / ((MMSample)audio_hw_get_sample_rate(NULL) 
+                    / (MMSample)audio_hw_get_block_size(NULL)) * 0xffffffffULL);
+        MMSeq_doAllCurrentEvents(sequence);
+    }
+}
+
+/* Like scheduler_incTimeAndDoEvents but increments one the clock 1/24 of a
+ * quarter note (according to the most common midi clock rate) */
+void scheduler_incTimeAndDoEvents_midiclock(void)
+{
+#ifdef DEBUG
+    assert(sequence);
+#endif 
+    if (scheduler_get_advance_mode() == sched_advance_mode_MIDI) {
+        MMSeq_incTime(sequence, 0xffffffffULL / 24);
+        MMSeq_doAllCurrentEvents(sequence);
+    }
 }
 
 /* It could be that head is a sentinel and contains no child (as is the case

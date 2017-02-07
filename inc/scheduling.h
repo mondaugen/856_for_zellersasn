@@ -39,14 +39,23 @@ struct __MeasureLEDOffEventListNode {
     MeasureLEDOffEvent *child;
 };
 
+typedef enum {
+    sched_advance_mode_INTERNAL,
+    sched_advance_mode_MIDI,
+    sched_advance_mode_END,
+} sched_advance_mode_t;
+
 extern MMSeq *sequence;
 extern NoteOnEventListNode noteOnEventListHead[];
 extern NoteSchedEventListNode noteSchedEventListHead;
 extern MeasureLEDOffEventListNode measureLEDOffEventListHead;
 extern int noteOnEventCount[];
+sched_advance_mode_t scheduler_get_advance_mode(void);
+void scheduler_advance_mode_cycle(void);
 void scheduler_setup(void);
 void schedule_noteOn_event(MMTime timeFromNow, NoteOnEvent *ev);
 void scheduler_incTimeAndDoEvents(void);
+void scheduler_incTimeAndDoEvents_midiclock(void);
 void set_noteOnEvents_active(NoteOnEventListNode *head);
 void set_noteOnEvents_inactive(NoteOnEventListNode *head);
 void set_noteSchedEvents_active(NoteSchedEventListNode *head);
