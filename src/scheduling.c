@@ -16,6 +16,7 @@
  * and the 32 MSB are the integer part of a beat index. So that this works, the
  * scheduler time is incremented 0xffffffff*tempoBPM beats per minute and events
  * are scheduled 0xffffffff ticks apart. */
+#define SCHED_BEAT_RES (0x10000000ULL*6ULL) 
 
 struct __NoteOnEvent {
     MMEvent head;
@@ -267,7 +268,7 @@ static void NoteOnEvent_happen(MMEvent *event)
             schedule_noteOn_event(
                     (noteParamSets[noe->parameterSet].eventDeltaBeats
                      * noteParamSets[noe->parameterSet].swing[_next_swing_idx])
-                     * 0xffffffffULL,
+                     * SCHED_BEAT_RES,
                     NoteOnEvent_new(1,
                         noe->parameterSet,
                         noe->numRepeats - 1,
@@ -386,7 +387,7 @@ static void NoteSchedEvent_happen(MMEvent *event)
                 noe->pitch_mode = nse->pitch_mode;
                 schedule_noteOn_event(
                         noteParamSets[n].offsetBeats
-                        * 0xffffffffULL,
+                        * SCHED_BEAT_RES,
                         noe);
             } else {
                 noteOnEventCount[n] += 1;
@@ -394,14 +395,14 @@ static void NoteSchedEvent_happen(MMEvent *event)
         }
         if (nse->one_shot == 0) {
             schedule_noteSched_event(SYNTH_CONTROL_DEFAULT_EVENTDELTABEATS
-                    * 0xffffffffULL,
+                    * SCHED_BEAT_RES,
                     NoteSchedEvent_new(1));
             /* Turn on LED */
             MEASURE_LED_SET();
             /* Schedule measure LED off event to turn off the measure indicating LED
              * */
             schedule_measureLEDOff_event(SYNTH_CONTROL_DEFAULT_EVENTDELTABEATS
-                    * 0xffffffffULL / MEASURE_LED_LENGTH_SCALAR,
+                    * SCHED_BEAT_RES / MEASURE_LED_LENGTH_SCALAR,
                     MeasureLEDOffEvent_new(1));
             /* If scheduled recording enabled, stop the previous recording and start
              * a new one. It is always okay to stop the recording, because the
@@ -447,7 +448,7 @@ void scheduler_incTimeAndDoEvents(void)
     if (scheduler_get_advance_mode() == sched_advance_mode_INTERNAL) {
         MMSeq_incTime(sequence,(synth_control_get_tempoBPM() / 60.) 
                 / ((MMSample)audio_hw_get_sample_rate(NULL) 
-                    / (MMSample)audio_hw_get_block_size(NULL)) * 0xffffffffULL);
+                    / (MMSample)audio_hw_get_block_size(NULL)) * SCHED_BEAT_RES);
         MMSeq_doAllCurrentEvents(sequence);
     }
 }
@@ -460,7 +461,7 @@ void scheduler_incTimeAndDoEvents_midiclock(void)
     assert(sequence);
 #endif 
     if (scheduler_get_advance_mode() == sched_advance_mode_MIDI) {
-        MMSeq_incTime(sequence, 0xffffffffULL / 24);
+        MMSeq_incTime(sequence, SCHED_BEAT_RES / 24);
         MMSeq_doAllCurrentEvents(sequence);
     }
 }

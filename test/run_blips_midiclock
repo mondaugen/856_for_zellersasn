@@ -1,0 +1,37 @@
+#! /bin/bash -v
+
+on_sigint() { 
+    kill -n 9 $JACKD_PROC_ID;
+    kill -n 9 $BLIPS_PROC_ID;
+    RUNNING=0
+    exit 0
+};
+
+SERVER_NAME=blips_jack_server;
+
+# Launch jackd audio server
+jackd -n ${SERVER_NAME} -dalsa -dhw:1 -X raw &
+
+JACKD_PROC_ID=$!;
+
+jack_wait -s ${SERVER_NAME} -w;
+
+# launch blips
+export JACK_NO_START_SERVER=1;
+JACK_DEFAULT_SERVER=${SERVER_NAME} test/blips_midiclock &
+
+BLIPS_PROC_ID=$!;
+
+# connect audio and midi to soundcard
+jack_connect -s ${SERVER_NAME} blips:midi_out system:midi_playback_1;
+jack_connect -s ${SERVER_NAME} blips:audio_out system:playback_2;
+
+echo "Test running, press CTRL-C to exit.";
+trap on_sigint SIGINT;
+
+RUNNING=1
+
+while [ ${RUNNING} ]
+do
+    sleep 1;
+done
