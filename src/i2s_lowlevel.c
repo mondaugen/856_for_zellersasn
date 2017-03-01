@@ -17,6 +17,12 @@
  #define CODEC_CS4270
 #endif
 
+/* BOARD_V1 always does mix of digital and analog */
+#ifdef BOARD_V1
+#define CODEC_ANALOG_DIGITAL_MIX 
+#endif  
+
+
 #ifdef CODEC_DMA_TRIGGER_CORRECT_I2S_FRAME_ERROR
 #define  FRAME_ERROR_BLOCK_COUNT_TRIG 1000UL
 static uint32_t i2s_block_counter = 1;
@@ -653,6 +659,7 @@ static void codec_prog_reg_i2c(uint8_t addr,
     while(codec_i2c_check_flags(0x00000002));
 }
 
+#if defined(CODEC_CS4270)
 static void codec_read_reg_i2c(uint8_t addr,
                                uint8_t reg_addr,
                                uint16_t *reg_val)
@@ -667,11 +674,7 @@ static void codec_read_reg_i2c(uint8_t addr,
     /* Wait for ADDR bit to be set */
     while (!codec_i2c_check_flags(0x00020000));
     uint32_t byte1;
-#if defined(CODEC_WM8778)
- #warning("Register read not available on WM8778.")
-#elif defined(CODEC_CS4270)
     byte1 = reg_addr;
-#endif
     /* Wait for I2C to finish transmitting */
     while(!codec_i2c_check_flags(0x00800000));
     I2C2->DR = byte1;
@@ -700,6 +703,7 @@ static void codec_read_reg_i2c(uint8_t addr,
     /* Stop transmission */
     I2C2->CR1 = (I2C2->CR1 | I2C_CR1_STOP);
 }
+#endif  
 
 static void codec_i2c_setup(void)
 {
@@ -803,7 +807,7 @@ static void __attribute__((optimize("O0"))) codec_config_via_i2c(void)
     while (reg != 0x00);
 #else
 #error("Please define codec model.")
-#endif  
+#endif
 
 
 #ifdef CODEC_ANALOG_DIGITAL_MIX 

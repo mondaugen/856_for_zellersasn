@@ -52,7 +52,7 @@ OCD 		   			 = sudo openocd -f /usr/local/share/openocd/scripts/board/stm32f429d
 PYTHON					 = python
 CONST_OBJS				 = objs/tables.o
 
-all: $(OBJSDIR) $(OBJS) $(BIN) $(TESTS)
+all: $(OBJSDIR) $(OBJS) $(BIN)
 
 $(OBJSDIR):
 	if [ ! -d "$(OBJSDIR)" ]; then mkdir $(OBJSDIR); fi

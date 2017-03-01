@@ -1,0 +1,20 @@
+#! /bin/bash
+
+if [ -z $1 ]
+then
+    OUTFILE=/tmp/flash.bin
+else
+    OUTFILE=$1
+fi
+
+if [ -z ${OPENOCD_INTERFACE} ]
+then
+    export OPENOCD_INTERFACE=interface/stlink-v2.cfg;
+fi
+
+# Flash size is 2MB for stm32f429ZIT
+sudo openocd -f /usr/local/share/openocd/scripts/board/stm32f429discovery.cfg \
+    -f ${OPENOCD_INTERFACE} -c init \
+    -c "reset halt" \
+    -c "dump_image ${OUTFILE} 0x0 0x200000" \
+    -c shutdown
