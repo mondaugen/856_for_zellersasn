@@ -1,5 +1,7 @@
 #!/bin/bash
 
+rm -f /tmp/adc_vals_addr
+
 # Get addresses and sizes of memory regions where ADC values go
 # This is formatted addr size_one_item_bytes n_items
 arm-none-eabi-gdb --command scripts/get_adc_addrs.gdb

@@ -8,7 +8,7 @@ arm-none-eabi-gcc -D${BOARD_VERSION} -DSTM32F429_439xx -Iinc -I../../archives/CM
 # get register addresses by looking at symbol addresses with gdb
 arm-none-eabi-gdb --command scripts/get_led_addrs.gdb;
 
- check switch states using calculated addresses and openocd
+# check switch states using calculated addresses and openocd
 OCD='sudo openocd \
     -f /usr/local/share/openocd/scripts/board/stm32f429discovery.cfg \
     -f '$OPENOCD_INTERFACE;
