@@ -18,9 +18,14 @@ on_sigint() { kill -n 9 $! ; }
 make flash
 make reset
 sleep 2
-sh scripts/test_switch.sh
+scripts/test_switch.sh
+make reset
 scripts/test_pot.sh
-sh scripts/test_led.sh
+scripts/test_led.sh 0
+scripts/test_led.sh 1
+scripts/test_led.sh 2
+scripts/test_led.sh 3
+scripts/test_led.sh -1
 trap - SIGINT
 # play_test_file seems to already trap sigint properly
 echo "Unplug USB."

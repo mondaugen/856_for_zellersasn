@@ -1,3 +1,4 @@
+#!/bin/bash
 # call from root of repository using sh scripts/test_switch3.sh
 
 # make code to source in gdb to get switch register addresses and pin numbers
