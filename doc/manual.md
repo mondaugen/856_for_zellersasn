@@ -288,6 +288,10 @@ If held down while adjusting the PITCH knob, the pitches of all repeats for the
 currently selected note set are adjusted simultaneously. This is useful if you
 would like to have repeated notes at a different pitch, but no arpeggio effect.
 
+If held down while adjusting the &#x394; knob when N2 or N3 is selected,
+controls swing applied to the rhythm that separates the repeats. Putting the
+knob in the middle position gives no swing.
+
 If held down and the (FBK) switch is clicked (the bottom position of the
 FADE/GAIN/(FBK) switch), the gains of N2 and N3 are set to 0 (they are
 silenced). Their settings still remain.
@@ -829,3 +833,17 @@ means all pitches are transposed 1 octave up, 48 means they are all transposed
 one octave down, etc. The velocity value scales the GAIN value of all notes. 127
 means no scaling, 63 is a scaling of about half, etc. Note off messages are
 ignored. 
+
+### MIDI clock
+
+The 856 can be synchronized to external hardware by sending it a MIDI
+clock. To see if this is active, hold down the UNI switch. If the first
+LED is lit up it means the 856 is using internal scheduling, if the second LED
+is lit up, it means it is listening for a MIDI clock to control its scheduling.
+To toggle between the two modes click the PLAY footswitch while holding down the
+UNI switch. You should see the LED change to indicate what mode has been set.
+Note that in MIDI clock mode no playback will happen if no clock is being sent!
+The 856 expects 24 MIDI clock messages per quarter note, which is compatible with most
+hardware.
+
+
