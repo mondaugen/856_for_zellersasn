@@ -632,7 +632,9 @@ void synth_control_record_stop(void)
         scheduleRecording = 0;
         synth_control_autoRecord_stop_helper();
     } else {
+        int sched_was_on = 0;
         if (schedulerState == 1) {
+            sched_was_on = 1;
             schedulerState_off_helper((void*)noteOnEventListHead);
         }
         SynthControlRecMode _recMode = synth_control_get_recMode();
@@ -646,6 +648,11 @@ void synth_control_record_stop(void)
         if ((_recMode == SynthControlRecMode_REC_LEN_1_BEAT)
                 || (_recMode == SynthControlRecMode_REC_LEN_1_BEAT_REC_SCHED)) {
             schedulerState_on_helper();
+        } else {
+            /* Was in free mode. If was playing, turn back on. */
+            if (sched_was_on) {
+                schedulerState_on_helper();
+            }
         }
     }
 }
