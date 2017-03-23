@@ -1,12 +1,6 @@
 a={
-    // gui size stuff
-    var slider_height = 15,
-        slider_width = 128,
-        gui_element_gap = 0,
-        row_height = 17;
-    
     // synth parameter stuff
-    var num_ccs_note=17,
+    var num_ccs_note=18,
         num_ccs_global=10,
         num_note_param_sets=3,
         num_presets=3,
@@ -30,6 +24,7 @@ a={
         "NUM_REPS",
         "STRIDE_STATE",
         "INTERM",
+        "SWING"
     ],
         midi_global_commands = [
         "TEMPO_COARSE",
@@ -61,6 +56,7 @@ a={
         128,
         2  ,
         128,
+        128,
     ],
         midi_global_commands_num_steps = [
         128,
@@ -75,6 +71,13 @@ a={
         2 
     ],
         midi_commands_num_steps = List();
+
+    // gui size stuff
+    var slider_height = 15,
+        slider_width = 128,
+        gui_element_gap = 0,
+        row_height = num_ccs_note;
+    
     var win = Window.new(
         "856 Controls",
         Rect(0,0,slider_width,(slider_width + gui_element_gap)*tot_num_ccs)
