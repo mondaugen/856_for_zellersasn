@@ -13,11 +13,8 @@ The knobs give the user the ability to design sequences. This should be kept in
 mind when adjusting the knobs: what you adjust may not immediately be audible as
 you are setting a parameter that will be changed the next time a sample plays.
 
-The momentary switches "acknowledge" a press when they are released. For
-example, when you want to record a loop (in A=R mode), press and hold the record
-footswitch on the left and release it when you want to start recording. When you
-want to stop recording press and hold the record footswitch and release when you
-want recording to end.
+Recording works as follows: press and release the left footswitch to start
+recording. Press and release it again to stop.
 
 You can only record for a maximum of 20 seconds. After this time, the recording
 will automatically stop.
@@ -67,9 +64,9 @@ The rest of the switches can stay as they are for now.
 
 Play a loop you are interested in recording. The first time we recommend just
 playing a note and letting it sound, then recording it for 1 or 2 seconds --
-what is going on will be clearer this way. Press and hold the left footswitch
-and let go when you want to start recording. Press and hold the switch and let
-go when you want to stop.  The loop you played should now be playing.
+what is going on will be clearer this way. Click the left footswitch and to
+start recording. Click the switch to stop. The loop you played should now be
+playing.
 
 As the N1/BAR/N2/N3 switch is in the upward position and we are in A=R mode, the
 TMPO/REP knob only slightly changes the tempo. This is useful for adjusting your
@@ -134,13 +131,13 @@ PRE1/PRE2/PRE3 switch and click the STR-RCL downwards.
 
 ### Left footswitch
 
-Starts and stops recording. The command is acknowledged when the switch is
-released.
+Starts and stops recording. The command is acknowledged as soon as the switch is
+pressed down.
 
 ### Right footswitch
 
-Starts and stops playback. The command is acknowledged when the switch is
-released.
+Starts and stops playback. The command is acknowledged as soon as the switch is
+pressed down.
 
 ### ENV
 
@@ -325,7 +322,6 @@ starts playing at the time half way between two flashes of the BEAT light.
 ### FADE/GAIN/(FBK)
 
 In the middle position, the GAIN knob controls the loudness of the note set.
-This gain setting is only acknowledged when the next note plays.
 
 In the top position, this controls the fading of repeated notes. If turned
 counter-clockwise, the repeated notes fade-out and if turned clockwise, the
