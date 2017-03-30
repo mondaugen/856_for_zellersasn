@@ -16,47 +16,50 @@
  14 | N1/BAR Number of repeats control | Adjust the number of repeats (the number of notes in the arpeggio) just as the TMPO/REP knob does. * 
  15 | N1/BAR Stride state | If non-zero (1-127), enables playback offset advancement, otherwise if 0, disable playback offset advancement. This cannot be in conflict with the STIDE/ABS/(UNI) switch. That means you cannot control this parameter over MIDI when the note whose parameters you are adjusting is selected with the N1/BAR/N2/N3 switch, in this case the N1/BAR note. 
  16 | N1/BAR skip control | Control how often the arpeggio plays just like the &#x394; knob does with the FREE/QUANT/SKIP switch in the downward position. 
- 17 | N2 Pitch 1 control (fine) | Adjust pitch of 1st, 4th, ... notes in arpeggio from -100 cents to +100 cents (hundreths of a semitone). 
- 18 | N2 Pitch 2 control (fine) | Adjust pitch of 2nd, 5th, ... notes in arpeggio from -100 cents to +100 cents (hundreths of a semitone). 
- 19 | N2 Pitch 3 control (fine) | Adjust pitch of 3rd, 6th, ... notes in arpeggio from -100 cents to +100 cents (hundreths of a semitone). 
- 20 | N2 Envelope control | Control the amplitude envelope of the notes just as the ENV knob does. 
- 21 | N2 Length control | Control the length of the notes just as the LEN knob does. 
- 22 | N2 Pitch 1 control | Adjust pitch of 1st, 4th, ... notes in arpeggio according to the control change value. 60 is no transposition, 48 is an octave below, 72 an octave above, etc. Note that this is more range than is available on the physical interface. 
- 23 | N2 Pitch 2 control | Adjust pitch of 2nd, 5th, ... notes in arpeggio according to the control change value. 60 is no transposition, 48 is an octave below, 72 an octave above, etc. Note that this is more range than is available on the physical interface. 
- 24 | N2 Pitch 3 control | Adjust pitch of 3rd, 6th, ... notes in arpeggio according to the control change value. 60 is no transposition, 48 is an octave below, 72 an octave above, etc. Note that this is more range than is available on the physical interface. 
- 25 | N2 Gain control | Control the gain just as the GAIN knob does with the FADE/GAIN/(FBK) switch in the middle position. 
- 26 | N2 Position control | Adjust the position just as the POS knob does with the STRIDE/ABS/(UNI) switch in the middle position. 
- 27 | N2 Stride control | Adjust the position advancement just as the POS knob does with the STRIDE/ABS/(UNI) switch in the upward position. 
- 28 | N2 Offset control | Adjust the playback offset just as the OFST knob does. 
- 29 | N2 Fade control | Adjust the fade just as the GAIN knob does with the FADE/GAIN/(FBK) switch in the upward position. 
- 30 | N2 Free &#x394; control | Adjust the time between notes just as the &#x394; knob does with the FREE/QUANT/SKIP switch in the upward position. 
- 31 | N2 Number of repeats control | Adjust the number of repeats (the number of notes in the arpeggio) just as the TMPO/REP knob does. 
- 32 | N2 Stride state | If non-zero (1-127), enables playback offset advancement, otherwise if 0, disable playback offset advancement. This cannot be in conflict with the STIDE/ABS/(UNI) switch. That means you cannot control this parameter over MIDI when the note whose parameters you are adjusting is selected with the N2/N2/N3 switch, in this case the N2 note. 
- 33 | N2 skip control | Control how often the arpeggio plays just like the &#x394; knob does with the FREE/QUANT/SKIP switch in the downward position. 
- 34 | N3 Pitch 1 control (fine) | Adjust pitch of 1st, 4th, ... notes in arpeggio from -100 cents to +100 cents (hundreths of a semitone). 
- 35 | N3 Pitch 2 control (fine) | Adjust pitch of 2nd, 5th, ... notes in arpeggio from -100 cents to +100 cents (hundreths of a semitone). 
- 36 | N3 Pitch 3 control (fine) | Adjust pitch of 3rd, 6th, ... notes in arpeggio from -100 cents to +100 cents (hundreths of a semitone). 
- 37 | N3 Envelope control | Control the amplitude envelope of the notes just as the ENV knob does. 
- 38 | N3 Length control | Control the length of the notes just as the LEN knob does. 
- 39 | N3 Pitch 1 control | Adjust pitch of 1st, 4th, ... notes in arpeggio according to the control change value. 60 is no transposition, 48 is an octave below, 72 an octave above, etc. Note that this is more range than is available on the physical interface. 
- 40 | N3 Pitch 2 control | Adjust pitch of 2nd, 5th, ... notes in arpeggio according to the control change value. 60 is no transposition, 48 is an octave below, 72 an octave above, etc. Note that this is more range than is available on the physical interface. 
- 41 | N3 Pitch 3 control | Adjust pitch of 3rd, 6th, ... notes in arpeggio according to the control change value. 60 is no transposition, 48 is an octave below, 72 an octave above, etc. Note that this is more range than is available on the physical interface. 
- 42 | N3 Gain control | Control the gain just as the GAIN knob does with the FADE/GAIN/(FBK) switch in the middle position. 
- 43 | N3 Position control | Adjust the position just as the POS knob does with the STRIDE/ABS/(UNI) switch in the middle position. 
- 44 | N3 Stride control | Adjust the position advancement just as the POS knob does with the STRIDE/ABS/(UNI) switch in the upward position. 
- 45 | N3 Offset control | Adjust the playback offset just as the OFST knob does. 
- 46 | N3 Fade control | Adjust the fade just as the GAIN knob does with the FADE/GAIN/(FBK) switch in the upward position. 
- 47 | N3 Free &#x394; control | Adjust the time between notes just as the &#x394; knob does with the FREE/QUANT/SKIP switch in the upward position. 
- 48 | N3 Number of repeats control | Adjust the number of repeats (the number of notes in the arpeggio) just as the TMPO/REP knob does. 
- 49 | N3 Stride state | If non-zero (1-127), enables playback offset advancement, otherwise if 0, disable playback offset advancement. This cannot be in conflict with the STIDE/ABS/(UNI) switch. That means you cannot control this parameter over MIDI when the note whose parameters you are adjusting is selected with the N3/N2/N3 switch, in this case the N3 note. 
- 50 | N3 skip control | Control how often the arpeggio plays just like the &#x394; knob does with the FREE/QUANT/SKIP switch in the downward position. 
- 51 | Coarse tempo control | Control how often the sequence plays in beats per minute (BPM) from 40 BPM to 240 BPM. 
- 52 | Fine tempo control | Control how often the sequence plays by adding to the current tempo -10 to +10 BPM. 
- 53 | Tempo scaling | Scale the tempo like the &#x394; knob with N1/BAR/N2/N3 in the upward position and FREE/QUANT/SKIP in the middle position. 
- 54 | Tempo nudge | Slightly adjust the tempo like the TMPO/REP knob with N1/BAR/N2/N3 in the upward position and FREE/R=B/AREC in the middle position. 
- 55 | Preset store | Store the current settings in a specified register. The message value of 0 stores in the PRE1 register, a value of 1 stores in the PRE2 register and a value of 2 stores in the PRE3 register. If greater than 2, stores in the PRE3 register. 
- 56 | Preset recall | Recall the current settings from a specified register. The message value of 0 recalls from the PRE1 register, a value of 1 recalls from the PRE2 register and a value of 2 recalls from the PRE3 register.  If greater than 2, recalls from the PRE3 register. 
- 57 | Record enable/disable | Start/stop recording. A message value of 0 stops recording. A message value greater than 0 starts or restarts recording depending on whether or not recording is already going on. 
- 58 | Play start | Start/stop playback. A message value of 0 disables all playback. A message value greater than 0 starts playback. If playback is already going on it will start a new set of notes along side the already playing set. 
- 59 | Record mode | Sets the record mode just like the FREE/R=B/AREC switch. A message value of 0 sets the FREE record mode, a value of 1 sets the R=B mode and a value of 2 sets the AREC mode. A value greater than 2 sets the AREC mode. 
- 60 | Feedback state | Sets the feedback state just like the bottom position of the FADE/GAIN/(FBK) switch. A non-zero value turns feedback on, a zero value turns it off. Note feedback is disabled (cannot be turned on) in AREC mode. 
+ 17 | N1/BAR swing control | Control the swing factor for the time between repeats of notes.
+ 18 | N2 Pitch 1 control (fine) | Adjust pitch of 1st, 4th, ... notes in arpeggio from -100 cents to +100 cents (hundreths of a semitone). 
+ 19 | N2 Pitch 2 control (fine) | Adjust pitch of 2nd, 5th, ... notes in arpeggio from -100 cents to +100 cents (hundreths of a semitone). 
+ 20 | N2 Pitch 3 control (fine) | Adjust pitch of 3rd, 6th, ... notes in arpeggio from -100 cents to +100 cents (hundreths of a semitone). 
+ 21 | N2 Envelope control | Control the amplitude envelope of the notes just as the ENV knob does. 
+ 22 | N2 Length control | Control the length of the notes just as the LEN knob does. 
+ 23 | N2 Pitch 1 control | Adjust pitch of 1st, 4th, ... notes in arpeggio according to the control change value. 60 is no transposition, 48 is an octave below, 72 an octave above, etc. Note that this is more range than is available on the physical interface. 
+ 24 | N2 Pitch 2 control | Adjust pitch of 2nd, 5th, ... notes in arpeggio according to the control change value. 60 is no transposition, 48 is an octave below, 72 an octave above, etc. Note that this is more range than is available on the physical interface. 
+ 25 | N2 Pitch 3 control | Adjust pitch of 3rd, 6th, ... notes in arpeggio according to the control change value. 60 is no transposition, 48 is an octave below, 72 an octave above, etc. Note that this is more range than is available on the physical interface. 
+ 26 | N2 Gain control | Control the gain just as the GAIN knob does with the FADE/GAIN/(FBK) switch in the middle position. 
+ 27 | N2 Position control | Adjust the position just as the POS knob does with the STRIDE/ABS/(UNI) switch in the middle position. 
+ 28 | N2 Stride control | Adjust the position advancement just as the POS knob does with the STRIDE/ABS/(UNI) switch in the upward position. 
+ 29 | N2 Offset control | Adjust the playback offset just as the OFST knob does. 
+ 30 | N2 Fade control | Adjust the fade just as the GAIN knob does with the FADE/GAIN/(FBK) switch in the upward position. 
+ 31 | N2 Free &#x394; control | Adjust the time between notes just as the &#x394; knob does with the FREE/QUANT/SKIP switch in the upward position. * 
+ 32 | N2 Number of repeats control | Adjust the number of repeats (the number of notes in the arpeggio) just as the TMPO/REP knob does. * 
+ 33 | N2 Stride state | If non-zero (1-127), enables playback offset advancement, otherwise if 0, disable playback offset advancement. This cannot be in conflict with the STIDE/ABS/(UNI) switch. That means you cannot control this parameter over MIDI when the note whose parameters you are adjusting is selected with the N1/BAR/N2/N3 switch, in this case the N1/BAR note. 
+ 34 | N2 skip control | Control how often the arpeggio plays just like the &#x394; knob does with the FREE/QUANT/SKIP switch in the downward position. 
+ 35 | N2 swing control | Control the swing factor for the time between repeats of notes.
+ 36 | N3 Pitch 1 control (fine) | Adjust pitch of 1st, 4th, ... notes in arpeggio from -100 cents to +100 cents (hundreths of a semitone). 
+ 37 | N3 Pitch 2 control (fine) | Adjust pitch of 2nd, 5th, ... notes in arpeggio from -100 cents to +100 cents (hundreths of a semitone). 
+ 38 | N3 Pitch 3 control (fine) | Adjust pitch of 3rd, 6th, ... notes in arpeggio from -100 cents to +100 cents (hundreths of a semitone). 
+ 39 | N3 Envelope control | Control the amplitude envelope of the notes just as the ENV knob does. 
+ 40 | N3 Length control | Control the length of the notes just as the LEN knob does. 
+ 41 | N3 Pitch 1 control | Adjust pitch of 1st, 4th, ... notes in arpeggio according to the control change value. 60 is no transposition, 48 is an octave below, 72 an octave above, etc. Note that this is more range than is available on the physical interface. 
+ 42 | N3 Pitch 2 control | Adjust pitch of 2nd, 5th, ... notes in arpeggio according to the control change value. 60 is no transposition, 48 is an octave below, 72 an octave above, etc. Note that this is more range than is available on the physical interface. 
+ 43 | N3 Pitch 3 control | Adjust pitch of 3rd, 6th, ... notes in arpeggio according to the control change value. 60 is no transposition, 48 is an octave below, 72 an octave above, etc. Note that this is more range than is available on the physical interface. 
+ 44 | N3 Gain control | Control the gain just as the GAIN knob does with the FADE/GAIN/(FBK) switch in the middle position. 
+ 45 | N3 Position control | Adjust the position just as the POS knob does with the STRIDE/ABS/(UNI) switch in the middle position. 
+ 46 | N3 Stride control | Adjust the position advancement just as the POS knob does with the STRIDE/ABS/(UNI) switch in the upward position. 
+ 47 | N3 Offset control | Adjust the playback offset just as the OFST knob does. 
+ 48 | N3 Fade control | Adjust the fade just as the GAIN knob does with the FADE/GAIN/(FBK) switch in the upward position. 
+ 49 | N3 Free &#x394; control | Adjust the time between notes just as the &#x394; knob does with the FREE/QUANT/SKIP switch in the upward position. * 
+ 50 | N3 Number of repeats control | Adjust the number of repeats (the number of notes in the arpeggio) just as the TMPO/REP knob does. * 
+ 51 | N3 Stride state | If non-zero (1-127), enables playback offset advancement, otherwise if 0, disable playback offset advancement. This cannot be in conflict with the STIDE/ABS/(UNI) switch. That means you cannot control this parameter over MIDI when the note whose parameters you are adjusting is selected with the N3/N2/N3 switch, in this case the N3 note. 
+ 52 | N3 skip control | Control how often the arpeggio plays just like the &#x394; knob does with the FREE/QUANT/SKIP switch in the downward position. 
+ 53 | N3 swing control | Control the swing factor for the time between repeats of notes.
+ 54 | Coarse tempo control | Control how often the sequence plays in beats per minute (BPM) from 40 BPM to 240 BPM. 
+ 55 | Fine tempo control | Control how often the sequence plays by adding to the current tempo -10 to +10 BPM. 
+ 56 | Tempo scaling | Scale the tempo like the &#x394; knob with N1/BAR/N2/N3 in the upward position and FREE/QUANT/SKIP in the middle position. 
+ 57 | Tempo nudge | Slightly adjust the tempo like the TMPO/REP knob with N1/BAR/N2/N3 in the upward position and FREE/R=B/AREC in the middle position. 
+ 58 | Preset store | Store the current settings in a specified register. The message value of 0 stores in the PRE1 register, a value of 1 stores in the PRE2 register and a value of 2 stores in the PRE3 register. If greater than 2, stores in the PRE3 register. 
+ 59 | Preset recall | Recall the current settings from a specified register. The message value of 0 recalls from the PRE1 register, a value of 1 recalls from the PRE2 register and a value of 2 recalls from the PRE3 register.  If greater than 2, recalls from the PRE3 register. 
+ 60 | Record enable/disable | Start/stop recording. A message value of 0 stops recording. A message value greater than 0 starts or restarts recording depending on whether or not recording is already going on. 
+ 61 | Play start | Start/stop playback. A message value of 0 disables all playback. A message value greater than 0 starts playback. If playback is already going on it will start a new set of notes along side the already playing set. 
+ 62 | Record mode | Sets the record mode just like the FREE/R=B/AREC switch. A message value of 0 sets the FREE record mode, a value of 1 sets the R=B mode and a value of 2 sets the AREC mode. A value greater than 2 sets the AREC mode. 
+ 63 | Feedback state | Sets the feedback state just like the bottom position of the FADE/GAIN/(FBK) switch. A non-zero value turns feedback on, a zero value turns it off. Note feedback is disabled (cannot be turned on) in AREC mode. 
