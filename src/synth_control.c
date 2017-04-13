@@ -632,27 +632,26 @@ void synth_control_record_stop(void)
         scheduleRecording = 0;
         synth_control_autoRecord_stop_helper();
     } else {
-        int sched_was_on = 0;
-        if (schedulerState == 1) {
-            sched_was_on = 1;
-            schedulerState_off_helper((void*)noteOnEventListHead);
-        }
         SynthControlRecMode _recMode = synth_control_get_recMode();
+        /* Stop playback if R=B or AREC */
+        if ((_recMode == SynthControlRecMode_REC_LEN_1_BEAT) ||
+            (_recMode == SynthControlRecMode_REC_LEN_1_BEAT_REC_SCHED)) {
+            if (schedulerState == 1) {
+                schedulerState_off_helper((void*)noteOnEventListHead);
+            }
+        }
         if (_recMode == SynthControlRecMode_REC_LEN_1_BEAT_REC_SCHED) {
             /* Recording will be stopped by event in scheduler */
             scheduleRecording = 2;
         } else {
+            /* Stop recording if not in AREC mode */
             synth_control_record_stop_helper(scrsh_source_USER);
         }
-        /* In FREE record mode, playback is not triggered */
+        /* Turn back on scheduling if in R=B or AREC mode, otherwise scheduling
+         * was never stopped. */
         if ((_recMode == SynthControlRecMode_REC_LEN_1_BEAT)
                 || (_recMode == SynthControlRecMode_REC_LEN_1_BEAT_REC_SCHED)) {
             schedulerState_on_helper();
-        } else {
-            /* Was in free mode. If was playing, turn back on. */
-            if (sched_was_on) {
-                schedulerState_on_helper();
-            }
         }
     }
 }
