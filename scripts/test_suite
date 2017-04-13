@@ -15,7 +15,7 @@ trap on_sigint SIGINT
 
 on_sigint() { kill -n 9 $! ; }
 
-make flash
+CFLAGS=-D${BOARD_VERSION} make flash
 make reset
 sleep 2
 scripts/test_switch.sh
