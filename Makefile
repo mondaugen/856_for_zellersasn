@@ -1,4 +1,5 @@
 OPENOCD_INTERFACE		?= interface/stlink-v2.cfg
+OPENOCD_BOARD			?= /usr/local/share/openocd/scripts/board/stm32f429discovery.cfg#board/stm32f429discovery.cfg
 OPTIMIZE				 ?= -O0
 BIN 					 = main.elf
 MMMIDI_PATH				 = ../mmmidi
@@ -48,7 +49,7 @@ TESTS					 = $(addprefix $(TESTDIR)/,\
 						    $(addsuffix .o, $(basename $(TESTSRC))))
 VPATH				    += :test
 CC 						 = arm-none-eabi-gcc
-OCD 		   			 = sudo openocd -f /usr/local/share/openocd/scripts/board/stm32f429discovery.cfg -f $(OPENOCD_INTERFACE)
+OCD 		   			 = sudo openocd -f $(OPENOCD_BOARD) -f $(OPENOCD_INTERFACE)
 PYTHON					 = python
 CONST_OBJS				 = objs/tables.o
 

@@ -11,10 +11,8 @@
  #error("Please define board version.")
 #endif  
 
-#if defined(BOARD_V1)
- #define CODEC_WM8778 
-#elif defined(BOARD_V2)
- #define CODEC_CS4270
+#if !defined(CODEC_WM8778) && !defined(CODEC_CS4270)
+#error "Must define codec type."
 #endif
 
 /* BOARD_V1 always does mix of digital and analog */
@@ -28,7 +26,7 @@
 static uint32_t i2s_block_counter = 1;
 #endif  
 
-#define WM8778_CODEC_ADDR  ((uint8_t)0x34)
+#define WM8778_CODEC_ADDR  ((uint8_t)0x36)
 #define CS4270_CODEC_ADDR  ((uint8_t)0x90) 
 #define CODEC_I2C_TIMEOUT       ((uint32_t)1000000) 
 
