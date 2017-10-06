@@ -20,3 +20,9 @@ in this directory and it should build. Do
 make flash
 
 to flash chips.
+
+Notes for BOARD_V2 05-Oct-17
+build with the following command (remove AUDIO_HW_TEST_OUTPUT if you don't just
+want to pass a bitstream of 0xff000000,0xff000000 to the codec)
+ CFLAGS=-DBOARD_V2\ -DCODEC_WM8778\ -DAUDIO_HW_TEST_OUTPUT\
+-DCODEC_ANALOG_DIGITAL_MIX make

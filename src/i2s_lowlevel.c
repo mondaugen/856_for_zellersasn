@@ -34,6 +34,33 @@ static uint32_t i2s_block_counter = 1;
 extern void HardFault_Handler(void);
 #endif
 
+#define DMA_TX_STREAM_BLOCK DMA1_Stream4 
+#define DMA_TX_CHANNEL 2U
+#define DMA_RX_STREAM_BLOCK DMA1_Stream2 
+#define DMA_RX_CHANNEL 0U
+#define DMA_RX_IRQ_HANDLER DMA1_Stream2_IRQHandler
+#define DMA_RX_IRQ_N DMA1_Stream2_IRQn
+#define DMA_TX_IRQ_HANDLER DMA1_Stream4_IRQHandler
+#define DMA_TX_IRQ_N DMA1_Stream4_IRQn
+#define DMA_RX_ISR DMA1->LISR
+#define DMA_RX_IFCR DMA1->LIFCR
+#define DMA_RX_TEIF DMA_LISR_TEIF2
+#define DMA_RX_CTEIF DMA_LIFCR_CTEIF2
+#define DMA_RX_CDMEIF DMA_LIFCR_CDMEIF2
+#define DMA_RX_CHTIF DMA_LIFCR_CHTIF2
+#define DMA_RX_TEIF DMA_LISR_TEIF2
+#define DMA_RX_DMEIF DMA_LISR_DMEIF2
+#define DMA_RX_TCIF DMA_LISR_TCIF2
+#define DMA_RX_CTCIF DMA_LIFCR_CTCIF2
+#define DMA_RX_HTIF DMA_LISR_HTIF2
+
+#define DMA_TX_ISR DMA1->HISR
+#define DMA_TX_IFCR DMA1->HIFCR
+#define DMA_TX_TEIF DMA_HISR_TEIF5
+#define DMA_TX_CTEIF DMA_HIFCR_CTEIF5
+#define DMA_TX_DMEIF DMA_HISR_DMEIF5
+#define DMA_TX_CDMEIF DMA_HIFCR_CDMEIF5 
+
 /* Where data to be transferred to CODEC reside */
 static int16_t codecDmaTxBuf[CODEC_DMA_BUF_LEN * 2]
     __attribute__((section(".small_data"),aligned(1024)));
@@ -199,6 +226,7 @@ static int i2s_peripherals_setup(uint32_t sr)
 #endif  
 
     /* Turn on DMA1 clock */
+    /* TODO: Change these if DMA every changes to DMA2 */
     RCC->AHB1ENR |= RCC_AHB1ENR_DMA1EN;
     /* Reset DMA1 peripheral */
     RCC->AHB1RSTR |= RCC_AHB1RSTR_DMA1RST;
@@ -206,130 +234,137 @@ static int i2s_peripherals_setup(uint32_t sr)
 
     /* Set up memory to peripheral DMA */
     /* Disable DMA peripheral */
-    if (DMA1_Stream7->CR & DMA_SxCR_EN) {
-        DMA1_Stream7->CR &= ~(DMA_SxCR_EN);
+    if (DMA_TX_STREAM_BLOCK->CR & DMA_SxCR_EN) {
+        DMA_TX_STREAM_BLOCK->CR &= ~(DMA_SxCR_EN);
     }
     /* Wait until free */
-    while (DMA1_Stream7->CR & DMA_SxCR_EN);
-    /* Set peripheral address to SPI3 data register */
-    DMA1_Stream7->PAR = (uint32_t)&(SPI3->DR);
+    while (DMA_TX_STREAM_BLOCK->CR & DMA_SxCR_EN);
+    ///* Set peripheral address to SPI3 data register */
+    //DMA_TX_STREAM_BLOCK->PAR = (uint32_t)&(SPI3->DR);
+    // try with these I2SExt as peripheral
+    DMA_TX_STREAM_BLOCK->PAR = (uint32_t)&(I2S3ext->DR);
     /* Set memory address to transmit buffer */
-    DMA1_Stream7->M0AR = (uint32_t)codecDmaTxBuf;
+    DMA_TX_STREAM_BLOCK->M0AR = (uint32_t)codecDmaTxBuf;
     /* Inform DMA peripheral of buffer length. This is two times the defined
      * value because we trigger on HALF and FULL transfer */
-    DMA1_Stream7->NDTR = (uint32_t)(CODEC_DMA_BUF_LEN * 2);
+    DMA_TX_STREAM_BLOCK->NDTR = (uint32_t)(CODEC_DMA_BUF_LEN * 2);
     /* Set up DMA control register: */
-    /* Channel 0 */
-    DMA1_Stream7->CR &= ~DMA_SxCR_CHSEL;
+    /* Channel */
+    DMA_TX_STREAM_BLOCK->CR &= ~DMA_SxCR_CHSEL;
+    DMA_TX_STREAM_BLOCK->CR |= DMA_TX_CHANNEL << 25u;
     /* Priority VERY HIGH */
-    DMA1_Stream7->CR &= ~DMA_SxCR_PL;
-    DMA1_Stream7->CR |= 0x3 << 16;
+    DMA_TX_STREAM_BLOCK->CR &= ~DMA_SxCR_PL;
+    DMA_TX_STREAM_BLOCK->CR |= 0x3 << 16;
 #ifdef CODEC_DMA_DIRECT_MODE
-    DMA1_Stream7->FCR &= ~DMA_SxFCR_DMDIS;
+    DMA_TX_STREAM_BLOCK->FCR &= ~DMA_SxFCR_DMDIS;
 #else
-    DMA1_Stream7->FCR |= DMA_SxFCR_DMDIS;
+    DMA_TX_STREAM_BLOCK->FCR |= DMA_SxFCR_DMDIS;
     /* PBURST one burst of 8 beats */
-    DMA1_Stream7->CR &= ~DMA_SxCR_PBURST;
-    DMA1_Stream7->CR |= 0x2 << 21;
+    DMA_TX_STREAM_BLOCK->CR &= ~DMA_SxCR_PBURST;
+    DMA_TX_STREAM_BLOCK->CR |= 0x2 << 21;
     /* MBURST one burst of 8 beats */
-    DMA1_Stream7->CR &= ~DMA_SxCR_MBURST;
-    DMA1_Stream7->CR |= 0x2 << 23;
+    DMA_TX_STREAM_BLOCK->CR &= ~DMA_SxCR_MBURST;
+    DMA_TX_STREAM_BLOCK->CR |= 0x2 << 23;
 #endif /* CODEC_DMA_DIRECT_MODE */
     /* No Double Buffer Mode (we do this ourselves with the HALF and FULL
      * transfer) */
-    DMA1_Stream7->CR &= ~DMA_SxCR_DBM;
+    DMA_TX_STREAM_BLOCK->CR &= ~DMA_SxCR_DBM;
     /* Memory datum size 16-bit */
-    DMA1_Stream7->CR &= ~DMA_SxCR_MSIZE;
-    DMA1_Stream7->CR |= 0x1 << 13;
+    DMA_TX_STREAM_BLOCK->CR &= ~DMA_SxCR_MSIZE;
+    DMA_TX_STREAM_BLOCK->CR |= 0x1 << 13;
     /* Peripheral datum size 16-bit */
-    DMA1_Stream7->CR &= ~DMA_SxCR_PSIZE;
-    DMA1_Stream7->CR |= 0x1 << 11;
+    DMA_TX_STREAM_BLOCK->CR &= ~DMA_SxCR_PSIZE;
+    DMA_TX_STREAM_BLOCK->CR |= 0x1 << 11;
     /* Memory incremented after each transfer */
-    DMA1_Stream7->CR |= DMA_SxCR_MINC;
+    DMA_TX_STREAM_BLOCK->CR |= DMA_SxCR_MINC;
     /* No peripheral address increment */
-    DMA1_Stream7->CR &= ~DMA_SxCR_PINC;
+    DMA_TX_STREAM_BLOCK->CR &= ~DMA_SxCR_PINC;
     /* Circular buffer mode */
-    DMA1_Stream7->CR |= DMA_SxCR_CIRC;
+    DMA_TX_STREAM_BLOCK->CR |= DMA_SxCR_CIRC;
     /* Memory to peripheral mode (this is the transmitting peripheral) */
-    DMA1_Stream7->CR &= ~DMA_SxCR_DIR;
-    DMA1_Stream7->CR |= 0x1 << 6;
+    DMA_TX_STREAM_BLOCK->CR &= ~DMA_SxCR_DIR;
+    DMA_TX_STREAM_BLOCK->CR |= 0x1 << 6;
     /* DMA is the flow controller (DMA will keep transferring items from memory
      * to peripheral until disabled) */
-    DMA1_Stream7->CR &= ~DMA_SxCR_PFCTRL;
+    DMA_TX_STREAM_BLOCK->CR &= ~DMA_SxCR_PFCTRL;
     // /* Only trigger interrupt on RX line */
-    ///* Enable interrupt on transfer complete */
-    //DMA1_Stream7->CR |= DMA_SxCR_TCIE;
+    /* Enable interrupt on transfer complete */
+    DMA_TX_STREAM_BLOCK->CR |= DMA_SxCR_TCIE;
     ///* Enable interrupt on transfer half complete */
-    //DMA1_Stream7->CR |= DMA_SxCR_HTIE;
+    //DMA_TX_STREAM_BLOCK->CR |= DMA_SxCR_HTIE;
     /* clear possible Interrupt flags */
+    /* TODO: This should be defined */
     DMA1->HIFCR |= 0x0f400000;
     /* Interrupt on transfer error */
-    DMA1_Stream7->CR |= DMA_SxCR_TEIE;
+    DMA_TX_STREAM_BLOCK->CR |= DMA_SxCR_TEIE;
     /* Interrupt on direct mode error */
-    DMA1_Stream7->CR |= DMA_SxCR_DMEIE;
+    DMA_TX_STREAM_BLOCK->CR |= DMA_SxCR_DMEIE;
     
     /* Set up peripheral to memory DMA */
     /* Disable DMA peripheral */
-    if (DMA1_Stream0->CR & DMA_SxCR_EN) {
-        DMA1_Stream0->CR &= ~(DMA_SxCR_EN);
+    if (DMA_RX_STREAM_BLOCK->CR & DMA_SxCR_EN) {
+        DMA_RX_STREAM_BLOCK->CR &= ~(DMA_SxCR_EN);
     }
     /* Wait until free */
-    while (DMA1_Stream0->CR & DMA_SxCR_EN);
-    /* Set peripheral address to I2S3_ext data register */
-    DMA1_Stream0->PAR = (uint32_t)&(I2S3ext->DR);
+    while (DMA_RX_STREAM_BLOCK->CR & DMA_SxCR_EN);
+//    /* Set peripheral address to I2S3_ext data register */
+//    DMA_RX_STREAM_BLOCK->PAR = (uint32_t)&(I2S3ext->DR);
+//  Try with SPI as data register
+    DMA_RX_STREAM_BLOCK->PAR = (uint32_t)&(SPI3->DR);
     /* Set memory address to receive buffer */
-    DMA1_Stream0->M0AR = (uint32_t)codecDmaRxBuf;
+    DMA_RX_STREAM_BLOCK->M0AR = (uint32_t)codecDmaRxBuf;
     /* Inform DMA peripheral of buffer length. This is two times the defined
      * value because we trigger on HALF and FULL transfer */
-    DMA1_Stream0->NDTR = (uint32_t)(CODEC_DMA_BUF_LEN * 2);
+    DMA_RX_STREAM_BLOCK->NDTR = (uint32_t)(CODEC_DMA_BUF_LEN * 2);
     /* Set up DMA control register: */
-    /* Channel 3 */
-    DMA1_Stream0->CR &= ~DMA_SxCR_CHSEL;
-    DMA1_Stream0->CR |= 0x3 << 25;
+    /* Channel 2 */
+    DMA_RX_STREAM_BLOCK->CR &= ~DMA_SxCR_CHSEL;
+    DMA_RX_STREAM_BLOCK->CR |= DMA_RX_CHANNEL << 25u;
     /* Priority VERY HIGH */
-    DMA1_Stream0->CR &= ~DMA_SxCR_PL;
-    DMA1_Stream0->CR |= 0x3 << 16;
+    DMA_RX_STREAM_BLOCK->CR &= ~DMA_SxCR_PL;
+    DMA_RX_STREAM_BLOCK->CR |= 0x3 << 16;
 #ifdef CODEC_DMA_DIRECT_MODE
-    DMA1_Stream0->FCR &= ~DMA_SxFCR_DMDIS;
+    DMA_RX_STREAM_BLOCK->FCR &= ~DMA_SxFCR_DMDIS;
 #else
-    DMA1_Stream0->FCR |= DMA_SxFCR_DMDIS;
+    DMA_RX_STREAM_BLOCK->FCR |= DMA_SxFCR_DMDIS;
     /* PBURST one burst of 8 beats */
-    DMA1_Stream0->CR &= ~DMA_SxCR_PBURST;
-    DMA1_Stream0->CR |= 0x2 << 21;
+    DMA_RX_STREAM_BLOCK->CR &= ~DMA_SxCR_PBURST;
+    DMA_RX_STREAM_BLOCK->CR |= 0x2 << 21;
     /* MBURST one burst of 8 beats */
-    DMA1_Stream0->CR &= ~DMA_SxCR_MBURST;
-    DMA1_Stream0->CR |= 0x2 << 23;
+    DMA_RX_STREAM_BLOCK->CR &= ~DMA_SxCR_MBURST;
+    DMA_RX_STREAM_BLOCK->CR |= 0x2 << 23;
 #endif /* CODEC_DMA_DIRECT_MODE */
     /* No Double Buffer Mode (we do this ourselves with the HALF and FULL
      * transfer) */
-    DMA1_Stream0->CR &= ~DMA_SxCR_DBM;
+    DMA_RX_STREAM_BLOCK->CR &= ~DMA_SxCR_DBM;
     /* Memory datum size 16-bit */
-    DMA1_Stream0->CR &= ~DMA_SxCR_MSIZE;
-    DMA1_Stream0->CR |= 0x1 << 13;
+    DMA_RX_STREAM_BLOCK->CR &= ~DMA_SxCR_MSIZE;
+    DMA_RX_STREAM_BLOCK->CR |= 0x1 << 13;
     /* Peripheral datum size 16-bit */
-    DMA1_Stream0->CR &= ~DMA_SxCR_PSIZE;
-    DMA1_Stream0->CR |= 0x1 << 11;
+    DMA_RX_STREAM_BLOCK->CR &= ~DMA_SxCR_PSIZE;
+    DMA_RX_STREAM_BLOCK->CR |= 0x1 << 11;
     /* Memory incremented after each transfer */
-    DMA1_Stream0->CR |= DMA_SxCR_MINC;
+    DMA_RX_STREAM_BLOCK->CR |= DMA_SxCR_MINC;
     /* No peripheral address increment */
-    DMA1_Stream0->CR &= ~DMA_SxCR_PINC;
+    DMA_RX_STREAM_BLOCK->CR &= ~DMA_SxCR_PINC;
     /* Circular buffer mode */
-    DMA1_Stream0->CR |= DMA_SxCR_CIRC;
+    DMA_RX_STREAM_BLOCK->CR |= DMA_SxCR_CIRC;
     /* Peripheral to memory mode (this is the receiving peripheral) */
-    DMA1_Stream0->CR &= ~DMA_SxCR_DIR;
+    DMA_RX_STREAM_BLOCK->CR &= ~DMA_SxCR_DIR;
     /* DMA is the flow controller (DMA will keep transferring items from
      * peripheral to memory until disabled) */
-    DMA1_Stream0->CR &= ~DMA_SxCR_PFCTRL;
+    DMA_RX_STREAM_BLOCK->CR &= ~DMA_SxCR_PFCTRL;
     /* clear possible Interrupt flags */
+    /* TODO: This should be defined */
     DMA1->LIFCR |= 0x0000003d;
     /* Enable interrupt on transfer complete */
-    DMA1_Stream0->CR |= DMA_SxCR_TCIE;
+    DMA_RX_STREAM_BLOCK->CR |= DMA_SxCR_TCIE;
     /* Enable interrupt on transfer half complete */
-    DMA1_Stream0->CR |= DMA_SxCR_HTIE;
+    DMA_RX_STREAM_BLOCK->CR |= DMA_SxCR_HTIE;
     /* Interrupt on transfer error */
-    DMA1_Stream0->CR |= DMA_SxCR_TEIE;
+    DMA_RX_STREAM_BLOCK->CR |= DMA_SxCR_TEIE;
     /* Interrupt on direct mode error */
-    DMA1_Stream0->CR |= DMA_SxCR_DMEIE;
+    DMA_RX_STREAM_BLOCK->CR |= DMA_SxCR_DMEIE;
 
     /* Turn on I2S3 clock (SPI3) */
     RCC->APB1ENR |= RCC_APB1ENR_SPI3EN;
@@ -345,17 +380,23 @@ static int i2s_peripherals_setup(uint32_t sr)
     /* CKPOL = 0, I2SMOD = 1, I2SEN = 0 (don't enable yet), I2SSTD = 00
      * (Phillips), DATLEN = 00 (16-bit), CHLEN = 0 (16-bit) I2SCFGR = 10 (Master
      * transmit) */
-    SPI3->I2SCFGR = 0xa00;
+//    SPI3->I2SCFGR = 0xa00;
+// try master receive
+    SPI3->I2SCFGR = 0xb00;
 
-    /* TXDMAEN = 1 (Transmit buffer empty DMA request enable), other bits off */
-    SPI3->CR2 = SPI_CR2_TXDMAEN ;
+//    /* TXDMAEN = 1 (Transmit buffer empty DMA request enable), other bits off */
+//    RX buffer not empty DMA request
+    SPI3->CR2 = SPI_CR2_RXDMAEN ;
     /* Set up duplex instance the same as SPI3, except configure as slave
      * receive and trigger interrupt when receive buffer full */
     /* same as above but I2SCFG = 01 (slave receive) */
-    I2S3ext->I2SCFGR = 0x900;
+//    I2S3ext->I2SCFGR = 0x900;
+//  try slave transmit
+    I2S3ext->I2SCFGR = 0x800;
 
-    /* RXDMAEN = 1 (Receive buffer not empty DMA request enable), other bits off */
-    I2S3ext->CR2 = SPI_CR2_RXDMAEN ;
+//    /* RXDMAEN = 1 (Receive buffer not empty DMA request enable), other bits off */
+//    TX buffer not empty DMA request
+    I2S3ext->CR2 = SPI_CR2_TXDMAEN ;
     
     /* Enable I2S error interrupts */
     i2s_error_setup();
@@ -371,14 +412,14 @@ static int i2s_peripherals_setup(uint32_t sr)
 static void i2s_peripherals_disable(void)
 {
     /* Disable DMA interrupts */
-    NVIC_DisableIRQ(DMA1_Stream7_IRQn);
-    NVIC_DisableIRQ(DMA1_Stream0_IRQn);
+    NVIC_DisableIRQ(DMA_TX_IRQ_N);
+    NVIC_DisableIRQ(DMA_RX_IRQ_N);
     /* Disable SPI3 interrupt */
     NVIC_DisableIRQ(SPI3_IRQn);
 
     /* Clear pending IRQs */
-    NVIC_ClearPendingIRQ(DMA1_Stream7_IRQn);
-    NVIC_ClearPendingIRQ(DMA1_Stream0_IRQn);
+    NVIC_ClearPendingIRQ(DMA_TX_IRQ_N);
+    NVIC_ClearPendingIRQ(DMA_RX_IRQ_N);
     NVIC_ClearPendingIRQ(SPI3_IRQn);
 
     /* Disable I2S peripherals */
@@ -386,8 +427,8 @@ static void i2s_peripherals_disable(void)
     SPI3->I2SCFGR &= ~SPI_I2SCFGR_I2SE;
 
     /* Disable I2S DMA streams */
-    DMA1_Stream7->CR &= ~DMA_SxCR_EN;
-    DMA1_Stream0->CR &= ~DMA_SxCR_EN;
+    DMA_TX_STREAM_BLOCK->CR &= ~DMA_SxCR_EN;
+    DMA_RX_STREAM_BLOCK->CR &= ~DMA_SxCR_EN;
 
     /* Disable I2S Pins */
     RCC->AHB1ENR &= ~(RCC_AHB1ENR_GPIOAEN | RCC_AHB1ENR_GPIOCEN);
@@ -427,14 +468,14 @@ static void i2s_audio_start()
 
     /* clear possible Interrupt flags */
 //    DMA1->HIFCR |= 0x00000f40;
-    DMA1_Stream7->CR |= DMA_SxCR_EN;
+    DMA_TX_STREAM_BLOCK->CR |= DMA_SxCR_EN;
     /* clear possible Interrupt flags */
 //    DMA1->LIFCR |= 0x0000003f;
-    DMA1_Stream0->CR |= DMA_SxCR_EN;
+    DMA_RX_STREAM_BLOCK->CR |= DMA_SxCR_EN;
 
     /* Enable DMA interrupts */
-    NVIC_EnableIRQ(DMA1_Stream7_IRQn);
-    NVIC_EnableIRQ(DMA1_Stream0_IRQn);
+    NVIC_EnableIRQ(DMA_TX_IRQ_N);
+    NVIC_EnableIRQ(DMA_RX_IRQ_N);
 
     /* Turn on I2S3 and its extended block */
     SPI3->I2SCFGR |= 0x400;
@@ -444,7 +485,7 @@ static void i2s_audio_start()
     I2S3ext->I2SCFGR |= 0x400;
 
     /* Wait for them to be enabled (to show they are ready) */
-    while(!((DMA1_Stream7->CR & DMA_SxCR_EN) && (DMA1_Stream0->CR & DMA_SxCR_EN)));
+    while(!((DMA_TX_STREAM_BLOCK->CR & DMA_SxCR_EN) && (DMA_RX_STREAM_BLOCK->CR & DMA_SxCR_EN)));
 
 #if defined(CODEC_CS4270) 
     /* Reset DAC, ADC power down bits to start sound */
@@ -461,37 +502,37 @@ audio_hw_err_t audio_hw_start(audio_hw_setup_t *params)
     return 0;
 }
 
-void DMA1_Stream0_IRQHandler(void)
+void DMA_RX_IRQ_HANDLER(void)
 {
-    NVIC_ClearPendingIRQ(DMA1_Stream0_IRQn);
-    uint32_t dma1_lisr = DMA1->LISR;
-    if (dma1_lisr & DMA_LISR_TEIF0) {
+    NVIC_ClearPendingIRQ(DMA_RX_IRQ_N);
+    uint32_t dma_isr = DMA_RX_ISR;
+    if (dma_isr & DMA_RX_TEIF) {
         /* Transfer error */
 #ifdef CODEC_DMA_HARDFAULT_ON_I2S_ERR
         HardFault_Handler();
 #endif
-        DMA1->LIFCR |= DMA_LIFCR_CTEIF0;
+        DMA_RX_IFCR |= DMA_RX_CTEIF;
     }
-    if (dma1_lisr & DMA_LISR_DMEIF0) {
+    if (dma_isr & DMA_RX_DMEIF) {
         /* Direct mode error */
 #ifdef CODEC_DMA_HARDFAULT_ON_I2S_ERR
         HardFault_Handler();
 #endif
-        DMA1->LIFCR |= DMA_LIFCR_CDMEIF0;
+        DMA_RX_IFCR |= DMA_RX_CDMEIF;
     }
     /* If transfer complete on stream 0 (peripheral to memory), set current rx
      * pointer to half of the buffer */
-    if (dma1_lisr & DMA_LISR_TCIF0) {
+    if (dma_isr & DMA_RX_TCIF) {
         /* clear flag */
-        DMA1->LIFCR |= DMA_LIFCR_CTCIF0;
+        DMA_RX_IFCR |= DMA_RX_CTCIF;
         codecDmaTxPtr = codecDmaTxBuf + CODEC_DMA_BUF_LEN;
         codecDmaRxPtr = codecDmaRxBuf + CODEC_DMA_BUF_LEN;
     }
     /* If half of transfer complete on stream 0 (peripheral to memory), set
      * current rx pointer to beginning of the buffer */
-    if (dma1_lisr & DMA_LISR_HTIF0) {
+    if (dma_isr & DMA_RX_HTIF) {
         /* clear flag */
-        DMA1->LIFCR |= DMA_LIFCR_CHTIF0;
+        DMA_RX_IFCR |= DMA_RX_CHTIF;
         codecDmaTxPtr = codecDmaTxBuf;
         codecDmaRxPtr = codecDmaRxBuf;
     }
@@ -512,23 +553,23 @@ void DMA1_Stream0_IRQHandler(void)
     audio_hw_io(&audiohwio);
 }
 
-void DMA1_Stream7_IRQHandler(void)
+void DMA_TX_IRQ_HANDLER(void)
 {
-    NVIC_ClearPendingIRQ(DMA1_Stream7_IRQn);
-    uint32_t dma1_hisr = DMA1->LISR;
-    if (dma1_hisr & DMA_HISR_TEIF7) {
+    NVIC_ClearPendingIRQ(DMA_TX_IRQ_N);
+    uint32_t dma_isr = DMA_TX_ISR;
+    if (dma_isr & DMA_TX_TEIF) {
         /* Transfer error */
 #ifdef CODEC_DMA_HARDFAULT_ON_I2S_ERR
         HardFault_Handler();
 #endif
-        DMA1->HIFCR |= DMA_HIFCR_CTEIF7;
+        DMA_TX_IFCR |= DMA_TX_CTEIF;
     }
-    if (dma1_hisr & DMA_HISR_DMEIF7) {
+    if (dma_isr & DMA_TX_DMEIF) {
         /* Direct mode error */
 #ifdef CODEC_DMA_HARDFAULT_ON_I2S_ERR
         HardFault_Handler();
 #endif
-        DMA1->HIFCR |= DMA_HIFCR_CDMEIF7;
+        DMA_TX_IFCR |= DMA_TX_CDMEIF;
     }
 
 }
