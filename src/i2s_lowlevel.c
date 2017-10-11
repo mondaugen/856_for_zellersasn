@@ -140,10 +140,8 @@ static int i2s_peripherals_setup(uint32_t sr)
     /* Turn on GPIO clock for I2S3 pins */
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN | RCC_AHB1ENR_GPIOCEN;
 
-#if defined(CODEC_CS4270)
     /* Enable port E clock */
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOEEN;
-#endif  
 
     /* Configure GPIO */
     /* Configure PA15 to Alternate Function */
@@ -159,6 +157,10 @@ static int i2s_peripherals_setup(uint32_t sr)
     GPIOC->MODER |= (0x1 << 2);
     GPIOE->MODER &= ~((0x3 << 4) | (0x3 << 6) | (0x3 << 8));
     GPIOE->MODER |= ((0x1 << 4) | (0x1 << 6) | (0x1 << 8));
+#elif defined(CODEC_WM8778)
+    /* PE2 set to output */
+    GPIOE->MODER &= ~(0x3 << (2*2));
+    GPIOE->MODER |= 0x1 << (2*2);
 #endif  
 
     /* Set pins to high speed */
@@ -168,6 +170,8 @@ static int i2s_peripherals_setup(uint32_t sr)
 #if defined(CODEC_CS4270)
     GPIOC->OSPEEDR |= (0x3 << 2);
     GPIOE->OSPEEDR |= ((0x3 << 4) | (0x3 << 6) | (0x3 << 8));
+#elif defined(CODEC_WM8778)
+    GPIOE->OSPEEDR |= (0x3 << (2*2));
 #endif  
 
     /* Pins have no-pull up nor pull-down */
@@ -177,6 +181,8 @@ static int i2s_peripherals_setup(uint32_t sr)
 #if defined(CODEC_CS4270)
     GPIOC->PUPDR &= ~(0x3 << 2);
     GPIOE->PUPDR &= ~((0x3 << 4) | (0x3 << 6) | (0x3 << 8));
+#elif defined(CODEC_WM8778)
+    GPIOE->PUPDR &= ~(0x3 << (2*2));
 #endif  
 
     /* A15 Alternate function 6 */
@@ -195,7 +201,10 @@ static int i2s_peripherals_setup(uint32_t sr)
  */
     GPIOC->ODR &= ~(0x1 << 1);
     /* Reset AD0-2 pins */
-    GPIOE->ODR &= ((0x1 << 2) | (0x1 << 3) | (0x1 << 4));
+    GPIOE->ODR &= ~((0x1 << 2) | (0x1 << 3) | (0x1 << 4));
+#elif defined(CODEC_WM8778)
+    /* Set PE2 */
+    GPIOE->ODR |= (0x1 << 2);
 #endif  
 
     /* Turn on DMA1 clock */
