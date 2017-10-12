@@ -819,7 +819,7 @@ static void __attribute__((optimize("O0"))) codec_config_via_i2c(void)
 
 #ifdef CODEC_ANALOG_DIGITAL_MIX 
     /* Mix analog and digital output */
- #if defined(CODEC_WM8778)
+ #if defined(CODEC_WM8778) && (!defined(AUDIO_HW_TEST_THROUGHPUT)) && (!defined(AUDIO_HW_TEST_WET_DRY_MIX))
     codec_prog_reg_i2c(WM8778_CODEC_ADDR,0x16,0x5);
  #elif defined(CODEC_CS4270)
     #warning("Analog passthrough not supported by software, hardware must be altered for this capability.")

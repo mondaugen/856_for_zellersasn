@@ -25,8 +25,8 @@ int audio_setup(void *data)
 
 void audio_hw_io(audio_hw_io_t *params)
 {
-#ifdef AUDIO_HW_TEST_THROUGHPUT
     int n;
+#ifdef AUDIO_HW_TEST_THROUGHPUT
 #if defined(BOARD_V1)
     for (n = 0; n < params->length; n++) {
         params->out[n*params->nchans_out] =
@@ -34,10 +34,16 @@ void audio_hw_io(audio_hw_io_t *params)
     }
 #elif defined(BOARD_V2)
     for (n = 0; n < params->length; n++) {
-        params->out[n*params->nchans_out+1] =
-            params->in[n*params->nchans_in+1];
+        params->out[n*params->nchans_out] =
+            params->in[n*params->nchans_in];
     }
 #endif
+#elif defined(AUDIO_HW_TEST_OUTPUT)
+    /* Generate square wave in bits */
+    for (n = 0; n < params->length; n++) {
+        params->out[n*params->nchans_out] = (int16_t)0xff00;
+        params->out[n*params->nchans_out+1] = (int16_t)0xff00;
+    }
 #else
     /* Process switches. MIDI trumps switches if messages present */
     switch_control_do_all();
@@ -56,7 +62,6 @@ void audio_hw_io(audio_hw_io_t *params)
     scheduler_incTimeAndDoEvents();
     /* Process audio */
     MMSigProc_tick(&sigChain);
-    int n;
     for (n = 0; n < params->length; n++) {
         /* saturate output */
         if (outBus->data[outBus->channels*n] > 1.) {
@@ -72,10 +77,20 @@ void audio_hw_io(audio_hw_io_t *params)
             ((MMSample)params->in[n*params->nchans_in])
             /AUDIO_HW_SAMPLE_T_MAX;
 #elif defined(BOARD_V2)
-        params->out[n*params->nchans_out + 1] =
+#if defined(AUDIO_HW_TEST_WET_DRY_MIX)
+        for (n = 0; n < params->length; n++) {
+            params->out[n*params->nchans_out] =
+                params->in[n*params->nchans_in];
+        }
+//        params->out[n*params->nchans_out] = __SADD16(
+//                outBus->data[outBus->channels*n] * AUDIO_HW_SAMPLE_T_MAX,
+//                params->out[n*params->nchans_out]);
+#else
+        params->out[n*params->nchans_out] =
             outBus->data[outBus->channels*n] * AUDIO_HW_SAMPLE_T_MAX;
+#endif
         inBus->data[n*inBus->channels] = 
-            ((MMSample)params->in[n*params->nchans_in+1])
+            ((MMSample)params->in[n*params->nchans_in])
             /AUDIO_HW_SAMPLE_T_MAX;
 #endif
     }

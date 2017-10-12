@@ -20,10 +20,49 @@
 #include "synth_midi_control.h" 
 #include "startup_polling.h" 
 
+#if defined(RAM_INTEGRITY_TEST) || defined(RAM_INTEGRITY_TEST2) || defined(RAM_INTEGRITY_TEST3)
+#include "fmc.h"
+static void
+debug_ram_integrity_wait(void)
+{
+    while (1);
+}
+static void
+debug_ram_integrity(void)
+{
+    uint32_t i;
+    uint32_t *ptr = (uint32_t*)SDRAM_BANK_ADDR;
+    for (i = 0; i < SDRAM_LENGTH/sizeof(uint32_t); i++) {
+        *ptr++ = i;
+    }
+    /* Just halt here. */
+    debug_ram_integrity_wait();
+}
+static void __attribute__((optimize("O0")))
+debug_ram_integrity_read_write(void) 
+{
+    uint8_t i = 0;
+    uint8_t *ptr = (uint8_t*)SDRAM_BANK_ADDR;
+    while (1) {
+        *ptr = i;
+        if (*ptr != i) {
+            break;
+        }
+        ptr++;
+        ptr = ptr >= (SDRAM_BANK_ADDR + SDRAM_LENGTH) ? (ptr - SDRAM_LENGTH) : ptr;
+        i++;
+    }
+    debug_ram_integrity_wait();
+}
+#endif 
+
 #define INITIAL_COUNT 1000000L 
 
 int main (void)
 {
+#ifdef RAM_INTEGRITY_TEST
+    debug_ram_integrity();
+#endif 
 #ifdef AUDIO_HW_TEST_THROUGHPUT 
     if (audio_setup(NULL)) {
         THROW_ERR("Error setting up audio.");
@@ -57,6 +96,12 @@ int main (void)
     synth_switch_control_setup();
     synth_midi_control_setup(midi_channel);
     audio_start();
+#ifdef RAM_INTEGRITY_TEST2
+    debug_ram_integrity();
+#endif 
+#ifdef RAM_INTEGRITY_TEST3
+    debug_ram_integrity_read_write();
+#endif 
 #if defined(TIMER_EVENT_TEST) || defined(TIMER_TEST)
     timers_enable();
 #endif
