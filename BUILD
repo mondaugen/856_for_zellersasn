@@ -20,3 +20,6 @@ in this directory and it should build. Do
 make flash
 
 to flash chips.
+
+Probably will have to pass defines like so:
+CFLAGS=-DBOARD_V2\ -DCODEC_WM8778\ -DAUDIO_HW_TEST_OUTPUT\ -DCODEC_ANALOG_DIGITAL_MIX make

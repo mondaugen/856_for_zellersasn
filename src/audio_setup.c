@@ -13,6 +13,9 @@
 #include "adc_channel.h" 
 #include "led_status.h" 
 
+#define CODEC_LIVE_INPUT_CHANNEL 0
+#define CODEC_LIVE_OUTPUT_CHANNEL 0
+
 int audio_ready = 0;
 
 /* Pass in the name of the audio device as a string */
@@ -29,20 +32,20 @@ void audio_hw_io(audio_hw_io_t *params)
 #ifdef AUDIO_HW_TEST_THROUGHPUT
 #if defined(BOARD_V1)
     for (n = 0; n < params->length; n++) {
-        params->out[n*params->nchans_out] =
-            params->in[n*params->nchans_in];
+        params->out[n*params->nchans_out+CODEC_LIVE_OUTPUT_CHANNEL] =
+            params->in[n*params->nchans_in+CODEC_LIVE_INPUT_CHANNEL];
     }
 #elif defined(BOARD_V2)
     for (n = 0; n < params->length; n++) {
-        params->out[n*params->nchans_out] =
-            params->in[n*params->nchans_in];
+        params->out[n*params->nchans_out+CODEC_LIVE_OUTPUT_CHANNEL] =
+            params->in[n*params->nchans_in+CODEC_LIVE_INPUT_CHANNEL];
     }
 #endif
 #elif defined(AUDIO_HW_TEST_OUTPUT)
     /* Generate square wave in bits */
     for (n = 0; n < params->length; n++) {
-        params->out[n*params->nchans_out] = (int16_t)0xff00;
-        params->out[n*params->nchans_out+1] = (int16_t)0xff00;
+        params->out[n*params->nchans_out+CODEC_LIVE_OUTPUT_CHANNEL] = (int16_t)0xff00;
+        params->out[n*params->nchans_out+CODEC_LIVE_OUTPUT_CHANNEL+1] = (int16_t)0xff00;
     }
 #else
     /* Process switches. MIDI trumps switches if messages present */
@@ -71,26 +74,27 @@ void audio_hw_io(audio_hw_io_t *params)
         }
         /* Only the first channel is written/read */
 #if defined(BOARD_V1)
-        params->out[n*params->nchans_out] =
+        params->out[n*params->nchans_out+CODEC_LIVE_OUTPUT_CHANNEL] =
             outBus->data[outBus->channels*n] * AUDIO_HW_SAMPLE_T_MAX;
         inBus->data[n*inBus->channels] = 
-            ((MMSample)params->in[n*params->nchans_in])
+            ((MMSample)params->in[n*params->nchans_in+CODEC_LIVE_INPUT_CHANNEL])
             /AUDIO_HW_SAMPLE_T_MAX;
 #elif defined(BOARD_V2)
 #if defined(AUDIO_HW_TEST_WET_DRY_MIX)
-        for (n = 0; n < params->length; n++) {
-            params->out[n*params->nchans_out] =
-                params->in[n*params->nchans_in];
-        }
-//        params->out[n*params->nchans_out] = __SADD16(
-//                outBus->data[outBus->channels*n] * AUDIO_HW_SAMPLE_T_MAX,
-//                params->out[n*params->nchans_out]);
+        params->out[n*params->nchans_out+CODEC_LIVE_OUTPUT_CHANNEL] =
+            params->in[n*params->nchans_in+CODEC_LIVE_INPUT_CHANNEL];
 #else
-        params->out[n*params->nchans_out] =
+#if defined(AUDIO_HW_WET_DRY_MIX_SOFTWARE)
+        params->out[n*params->nchasrc/audio_setup.cns_out+CODEC_LIVE_OUTPUT_CHANNEL] = __SADD16(
+            outBus->data[outBus->channels*n] * AUDIO_HW_SAMPLE_T_MAX,
+            params->in[n*params->nchans_in+CODEC_LIVE_INPUT_CHANNEL]);
+#else
+        params->out[n*params->nchans_out+CODEC_LIVE_OUTPUT_CHANNEL] =
             outBus->data[outBus->channels*n] * AUDIO_HW_SAMPLE_T_MAX;
 #endif
+#endif
         inBus->data[n*inBus->channels] = 
-            ((MMSample)params->in[n*params->nchans_in])
+            ((MMSample)params->in[n*params->nchans_in+CODEC_LIVE_INPUT_CHANNEL])
             /AUDIO_HW_SAMPLE_T_MAX;
 #endif
     }
