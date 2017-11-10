@@ -28,7 +28,7 @@ static uint32_t i2s_block_counter = 1;
 
 #define WM8778_CODEC_ADDR  ((uint8_t)0x36)
 #define CS4270_CODEC_ADDR  ((uint8_t)0x90) 
-#define CODEC_I2C_TIMEOUT       ((uint32_t)1000000) 
+#define CODEC_I2C_TIMEOUT  ((uint32_t)1000000) 
 
 #ifdef CODEC_DMA_HARDFAULT_ON_I2S_ERR
 extern void HardFault_Handler(void);
@@ -153,10 +153,8 @@ static int i2s_peripherals_setup(uint32_t sr)
 
 #if defined(CODEC_CS4270)
     /* Configure PC1, PE 2,3,4 to output */
-    GPIOC->MODER &= ~(0x3 << 2);
-    GPIOC->MODER |= (0x1 << 2);
-    GPIOE->MODER &= ~((0x3 << 4) | (0x3 << 6) | (0x3 << 8));
-    GPIOE->MODER |= ((0x1 << 4) | (0x1 << 6) | (0x1 << 8));
+    GPIOE->MODER &= ~((0x3 << 4) | (0x3 << 6) | (0x3 << 8) | (0x3 << 10));
+    GPIOE->MODER |= ((0x1 << 4) | (0x1 << 6) | (0x1 << 8) | (0x1 << 10));
 #elif defined(CODEC_WM8778)
     /* PE2 set to output */
     GPIOE->MODER &= ~(0x3 << (2*2));
@@ -168,8 +166,7 @@ static int i2s_peripherals_setup(uint32_t sr)
     GPIOC->OSPEEDR |= (0x3 << 20) | (0x3 << 22) | (0x3 << 24) | (0x3 << 14);
 
 #if defined(CODEC_CS4270)
-    GPIOC->OSPEEDR |= (0x3 << 2);
-    GPIOE->OSPEEDR |= ((0x3 << 4) | (0x3 << 6) | (0x3 << 8));
+    GPIOE->OSPEEDR |= ((0x3 << 4) | (0x3 << 6) | (0x3 << 8) | (0x3 << 10));
 #elif defined(CODEC_WM8778)
     GPIOE->OSPEEDR |= (0x3 << (2*2));
 #endif  
@@ -179,8 +176,7 @@ static int i2s_peripherals_setup(uint32_t sr)
     GPIOC->PUPDR &= ~((0x3 << 20) | (0x3 << 22) | (0x3 << 24) | (0x3 << 14));
 
 #if defined(CODEC_CS4270)
-    GPIOC->PUPDR &= ~(0x3 << 2);
-    GPIOE->PUPDR &= ~((0x3 << 4) | (0x3 << 6) | (0x3 << 8));
+    GPIOE->PUPDR &= ~((0x3 << 4) | (0x3 << 6) | (0x3 << 8) | (0x3 << 10));
 #elif defined(CODEC_WM8778)
     GPIOE->PUPDR &= ~(0x3 << (2*2));
 #endif  
@@ -196,10 +192,10 @@ static int i2s_peripherals_setup(uint32_t sr)
     GPIOC->AFR[1] |= ((0x6 << 8) | (0x5 << 12) | (0x6 << 16));
 
 #if defined(CODEC_CS4270)
-/* Assert RESET by resetting pin PC1 which will be set once
+/* Assert RESET by resetting pin PE5 which will be set once
  * codec is ready to be programmed
  */
-    GPIOC->ODR &= ~(0x1 << 1);
+    GPIOE->ODR &= ~(0x1 << 5);
     /* Reset AD0-2 pins */
     GPIOE->ODR &= ~((0x1 << 2) | (0x1 << 3) | (0x1 << 4));
 #elif defined(CODEC_WM8778)
@@ -550,7 +546,7 @@ static void i2s_correct_frame_error(void)
 
 #if defined(CODEC_CS4270)
         /* Assert reset by pulling pin low */
-        GPIOC->ODR &= ~(0x1 << 1);
+        GPIOE->ODR &= ~(0x1 << 5);
 #endif  
         
         i2s_peripherals_disable();
@@ -779,7 +775,7 @@ static void __attribute__((optimize("O0"))) codec_config_via_i2c(void)
     codec_prog_reg_i2c(WM8778_CODEC_ADDR,0x5,0x00ff);
 #elif defined(CODEC_CS4270)
     /* Chip reset should be asserted, deassert to allow programming */
-    GPIOC->ODR |= (0x1 << 1);
+    GPIOE->ODR |= (0x1 << 5);
     /* Set power down bit to confirm software control */
     codec_prog_reg_i2c(CS4270_CODEC_ADDR,0x02,0x01);
     /* Wait */
@@ -802,15 +798,15 @@ static void __attribute__((optimize("O0"))) codec_config_via_i2c(void)
     codec_prog_reg_i2c(CS4270_CODEC_ADDR,0x07,0x00);
     /* Read register contents */
     /* Check correct values */
-    codec_read_reg_i2c(CS4270_CODEC_ADDR,0x02,&reg);
+    reg=0;codec_read_reg_i2c(CS4270_CODEC_ADDR,0x02,&reg);
     while (reg != 0x22);
-    codec_read_reg_i2c(CS4270_CODEC_ADDR,0x03,&reg);
+    reg=0;codec_read_reg_i2c(CS4270_CODEC_ADDR,0x03,&reg);
     while (reg != 0x31);
-    codec_read_reg_i2c(CS4270_CODEC_ADDR,0x04,&reg);
+    reg=0;codec_read_reg_i2c(CS4270_CODEC_ADDR,0x04,&reg);
     while (reg != 0x09);
-    codec_read_reg_i2c(CS4270_CODEC_ADDR,0x05,&reg);
+    reg=0;codec_read_reg_i2c(CS4270_CODEC_ADDR,0x05,&reg);
     while (reg != 0x80);
-    codec_read_reg_i2c(CS4270_CODEC_ADDR,0x07,&reg);
+    reg=1;codec_read_reg_i2c(CS4270_CODEC_ADDR,0x07,&reg);
     while (reg != 0x00);
 #else
 #error("Please define codec model.")
