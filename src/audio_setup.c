@@ -42,11 +42,19 @@ void audio_hw_io(audio_hw_io_t *params)
     }
 #endif
 #elif defined(AUDIO_HW_TEST_OUTPUT)
+#if defined(AUDIO_HW_TEST_OUTPUT_RAMP)
+    static int16_t _rampval = 0;
+    for (n = 0; n < params->length; n++) {
+        params->out[n*params->nchans_out+CODEC_LIVE_OUTPUT_CHANNEL] = (int16_t)_rampval;
+        params->out[n*params->nchans_out+CODEC_LIVE_OUTPUT_CHANNEL+1] = (int16_t)(_rampval+=1000);
+    }
+#else
     /* Generate square wave in bits */
     for (n = 0; n < params->length; n++) {
         params->out[n*params->nchans_out+CODEC_LIVE_OUTPUT_CHANNEL] = (int16_t)0xff00;
         params->out[n*params->nchans_out+CODEC_LIVE_OUTPUT_CHANNEL+1] = (int16_t)0xff00;
     }
+#endif
 #else
     /* Process switches. MIDI trumps switches if messages present */
     switch_control_do_all();

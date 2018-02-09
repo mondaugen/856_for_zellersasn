@@ -1,7 +1,11 @@
 #! /bin/bash
 if [ -z ${OPENOCD_INTERFACE} ]
 then
-    export OPENOCD_INTERFACE=interface/stlink-v2.cfg;
+    OPENOCD_INTERFACE=interface/stlink-v2.cfg;
 fi
-sudo openocd -f /usr/local/share/openocd/scripts/board/stm32f429discovery.cfg \
+if [ -z ${OPENOCD_BOARD} ]
+then
+    OPENOCD_BOARD=/usr/local/share/openocd/scripts/board/stm32f429discovery.cfg;
+fi
+sudo openocd -f ${OPENOCD_BOARD} \
     -f ${OPENOCD_INTERFACE}

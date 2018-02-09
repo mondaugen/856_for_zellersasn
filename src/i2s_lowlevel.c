@@ -54,12 +54,19 @@ static unsigned int rate = 0;
 
 static unsigned int i2s_frame_error_flag = 0;
 
+static uint16_t all_codec_reg[8];
+
 static void codec_i2c_setup(void);
 static void codec_config_via_i2c(void);
 static void i2s_correct_frame_error(void);
 static void codec_prog_reg_i2c(uint8_t addr,
                                uint8_t reg_addr,
                                uint16_t reg_val);
+#if defined(CODEC_CS4270)
+static void codec_read_reg_i2c(uint8_t addr,
+                               uint8_t reg_addr,
+                               uint16_t *reg_val);
+#endif 
 
 unsigned int audio_hw_get_sample_rate(void *data) {
     return rate;
@@ -454,6 +461,13 @@ static void i2s_audio_start()
 #if defined(CODEC_CS4270) 
     /* Reset DAC, ADC power down bits to start sound */
     codec_prog_reg_i2c(CS4270_CODEC_ADDR,0x02,0x00);
+    uint16_t reg=0xff;
+    codec_read_reg_i2c(CS4270_CODEC_ADDR,0x02,&reg);
+    while (reg != 0x00);
+    uint8_t n;
+    for (n=1;n<=8;n++) {
+        codec_read_reg_i2c(CS4270_CODEC_ADDR,n,&all_codec_reg[n-1]);
+    }
 #endif
 }
 
@@ -776,22 +790,26 @@ static void __attribute__((optimize("O0"))) codec_config_via_i2c(void)
 #elif defined(CODEC_CS4270)
     /* Chip reset should be asserted, deassert to allow programming */
     GPIOE->ODR |= (0x1 << 5);
-    /* Set power down bit to confirm software control */
-    codec_prog_reg_i2c(CS4270_CODEC_ADDR,0x02,0x01);
-    /* Wait */
-    int j = 1000000;
-    while (j--);
+    ///* Set power down bit to confirm software control */
+    //codec_prog_reg_i2c(CS4270_CODEC_ADDR,0x02,0x01);
+    ///* Wait */
+    //int j = 1000000;
+    //while (j--);
     uint16_t reg;
+    /* Reset power down bit, power down ADC, DAC */
+    codec_prog_reg_i2c(CS4270_CODEC_ADDR,0x02,0x23);
     /* Read register contents */
     codec_read_reg_i2c(CS4270_CODEC_ADDR,0x01,&reg);
     /* Check correct value */
     while ((reg & 0xf0) != 0xc0);
-    /* Reset power down bit, power down ADC, DAC */
-    codec_prog_reg_i2c(CS4270_CODEC_ADDR,0x02,0x22);
     /* Set pop-suppression, slave mode */
     codec_prog_reg_i2c(CS4270_CODEC_ADDR,0x03,0x31);
     /* Set DAC, ADC to I2S mode */
+#if defined(CODEC_DIGITAL_LOOPBACK)
+    codec_prog_reg_i2c(CS4270_CODEC_ADDR,0x04,0x29);
+#else
     codec_prog_reg_i2c(CS4270_CODEC_ADDR,0x04,0x09);
+#endif
     /* Set single DAC volume */
     codec_prog_reg_i2c(CS4270_CODEC_ADDR,0x05,0x80);
     /* Set DAC volume to 0dB (no attenuation) */
@@ -799,11 +817,15 @@ static void __attribute__((optimize("O0"))) codec_config_via_i2c(void)
     /* Read register contents */
     /* Check correct values */
     reg=0;codec_read_reg_i2c(CS4270_CODEC_ADDR,0x02,&reg);
-    while (reg != 0x22);
+    while (reg != 0x23);
     reg=0;codec_read_reg_i2c(CS4270_CODEC_ADDR,0x03,&reg);
     while (reg != 0x31);
     reg=0;codec_read_reg_i2c(CS4270_CODEC_ADDR,0x04,&reg);
+#if defined(CODEC_DIGITAL_LOOPBACK)
+    while (reg != 0x29);
+#else
     while (reg != 0x09);
+#endif
     reg=0;codec_read_reg_i2c(CS4270_CODEC_ADDR,0x05,&reg);
     while (reg != 0x80);
     reg=1;codec_read_reg_i2c(CS4270_CODEC_ADDR,0x07,&reg);
