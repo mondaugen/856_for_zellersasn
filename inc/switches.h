@@ -10,7 +10,7 @@
  #error("Please define board version.")
 #endif  
 
-#define NUM_SWITCHES            18
+#define NUM_SWITCHES            19
 
 #define FSW1_ENR                RCC_AHB1ENR_GPIOBEN
 #define FSW2_ENR                RCC_AHB1ENR_GPIOEEN
@@ -31,6 +31,9 @@
 #define SW7_BTM_ENR             RCC_AHB1ENR_GPIOCEN
 #define SW8_TOP_ENR             RCC_AHB1ENR_GPIOBEN
 #define SW8_BTM_ENR             RCC_AHB1ENR_GPIOCEN
+#if defined(BOARD_V2)
+#define EXPSW_ENR               RCC_AHB1ENR_GPIOFEN
+#endif /* defined(BOARD_V2) */
 
 #define FSW1_PORT               GPIOB
 #define FSW2_PORT               GPIOE
@@ -51,6 +54,9 @@
 #define SW7_BTM_PORT            GPIOC
 #define SW8_TOP_PORT            GPIOB
 #define SW8_BTM_PORT            GPIOC
+#if defined(BOARD_V2)
+#define EXPSW_PORT              GPIOF
+#endif /* defined(BOARD_V2) */
 
 #define FSW1_PORT_PIN           4
 #define FSW2_PORT_PIN           6
@@ -75,6 +81,9 @@
 #define SW7_BTM_PORT_PIN        8
 #define SW8_TOP_PORT_PIN        9
 #define SW8_BTM_PORT_PIN        6
+#if defined(BOARD_V2)
+#define EXPSW_PORT_PIN          8 
+#endif /* defined(BOARD_V2) */
 
 #define MSW3_TOP_PORT_PIN       SW3_TOP_PORT_PIN
 #define MSW3_BTM_PORT_PIN       SW3_BTM_PORT_PIN
@@ -107,6 +116,9 @@
 #define SW7_BTM_ADDR            (&((SW7_BTM_PORT)->IDR))   
 #define SW8_TOP_ADDR            (&((SW8_TOP_PORT)->IDR))   
 #define SW8_BTM_ADDR            (&((SW8_BTM_PORT)->IDR))   
+#if defined(BOARD_V2)
+#define EXPSW_ADDR              (&((EXPSW_PORT)->IDR))   
+#endif /* defined(BOARD_V2) */
 
 #define MSW3_TOP_ADDR           SW3_TOP_ADDR 
 #define MSW3_BTM_ADDR           SW3_BTM_ADDR 
@@ -207,6 +219,9 @@ uint32_t sw7_top_get_state(void);
 uint32_t sw7_btm_get_state(void);
 uint32_t sw8_top_get_state(void);
 uint32_t sw8_btm_get_state(void);
+#if defined(BOARD_V2)
+uint32_t expsw_get_state(void);
+#endif /* defined(BOARD_V2) */
 void get_switch_states(uint32_t *states);
 void reset_sw_toggle_states(void);
 

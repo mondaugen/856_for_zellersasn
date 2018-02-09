@@ -22,6 +22,9 @@ static uint32_t (*sw_get_state_funcs[]) (void) = {
     sw7_btm_get_state,
     sw8_top_get_state,
     sw8_btm_get_state,
+#if defined(BOARD_V2)
+    expsw_get_state,
+#endif /* defined(BOARD_V2) */
     NULL
 };
 
@@ -57,6 +60,9 @@ void switches_setup(void)
         SW7_BTM_ENR,
         SW8_TOP_ENR,
         SW8_BTM_ENR,
+#if defined(BOARD_V2)
+        EXPSW_ENR,
+#endif /* defined(BOARD_V2) */
     };
         
     GPIO_TypeDef *gpios[] = {
@@ -78,6 +84,9 @@ void switches_setup(void)
         SW7_BTM_PORT,     
         SW8_TOP_PORT,     
         SW8_BTM_PORT,
+#if defined(BOARD_V2)
+        EXPSW_PORT,
+#endif /* defined(BOARD_V2) */
         NULL
     };    
 
@@ -100,6 +109,9 @@ void switches_setup(void)
         SW7_BTM_PORT_PIN,
         SW8_TOP_PORT_PIN,
         SW8_BTM_PORT_PIN,
+#if defined(BOARD_V2)
+        EXPSW_PORT_PIN,
+#endif /* defined(BOARD_V2) */
     };
 
     uint32_t *enr = enrs, *pin = pins;
@@ -329,6 +341,13 @@ uint32_t sw8_btm_get_state(void)
 {
     return (SW8_BTM_PORT->IDR & (0x1 << SW8_BTM_PORT_PIN)) >> SW8_BTM_PORT_PIN;
 }
+
+#if defined(BOARD_V2)
+uint32_t expsw_get_state(void)
+{
+    return (EXPSW_PORT->IDR & (0x1 << EXPSW_PORT_PIN)) >> EXPSW_PORT_PIN;
+}
+#endif /* defined(BOARD_V2) */
 
 /* Fills an array of length NUM_SWITCHES with the switch states. The states are
  * in the same order as the order of the defines in switches.h. */
