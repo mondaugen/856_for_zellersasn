@@ -23,3 +23,7 @@ to flash chips.
 
 Probably will have to pass defines like so:
 CFLAGS=-DBOARD_V2\ -DCODEC_WM8778\ -DAUDIO_HW_TEST_OUTPUT\ -DCODEC_ANALOG_DIGITAL_MIX make
+
+To make a DFU that will work, you have to strip the debugging symbols:
+
+arm-none-eabi-strip -g -O binary main.elf -o /tmp/main-stripped.bin

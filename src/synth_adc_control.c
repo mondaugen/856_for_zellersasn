@@ -6,27 +6,6 @@
 
 static float synth_adc_scale_thresh(float x);
 
-#define SYNTH_ADC_SETUP(name,data_start_idx,func)\
-    static void synth_adc_ ## name ## _control_setup(void)\
-    {\
-        static adc_channel_t channel;\
-        static adc_channel_do_set_t do_set;\
-        static adc_channel_do_data_t channel_data;\
-        adc_channel_do_data_init(&channel_data,\
-                                 adc_channel_do_style_CHANGED_INIT,\
-                                 SYNTH_ADC_THRESHOLD,\
-                                 0);\
-        adc_channel_init(&channel,\
-                         adc_data_starts[data_start_idx],\
-                         adc_raw_value_strides[data_start_idx],\
-                         ADC_AVG_SIZE);\
-        adc_channel_do_set_init(&do_set,\
-                                &channel,\
-                                func,\
-                                &channel_data);\
-        adc_channel_do_set_add(&do_set);\
-    }
-
 #define SYNTH_ADC_CONTROL_FLOAT(name)\
     static void synth_adc_ ## name ## _control(adc_channel_t *chan,\
                                                adc_channel_do_data_t *data)\
@@ -41,7 +20,7 @@ struct synth_adc_obj_t {
 };
 
 void
-synth_adc_obj_init(synth_adc_obj_t *sao,
+synth_adc_obj_init(struct synth_adc_obj_t *sao,
         size_t data_start_idx,
         adc_channel_do_func_t func)
 {
@@ -61,11 +40,8 @@ synth_adc_obj_init(synth_adc_obj_t *sao,
 }
 
 SYNTH_ADC_CONTROL_FLOAT(envelopeTime_curParams);
-SYNTH_ADC_SETUP(envelopeTime_curParams,SYNTH_ADC_ENV_IDX,synth_adc_envelopeTime_curParams_control);
 SYNTH_ADC_CONTROL_FLOAT(sustainTime_curParams);
-SYNTH_ADC_SETUP(sustainTime_curParams,SYNTH_ADC_SUS_IDX,synth_adc_sustainTime_curParams_control);
 SYNTH_ADC_CONTROL_FLOAT(offset_curParams);
-SYNTH_ADC_SETUP(offset_curParams,SYNTH_ADC_OFFSET_IDX,synth_adc_offset_curParams_control);
 
 static float synth_adc_scale_thresh(float x)
 {
@@ -96,7 +72,6 @@ static void synth_adc_pos_curParams_control(adc_channel_t *chan,
     }
 }
 
-SYNTH_ADC_SETUP(pos_curParams,SYNTH_ADC_POS_IDX,synth_adc_pos_curParams_control);
 
 static void synth_adc_eventDelta_curParams_control(adc_channel_t *chan,
                                          adc_channel_do_data_t *data)
@@ -140,8 +115,6 @@ static void synth_adc_eventDelta_curParams_control(adc_channel_t *chan,
     }
 }
 
-SYNTH_ADC_SETUP(eventDelta_curParams,SYNTH_ADC_EVENTDELTA_IDX,
-        synth_adc_eventDelta_curParams_control);
 
 static void synth_adc_pitch_curParams_control(adc_channel_t *chan,
                                     adc_channel_do_data_t *data)
@@ -166,7 +139,6 @@ static void synth_adc_pitch_curParams_control(adc_channel_t *chan,
     }
 }
 
-SYNTH_ADC_SETUP(pitch_curParams,SYNTH_ADC_PITCH_IDX,synth_adc_pitch_curParams_control);
 
 static void synth_adc_gain_curParams_control(adc_channel_t *chan,
                                    adc_channel_do_data_t *data)
@@ -183,11 +155,12 @@ static void synth_adc_gain_curParams_control(adc_channel_t *chan,
                 synth_control_set_wet_curParams(
                         synth_adc_scale_thresh(chan->cur_val));
                 break;
+            default:
+                break;
         }
     }
 }
 
-SYNTH_ADC_SETUP(gain_curParams,SYNTH_ADC_GAIN_IDX,synth_adc_gain_curParams_control);
 
 static void synth_adc_tempo_control(adc_channel_t *chan,
                                    adc_channel_do_data_t *data)
@@ -206,7 +179,6 @@ static void synth_adc_tempo_control(adc_channel_t *chan,
     }
 }
 
-SYNTH_ADC_SETUP(tempo,SYNTH_ADC_TEMPO_IDX,synth_adc_tempo_control);
 
 #if defined(BOARD_V2)
 
@@ -218,20 +190,20 @@ static void __attribute__((optimize("O0"))) synth_adc_expr_control(adc_channel_t
    cur_val = chan->cur_val;
 }
 
-SYNTH_ADC_SETUP(expr,SYNTH_ADC_EXPR_IDX,synth_adc_expr_control);
 #endif
+
+static struct synth_adc_obj_t envelopeTime_curParams_sao;
+static struct synth_adc_obj_t sustainTime_curParams_sao;
+static struct synth_adc_obj_t offset_curParams_sao;
+static struct synth_adc_obj_t pos_curParams_sao;
+static struct synth_adc_obj_t eventDelta_curParams_sao;
+static struct synth_adc_obj_t pitch_curParams_sao;
+static struct synth_adc_obj_t gain_curParams_sao;
+static struct synth_adc_obj_t tempo_sao;
+static struct synth_adc_obj_t expr_sao;
 
 void synth_adc_control_setup(void)
 {
-    struct synth_adc_obj_t envelopeTime_curParams_sao;
-    struct synth_adc_obj_t sustainTime_curParams_sao;
-    struct synth_adc_obj_t offset_curParams_sao;
-    struct synth_adc_obj_t pos_curParams_sao;
-    struct synth_adc_obj_t eventDelta_curParams_sao;
-    struct synth_adc_obj_t pitch_curParams_sao;
-    struct synth_adc_obj_t gain_curParams_sao;
-    struct synth_adc_obj_t tempo_sao;
-    struct synth_adc_obj_t expr_sao;
     synth_adc_obj_init(&envelopeTime_curParams_sao ,SYNTH_ADC_ENV_IDX,synth_adc_envelopeTime_curParams_control);
     synth_adc_obj_init(&sustainTime_curParams_sao ,SYNTH_ADC_SUS_IDX,synth_adc_sustainTime_curParams_control);
     synth_adc_obj_init(&offset_curParams_sao ,SYNTH_ADC_OFFSET_IDX,synth_adc_offset_curParams_control);
