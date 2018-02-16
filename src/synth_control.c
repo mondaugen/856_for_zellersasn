@@ -73,6 +73,8 @@ static void schedulerState_on_helper(void);
 static void synth_control_fbk_tog_setup(void);
 static void synth_control_reset_aux_note_all_params(void);
 
+static int expr_ctl_chosen = 0;
+
 void autorelease_on_done(MMEnvedSamplePlayer * esp)
 {
     MMWavTab_dec_n_players(esp->spsp.samples);
@@ -740,6 +742,24 @@ static void synth_control_reset_aux_note_gains(void)
     }
 }
 
+void
+synth_control_expr_ctl_chosen_set(void)
+{
+    expr_ctl_chosen = 1;
+}    
+
+void
+synth_control_expr_ctl_chosen_reset(void)
+{
+    expr_ctl_chosen = 0;
+}    
+
+int
+synth_control_expr_ctl_chosen(void)
+{
+    return expr_ctl_chosen;
+}
+
 static void synth_control_fbk_reset_cb(void* data)
 {
     int *_num_fbk_presses = (int*)data;
@@ -762,24 +782,30 @@ void synth_control_fbk_tog(void)
 {
     SynthControlPosMode pm;
     pm = synth_control_get_posMode_curParams();
-    if (pm == SynthControlPosMode_UNI){
-       if (num_fbk_presses == 0) {
-            synth_control_reset_aux_note_gains();
-            num_fbk_presses++;
-        } else if (num_fbk_presses == 1) {
-            synth_control_reset_aux_note_all_params();
-            num_fbk_presses++;
-        }
-        synth_control_set_uni_stuff_changed();
-    } else {
-        SynthControlRecMode _recmode;
-        _recmode = synth_control_get_recMode();
-        if (_recmode == SynthControlRecMode_REC_LEN_1_BEAT_REC_SCHED) {
-            /* Do NOTHING */
+    if (!synth_control_expr_ctl_chosen()) {
+        if (pm == SynthControlPosMode_UNI){
+           if (num_fbk_presses == 0) {
+                synth_control_reset_aux_note_gains();
+                num_fbk_presses++;
+            } else if (num_fbk_presses == 1) {
+                synth_control_reset_aux_note_all_params();
+                num_fbk_presses++;
+            }
+            synth_control_set_uni_stuff_changed();
         } else {
-            synth_control_feedback_tog();
+            SynthControlRecMode _recmode;
+            _recmode = synth_control_get_recMode();
+            if (_recmode == SynthControlRecMode_REC_LEN_1_BEAT_REC_SCHED) {
+                /* Do NOTHING */
+            } else {
+                synth_control_feedback_tog();
+            }
         }
     }
+    synth_control_expr_ctl_chosen_reset();
+    /* Otherwise a knob was moved to choose what the expression
+       pedal controls, so we ignore the toggle functionality of the fbk
+       switch. */
 }
 
 static void free_playing_spsp_voice(void *voice_number)

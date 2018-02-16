@@ -179,11 +179,12 @@ SYNTH_SWITCH_CONTROL(SynthControlGainMode,
         synth_control_set_gainMode,
         SynthControlGainMode_FADE,
         SynthControlGainMode_WET,
-        SynthControlGainMode_WET); 
-SYNTH_SWITCH_SETUP(SynthControlGainMode,SW7,
+        SynthControlGainMode_FBKHOLD); 
+SYNTH_SWITCH_SETUP(SynthControlGainMode,
+        SW7,
         SynthControlGainMode_FADE,
         SynthControlGainMode_WET,
-        SynthControlGainMode_WET); 
+        SynthControlGainMode_FBKHOLD); 
 SYNTH_SWITCH_CONTROL_TOG(record);
 /* Footswitches use debounce method C */
 SYNTH_SWITCH_SETUP_TOG(record,FSW1,switch_debouncer_style_C);

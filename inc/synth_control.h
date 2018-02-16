@@ -38,7 +38,9 @@ typedef enum {
     /* Control the fade amount for repeated notes. */
     SynthControlGainMode_FADE,
     /* Control the gain of new notes */
-    SynthControlGainMode_WET
+    SynthControlGainMode_WET,
+    /* If the feedback switch is held in downward position, the switch is in this state */
+    SynthControlGainMode_FBKHOLD
 } SynthControlGainMode;
 #define SYNTH_CONTROL_GAIN_MODE_N_MODES 2 
 
@@ -344,5 +346,6 @@ void synth_control_fbk_tog(void);
 void synth_control_set_swing(float param,
                              int idx);
 void synth_control_set_swing_curParams(float param);
+void synth_control_expr_ctl_chosen_set(void);
 
 #endif /* SYNTH_CONTROL_H */
