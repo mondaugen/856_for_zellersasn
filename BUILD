@@ -27,3 +27,7 @@ CFLAGS=-DBOARD_V2\ -DCODEC_WM8778\ -DAUDIO_HW_TEST_OUTPUT\ -DCODEC_ANALOG_DIGITA
 To make a DFU that will work, you have to strip the debugging symbols:
 
 arm-none-eabi-strip -g -O binary main.elf -o /tmp/main-stripped.bin
+
+Flash DFU (on Linux) with
+
+sudo dfu-util -D /tmp/main-stripped.bin -s 0x08000000 -a 0
