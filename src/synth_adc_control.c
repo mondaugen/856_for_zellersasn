@@ -3,6 +3,7 @@
 #include "adc_channel.h" 
 #include "synth_adc_control.h" 
 #include "synth_control.h"
+#include "switches.h"
 
 static float synth_adc_scale_thresh(float x);
 
@@ -17,7 +18,7 @@ typedef struct synth_adc_channel_do_data_t synth_adc_channel_do_data_t;
 struct synth_adc_channel_do_data_t {
     adc_channel_do_data_t super;
     /* The function to call normally (when FBK is not held down) */
-    adc_channel_do_func_t *normal_func;
+    adc_channel_do_func_t normal_func;
 };
 
 struct synth_adc_obj_t {
@@ -30,32 +31,26 @@ struct synth_adc_obj_t {
    the parameter the expression pedal controls, otherwise it just calls the
    normal_func contained in synth_adc_channel_do_data_t. */
 static void synth_adc_check_fbk_and_call(adc_channel_t *chan,
-                                  adc_channel_do_data_t *data)
-{
-    synth_adc_channel_do_data_t *sadc = (synth_adc_channel_do_data_t*)data;
-    if (synth_control_get_gainMode() == SynthControlGainMode_FBKHOLD) {
-        expr_sao.channel_data.normal_func = sadc->normal_func;
-        /* Inform that we indeed chose what to control with the expression pedal */
-        synth_control_expr_ctl_chosen_set();
-    } else {
-        /* Otherwise just call the normal function */
-        sadc->normal_func(chan,data);
-    }
-}
+                                  adc_channel_do_data_t *data);
 
 /* Check if expression pedal plugged in and if it is, call the function it
    controls, otherwise do nothing */
 static void synth_adc_check_expr_and_call(adc_channel_t *chan,
                                   adc_channel_do_data_t *data)
 {
-    //if (); //check if expression plugged in 
+    synth_adc_channel_do_data_t *sadc = (synth_adc_channel_do_data_t*)data;
+    /* check if expression plugged in  */
+    if (expsw_get_state()) {
+        sadc->normal_func(chan,data);
+    }
+    /* Otherwise do nothing */
 }
 
 void
 synth_adc_obj_init(struct synth_adc_obj_t *sao,
         size_t data_start_idx,
         adc_channel_do_func_t func,
-        adc_channel_do_func_t normal_func,
+        adc_channel_do_func_t normal_func)
 {
     adc_channel_do_data_init((adc_channel_do_data_t*)&sao->channel_data,
             adc_channel_do_style_CHANGED_INIT,
@@ -68,7 +63,7 @@ synth_adc_obj_init(struct synth_adc_obj_t *sao,
         adc_channel_do_set_init(&sao->do_set,
                 &sao->channel,
                 func,
-                &sao->channel_data);
+                (adc_channel_do_data_t*)&sao->channel_data);
         adc_channel_do_set_add(&sao->do_set);
         sao->channel_data.normal_func = normal_func;
 }
@@ -236,18 +231,55 @@ static struct synth_adc_obj_t gain_curParams_sao;
 static struct synth_adc_obj_t tempo_sao;
 static struct synth_adc_obj_t expr_sao;
 
-void synth_adc_control_setup(void)
+/* Check if FBK switch is down. If it is, when you turn a knob it sets that as
+   the parameter the expression pedal controls, otherwise it just calls the
+   normal_func contained in synth_adc_channel_do_data_t. */
+static void synth_adc_check_fbk_and_call(adc_channel_t *chan,
+                                  adc_channel_do_data_t *data)
 {
-    synth_adc_obj_init(&envelopeTime_curParams_sao ,SYNTH_ADC_ENV_IDX,synth_adc_envelopeTime_curParams_control);
-    synth_adc_obj_init(&sustainTime_curParams_sao ,SYNTH_ADC_SUS_IDX,synth_adc_sustainTime_curParams_control);
-    synth_adc_obj_init(&offset_curParams_sao ,SYNTH_ADC_OFFSET_IDX,synth_adc_offset_curParams_control);
-    synth_adc_obj_init(&pos_curParams_sao ,SYNTH_ADC_POS_IDX,synth_adc_pos_curParams_control);
-    synth_adc_obj_init(&eventDelta_curParams_sao ,SYNTH_ADC_EVENTDELTA_IDX, synth_adc_eventDelta_curParams_control);
-    synth_adc_obj_init(&pitch_curParams_sao ,SYNTH_ADC_PITCH_IDX,synth_adc_pitch_curParams_control);
-    synth_adc_obj_init(&gain_curParams_sao ,SYNTH_ADC_GAIN_IDX,synth_adc_gain_curParams_control);
-    synth_adc_obj_init(&tempo_sao ,SYNTH_ADC_TEMPO_IDX,synth_adc_tempo_control);
+    synth_adc_channel_do_data_t *sadc = (synth_adc_channel_do_data_t*)data;
+    if (synth_control_get_gainMode() == SynthControlGainMode_FBKHOLD) {
+        expr_sao.channel_data.normal_func = sadc->normal_func;
+        /* Inform that we indeed chose what to control with the expression pedal */
+        synth_control_expr_ctl_chosen_set();
+    } else {
+        /* Otherwise just call the normal function */
+        sadc->normal_func(chan,data);
+    }
+}
+
+void
+synth_adc_control_setup (void)
+{
+  synth_adc_obj_init (&envelopeTime_curParams_sao, SYNTH_ADC_ENV_IDX,
+                      synth_adc_check_fbk_and_call,
+                      synth_adc_envelopeTime_curParams_control);
+  synth_adc_obj_init (&sustainTime_curParams_sao, SYNTH_ADC_SUS_IDX,
+                      synth_adc_check_fbk_and_call,
+                      synth_adc_sustainTime_curParams_control);
+  synth_adc_obj_init (&offset_curParams_sao, SYNTH_ADC_OFFSET_IDX,
+                      synth_adc_check_fbk_and_call,
+                      synth_adc_offset_curParams_control);
+  synth_adc_obj_init (&pos_curParams_sao, SYNTH_ADC_POS_IDX,
+                      synth_adc_check_fbk_and_call,
+                      synth_adc_pos_curParams_control);
+  synth_adc_obj_init (&eventDelta_curParams_sao, SYNTH_ADC_EVENTDELTA_IDX,
+                      synth_adc_check_fbk_and_call,
+                      synth_adc_eventDelta_curParams_control);
+  synth_adc_obj_init (&pitch_curParams_sao, SYNTH_ADC_PITCH_IDX,
+                      synth_adc_check_fbk_and_call,
+                      synth_adc_pitch_curParams_control);
+  synth_adc_obj_init (&gain_curParams_sao, SYNTH_ADC_GAIN_IDX,
+                      synth_adc_check_fbk_and_call,
+                      synth_adc_gain_curParams_control);
+  synth_adc_obj_init (&tempo_sao, SYNTH_ADC_TEMPO_IDX,
+                      synth_adc_check_fbk_and_call, synth_adc_tempo_control);
 #if defined(BOARD_V2)
-    synth_adc_obj_init(&expr_sao ,SYNTH_ADC_EXPR_IDX,synth_adc_expr_control);
+  synth_adc_obj_init (&expr_sao, SYNTH_ADC_EXPR_IDX,
+                      synth_adc_check_expr_and_call, 
+                      /* This function does nothing, which is initially what the
+                         expression pedal does. */
+                      synth_adc_expr_control);
 #endif
 
 }
