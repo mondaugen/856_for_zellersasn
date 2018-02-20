@@ -971,6 +971,8 @@ void synth_control_gain_control(void *data_, float gain_param)
         case SynthControlGainMode_FADE:
             synth_control_set_ampLastEcho_curParams(gain_param);
             break;
+        default:
+            break;
     }
 }
 

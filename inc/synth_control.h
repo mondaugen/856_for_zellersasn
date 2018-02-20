@@ -42,7 +42,7 @@ typedef enum {
     /* If the feedback switch is held in downward position, the switch is in this state */
     SynthControlGainMode_FBKHOLD
 } SynthControlGainMode;
-#define SYNTH_CONTROL_GAIN_MODE_N_MODES 2 
+#define SYNTH_CONTROL_GAIN_MODE_N_MODES 3
 
 typedef enum {
     SynthControlRecMode_START__ = 0,
