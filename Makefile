@@ -2,6 +2,7 @@ OPENOCD_INTERFACE		?= interface/stlink-v2.cfg
 OPENOCD_BOARD			?= /usr/local/share/openocd/scripts/board/stm32f429discovery.cfg#board/stm32f429discovery.cfg
 OPTIMIZE				 ?= -O0
 BIN 					 = main.elf
+BIN_STRIPPED			 = main-stripped.bin
 MMMIDI_PATH				 = ../mmmidi
 MM_DSP_PATH				 = ../mm_dsp
 MM_PRIMITIVES_PATH		 = ../mm_primitives
@@ -49,9 +50,13 @@ TESTS					 = $(addprefix $(TESTDIR)/,\
 						    $(addsuffix .o, $(basename $(TESTSRC))))
 VPATH				    += :test
 CC 						 = arm-none-eabi-gcc
+STRIP					 = arm-none-eabi-strip
 OCD 		   			 = sudo openocd -f $(OPENOCD_BOARD) -f $(OPENOCD_INTERFACE)
 PYTHON					 = python
 CONST_OBJS				 = objs/tables.o
+
+# The address the DFU uploader uses to write the DFU file to the device.
+DFUSE_ADDR				 = 0x08000000
 
 all: $(OBJSDIR) $(OBJS) $(BIN)
 
@@ -70,8 +75,14 @@ $(OBJS) : $(OBJSDIR)/%.o: %.c $(DEP)
 $(BIN) : $(OBJS) $(CONST_OBJS) $(LIBDEP)
 	$(CC) $(filter %.o, $^) -o $@ $(CFLAGS) $(LDFLAGS)
 
+$(BIN_STRIPPED) : $(BIN)
+	$(STRIP) -g -O binary $(BIN) -o $(BIN_STRIPPED)
+
 $(TESTS) : $(TESTDIR)/%.o: %.c $(DEP)
 	$(CC) -c $(CFLAGS) $< -o $@
+
+dfu_flash: $(BIN_STRIPPED)
+	sudo dfu-util -D $(BIN_STRIPPED) -s $(DFUSE_ADDR) -a 0
 
 flash: $(BIN)
 	$(OCD) -c init \

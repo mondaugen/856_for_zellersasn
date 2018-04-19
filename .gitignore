@@ -9,3 +9,4 @@ gdb.txt
 *.o
 constants/tables.{c,h}
 test/blips_midiclock
+*.bin

@@ -17,4 +17,37 @@ MIDIDEV=hw:1,0,0
 MIDI_CHANNEL=0
 CC=$(cat /tmp/test_midi_play_off_nums.XXX)
 
-amidi -p $MIDIDEV -S `printf "b%x %02x 00" $MIDI_CHANNEL $CC`  
+if [ "${BOARD_VERSION}" == BOARD_V2 ]; then
+    # flush old receive
+    amidi -p $MIDIDEV -d > /dev/null&
+    sleep 0.1
+    kill $!
+    # launch midi receive
+    amidi -p $MIDIDEV -d > /tmp/midithruresult.XXX&
+fi
+
+sleep 0.1
+
+mididat=`printf "B%X %02X 00" $MIDI_CHANNEL $CC`  
+
+amidi -p $MIDIDEV -S "$mididat"
+
+sleep 0.1
+
+if [ "${BOARD_VERSION}" == BOARD_V2 ]; then
+    # check midi received correct data via midi thru
+    kill $!
+    sleep 0.1
+    # hack with grep to remove blank lines
+    midiresult="$(cat /tmp/midithruresult.XXX | grep -e '\S\+')"
+    if [  "$midiresult" == "$mididat" ];
+    then
+        echo "PASSED"; 
+    else
+        echo "FAILED, received:"
+        echo "$midiresult"
+        echo "but sent"
+        echo "$mididat"
+    fi
+    rm -f /tmp/midithruresult.XXX
+fi
