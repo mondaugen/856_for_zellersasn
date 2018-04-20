@@ -18,7 +18,7 @@ on_sigint() { kill -n 9 $! ; }
 if [ "$BOARD_VERSION" == BOARD_V2 ]; then
 
     cat <<EOF
-Plug in USB without power.
+Plug in all connections without power.
 Then plug in power.
 The device should be ready to flash via DFU.
 (press Enter to continue)
@@ -29,7 +29,8 @@ EOF
     CFLAGS=-DBOARD_V2\ -DCODEC_CS4270 make dfu_flash
 
     cat <<EOF
-Unplug the USB, plug in the debugging connector for the subsequent steps.
+Unplug the USB, then power-cycle the device.
+The device should now be ready to test.
 (press Enter to continue)
 EOF
 

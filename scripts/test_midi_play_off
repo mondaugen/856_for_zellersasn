@@ -42,9 +42,9 @@ if [ "${BOARD_VERSION}" == BOARD_V2 ]; then
     midiresult="$(cat /tmp/midithruresult.XXX | grep -e '\S\+')"
     if [  "$midiresult" == "$mididat" ];
     then
-        echo "PASSED"; 
+        echo "MIDI thru PASSED"; 
     else
-        echo "FAILED, received:"
+        echo "MIDI thru FAILED, received:"
         echo "$midiresult"
         echo "but sent"
         echo "$mididat"

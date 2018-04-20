@@ -82,7 +82,7 @@ $(TESTS) : $(TESTDIR)/%.o: %.c $(DEP)
 	$(CC) -c $(CFLAGS) $< -o $@
 
 dfu_flash: $(BIN_STRIPPED)
-	sudo dfu-util -D $(BIN_STRIPPED) -s $(DFUSE_ADDR) -a 0
+	sudo dfu-util -D $(BIN_STRIPPED) -s $(DFUSE_ADDR):leave -a 0
 
 flash: $(BIN)
 	$(OCD) -c init \
