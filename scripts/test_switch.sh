@@ -14,4 +14,4 @@ OCD='sudo openocd \
     -f /usr/local/share/openocd/scripts/board/stm32f429discovery.cfg \
     -f '$OPENOCD_INTERFACE;
 
-eval "$OCD" "-f scripts/test_switch.tcl";
+eval "$OCD" "-f scripts/test_switch.tcl"

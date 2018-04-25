@@ -1,0 +1,11 @@
+#!/bin/bash
+# Plays a sine wave on the right channel of the given AUDIODEV
+find ~/Music -name "*.mp3" -or -name "*.wav" -or -name "*.flac" -print0 \
+    | sort -zR | xargs -0 -I{} \
+    bash -c 'dur=$(soxi -D "{}"); 
+             rdur=$(echo "$dur * $RANDOM / 32767" | bc -l);
+             AUDIODEV=plughw:CARD=Pro,DEV=0 sox "{}" -t alsa trim $rdur -0 repeat 1000;'
+
+#              sox "{}" -t alsa;'
+#             sox --combine merge "|sox -n -r 48000 -c 1 -p synth sine 1 gain -200"\
+#                "|sox {} -r 48000 -c 1 -p repeat 1000000" -t alsa ' 
