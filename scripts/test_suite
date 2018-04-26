@@ -18,9 +18,11 @@ on_sigint() { kill -n 9 $! ; }
 start_time=$(date +%s)
 
 cat <<EOF
+
 Welcome to the 856 for ZELLERSASN test.
 Start test in SWITCH MODE.
 (press Enter to continue)
+
 EOF
 
 read
@@ -29,10 +31,12 @@ if [ -z "$NO_FLASH_DEVICE"]; then
     if [ "$BOARD_VERSION" == BOARD_V2 ]; then
 
         cat <<EOF
+
 Plug in all connections without power.
 Then plug in power.
 The device should be ready to flash via DFU.
 (press Enter to continue)
+
 EOF
 
         read
@@ -40,9 +44,11 @@ EOF
         CFLAGS=-DBOARD_V2\ -DCODEC_CS4270 make dfu_flash
 
         cat <<EOF
+
 Unplug the USB, then power-cycle the device.
 The device should now be ready to test.
 (press Enter to continue)
+
 EOF
 
         read
@@ -55,27 +61,26 @@ make reset
 sleep 2
 scripts/test_switch.sh
 make reset
-scripts/test_pot.sh
-scripts/test_led.sh 0
-scripts/test_led.sh 1
-scripts/test_led.sh 2
-scripts/test_led.sh 3
-scripts/test_led.sh -1
 
 cat<<EOF
+
 Remove power.
 Change to EXP MODE.
 Apply power.
 Now test ADC.
 (press Enter to continue)
+
 EOF
 read
 
 scripts/test_pot.sh
 
+# Just test all LEDs at once
+scripts/test_led.sh -1
+
 #trap - SIGINT
 # play_test_file seems to already trap sigint properly
-echo "Unplug USB."
+#echo "Unplug USB."
 scripts/play_random_file
 scripts/test_midi_play_off
 
