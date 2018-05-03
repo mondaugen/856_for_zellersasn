@@ -1,5 +1,108 @@
 #!/bin/bash
 
+prompt_msg="press c to continue, s to skip, q to quit"
+
+_exit () {
+    echo "quiting test..."
+    exit $1
+}
+
+_continue_or_quit () {
+    while [ 1 ]
+    do
+        echo "c to continue, q to quit"
+        read -s -n 1 readret
+        case $readret in
+            q)
+                _exit 1 ;;
+            c)
+                break
+                ;;
+            *)
+                echo "command $readret not understood" ;;
+        esac
+    done
+}
+
+# Accepts name of function as first argument, which is called if "c" is pressed,
+# otherwise it may quit or skip
+_user_action_prompt ()
+{
+    while [ 1 ]
+    do
+        echo "$prompt_msg"
+
+        read -s -n 1 readret
+
+        case $readret in
+            q)
+                _exit 1 ;;
+            c)
+                $1
+                break
+                ;;
+            s) 
+                echo "skipping..."
+                break ;;
+            *)
+                echo "command $readret not understood" ;;
+        esac
+    done
+}
+
+_check_usbdevs () {
+    while [ 1 ]
+    do
+        echo "press c to check presence of DFU device, s to skip, q to quit"
+
+        read -s -n 1 readret
+
+        case $readret in
+            q)
+                _exit 1 ;;
+            c)
+                mydev=$(lsusb|grep 'STMicroelectronics STM Device in DFU Mode')
+                if [ -n "$mydev" ]; then
+                    echo "device detected"
+                    break
+                else
+                    echo "no device found"
+                fi
+                ;;
+            s) 
+                echo "skipping..."
+                break ;;
+            *)
+                echo "command $readret not understood" ;;
+        esac
+    done
+}
+
+_dfu_flash () {
+    CFLAGS=-DBOARD_V2\ -DCODEC_CS4270 make dfu_flash 
+}
+
+_test_switch () {
+    scripts/test_switch.sh
+}
+
+_test_pot () {
+    scripts/test_pot.sh
+}
+
+_test_leds () {
+    # Just test all LEDs at once
+    scripts/test_led.sh -1
+}
+
+_test_audio () {
+    scripts/play_random_file
+}
+
+_test_midi () {
+    scripts/test_midi_play_off
+}
+
 if [ -z ${OPENOCD_INTERFACE} ]
 then
     export OPENOCD_INTERFACE=interface/stlink-v2.cfg;
@@ -21,11 +124,10 @@ cat <<EOF
 
 Welcome to the 856 for ZELLERSASN test.
 Start test in SWITCH MODE.
-(press Enter to continue)
 
 EOF
 
-read
+_continue_or_quit
 
 if [ -z "$NO_FLASH_DEVICE"]; then
     if [ "$BOARD_VERSION" == BOARD_V2 ]; then
@@ -34,32 +136,40 @@ if [ -z "$NO_FLASH_DEVICE"]; then
 
 Plug in all connections without power.
 Then plug in power.
-The device should be ready to flash via DFU.
-(press Enter to continue)
 
 EOF
+        _check_usbdevs
 
-        read
-
-        CFLAGS=-DBOARD_V2\ -DCODEC_CS4270 make dfu_flash
+        cat <<EOF
+The device should be ready to flash via DFU.
+EOF
+        _user_action_prompt _dfu_flash
 
         cat <<EOF
 
 Unplug the USB, then power-cycle the device.
 The device should now be ready to test.
-(press Enter to continue)
 
 EOF
 
-        read
+    _continue_or_quit
 
     else
+        # TODO add prompt for this
         CFLAGS=-D${BOARD_VERSION} make flash
     fi
 fi
+
 make reset
 sleep 2
-scripts/test_switch.sh
+
+cat <<EOF
+
+Test switches
+
+EOF
+_user_action_prompt _test_switch
+
 make reset
 
 cat<<EOF
@@ -68,22 +178,38 @@ Remove power.
 Change to EXP MODE.
 Apply power.
 Now test ADC.
-(press Enter to continue)
 
 EOF
-read
+_user_action_prompt _test_pot
 
-scripts/test_pot.sh
+cat <<EOF
 
-# Just test all LEDs at once
-scripts/test_led.sh -1
+Test LEDs
+
+EOF
+_user_action_prompt _test_leds
 
 #trap - SIGINT
 # play_test_file seems to already trap sigint properly
 #echo "Unplug USB."
-scripts/play_random_file
-scripts/test_midi_play_off
+
+cat <<EOF
+
+Test audio (file will play)
+Leave loop playing on device for next test
+
+EOF
+_user_action_prompt _test_audio
+
+cat <<EOF
+
+Test MIDI (will send note of, playback on device should stop)
+
+EOF
+_user_action_prompt _test_midi
 
 end_time=$(date +%s)
 elapsed_time=$(( $end_time - $start_time ))
 echo "Test took $(date --date=@$elapsed_time +%M\'%S\")"
+
+exit 0
