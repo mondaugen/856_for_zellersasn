@@ -199,6 +199,8 @@ Leave loop playing on device for next test
 EOF
 _user_action_prompt _test_audio
 
+sleep 1
+
 cat <<EOF
 
 Test MIDI (will send note of, playback on device should stop)
