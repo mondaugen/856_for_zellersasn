@@ -157,11 +157,9 @@ EOF
     else
         # TODO add prompt for this
         CFLAGS=-D${BOARD_VERSION} make flash
+        make reset
     fi
 fi
-
-make reset
-sleep 2
 
 cat <<EOF
 
