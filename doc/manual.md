@@ -857,4 +857,14 @@ Note that in MIDI clock mode no playback will happen if no clock is being sent!
 The 856 expects 24 MIDI clock messages per quarter note, which is compatible with most
 hardware.
 
+### MIDI Through
 
+All the MIDI messages entering the unit via the MIDI in port are passed through
+to the MIDI through port.
+
+## The expression pedal
+
+It's easy to use an expression pedal with the 856. Simply plug one into the 1/4
+inch jack closest to the DC jack. Then to choose what knob to control with the
+expression pedal, simply hold down the FBK switch while turning the knob you want to
+control. After you let go of FBK, the expression pedal should now control that knob.
