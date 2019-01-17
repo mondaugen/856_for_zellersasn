@@ -23,6 +23,7 @@ if [ "${BOARD_VERSION}" == BOARD_V2 ]; then
     sleep 0.1
     kill $!
     # launch midi receive
+    rm -f /tmp/midithruresult.XXX
     amidi -p $MIDIDEV -d > /tmp/midithruresult.XXX&
 fi
 
