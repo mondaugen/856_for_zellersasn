@@ -718,11 +718,7 @@ void synth_control_record_tog(void)
 void synth_control_feedback_control(uint32_t feedback_param)
 {
     if (feedback_param > 0) {
-        SynthControlRecMode _recmode;
-        _recmode = synth_control_get_recMode();
-        /* Feedback is unavailable in record scheduling mode. */
-        if ((feedbackState == 0)
-                && (_recmode != SynthControlRecMode_REC_LEN_1_BEAT_REC_SCHED)) {
+        if ((feedbackState == 0)) {
             /* Move fbBusSplitter to onNode */
             MMSigProc_insertAfter(fbOnNode,&fbBusSplitter);
             feedbackState = 1;
@@ -811,13 +807,8 @@ void synth_control_fbk_tog(void)
             }
             synth_control_set_uni_stuff_changed();
         } else {
-            SynthControlRecMode _recmode;
-            _recmode = synth_control_get_recMode();
-            if (_recmode == SynthControlRecMode_REC_LEN_1_BEAT_REC_SCHED) {
-                /* Do NOTHING */
-            } else {
-                synth_control_feedback_tog();
-            }
+            /* this also checks to see if enabling feedback is allowed */
+            synth_control_feedback_tog();
         }
     }
     synth_control_expr_ctl_chosen_reset();
@@ -1168,12 +1159,6 @@ void synth_control_set_recMode(SynthControlRecMode recMode_param)
          * we turn off auto record. */
         if (recMode != SynthControlRecMode_REC_LEN_1_BEAT_REC_SCHED) {
             synth_control_autoRecord_stop_helper();
-        }
-        /* This means we're entering
-         * SynthControlRecMode_REC_LEN_1_BEAT_REC_SCHED and when we do this we
-         * turn off feedback. */
-        if (recMode == SynthControlRecMode_REC_LEN_1_BEAT_REC_SCHED) {
-            synth_control_feedback_control(0);
         }
     }
 }
