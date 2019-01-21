@@ -137,7 +137,7 @@ pressed down.
 ### Right footswitch
 
 Starts and stops playback. The command is acknowledged as soon as the switch is
-pressed down.
+pressed down. Note that playback is disabled if no recording has been made.
 
 ### ENV
 
@@ -874,7 +874,7 @@ channel 1, no LEDs will be illuminated.
 <tr>
 <td> 54 </td>
 <td> Coarse tempo control </td>
-<td> Control how often the sequence plays in beats per minute (BPM) from 40 BPM to 240 BPM. </td>
+<td> Control how often the sequence plays in beats per minute (BPM) from 11 BPM to 60 BPM. </td>
 </tr>
 <tr>
 <td> 55 </td>
