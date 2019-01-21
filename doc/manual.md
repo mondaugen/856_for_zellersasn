@@ -349,17 +349,17 @@ channel and are content with the 856 only responding to messages transmitted on
 channel 1 then you can skip this step. Otherwise follow the following
 instructions:
 
-Turn off the 856 by unplugging it. Set the switches in the top row according to
+Turn off the 856 by unplugging it. Set the switches according to
 the MIDI channel you would like to set. See the following table for the
 settings:
 
 <table border="1">
 <tr>
 <td>Channel</td>
-<td>Switch 1 position</td>
-<td>Switch 2 position</td>
-<td>Switch 3 position</td>
-<td>Switch 4 position</td>
+<td>N1/N2/N3 position</td>
+<td>FREE/R=B/AREC position</td>
+<td>FREE/QUANT/SKIP position</td>
+<td>P1/P2/P3 position</td>
 </tr>
 <tr>
 <td>1</td>
@@ -493,14 +493,102 @@ settings:
 </table>
 
 For example, if you would like the 856 to respond to MIDI messages transmitted
-on channel 10, set the top left-hand switch to the upward position, the top
-middle-left switch to the middle or downward position, the top middle-right switch to the middle
-or downward position and the top right-hand switch to the upward position.
+on channel 10, set the N1/N2/N3 switch to the upward position, the FREE/R=B/AREC switch to the middle or downward position, the FREE/QUANT/SKIP switch to the middle
+or downward position and the top P1/P2/P3 to the upward position.
 
 Now, while holding the (UNI) switch down, plug in the power to the back of the
-pedal. The MIDI channel you selected should display briefly on the LEDs using the same
-pattern as in the table (the illuminated LEDs will correspond to switches in the
-upward position, the dark LEDs to those in the middle or downward position).
+pedal. The MIDI channel you selected should display briefly on the LEDs in
+binary with the most significant bit on the left most light. A light that is on
+corresponds to a 1 whereas a light that is off corresponds to a 0. The light
+(bit) pattern and the corresponding MIDI channel are shown in the following
+table.
+
+<table border="1">
+<tr>
+<td>MIDI Channel</td>
+<td>Light (bit) pattern</td>
+</tr>
+<tr>
+<td>1</td>
+<td>0000</td>
+</tr>
+</tr>
+<tr>
+<td>2</td>
+<td>0001</td>
+</tr>
+</tr>
+<tr>
+<td>3</td>
+<td>0010</td>
+</tr>
+</tr>
+<tr>
+<td>4</td>
+<td>0011</td>
+</tr>
+</tr>
+<tr>
+<td>5</td>
+<td>0100</td>
+</tr>
+</tr>
+<tr>
+<td>6</td>
+<td>0101</td>
+</tr>
+</tr>
+<tr>
+<td>7</td>
+<td>0110</td>
+</tr>
+</tr>
+<tr>
+<td>8</td>
+<td>0111</td>
+</tr>
+</tr>
+<tr>
+<td>9</td>
+<td>1000</td>
+</tr>
+</tr>
+<tr>
+<td>10</td>
+<td>1001</td>
+</tr>
+</tr>
+<tr>
+<td>11</td>
+<td>1010</td>
+</tr>
+</tr>
+<tr>
+<td>12</td>
+<td>1011</td>
+</tr>
+</tr>
+<tr>
+<td>13</td>
+<td>1100</td>
+</tr>
+</tr>
+<tr>
+<td>14</td>
+<td>1101</td>
+</tr>
+</tr>
+<tr>
+<td>15</td>
+<td>1110</td>
+</tr>
+</tr>
+<tr>
+<td>16</td>
+<td>1111</td>
+</tr>
+</table>
+
 Shortly afterward, the pedal will continue to power up normally.
 It should now respond to messages on the channel you chose. Note that for
 channel 1, no LEDs will be illuminated.
@@ -516,17 +604,17 @@ channel 1, no LEDs will be illuminated.
 <tr>
 <td> 0 </td>
 <td> N1/BAR Pitch 1 control (fine) </td>
-<td> Adjust pitch of 1st, 4th, ... notes in arpeggio from -100 cents to +100 cents (hundreths of a semitone). </td>
+<td> Adjust pitch of 1st, 4th, ... notes in arpeggio from -50 cents to +50 cents (hundreths of a semitone). </td>
 </tr>
 <tr>
 <td> 1 </td>
 <td> N1/BAR Pitch 2 control (fine) </td>
-<td> Adjust pitch of 2nd, 5th, ... notes in arpeggio from -100 cents to +100 cents (hundreths of a semitone). </td>
+<td> Adjust pitch of 2nd, 5th, ... notes in arpeggio from -50 cents to +50 cents (hundreths of a semitone). </td>
 </tr>
 <tr>
 <td> 2 </td>
 <td> N1/BAR Pitch 3 control (fine) </td>
-<td> Adjust pitch of 3rd, 6th, ... notes in arpeggio from -100 cents to +100 cents (hundreths of a semitone). </td>
+<td> Adjust pitch of 3rd, 6th, ... notes in arpeggio from -50 cents to +50 cents (hundreths of a semitone). </td>
 </tr>
 <tr>
 <td> 3 </td>
@@ -606,17 +694,17 @@ channel 1, no LEDs will be illuminated.
 <tr>
 <td> 18 </td>
 <td> N2 Pitch 1 control (fine) </td>
-<td> Adjust pitch of 1st, 4th, ... notes in arpeggio from -100 cents to +100 cents (hundreths of a semitone). </td>
+<td> Adjust pitch of 1st, 4th, ... notes in arpeggio from -50 cents to +50 cents (hundreths of a semitone). </td>
 </tr>
 <tr>
 <td> 19 </td>
 <td> N2 Pitch 2 control (fine) </td>
-<td> Adjust pitch of 2nd, 5th, ... notes in arpeggio from -100 cents to +100 cents (hundreths of a semitone). </td>
+<td> Adjust pitch of 2nd, 5th, ... notes in arpeggio from -50 cents to +50 cents (hundreths of a semitone). </td>
 </tr>
 <tr>
 <td> 20 </td>
 <td> N2 Pitch 3 control (fine) </td>
-<td> Adjust pitch of 3rd, 6th, ... notes in arpeggio from -100 cents to +100 cents (hundreths of a semitone). </td>
+<td> Adjust pitch of 3rd, 6th, ... notes in arpeggio from -50 cents to +50 cents (hundreths of a semitone). </td>
 </tr>
 <tr>
 <td> 21 </td>
@@ -696,17 +784,17 @@ channel 1, no LEDs will be illuminated.
 <tr>
 <td> 36 </td>
 <td> N3 Pitch 1 control (fine) </td>
-<td> Adjust pitch of 1st, 4th, ... notes in arpeggio from -100 cents to +100 cents (hundreths of a semitone). </td>
+<td> Adjust pitch of 1st, 4th, ... notes in arpeggio from -50 cents to +50 cents (hundreths of a semitone). </td>
 </tr>
 <tr>
 <td> 37 </td>
 <td> N3 Pitch 2 control (fine) </td>
-<td> Adjust pitch of 2nd, 5th, ... notes in arpeggio from -100 cents to +100 cents (hundreths of a semitone). </td>
+<td> Adjust pitch of 2nd, 5th, ... notes in arpeggio from -50 cents to +50 cents (hundreths of a semitone). </td>
 </tr>
 <tr>
 <td> 38 </td>
 <td> N3 Pitch 3 control (fine) </td>
-<td> Adjust pitch of 3rd, 6th, ... notes in arpeggio from -100 cents to +100 cents (hundreths of a semitone). </td>
+<td> Adjust pitch of 3rd, 6th, ... notes in arpeggio from -50 cents to +50 cents (hundreths of a semitone). </td>
 </tr>
 <tr>
 <td> 39 </td>

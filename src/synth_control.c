@@ -67,6 +67,9 @@ SynthControlPitchIndex      editing_which_pitch;
 int                         schedulerState;
 /* What preset would be recalled/stored. First preset is numbered 0. */
 SynthControlPresetNumber    presetNumber;
+/* If non-zero it means a recording has been made, otherwise it means no
+recording has yet been made */
+static int recording_exists = 0;
 
 static void schedulerState_off_helper(void *data);
 static void schedulerState_on_helper(void);
@@ -74,6 +77,19 @@ static void synth_control_fbk_tog_setup(void);
 static void synth_control_reset_aux_note_all_params(void);
 
 static int expr_ctl_chosen = 0;
+
+static int noteSched_scheduling_helper(NoteSchedEvent *nse)
+{
+    if (recording_exists == 0) {
+        /* We don't schedule, free the event */
+        free(nse);
+        return 0;
+    }
+    /* schedule the noteSchedEvent */
+    schedule_noteSched_event(0,nse);
+    return 1;
+}
+
 
 void autorelease_on_done(MMEnvedSamplePlayer * esp)
 {
@@ -627,6 +643,8 @@ void synth_control_record_start_helper(void)
 
 void synth_control_record_stop(void)
 {
+    /* Indicate a recording was made */
+    recording_exists = 1;
     if (scheduleRecording > 0) {
         /* If recordings are being scheduled, when the user requests the
          * recording to stop, we just stop recording but do not switch buffers
@@ -842,8 +860,9 @@ static void schedulerState_off_helper(void *data)
 static void schedulerState_on_helper(void)
 {
     /* schedule 1st event which is initially active */
-    schedule_noteSched_event(0, NoteSchedEvent_new(1));
-    schedulerState = 1;
+    if (noteSched_scheduling_helper( NoteSchedEvent_new(1))) {
+        schedulerState = 1;
+    }
 }
 
 void synth_control_schedulerState_control(void *data_, uint32_t schedulerState_param)
@@ -1354,7 +1373,7 @@ void synth_control_one_shot(MMSample pitch,
     NoteSchedEvent_set_pitch_mode(nse,SynthControlPitchMode_BUS);
     NoteSchedEvent_set_amplitude_scalar(nse,amplitude);
     NoteSchedEvent_set_one_shot(nse,1);
-    schedule_noteSched_event(0,nse);
+    noteSched_scheduling_helper(nse);
 }
 
 void synth_control_note_on(int parameterSet,
