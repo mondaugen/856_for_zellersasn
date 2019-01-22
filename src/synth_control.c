@@ -755,6 +755,14 @@ static void synth_control_reset_aux_note_gains(void)
     for (n = 1; n < NUM_NOTE_PARAM_SETS; n++) {
         noteParamSets[n].amplitude = SYNTH_CONTROL_DEFAULT_AMPLITUDE_AUXNOTE;
     }
+    noteParamSets[0].amplitude = SYNTH_CONTROL_DEFAULT_AMPLITUDE;
+}
+
+/* Calling this sets stride to 0 (no position advancement) */
+static void synth_control_reset_pos_stride(void)
+{
+    synth_control_set_positionStride(0.5,
+            synth_control_get_editingWhichParams());
 }
 
 void
@@ -777,7 +785,15 @@ synth_control_expr_ctl_chosen(void)
 
 static void synth_control_fbk_reset_cb(void* data)
 {
-    int *_num_fbk_presses = (int*)data;
+    int *_num_fbk_presses = (int*)data,
+        press_cnt = *_num_fbk_presses;
+    if (press_cnt == 1) {
+        synth_control_reset_pos_stride();
+    } else if (press_cnt == 2) {
+        synth_control_reset_aux_note_gains();
+    } else if (press_cnt == 3) {
+        synth_control_reset_aux_note_all_params();
+    } 
     *_num_fbk_presses = 0;
 }
 
@@ -799,13 +815,7 @@ void synth_control_fbk_tog(void)
     pm = synth_control_get_posMode_curParams();
     if (!synth_control_expr_ctl_chosen()) {
         if (pm == SynthControlPosMode_UNI){
-           if (num_fbk_presses == 0) {
-                synth_control_reset_aux_note_gains();
-                num_fbk_presses++;
-            } else if (num_fbk_presses == 1) {
-                synth_control_reset_aux_note_all_params();
-                num_fbk_presses++;
-            }
+            num_fbk_presses++;
             synth_control_set_uni_stuff_changed();
         } else {
             /* this also checks to see if enabling feedback is allowed */

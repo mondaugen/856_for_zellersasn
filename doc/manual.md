@@ -291,11 +291,14 @@ If held down while adjusting the &#x394; knob when N2 or N3 is selected,
 controls swing applied to the rhythm that separates the repeats. Putting the
 knob in the middle position gives no swing.
 
-If held down and the FBK switch is clicked (the bottom position of the
-FADE/GAIN/FBK switch), the gains of N2 and N3 are set to 0 (they are
-silenced). Their settings still remain.
+If held down and the FBK switch is clicked once (the bottom position of the
+FADE/GAIN/FBK switch), the STRIDE setting is reset to 0.
 
-If held down and the FBK switch is clicked twice, all the settings are reset
+If held down and the FBK switch is clicked twice (the bottom position of the
+FADE/GAIN/FBK switch), the gains of N2 and N3 are set to 0 (they are
+silenced) and N1's gain is set to 1. Their settings still remain.
+
+If held down and the FBK switch is clicked 3 times, all the settings are reset
 and only N1 plays as if a recording had just been made using R=B mode.
 
 ### PITCH
@@ -994,3 +997,8 @@ control. After you let go of FBK, the expression pedal should now control that k
 - Correctly indicate ±50 cents change (instead of ±100 cents) when adjusting the fine tuning.
 - Sending MIDI 64 for respective control change sets fine tuning to 0 or stride
   rate to 0. Tempo controlling control changes also choose exact midpoint when sending 64.
+- Clicking FBK when UNI held down resets STRIDE position now. Also stride always
+  active (before it was only active when the switch was in that position). The
+  previous functionality of zeroing the gain of and resetting all the settings
+  of N2 and N3 is still possible
+  but you now click FBK twice and 3 times respectively.
