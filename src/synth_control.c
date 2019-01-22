@@ -226,7 +226,7 @@ void synth_control_set_tempo_coarse_norm(float param)
     float _tmp;
     _tmp = floor(((SYNTH_CONTROL_TEMPOBPM_COARSE_MAX 
                     - SYNTH_CONTROL_TEMPOBPM_COARSE_MIN)
-                / SYNTH_CONTROL_TEMPOBPM_COARSE_QUANT + 1) 
+                / SYNTH_CONTROL_TEMPOBPM_COARSE_QUANT) 
             * param)
             * SYNTH_CONTROL_TEMPOBPM_COARSE_QUANT 
             + SYNTH_CONTROL_TEMPOBPM_COARSE_MIN;
@@ -360,6 +360,7 @@ void synth_control_set_pitch_chrom_quant_curParams(float param)
             synth_control_get_editingWhichParams());
 }
 
+/* expects input to be in [0,1] */
 void synth_control_set_pitch_fine_quant(float param, 
                                         int which_pitch,
                                         int note_param_idx)
@@ -367,7 +368,7 @@ void synth_control_set_pitch_fine_quant(float param,
     float _tmp;
     _tmp = floor(((SYNTH_CONTROL_PITCH_FINE_MAX 
                     - SYNTH_CONTROL_PITCH_FINE_MIN)
-                / SYNTH_CONTROL_PITCH_FINE_QUANT + 1) 
+                / SYNTH_CONTROL_PITCH_FINE_QUANT) 
             * param)
             * SYNTH_CONTROL_PITCH_FINE_QUANT 
             + SYNTH_CONTROL_PITCH_FINE_MIN;

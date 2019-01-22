@@ -1,13 +1,13 @@
 /* Copyright (c) 2016 Nicholas Esterer. All rights reserved. */
 
 #include "synth_midi_control.h" 
+#include "midi_util.h"
 
 #ifdef DEBUG 
 #include <assert.h> 
 static int synth_midi_check_index = 0;
 static void synth_midi_check_msg(MIDIMsg *msg,void (*fun)(void *,MIDIMsg *));
 #endif  
-
 
 static void synth_midi_note_param_indices_init(int *indices, size_t len)
 {
@@ -29,10 +29,10 @@ void synth_midi_cc_pitch_fine_control(void *data, MIDIMsg *msg)
 	#endif
     synth_midi_cc_pitch_control_t *params =
         (synth_midi_cc_pitch_control_t*)data;
-    synth_control_set_pitch_fine_quant((float)msg->data[2] 
-            / (float)MIDIMSG_DATA_BYTE_MAX,
-            params->pitch,
-            params->note);
+    synth_control_set_pitch_fine_quant(
+        midi_util_map_midpoint_exact(msg->data[2],0,1),
+        params->pitch,
+        params->note);
 }
 
 static void synth_midi_cc_pitch_control_t_init(
@@ -129,7 +129,7 @@ void synth_midi_cc_stride_control(void *data, MIDIMsg *msg)
 	#endif
     int *note = (int*)data;
     synth_control_set_positionStride(
-            (float)msg->data[2]/(float)MIDIMSG_DATA_BYTE_MAX,
+            midi_util_map_midpoint_exact(msg->data[2],0,1),
             *note);
 }
 
@@ -242,7 +242,7 @@ void synth_midi_cc_tempo_coarse_control(void *data, MIDIMsg *msg)
     #ifdef DEBUG
 	synth_midi_check_msg(msg,synth_midi_cc_tempo_coarse_control);
 	#endif
-    synth_control_set_tempo_coarse_norm((float)msg->data[2] / (float)MIDIMSG_DATA_BYTE_MAX);
+    synth_control_set_tempo_coarse_norm(midi_util_map_midpoint_exact(msg->data[2],0,1));
 }
 
 void synth_midi_cc_tempo_fine_control(void *data, MIDIMsg *msg)
@@ -250,7 +250,7 @@ void synth_midi_cc_tempo_fine_control(void *data, MIDIMsg *msg)
     #ifdef DEBUG
 	synth_midi_check_msg(msg,synth_midi_cc_tempo_fine_control);
 	#endif
-    synth_control_set_tempo_fine_norm((float)msg->data[2] / (float)MIDIMSG_DATA_BYTE_MAX);
+    synth_control_set_tempo_fine_norm(midi_util_map_midpoint_exact(msg->data[2],0,1));
 }
 
 void synth_midi_cc_tempo_scale_control(void *data, MIDIMsg *msg)

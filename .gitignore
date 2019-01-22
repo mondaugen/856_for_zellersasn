@@ -9,4 +9,5 @@ gdb.txt
 *.o
 constants/tables.{c,h}
 test/blips_midiclock
+test/midi_map_midpoint_exact
 *.bin
