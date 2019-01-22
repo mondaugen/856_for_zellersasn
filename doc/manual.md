@@ -21,10 +21,10 @@ will automatically stop.
 
 ## Terminology
 
-When we say "parameter" in this manual, we refer to the value that a particular
-knob represents. For example, the "pitch" knob controls the pitch parameter.
+When we say “parameter”, we refer to the value that a particular
+knob represents. For example, the “pitch” knob controls the pitch parameter.
 
-When we say "click a switch" in this manual, we mean press and release a switch.
+When we say “click a switch” in this manual, we mean press and release a switch.
 The time between pressing and releasing should be short, but it actually doesn't
 matter if nothing else changes while the switch is down (no knob is turned,
 etc.).
@@ -48,13 +48,13 @@ messages.
 Before going through all the controls on the 856, we'll take you through a
 tutorial to get a flavour for what can be done with it.
 
-See the "setting up" section to set up the pedal before proceeding.
+See the “setting up” section to set up the pedal before proceeding.
 
-To reset all the parameters hold the STRIDE/ABS/(UNI) switch in the down
-position while clicking the FADE/GAIN/(FBK) switch in the downward direction
+To reset all the parameters hold the STRIDE/ABS/UNI switch in the down
+position while clicking the FADE/GAIN/FBK switch in the downward direction
 twice.
 
-Set the controls to control note set 1 by putting the N1/BAR/N2/N3 switch in the
+Set the controls to control note set 1 by putting the N1/N2/N3 switch in the
 upward position.
 
 Put the pedal in R=B mode by putting the FREE/R=B/AREC switch in the middle
@@ -63,12 +63,12 @@ position.
 The rest of the switches can stay as they are for now.
 
 Play a loop you are interested in recording. The first time we recommend just
-playing a note and letting it sound, then recording it for 1 or 2 seconds --
+playing a note and letting it sound, then recording it for 1 or 2 seconds —
 what is going on will be clearer this way. Click the left footswitch and to
 start recording. Click the switch to stop. The loop you played should now be
 playing.
 
-As the N1/BAR/N2/N3 switch is in the upward position and we are in A=R mode, the
+As the N1/N2/N3 switch is in the upward position and we are in A=R mode, the
 TMPO/REP knob only slightly changes the tempo. This is useful for adjusting your
 loop if it wasn't quite recorded right. The &#x394; knob controls the tempo more
 coarsely if the FREE/QUANT/SKIP switch is in the upward position. If in the
@@ -76,18 +76,18 @@ middle position, it doubles, triples or quadruples the tempo depending on the
 &#x394; knob's position. This knob turned all the way clockwise does no scaling
 to the tempo, it turned all the way counter-clockwise quadruples the tempo.
 
-With the FADE/GAIN/(FBK) switch in the middle position, turn the GAIN knob all
-the way counter-clockwise. The loop should not sound the next time it plays (the
-gain adjustment will not be immediate). Put the N1/BAR/N2/N3 switch in the
-middle position. You are now controlling the second note set. Turn the LEN knob
-to about half, the TMPO/REP knob to about half. Set the FREE/QUANT/SKIP to the
-middle position and turn the &#x394; knob to the middle. Now turn up the GAIN
-knob to maximum. You should hear many repeated copies of the beginning of your
-loop. Try adjusting the TMPO/REP knob to add fewer or more copies. Try adjusting
-the &#x394; knob to change the time between the repeats.
+With the FADE/GAIN/FBK switch in the middle position, turn the GAIN knob all
+the way counter-clockwise. This will turn down the note all the way, turning it
+off. Put the N1/N2/N3 switch in the middle position. You are now controlling
+the second note set. Turn the LEN knob to about half, the TMPO/REP knob to about
+half. Set the FREE/QUANT/SKIP to the middle position and turn the &#x394; knob
+to the middle. Now turn up the GAIN knob to maximum. You should hear many
+repeated copies of the beginning of your loop. Try adjusting the TMPO/REP knob
+to add fewer or more copies. Try adjusting the &#x394; knob to change the time
+between the repeats.
 
 You can choose to sample a different part of your loop. To do this, set the
-STRIDE/ABS/(UNI) knob in the middle position and move the POS knob. You will
+STRIDE/ABS/UNI knob in the middle position and move the POS knob. You will
 hear the part of the loop that is sampled change based on where the POS knob is.
 
 The pitch of the repeats can be controlled. Set the TMPO/REP knob to maximum to
@@ -100,23 +100,23 @@ to a different position for each of the P1/P2/P3 switch settings, you should
 hear a sort of arpeggio in the repeats (or chord if the time between the repeats
 is short).
 
-You can make the repeats fade out or fade in by setting the FADE/GAIN/(FBK)
+You can make the repeats fade out or fade in by setting the FADE/GAIN/FBK
 switch to the upward position. The GAIN knob turned counter-clockwise will cause
 the repeats to fade out, there will be no fading if it is in the middle and the
 repeats will fade in if the knob is turned to the right. For fading in to be
 audible, the overall GAIN should not be maximum as the fading in is stopped when
-the notes would clip. To experience this, set the FADE/GAIN/(FBK) switch to the
+the notes would clip. To experience this, set the FADE/GAIN/FBK switch to the
 middle position and turn the GAIN knob to the middle. Then set the
-FADE/GAIN/(FBK) switch back to the top position and turn the GAIN knob to the
+FADE/GAIN/FBK switch back to the top position and turn the GAIN knob to the
 right. You should hear the notes fade in.
 
 Our original loop is still present, just turned down. To hear it along with what
-you've set up on note 2, set the N1/BAR/N2/N3 switch to the top position, set
-the FADE/GAIN/(FBK) switch to the middle position and turn the GAIN knob to the
+you've set up on note 2, set the N1/N2/N3 switch to the top position, set
+the FADE/GAIN/FBK switch to the middle position and turn the GAIN knob to the
 top (if it is already at the top, turn the knob down then up again). You should
 hear the original loop with the repeats you created on note 2 playing at the
 same time as the beginning of the loop. We can change when these repeats occur
-relative to note 1. Set the N1/BAR/N2/N3 switch to the middle position. Now
+relative to note 1. Set the N1/N2/N3 switch to the middle position. Now
 adjust the OFST knob. You should hear the repeats of note 2 starting sometime
 within the loop playing on note 1 -- when OFST is all the way counter-clockwise,
 the repeats start at the beginning of the loop and all the way clockwise they
@@ -152,10 +152,10 @@ example, this will give long attacks and decays to your loop, which you may or
 may not want. When recording a loop in R=B mode, the loop is automatically given
 an envelope with short attack and decay.
 
-### N1/BAR/N2/N3
+### N1/N2/N3
 
 Controls what note set you are controlling. In the upward position, controls
-N1/BAR (we say "BAR" because TMPO/REP, FREE/QUANT/SKIP and &#x394; behave
+N1 (we say “BAR” because TMPO/REP, FREE/QUANT/SKIP and &#x394; behave
 different from N2 and N3 in this setting). In the middle and lower positions
 controls N2 and N3 respectively.
 
@@ -181,7 +181,7 @@ how to choose the tempo).
 In R=B mode the length of your recording adjusts the tempo so that the notes of
 N1 are played with a delay equal to the length of your recording. This
 effectively creates a looping sensation. If the FBK light is on (see
-FADE/GAIN/(FBK)) then the gain of N2 and N3 is turned down so they do not play.
+FADE/GAIN/FBK) then the gain of N2 and N3 is turned down so they do not play.
 This is so you can record what the 856 is playing and have it play like a loop
 without the sampling of the other notes making it sound chaotic. As a
 side-effect, the timing determined by the &#x394; and OFST knobs are all based
@@ -198,15 +198,16 @@ you want to keep what is currently playing, press and release the REC button.
 
 ### TMPO/REP
 
-This knob serves two functions: when N1/BAR is selected it controls the tempo of
+This knob serves two functions: when N1 is selected it controls the tempo of
 the loop or sequence. When N2 or N3 are selected, it determines the number of
 repeats that are played of that note. This means repeats are not available for
 the first note set.
 
-When N1/BAR is selected, the knob's function changes depending on the position
-of FREE/A=B/AREC. When FREE/R=B/AREC is in FREE mode, the knob controls the tempo so that in fully
-counter-clockwise position, the there are 40 loops per minute (40 playings of
-N1) and in fully clockwise position, there are 240 loops per minute.
+When N1 is selected, the knob's function changes depending on the position
+of FREE/A=B/AREC. When FREE/R=B/AREC is in FREE mode, the knob controls the
+tempo so that in fully counter-clockwise position, the there are 11 loops per
+minute (11 playings of N1) and in fully clockwise position, there are 60 loops
+per minute. This can be finely adjusted ±10 BPM with the &#x394; knob.
 
 In R=B mode the knob slightly nudges the tempo: turning clockwise makes it
 slightly faster and counter-clockwise slightly slower.
@@ -216,25 +217,25 @@ In AREC mode it behaves the same as in R=B mode.
 ### FREE/QUANT/SKIP
 
 This switch controls the function of the &#x394; knob. The functions available
-change depending on the N1/BAR/N2/N3 switch. The following describes the various
-selections depending on whether or not the N1/BAR mode is selected or N2 or N3
+change depending on the N1/N2/N3 switch. The following describes the various
+selections depending on whether or not the N1 mode is selected or N2 or N3
 is selected.
 
 #### FREE
 
-If N1/BAR selected, &#x394; controls the tempo so that if &#x394; is fully
+If N1 selected, &#x394; controls the tempo so that if &#x394; is fully
 counter-clockwise 10 beats per minute are subtracted from its rate and if
 clockwise 10 beats per minute are added to it. A sort of fine tempo adjustment.
 
 If N2 or N3 selected, &#x394; controls the amount of time between the repeats of
 the notes. &#x394; in fully clockwise position, the time between repeats is
 equal to the length of the loop, &#x394; in fully counter-clockwise position,
-the time is 1/64 the length of the loop. N.B.: After reset (see (UNI)) the time
+the time is 1/64 the length of the loop. Note that after reset (see UNI) the time
 between repeats is 0 until the &#x394; knob is adjusted.
 
 #### QUANT
 
-If N1/BAR selected, &#x394; controls doubling, tripling or quadrupling of the
+If N1 selected, &#x394; controls doubling, tripling or quadrupling of the
 tempo. &#x394; in the fully counter-clockwise position causes tempo quadrupling
 and in the fully clockwise position no tempo scaling occurs.
 
@@ -244,10 +245,10 @@ are from 1/16, through 1/12, 1/8, 1/6, 1/4, 1/3, 1/2, to 3/4.
 
 #### SKIP
 
-This behaves the same for N1/BAR, N2 and N3. It determines how many loops to
+This behaves the same for N1, N2 and N3. It determines how many loops to
 wait until playing the set of notes again. Each note set can be set
 individually. This is useful to play different note sets with different
-densities as sometimes your sequences might get too cluttered. &#x394; in the
+densities as sometimes your sequences might get too cluttered. With &#x394; in the
 fully counter-clockwise position, the note set is played every loop. In the
 fully clockwise position, for every 4 loops, the note set plays only 1 time. In
 between more frequent choices are possible, like once every 2 or 3 loops.
@@ -262,7 +263,7 @@ Controls what pitch in the repeats the PITCH knob affects. P1 means PITCH
 changes the pitch of the 1st, 4th, etc. notes. P2 the 2nd, 5th etc. notes and so
 on.
 
-### STRIDE/ABS/(UNI)
+### STRIDE/ABS/UNI
 
 If in the central position, ABS, the POS knob controls absolutely where samples
 are taken from in the recording. If the POS knob is in the fully
@@ -270,14 +271,15 @@ counter-clockwise position, samples are taken from the beginning, if in the
 clockwise position, samples are taken from the end.
 
 If in the upward position, STRIDE, the POS knob controls the rate at which the
-sample selection is advanced through positions in the sample. A
+sample selection is advanced through positions in the sample every time a repeat
+is played (so the REP knob has to be turned up to hear this effect). A
 counter-clockwise position of the POS knob advances backward and a clockwise
 position of the POS knob advances forward. The knob in the centre does not
 advance the start position of sampling.
 
-#### (UNI)
+#### UNI
 
-If the STRIDE/ABS/(UNI) switch clicked down without adjusting any other controls
+If the STRIDE/ABS/UNI switch clicked down without adjusting any other controls
 while the switch is down, the pitches of the repeated notes (previously set via
 P1/P2/P3 and PITCH) are reset to unison, that is, their pitches are not altered.
 
@@ -289,16 +291,16 @@ If held down while adjusting the &#x394; knob when N2 or N3 is selected,
 controls swing applied to the rhythm that separates the repeats. Putting the
 knob in the middle position gives no swing.
 
-If held down and the (FBK) switch is clicked (the bottom position of the
-FADE/GAIN/(FBK) switch), the gains of N2 and N3 are set to 0 (they are
+If held down and the FBK switch is clicked (the bottom position of the
+FADE/GAIN/FBK switch), the gains of N2 and N3 are set to 0 (they are
 silenced). Their settings still remain.
 
-If held down and the (FBK) switch is clicked twice, all the settings are reset
-and only N1/BAR plays as if a recording had just been made using R=B mode.
+If held down and the FBK switch is clicked twice, all the settings are reset
+and only N1 plays as if a recording had just been made using R=B mode.
 
 ### PITCH
 
-Controls the pitch of the repeat selected with P1/P2/P3 (or all pitches if (UNI)
+Controls the pitch of the repeat selected with P1/P2/P3 (or all pitches if UNI
 held down). Turned fully counter-clockwise, the note is transposed down an
 octave and fully clockwise up an octave. The transpositions are quantized to the
 nearest semi-tone. The transposition also affects the length of the playback.
@@ -310,7 +312,7 @@ Chooses what preset is stored or recalled using the STR/-/RCL switch.
 ### POS
 
 Chooses either where sampling starts within the recording or the velocity of
-sampling-start advancement according to the STRIDE/ABS/(UNI) switch.
+sampling-start advancement according to the STRIDE/ABS/UNI switch.
 
 ### OFST
 
@@ -319,7 +321,7 @@ the fully counter-clockwise position, the note set starts playing at the same
 time as the BEAT light's illumination. If in the middle position the note set
 starts playing at the time half way between two flashes of the BEAT light.
 
-### FADE/GAIN/(FBK)
+### FADE/GAIN/FBK
 
 In the middle position, the GAIN knob controls the loudness of the note set.
 
@@ -327,18 +329,43 @@ In the top position, this controls the fading of repeated notes. If turned
 counter-clockwise, the repeated notes fade-out and if turned clockwise, the
 repeated notes fade-in. The gain is limited to 1. to avoid clipping, so to get a
 dramatic fade-in effect, the gain setting may need to be turned down (the GAIN
-knob turned counter-clockwise with the FADE/GAIN/(FBK) switch in the middle
+knob turned counter-clockwise with the FADE/GAIN/FBK switch in the middle
 position) before dialing-in a fade-in effect.
 
-The (FBK) position can be clicked, which will enable feedback in the FREE and R=B
+The FBK position can be clicked, which will enable feedback in the FREE and R=B
 modes. If FBK is on (the FBK light illuminated), when recording, the output of
-the pedal is also recorded. Feedback is not available in the AREC mode. (FBK)
-can also be used to reset note parameters, see STRIDE/ABS/(UNI).
+the pedal is also recorded. FBK
+can also be used to reset note parameters, see STRIDE/ABS/UNI.
+
+#### Overdubbing
+
+You might want to record a loop and then add new layers to it, keeping the
+length of the first loop. This is how to do it: To keep it simple, we suggest
+stopping playback and turning down note 2 and 3 (you can try with this stuff
+later). See the documentation on the UNI switch for a quick way to do this.
+
+Switch to AREC mode and activate “feedback” by clicking the FBK switch. Then
+click record and play your first loop on your instrument. Click record again to
+stop recording. The loop will start but it will also be recording the next loop
+(remember, AREC is “automatic recording” mode). So, unless you are ready to add
+the next layer, press record again and because record and playback are both
+active, recording will stop but the first layer will continue looping (playback
+will remain on).
+
+Okay, say you're ready to record the next layer. Now you can press record.
+Notice that recording doesn't start right away if you start it in the middle of
+a loop, it will start on the next beat (a flash of the BEAT light). Once it has
+started (and feedback is on), it will record what you are playing and also
+include the previous layer(s). Wait until after the BEAT light has lit up again
+before clicking the record switch again as clicking record too early will
+discard the recording. This last feature is handy though if you make a mistake:
+you can click before the BEAT light comes on again and discard the recording
+you just made, but keep the previous layer(s).
 
 ### GAIN
 
 Controls the loudness of the notes or their fading, depending on the setting of
-the FADE/GAIN/(FBK) switch.
+the FADE/GAIN/FBK switch.
 
 ## MIDI
 
@@ -496,11 +523,11 @@ For example, if you would like the 856 to respond to MIDI messages transmitted
 on channel 10, set the N1/N2/N3 switch to the upward position, the FREE/R=B/AREC switch to the middle or downward position, the FREE/QUANT/SKIP switch to the middle
 or downward position and the top P1/P2/P3 to the upward position.
 
-Now, while holding the (UNI) switch down, plug in the power to the back of the
+Now, while holding the UNI switch down, plug in the power to the back of the
 pedal. The MIDI channel you selected should display briefly on the LEDs in
 binary with the most significant bit on the left most light. A light that is on
 corresponds to a 1 whereas a light that is off corresponds to a 0. The light
-(bit) pattern and the corresponding MIDI channel are shown in the following
+(bit) patterns and the corresponding MIDI channel are shown in the following
 table.
 
 <table border="1">
@@ -603,92 +630,92 @@ channel 1, no LEDs will be illuminated.
 </tr>
 <tr>
 <td> 0 </td>
-<td> N1/BAR Pitch 1 control (fine) </td>
+<td> N1 Pitch 1 control (fine) </td>
 <td> Adjust pitch of 1st, 4th, ... notes in arpeggio from -50 cents to +50 cents (hundreths of a semitone). </td>
 </tr>
 <tr>
 <td> 1 </td>
-<td> N1/BAR Pitch 2 control (fine) </td>
+<td> N1 Pitch 2 control (fine) </td>
 <td> Adjust pitch of 2nd, 5th, ... notes in arpeggio from -50 cents to +50 cents (hundreths of a semitone). </td>
 </tr>
 <tr>
 <td> 2 </td>
-<td> N1/BAR Pitch 3 control (fine) </td>
+<td> N1 Pitch 3 control (fine) </td>
 <td> Adjust pitch of 3rd, 6th, ... notes in arpeggio from -50 cents to +50 cents (hundreths of a semitone). </td>
 </tr>
 <tr>
 <td> 3 </td>
-<td> N1/BAR Envelope control </td>
+<td> N1 Envelope control </td>
 <td> Control the amplitude envelope of the notes just as the ENV knob does. </td>
 </tr>
 <tr>
 <td> 4 </td>
-<td> N1/BAR Length control </td>
+<td> N1 Length control </td>
 <td> Control the length of the notes just as the LEN knob does. </td>
 </tr>
 <tr>
 <td> 5 </td>
-<td> N1/BAR Pitch 1 control </td>
+<td> N1 Pitch 1 control </td>
 <td> Adjust pitch of 1st, 4th, ... notes in arpeggio according to the control change value. 60 is no transposition, 48 is an octave below, 72 an octave above, etc. Note that this is more range than is available on the physical interface. </td>
 </tr>
 <tr>
 <td> 6 </td>
-<td> N1/BAR Pitch 2 control </td>
+<td> N1 Pitch 2 control </td>
 <td> Adjust pitch of 2nd, 5th, ... notes in arpeggio according to the control change value. 60 is no transposition, 48 is an octave below, 72 an octave above, etc. Note that this is more range than is available on the physical interface. </td>
 </tr>
 <tr>
 <td> 7 </td>
-<td> N1/BAR Pitch 3 control </td>
+<td> N1 Pitch 3 control </td>
 <td> Adjust pitch of 3rd, 6th, ... notes in arpeggio according to the control change value. 60 is no transposition, 48 is an octave below, 72 an octave above, etc. Note that this is more range than is available on the physical interface. </td>
 </tr>
 <tr>
 <td> 8 </td>
-<td> N1/BAR Gain control </td>
-<td> Control the gain just as the GAIN knob does with the FADE/GAIN/(FBK) switch in the middle position. </td>
+<td> N1 Gain control </td>
+<td> Control the gain just as the GAIN knob does with the FADE/GAIN/FBK switch in the middle position. </td>
 </tr>
 <tr>
 <td> 9 </td>
-<td> N1/BAR Position control </td>
-<td> Adjust the position just as the POS knob does with the STRIDE/ABS/(UNI) switch in the middle position. </td>
+<td> N1 Position control </td>
+<td> Adjust the position just as the POS knob does with the STRIDE/ABS/UNI switch in the middle position. </td>
 </tr>
 <tr>
 <td> 10 </td>
-<td> N1/BAR Stride control </td>
-<td> Adjust the position advancement just as the POS knob does with the STRIDE/ABS/(UNI) switch in the upward position. </td>
+<td> N1 Stride control </td>
+<td> Adjust the position advancement just as the POS knob does with the STRIDE/ABS/UNI switch in the upward position. </td>
 </tr>
 <tr>
 <td> 11 </td>
-<td> N1/BAR Offset control </td>
+<td> N1 Offset control </td>
 <td> Adjust the playback offset just as the OFST knob does. </td>
 </tr>
 <tr>
 <td> 12 </td>
-<td> N1/BAR Fade control </td>
-<td> Adjust the fade just as the GAIN knob does with the FADE/GAIN/(FBK) switch in the upward position. </td>
+<td> N1 Fade control </td>
+<td> Adjust the fade just as the GAIN knob does with the FADE/GAIN/FBK switch in the upward position. </td>
 </tr>
 <tr>
 <td> 13 </td>
-<td> N1/BAR Free &#x394; control </td>
+<td> N1 Free &#x394; control </td>
 <td> Adjust the time between notes just as the &#x394; knob does with the FREE/QUANT/SKIP switch in the upward position. * </td>
 </tr>
 <tr>
 <td> 14 </td>
-<td> N1/BAR Number of repeats control </td>
+<td> N1 Number of repeats control </td>
 <td> Adjust the number of repeats (the number of notes in the arpeggio) just as the TMPO/REP knob does. * </td>
 </tr>
 <tr>
 <td> 15 </td>
-<td> N1/BAR Stride state </td>
-<td> If non-zero (1-127), enables playback offset advancement, otherwise if 0, disable playback offset advancement. This cannot be in conflict with the STIDE/ABS/(UNI) switch. That means you cannot control this parameter over MIDI when the note whose parameters you are adjusting is selected with the N1/BAR/N2/N3 switch, in this case the N1/BAR note. </td>
+<td> N1 Stride state </td>
+<td> If non-zero (1-127), enables playback offset advancement, otherwise if 0, disable playback offset advancement. This cannot be in conflict with the STIDE/ABS/UNI switch. That means you cannot control this parameter over MIDI when the note whose parameters you are adjusting is selected with the N1/N2/N3 switch, in this case the N1 note. </td>
 </tr>
 <tr>
 <td> 16 </td>
-<td> N1/BAR skip control </td>
+<td> N1 skip control </td>
 <td> Control how often the arpeggio plays just like the &#x394; knob does with the FREE/QUANT/SKIP switch in the downward position. </td>
 </tr>
 <tr>
 <td> 17 </td>
-<td> N1/BAR swing control </td>
+<td> N1 swing control </td>
 <td> Control the swing factor for the time between repeats of notes.</td>
 </tr>
 <tr>
@@ -734,17 +761,17 @@ channel 1, no LEDs will be illuminated.
 <tr>
 <td> 26 </td>
 <td> N2 Gain control </td>
-<td> Control the gain just as the GAIN knob does with the FADE/GAIN/(FBK) switch in the middle position. </td>
+<td> Control the gain just as the GAIN knob does with the FADE/GAIN/FBK switch in the middle position. </td>
 </tr>
 <tr>
 <td> 27 </td>
 <td> N2 Position control </td>
-<td> Adjust the position just as the POS knob does with the STRIDE/ABS/(UNI) switch in the middle position. </td>
+<td> Adjust the position just as the POS knob does with the STRIDE/ABS/UNI switch in the middle position. </td>
 </tr>
 <tr>
 <td> 28 </td>
 <td> N2 Stride control </td>
-<td> Adjust the position advancement just as the POS knob does with the STRIDE/ABS/(UNI) switch in the upward position. </td>
+<td> Adjust the position advancement just as the POS knob does with the STRIDE/ABS/UNI switch in the upward position. </td>
 </tr>
 <tr>
 <td> 29 </td>
@@ -754,22 +781,22 @@ channel 1, no LEDs will be illuminated.
 <tr>
 <td> 30 </td>
 <td> N2 Fade control </td>
-<td> Adjust the fade just as the GAIN knob does with the FADE/GAIN/(FBK) switch in the upward position. </td>
+<td> Adjust the fade just as the GAIN knob does with the FADE/GAIN/FBK switch in the upward position. </td>
 </tr>
 <tr>
 <td> 31 </td>
 <td> N2 Free &#x394; control </td>
-<td> Adjust the time between notes just as the &#x394; knob does with the FREE/QUANT/SKIP switch in the upward position. * </td>
+<td> Adjust the time between notes just as the &#x394; knob does with the FREE/QUANT/SKIP switch in the upward position. </td>
 </tr>
 <tr>
 <td> 32 </td>
 <td> N2 Number of repeats control </td>
-<td> Adjust the number of repeats (the number of notes in the arpeggio) just as the TMPO/REP knob does. * </td>
+<td> Adjust the number of repeats (the number of notes in the arpeggio) just as the TMPO/REP knob does. </td>
 </tr>
 <tr>
 <td> 33 </td>
 <td> N2 Stride state </td>
-<td> If non-zero (1-127), enables playback offset advancement, otherwise if 0, disable playback offset advancement. This cannot be in conflict with the STIDE/ABS/(UNI) switch. That means you cannot control this parameter over MIDI when the note whose parameters you are adjusting is selected with the N1/BAR/N2/N3 switch, in this case the N1/BAR note. </td>
+<td> If non-zero (1-127), enables playback offset advancement, otherwise if 0, disable playback offset advancement. This cannot be in conflict with the STIDE/ABS/UNI switch. That means you cannot control this parameter over MIDI when the note whose parameters you are adjusting is selected with the N1/N2/N3 switch, in this case the N1 note. </td>
 </tr>
 <tr>
 <td> 34 </td>
@@ -824,17 +851,17 @@ channel 1, no LEDs will be illuminated.
 <tr>
 <td> 44 </td>
 <td> N3 Gain control </td>
-<td> Control the gain just as the GAIN knob does with the FADE/GAIN/(FBK) switch in the middle position. </td>
+<td> Control the gain just as the GAIN knob does with the FADE/GAIN/FBK switch in the middle position. </td>
 </tr>
 <tr>
 <td> 45 </td>
 <td> N3 Position control </td>
-<td> Adjust the position just as the POS knob does with the STRIDE/ABS/(UNI) switch in the middle position. </td>
+<td> Adjust the position just as the POS knob does with the STRIDE/ABS/UNI switch in the middle position. </td>
 </tr>
 <tr>
 <td> 46 </td>
 <td> N3 Stride control </td>
-<td> Adjust the position advancement just as the POS knob does with the STRIDE/ABS/(UNI) switch in the upward position. </td>
+<td> Adjust the position advancement just as the POS knob does with the STRIDE/ABS/UNI switch in the upward position. </td>
 </tr>
 <tr>
 <td> 47 </td>
@@ -844,7 +871,7 @@ channel 1, no LEDs will be illuminated.
 <tr>
 <td> 48 </td>
 <td> N3 Fade control </td>
-<td> Adjust the fade just as the GAIN knob does with the FADE/GAIN/(FBK) switch in the upward position. </td>
+<td> Adjust the fade just as the GAIN knob does with the FADE/GAIN/FBK switch in the upward position. </td>
 </tr>
 <tr>
 <td> 49 </td>
@@ -859,7 +886,7 @@ channel 1, no LEDs will be illuminated.
 <tr>
 <td> 51 </td>
 <td> N3 Stride state </td>
-<td> If non-zero (1-127), enables playback offset advancement, otherwise if 0, disable playback offset advancement. This cannot be in conflict with the STIDE/ABS/(UNI) switch. That means you cannot control this parameter over MIDI when the note whose parameters you are adjusting is selected with the N3/N2/N3 switch, in this case the N3 note. </td>
+<td> If non-zero (1-127), enables playback offset advancement, otherwise if 0, disable playback offset advancement. This cannot be in conflict with the STIDE/ABS/UNI switch. That means you cannot control this parameter over MIDI when the note whose parameters you are adjusting is selected with the N3/N2/N3 switch, in this case the N3 note. </td>
 </tr>
 <tr>
 <td> 52 </td>
@@ -884,12 +911,12 @@ channel 1, no LEDs will be illuminated.
 <tr>
 <td> 56 </td>
 <td> Tempo scaling </td>
-<td> Scale the tempo like the &#x394; knob with N1/BAR/N2/N3 in the upward position and FREE/QUANT/SKIP in the middle position. </td>
+<td> Scale the tempo like the &#x394; knob with N1/N2/N3 in the upward position and FREE/QUANT/SKIP in the middle position. </td>
 </tr>
 <tr>
 <td> 57 </td>
 <td> Tempo nudge </td>
-<td> Slightly adjust the tempo like the TMPO/REP knob with N1/BAR/N2/N3 in the upward position and FREE/R=B/AREC in the middle position. </td>
+<td> Slightly adjust the tempo like the TMPO/REP knob with N1/N2/N3 in the upward position and FREE/R=B/AREC in the middle position. </td>
 </tr>
 <tr>
 <td> 58 </td>
@@ -919,7 +946,7 @@ channel 1, no LEDs will be illuminated.
 <tr>
 <td> 63 </td>
 <td> Feedback state </td>
-<td> Sets the feedback state just like the bottom position of the FADE/GAIN/(FBK) switch. A non-zero value turns feedback on, a zero value turns it off. Note feedback is disabled (cannot be turned on) in AREC mode. </td>
+<td> Sets the feedback state just like the bottom position of the FADE/GAIN/FBK switch. A non-zero value turns feedback on, a zero value turns it off. </td>
 </tr>
 </table>
 
@@ -956,3 +983,14 @@ It's easy to use an expression pedal with the 856. Simply plug one into the 1/4
 inch jack closest to the DC jack. Then to choose what knob to control with the
 expression pedal, simply hold down the FBK switch while turning the knob you want to
 control. After you let go of FBK, the expression pedal should now control that knob.
+
+## Version information
+
+### v1.6
+
+- Documentation on choosing the MIDI channel makes it clear what switches should be manipulated.
+- Playback requests ignored if nothing has been recorded.
+- Tempo range in FREE mode made more reasonable.
+- Correctly indicate ±50 cents change (instead of ±100 cents) when adjusting the fine tuning.
+- Sending MIDI 64 for respective control change sets fine tuning to 0 or stride
+  rate to 0. Tempo controlling control changes also choose exact midpoint when sending 64.
