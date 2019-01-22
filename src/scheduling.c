@@ -275,15 +275,9 @@ static void NoteOnEvent_happen(MMEvent *event)
                         _next_repeat_idx,
                         noe->currentFade 
                             * noteParamSets[noe->parameterSet].fadeRate,
-                        /* If stride enabled, increment the previous current
-                         * position by the stride amount, wrapping between 0 and
-                         * 1, otherwise just put the position as dictated by the
-                         * parameter set */
-                        (_posMode == SynthControlPosMode_STRIDE) ?
-                            MM_fwrap(noe->currentPosition
-                                + noteParamSets[noe->parameterSet].positionStride,
-                                0,1) :
-                            noteParamSets[noe->parameterSet].startPoint,
+                        MM_fwrap(noe->currentPosition
+                            + noteParamSets[noe->parameterSet].positionStride,
+                            0,1),
                          _next_pitch,
                          noe->pitchOffset,
                          _next_pitch_idx,
