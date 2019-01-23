@@ -9,7 +9,7 @@
 static float map_0_1_pitch_range(float param)
 {
     float _tmp;
-    _tmp = floor(((SYNTH_CONTROL_PITCH_FINE_MAX 
+    _tmp = round(((SYNTH_CONTROL_PITCH_FINE_MAX 
                     - SYNTH_CONTROL_PITCH_FINE_MIN)
                 / SYNTH_CONTROL_PITCH_FINE_QUANT) 
             * param)

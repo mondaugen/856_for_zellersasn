@@ -1002,3 +1002,5 @@ control. After you let go of FBK, the expression pedal should now control that k
   previous functionality of zeroing the gain of and resetting all the settings
   of N2 and N3 is still possible
   but you now click FBK twice and 3 times respectively.
+- v0.5 of mm_dsp used now. This allows detuning by 1 cent because the playback
+  rate is compensated.

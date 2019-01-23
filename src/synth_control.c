@@ -224,7 +224,7 @@ void synth_control_set_tempoBPM_absolute(float _tempoBPM)
 void synth_control_set_tempo_coarse_norm(float param)
 {
     float _tmp;
-    _tmp = floor(((SYNTH_CONTROL_TEMPOBPM_COARSE_MAX 
+    _tmp = round(((SYNTH_CONTROL_TEMPOBPM_COARSE_MAX 
                     - SYNTH_CONTROL_TEMPOBPM_COARSE_MIN)
                 / SYNTH_CONTROL_TEMPOBPM_COARSE_QUANT) 
             * param)
@@ -243,7 +243,7 @@ void synth_control_set_tempo_coarse_norm(float param)
 void synth_control_set_tempo_fine_norm(float param)
 {
     float _tmp;
-    _tmp = floor(((SYNTH_CONTROL_TEMPOBPM_FINE_MAX 
+    _tmp = round(((SYNTH_CONTROL_TEMPOBPM_FINE_MAX 
                     - SYNTH_CONTROL_TEMPOBPM_FINE_MIN)
                 / SYNTH_CONTROL_TEMPOBPM_FINE_QUANT) 
             * param)
@@ -261,7 +261,7 @@ void synth_control_set_tempo_fine_norm(float param)
 /* Param should be in [0,1) */
 void synth_control_set_tempo_scale_norm(float param)
 {
-    int _tmp = (int)floor(SYNTH_CONTROL_TEMPOBPM_SCALE_TABLE_LENGTH
+    int _tmp = (int)round(SYNTH_CONTROL_TEMPOBPM_SCALE_TABLE_LENGTH
                             * param);
     if (_tmp >= SYNTH_CONTROL_TEMPOBPM_SCALE_TABLE_LENGTH) {
         _tmp = SYNTH_CONTROL_TEMPOBPM_SCALE_TABLE_LENGTH - 1;
@@ -333,7 +333,7 @@ void synth_control_set_pitch_chrom_quant(float param,
                                          int note_params_idx)
 {
     float _tmp;
-    _tmp = floor(((SYNTH_CONTROL_PITCH_CHROM_MAX 
+    _tmp = round(((SYNTH_CONTROL_PITCH_CHROM_MAX 
                     - SYNTH_CONTROL_PITCH_CHROM_MIN)
                 / SYNTH_CONTROL_PITCH_CHROM_QUANT + 1) 
             * param)
@@ -366,7 +366,7 @@ void synth_control_set_pitch_fine_quant(float param,
                                         int note_param_idx)
 {
     float _tmp;
-    _tmp = floor(((SYNTH_CONTROL_PITCH_FINE_MAX 
+    _tmp = round(((SYNTH_CONTROL_PITCH_FINE_MAX 
                     - SYNTH_CONTROL_PITCH_FINE_MIN)
                 / SYNTH_CONTROL_PITCH_FINE_QUANT) 
             * param)
@@ -425,7 +425,7 @@ void synth_control_set_positionStride_curParams(float positionStride_param)
 void synth_control_set_eventDelta_quant(float eventDeltaBeats_param, int note_params_idx)
 {
     int _tmp;
-    _tmp = (int)floor(SYNTH_CONTROL_EVENTDELTA_QUANT_TABLE_LENGTH 
+    _tmp = (int)round(SYNTH_CONTROL_EVENTDELTA_QUANT_TABLE_LENGTH 
             * eventDeltaBeats_param);
     if (_tmp >= SYNTH_CONTROL_EVENTDELTA_QUANT_TABLE_LENGTH) {
         _tmp = SYNTH_CONTROL_EVENTDELTA_QUANT_TABLE_LENGTH - 1;
