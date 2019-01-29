@@ -141,16 +141,20 @@ pressed down. Note that playback is disabled if no recording has been made.
 
 ### ENV
 
-Controls the amplitude shape of a playing note. Turned counter-clockwise,
-produces an amplitude envelope with slow attack and fast decay. Clockwise is an
-amplitude envelope with fast attack and slow decay. The envelope when in the
-middle has a slow attack and decay. In between you can find varying speeds for
-the attack and decay.
+Controls the amplitude shape of a playing note. Turned counter-clockwise or clockwise,
+produces an amplitude envelope with fast attack and fast decay. In between these two settings the attack and decay times vary as shown in the following chart:
+
+![Envelope time at ENV knob positions](env_ramp.png)
 
 Note that the envelope also applies to a loop. If in the middle position for
 example, this will give long attacks and decays to your loop, which you may or
 may not want. When recording a loop in R=B mode, the loop is automatically given
-an envelope with short attack and decay.
+an envelope with short attack and decay. This is because when recording a small
+ramp is applied to the beginning and end of the recording anyways in order to make it smoothly
+fade in and out. So if LEN is fully clockwise PITCH is unison and ENV is fully
+counter-clockwise, you will still hear a very small ramp at the beginning and
+end. This is to make the looper functionality pleasant sounding with less need
+for intervention from the user to make the loop end-points sound smooth.
 
 ### N1/N2/N3
 
