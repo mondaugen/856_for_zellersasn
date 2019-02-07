@@ -11,3 +11,9 @@ Some preset fields shouldn't be stored, for instance, the "mode" field.
 What is the initial preset when the device ships?
 
 Is the gain setting correct? See scheduling.c to see what I mean.
+
+Wed Feb  6 15:39:52 EST 2019
+- beat stride and repeat stride feature
+    - normal stride is now beat stride
+- tempo should be logarithmic, fine control fills in gaps precisely
+- try out limiter
