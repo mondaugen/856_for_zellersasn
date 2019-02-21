@@ -10,9 +10,7 @@
 #define CODEC_DMA_DIRECT_MODE 
 
 #ifdef  TEST_CODEC_UNDERRUN
- #define CODEC_SAMPLE_RATE 44100//16000//44100//32000//
-#else
- #define CODEC_SAMPLE_RATE 32000//44100//16000//44100//32000//
+ #define CODEC_SAMPLE_RATE 44100
 #endif
 
 #define CODEC_NUM_CHANNELS 2
@@ -29,8 +27,6 @@ typedef uint32_t audio_hw_setup_t;
  * half the total length of the array. */
 #ifdef TEST_CODEC_UNDERRUN
  #define CODEC_DMA_BUF_LEN 128
-#else
- #define CODEC_DMA_BUF_LEN 512
 #endif
 
 #define UINT16_TO_FLOAT(x) ((float)((int32_t)x - 0x8000)/((float)0x8000))

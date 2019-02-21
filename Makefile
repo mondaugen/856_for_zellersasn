@@ -8,18 +8,21 @@ MM_DSP_PATH				 = ../mm_dsp
 MM_PRIMITIVES_PATH		 = ../mm_primitives
 NE_DATASTRUCTURES_PATH   = ../ne_datastructures
 MM_DSP_SCHABLONE_PATH    = ../mm_dsp_schablone
+LIMITER_IR_AF_PATH       = ../audio_limiter
 SRC					     = $(notdir $(wildcard $(MM_DSP_SCHABLONE_PATH)/src/*.c))
 SRC					    += $(notdir $(wildcard $(MMMIDI_PATH)/src/*.c))
 SRC					    += $(notdir $(wildcard src/*.c))
 LIB						 = $(MM_DSP_PATH)/lib
 LIB						+= $(MM_PRIMITIVES_PATH)/lib
 LIB						+= $(NE_DATASTRUCTURES_PATH)/lib
+LIB						+= $(LIMITER_IR_AF_PATH)
 CMSIS_INCLUDES           = ../../build/CMSIS/Include
 INC 				     = $(MM_DSP_SCHABLONE_PATH)/inc
 INC					    += $(MMMIDI_PATH)/inc
 INC					    += $(MM_DSP_PATH)/inc
 INC					    += $(MM_PRIMITIVES_PATH)/inc
 INC					    += $(NE_DATASTRUCTURES_PATH)/inc
+INC						+= $(LIMITER_IR_AF_PATH)
 INC						+= inc
 INC						+= $(CMSIS_INCLUDES)
 INC						+= constants
@@ -40,7 +43,7 @@ CFLAGS					+= -ggdb3 $(OPTIMIZE) -DSTM32F429_439xx \
 
 LDFLAGS					 = $(foreach lib,$(LIB),-L$(lib))
 LDFLAGS				     += -lm -lmm_dsp -lmm_primitives \
-							-lne_datastructures -Tstm32f429.ld
+							-lne_datastructures -llimiter_ir_af -Tstm32f429.ld
 OBJSDIR					 = objs
 OBJS					 = $(addprefix $(OBJSDIR)/,\
 						   	$(addsuffix .o, $(basename $(SRC))))
@@ -54,6 +57,24 @@ STRIP					 = arm-none-eabi-strip
 OCD 		   			 = sudo openocd -f $(OPENOCD_BOARD) -f $(OPENOCD_INTERFACE)
 PYTHON					 = python
 CONST_OBJS				 = objs/tables.o
+
+# Audio settings
+BUFFER_SIZE=256
+NUM_CHANNELS=2
+CODEC_DMA_BUF_LEN=$(shell python -c 'print(int($(BUFFER_SIZE)*$(NUM_CHANNELS)))')
+CFLAGS+=-DBUFFER_SIZE=$(BUFFER_SIZE)
+CFLAGS+=-DCODEC_DMA_BUF_LEN=$(CODEC_DMA_BUF_LEN)
+CODEC_SAMPLE_RATE=32000
+CFLAGS+=-DCODEC_SAMPLE_RATE=$(CODEC_SAMPLE_RATE)
+
+# Limiter settings
+# ramp up time
+N_P_seconds=0.01
+N_P=$(shell python -c 'print(int($(CODEC_SAMPLE_RATE)*$(N_P_seconds)))')
+# ramp down time in seconds
+N_D_seconds=5
+# ramp down time in samples
+N_D=$(shell python -c 'print(int($(CODEC_SAMPLE_RATE)*$(N_D_seconds)))')
 
 # The address the DFU uploader uses to write the DFU file to the device.
 DFUSE_ADDR				 = 0x08000000
@@ -69,7 +90,14 @@ constants/tables.c constants/tables.h : constants/tables.py
 $(CONST_OBJS) : constants/tables.c constants/tables.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
-$(OBJS) : $(OBJSDIR)/%.o: %.c $(DEP)
+inc/_gend_fwir_header.h :
+	PYTHONPATH=$(LIMITER_IR_AF_PATH) \
+    N_D=$(N_D) \
+    N_P=$(N_P) \
+    BUFFER_SIZE=$(BUFFER_SIZE) \
+    OUTPUT_FILE=$@ python3 $(LIMITER_IR_AF_PATH)/gen_fwir_header.py
+
+$(OBJS) : $(OBJSDIR)/%.o: %.c $(DEP) inc/_gend_fwir_header.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
 $(BIN) : $(OBJS) $(CONST_OBJS) $(LIBDEP)
@@ -101,7 +129,8 @@ reset: $(BIN)
 	$(OCD) -c init -c "reset run" -c shutdown
 
 clean:
-	rm objs/*.o test/*.o
+	rm -f objs/*.o test/*.o inc/_gend_fwir_header.h
+
 
 tags:
 	ctags -R . \

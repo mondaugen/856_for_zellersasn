@@ -11,3 +11,5 @@ constants/tables.{c,h}
 test/blips_midiclock
 test/midi_map_midpoint_exact
 *.bin
+_gend_fwir_header.h
+inc/_gend_fwir_header.h
