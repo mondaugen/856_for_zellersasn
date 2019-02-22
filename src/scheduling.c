@@ -8,6 +8,14 @@
 #include "mm_common_calcs.h" 
 #include <math.h> 
 
+#ifndef MAX
+#define MAX(x,y) (((x)>(y))?(x):(y))
+#endif
+
+#ifndef MIN
+#define MIN(x,y) (((x)<(y))?(x):(y))
+#endif 
+
 #ifdef DEBUG
 #include <assert.h>
 #endif
@@ -321,16 +329,23 @@ static void NoteOnEvent_happen(MMEvent *event)
             no.attackTime = 0;
             no.releaseTime = 0;
 #else
-            no.attackTime = 
-                noteParamSets[noe->parameterSet].sustainTime
-                * (MMSample)MMArray_get_length(theSound->wavtab)
-                / (MMSample)audio_hw_get_sample_rate(NULL)
-                * noteParamSets[noe->parameterSet].attackTime;
-            no.releaseTime = 
-                noteParamSets[noe->parameterSet].sustainTime
-                * (MMSample)MMArray_get_length(theSound->wavtab)
-                / (MMSample)audio_hw_get_sample_rate(NULL)
-                * noteParamSets[noe->parameterSet].releaseTime;
+            float attackTime = noteParamSets[noe->parameterSet].sustainTime
+                    * (MMSample)MMArray_get_length(theSound->wavtab)
+                    / (MMSample)audio_hw_get_sample_rate(NULL)
+                    * noteParamSets[noe->parameterSet].attackTime,
+                  releaseTime = noteParamSets[noe->parameterSet].sustainTime
+                    * (MMSample)MMArray_get_length(theSound->wavtab)
+                    / (MMSample)audio_hw_get_sample_rate(NULL)
+                    * noteParamSets[noe->parameterSet].releaseTime;
+            no.attackTime = MIN(
+                MAX(attackTime,
+                    SYNTH_CONTROL_MIN_ATTACK_TIME),
+                    SYNTH_CONTROL_MAX_ATTACK_TIME);
+                
+            no.releaseTime = MIN(
+                MAX(releaseTime,
+                    SYNTH_CONTROL_MIN_RELEASE_TIME),
+                    SYNTH_CONTROL_MAX_RELEASE_TIME);
 #endif
             no.samples = theSound->wavtab;
             MMWavTab_inc_n_players(theSound->wavtab);

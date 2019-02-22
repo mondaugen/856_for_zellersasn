@@ -104,9 +104,9 @@ typedef struct __NoteParamSet {
 /* The amount of fade at the end of the recording in seconds */
 #define REC_LOOP_FADE_TIME_S 0.010
 /* Envelope parameters */
-#define SYNTH_CONTROL_MIN_ATTACK_TIME 0.001 
+#define SYNTH_CONTROL_MIN_ATTACK_TIME 0.01 
 #define SYNTH_CONTROL_MAX_ATTACK_TIME 0.5
-#define SYNTH_CONTROL_MIN_RELEASE_TIME 0.001
+#define SYNTH_CONTROL_MIN_RELEASE_TIME 0.01
 #define SYNTH_CONTROL_MAX_RELEASE_TIME 0.5
 
 /* Gain parameters */

@@ -105,14 +105,17 @@ void autorelease_on_done(MMEnvedSamplePlayer * esp)
 void synth_control_set_envelopeTime(float envelopeTime_param,
                                     int note_param_idx)
 {
+    /* The attack and release are specified as fractions of the length of the
+    audio, so the maxmimum attack and release are 0.5 and minimum are 0 (so that
+    their sum never excede 1) */
     env_map_attack_release_f(
             &noteParamSets[note_param_idx].attackTime,
             &noteParamSets[note_param_idx].releaseTime,
             envelopeTime_param,
-            SYNTH_CONTROL_MIN_ATTACK_TIME,
-            SYNTH_CONTROL_MAX_ATTACK_TIME,
-            SYNTH_CONTROL_MIN_RELEASE_TIME,
-            SYNTH_CONTROL_MAX_RELEASE_TIME);
+            0,
+            0.5,
+            0,
+            0.5);
 }
 
 void synth_control_set_envelopeTime_curParams(float envelopeTime_param)
@@ -616,8 +619,8 @@ void synth_control_record_stop_helper(scrsh_source_t origin)
             noteParamSets[0].intermittency = 0;
             noteParamSets[0].offsetBeats = 0;
             noteParamSets[0].startPoint = 0;
-            noteParamSets[0].attackTime = SYNTH_CONTROL_MIN_ATTACK_TIME;
-            noteParamSets[0].releaseTime = SYNTH_CONTROL_MIN_RELEASE_TIME;
+            noteParamSets[0].attackTime = 0;
+            noteParamSets[0].releaseTime = 0;
         }
     }
     /* Swap the playing and the recording sounds */

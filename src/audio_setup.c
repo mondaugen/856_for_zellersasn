@@ -18,6 +18,8 @@
 
 int audio_ready = 0;
 
+float max_val = 0;
+
 /* Pass in the name of the audio device as a string */
 int audio_setup(void *data)
 {
@@ -26,11 +28,18 @@ int audio_setup(void *data)
     return audio_hw_setup(&ahs);
 }
 
+static void track_max_val(float f)
+{
+    float f_ = fabsf(f);
+    if (f_ > max_val) { max_val = f_; }
+}
+
 static void saturate_output(audio_hw_io_t *params)
 {
     int n;
     for (n = 0; n < params->length; n++) {
         /* saturate output */
+        track_max_val(outBus->data[outBus->channels*n]);
         if (outBus->data[outBus->channels*n] > 1.) {
             outBus->data[outBus->channels*n] = 1.;
         } else if (outBus->data[outBus->channels*n] < -1.) {
