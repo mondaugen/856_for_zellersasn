@@ -12,37 +12,17 @@
 #include "switch_control.h" 
 #include "adc_channel.h" 
 #include "led_status.h" 
-#include "limiter_ir_af.h"
-#include "_gend_fwir_header.h"
 
 #define CODEC_LIVE_INPUT_CHANNEL 0
 #define CODEC_LIVE_OUTPUT_CHANNEL 0
 
 int audio_ready = 0;
 
-struct limiter_ir_af *audio_limiter = NULL;
-struct filter_w_ir *audio_limiter_fwir = NULL;
-struct limiter_ir_af_init liai;
-
-static void audio_limiter_setup(void)
-{
-    audio_limiter_fwir = filter_w_ir_new(&gen_fwir_header_filter_w_ir_init);
-
-    liai = (struct limiter_ir_af_init) {
-        .fwir = audio_limiter_fwir,
-        .buffer_size = BUFFER_SIZE,
-        .threshold = .9
-    };
-
-    audio_limiter = limiter_ir_af_new(&liai);
-}
-
 /* Pass in the name of the audio device as a string */
 int audio_setup(void *data)
 {
     audio_hw_setup_t ahs;
     ahs = CODEC_SAMPLE_RATE;
-    audio_limiter_setup();
     return audio_hw_setup(&ahs);
 }
 
@@ -106,10 +86,6 @@ void audio_hw_io(audio_hw_io_t *params)
     scheduler_incTimeAndDoEvents();
     /* Process audio */
     MMSigProc_tick(&sigChain);
-    if ((audio_limiter != NULL) && (outBus->channels == 1)) {
-        /* we can limit the output nicely */
-        limiter_ir_af_tick(audio_limiter,outBus->data);
-    } 
     saturate_output(params);
     for (n = 0; n < params->length; n++) {
         /* Only the first channel is written/read */

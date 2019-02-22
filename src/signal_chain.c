@@ -1,9 +1,12 @@
 /* Copyright (c) 2016 Nicholas Esterer. All rights reserved. */
 
+#include <string.h> 
 #include "signal_chain.h" 
 #include "wavetables.h" 
 #include "audio_setup.h" 
-#include <string.h> 
+#include "mm_busproc.h"
+#include "limiter_ir_af.h"
+#include "_gend_fwir_header.h"
 
 MMBus *inBus, *outBus, *fbBus;
 MMSigChain sigChain;
@@ -17,6 +20,32 @@ MMSigProc *fbOnNode;
 /* Instead of recording what comes in the input, just send 1s to the recorder. */
 MMSigConst fillOnesSigConst;
 #endif  
+
+static void audio_limiter_fun(MMBus *bus, void *aux_)
+{
+    struct limiter_ir_af *aux = aux_;
+    if ((aux != NULL) && (bus->channels == 1)) {
+        /* we can limit the output nicely */
+        limiter_ir_af_tick(aux,bus->data);
+    } 
+}
+
+struct limiter_ir_af *audio_limiter = NULL;
+struct filter_w_ir *audio_limiter_fwir = NULL;
+struct limiter_ir_af_init liai;
+
+static void audio_limiter_setup(void)
+{
+    audio_limiter_fwir = filter_w_ir_new(&gen_fwir_header_filter_w_ir_init);
+
+    liai = (struct limiter_ir_af_init) {
+        .fwir = audio_limiter_fwir,
+        .buffer_size = BUFFER_SIZE,
+        .threshold = .9
+    };
+
+    audio_limiter = limiter_ir_af_new(&liai);
+}
 
 static MMBusMerger fbBusMerger;
 
@@ -33,6 +62,9 @@ void signal_chain_setup(void)
     memset(fbBus->data,0,sizeof(MMSample)*fbBus->size*fbBus->channels);
     /* Initializes the signal chain that signal processors are put in to */
     MMSigChain_init(&sigChain);
+    /* Initialize audio limiter */
+    audio_limiter_setup();
+    MMBusProc *audio_limiter_bus_proc = MMBusProc_new(outBus,audio_limiter_fun,audio_limiter);
     int i;
     /* The last (NUM_NOTES-1) sample players sum into the bus, the first one
      * coming right at the top of the signal chain writes straight into the bus
@@ -59,8 +91,11 @@ void signal_chain_setup(void)
     /* insert in signal chain after sig const*/
     MMSigProc_insertAfter(&sigChain.sigProcs, &spsps[i]);
     /* The first spsps is the last one in the chain and so this is where you
-     * want to write to the feedback bus */
-    fbOnNode = (MMSigProc*)&spsps[0];
+     * want to put the limiter*/
+    MMSigProc_insertAfter((MMSigProc*)&spsps[0],audio_limiter_bus_proc);
+    /* We write to the feedback bus after limiting, so this is where it is
+    placed after when feedback is on. */
+    fbOnNode = (MMSigProc*)audio_limiter_bus_proc;
     /* Send the contents of the outBus to the fbBus. When feedback is on, the
      * bus splitter  will go after the last sampleplayer. When feedback is off,
      * it goes after the sig const and therefore only receives 0s */
