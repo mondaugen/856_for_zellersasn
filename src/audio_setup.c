@@ -48,9 +48,17 @@ static void saturate_output(audio_hw_io_t *params)
     }
 }
 
+/* If this is greater than 1, we have a buffer underrun */
+static volatile int n_audio_interrupts = 0;
+static volatile int underrun_occurred = 0;
+
 void audio_hw_io(audio_hw_io_t *params)
 {
     int n;
+    n_audio_interrupts++;
+    if (n_audio_interrupts > 1) {
+        underrun_occurred = 1;
+    }
 #ifdef AUDIO_HW_TEST_THROUGHPUT
 #if defined(BOARD_V1)
     for (n = 0; n < params->length; n++) {
@@ -124,4 +132,5 @@ void audio_hw_io(audio_hw_io_t *params)
 #endif
     }
 #endif /* AUDIO_HW_TEST_THROUGHPUT */
+    n_audio_interrupts--;
 }

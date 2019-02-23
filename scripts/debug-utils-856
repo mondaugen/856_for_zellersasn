@@ -10,3 +10,30 @@ define dump_adc_values
         set $n=$n-1
     end
 end
+
+# assumes you have set a break where outBus is defined
+define dump_output_buffer
+    if $argc == 0
+        set $n=100
+    else
+        set $n=$arg0
+    end
+    while $n > 0
+        continue
+        append binary memory /tmp/buf.f32 outBus->data outBus->data+outBus->size
+        set $n=$n-1
+    end
+end
+
+define dump_output_buffer_s16
+    if $argc == 0
+        set $n=100
+    else
+        set $n=$arg0
+    end
+    while $n > 0
+        continue
+        append binary memory /tmp/buf.s16 params->out params->out+(params->length*params->nchans_out)
+        set $n=$n-1
+    end
+end
