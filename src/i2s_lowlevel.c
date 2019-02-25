@@ -54,6 +54,10 @@ static unsigned int rate = 0;
 
 static unsigned int i2s_frame_error_flag = 0;
 
+static unsigned int i2s_dma_buffer_underrun = 0;
+/* Assumes CODEC_DMA_BUF_LEN is a power of 2 */
+#define DMA_NDTR_SIZE_MASK ((uint32_t)((CODEC_DMA_BUF_LEN * 2) - 1))
+
 static uint16_t all_codec_reg[8];
 
 static void codec_i2c_setup(void);
@@ -380,6 +384,11 @@ static int i2s_peripherals_setup(uint32_t sr)
    
 }
 
+uint32_t i2s_dma_get_ndtr(void)
+{
+    return DMA1_Stream0->NDTR;
+}
+
 static void i2s_peripherals_disable(void)
 {
     /* Disable DMA interrupts */
@@ -483,7 +492,8 @@ audio_hw_err_t audio_hw_start(audio_hw_setup_t *params)
 void DMA1_Stream0_IRQHandler(void)
 {
     NVIC_ClearPendingIRQ(DMA1_Stream0_IRQn);
-    uint32_t dma1_lisr = DMA1->LISR;
+    uint32_t dma1_lisr = DMA1->LISR,
+             ndtr = i2s_dma_get_ndtr(); /* number of items left to transfer */
     if (dma1_lisr & DMA_LISR_TEIF0) {
         /* Transfer error */
 #ifdef CODEC_DMA_HARDFAULT_ON_I2S_ERR
@@ -529,6 +539,10 @@ void DMA1_Stream0_IRQHandler(void)
         i2s_correct_frame_error();
     }
     audio_hw_io(&audiohwio);
+    ndtr = (ndtr - i2s_dma_get_ndtr()) & DMA_NDTR_SIZE_MASK;
+    if (ndtr > CODEC_DMA_BUF_LEN) {
+        i2s_dma_buffer_underrun = 1;
+    }
 }
 
 void DMA1_Stream7_IRQHandler(void)
