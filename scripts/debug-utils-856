@@ -37,3 +37,13 @@ define dump_output_buffer_s16
         set $n=$n-1
     end
 end
+
+define load_remote_bin_ocd
+    target remote localhost:3333
+    monitor reset halt
+    file $arg0
+    load
+    monitor reset halt
+    # import the methods defined in arm-debug-utils
+    source scripts/arm-debug-utils
+end

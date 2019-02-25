@@ -145,3 +145,13 @@ test_mem_read:
 	$(OCD) -c init \
 		-c "mdw 0x40021810" \
 		-c shutdown | awk '{print $$1}'
+
+test/bin/simple.bin : test/simple.c src/system_init.c src/syscalls.c src/startup.c src/fmc.c
+	$(CC) $^ -o $@ $(CFLAGS) $(LDFLAGS)
+
+flash_simple: test/bin/simple.bin
+	$(OCD) -c init \
+		-c "reset halt" \
+	    -c "flash write_image erase $<" \
+		-c "reset run" \
+	    -c shutdown
