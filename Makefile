@@ -16,7 +16,7 @@ LIB						 = $(MM_DSP_PATH)/lib
 LIB						+= $(MM_PRIMITIVES_PATH)/lib
 LIB						+= $(NE_DATASTRUCTURES_PATH)/lib
 LIB						+= $(LIMITER_IR_AF_PATH)
-CMSIS_INCLUDES           = ../../build/CMSIS/Include
+CMSIS_INCLUDES           = ../CMSIS_5/CMSIS/Core/Include/ ../CMSIS_5/CMSIS/DSP/Include/
 INC 				     = $(MM_DSP_SCHABLONE_PATH)/inc
 INC					    += $(MMMIDI_PATH)/inc
 INC					    += $(MM_DSP_PATH)/inc
@@ -57,6 +57,9 @@ STRIP					 = arm-none-eabi-strip
 OCD 		   			 = sudo openocd -f $(OPENOCD_BOARD) -f $(OPENOCD_INTERFACE)
 PYTHON					 = python
 CONST_OBJS				 = objs/tables.o
+
+# Linker settings for simple tests and profiling
+PROF_LDFLAGS             = -L../CMSIS_5/CMSIS/Lib/GCC -larm_cortexM4lf_math -Tstm32f429.ld
 
 # Audio settings
 BUFFER_SIZE=256
@@ -147,7 +150,7 @@ test_mem_read:
 		-c shutdown | awk '{print $$1}'
 
 test/bin/simple.bin : test/simple.c src/system_init.c src/syscalls.c src/startup.c src/fmc.c
-	$(CC) $^ -o $@ $(CFLAGS) $(LDFLAGS)
+	$(CC) $^ -o $@ $(CFLAGS) $(PROF_LDFLAGS)
 
 flash_simple: test/bin/simple.bin
 	$(OCD) -c init \
@@ -155,3 +158,22 @@ flash_simple: test/bin/simple.bin
 	    -c "flash write_image erase $<" \
 		-c "reset run" \
 	    -c shutdown
+
+test/data_1.h : test/gen_data_1.py
+	python3 $<
+
+test/bin/profile_arm_add.bin : test/profile_arm_add.c \
+                               src/system_init.c \
+                               src/syscalls.c \
+                               src/startup.c \
+                               src/fmc.c \
+                               test/data_1.h
+	$(CC) $(filter %.c, $^) -o $@ $(CFLAGS) $(PROF_LDFLAGS)
+
+test/bin/profile_arm_scale_add.bin : test/profile_arm_scale_add.c \
+                               src/system_init.c \
+                               src/syscalls.c \
+                               src/startup.c \
+                               src/fmc.c \
+                               test/data_1.h
+	$(CC) $(filter %.c, $^) -o $@ $(CFLAGS) $(PROF_LDFLAGS)
