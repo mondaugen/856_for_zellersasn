@@ -7,6 +7,7 @@
 #include "mm_busproc.h"
 #include "limiter_ir_af.h"
 #include "_gend_fwir_header.h"
+#include "dc_notch_filter.h"
 
 MMBus *inBus, *outBus, *fbBus;
 MMSigChain sigChain;
@@ -47,6 +48,27 @@ static void audio_limiter_setup(void)
     audio_limiter = limiter_ir_af_new(&liai);
 }
 
+struct dc_notch_filter_1_pole *dc_blocker = NULL;
+struct dc_notch_filter_1_pole_init dc_blocker_init;
+
+static void dc_blocker_fun(MMBus *bus, void *aux_)
+{
+    struct dc_notch_filter_1_pole *aux = aux_;
+    if ((aux != NULL) && (bus->channels == 1)) {
+        /* we can block dc */
+        dc_notch_filter_1_pole_tick(aux,bus->data);
+    } 
+}
+
+static void dc_blocker_setup(void)
+{
+    dc_blocker_init = (struct dc_notch_filter_1_pole_init) {
+        .r = .999, // gives pretty low 3dB point on highpass
+        .buffer_size = BUFFER_SIZE
+    };
+    dc_blocker = dc_notch_filter_1_pole_new(&dc_blocker_init);
+}
+
 static MMBusMerger fbBusMerger;
 
 void signal_chain_setup(void)
@@ -65,6 +87,9 @@ void signal_chain_setup(void)
     /* Initialize audio limiter */
     audio_limiter_setup();
     MMBusProc *audio_limiter_bus_proc = MMBusProc_new(outBus,audio_limiter_fun,audio_limiter);
+    /* Initialize DC blocker */
+    dc_blocker_setup();
+    MMBusProc *dc_blocker_bus_proc = MMBusProc_new(outBus,dc_blocker_fun,dc_blocker);
     int i;
     /* The last (NUM_NOTES-1) sample players sum into the bus, the first one
      * coming right at the top of the signal chain writes straight into the bus
@@ -90,9 +115,14 @@ void signal_chain_setup(void)
     MMTrapEnvedSamplePlayer_init(&spsps[i],&tespinit);
     /* insert in signal chain after sig const*/
     MMSigProc_insertAfter(&sigChain.sigProcs, &spsps[i]);
-    /* The first spsps is the last one in the chain and so this is where you
-     * want to put the limiter*/
-    MMSigProc_insertAfter((MMSigProc*)&spsps[0],audio_limiter_bus_proc);
+    /*
+    The first spsps is the last one in the chain and so this is where you
+    want to put the dc blocker and limiter
+    first we block DC.
+    */
+    MMSigProc_insertAfter((MMSigProc*)&spsps[0],dc_blocker_bus_proc);
+    /* Then we limit */
+    MMSigProc_insertAfter((MMSigProc*)dc_blocker_bus_proc,audio_limiter_bus_proc);
     /* We write to the feedback bus after limiting, so this is where it is
     placed after when feedback is on. */
     fbOnNode = (MMSigProc*)audio_limiter_bus_proc;
