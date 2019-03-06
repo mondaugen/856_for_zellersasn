@@ -307,10 +307,11 @@ static void NoteOnEvent_happen(MMEvent *event)
 //                    1. :
 //                    (noteParamSets[noe->parameterSet].amplitude
 //                            * noe->currentFade);
-            no.amplitude = noe->currentFade;
+            no.amplitude = noe->currentFade * noteParamSets[noe->parameterSet].initialFade;
             no.p_gain = &noteParamSets[noe->parameterSet].amplitude; 
-            no.index = noe->currentPosition
-                        * MMArray_get_length(theSound->wavtab);
+            no.index = MM_fwrap(
+                noteParamSets[noe->parameterSet].startPoint + noe->currentPosition,
+                0,1) * MMArray_get_length(theSound->wavtab);
             /* sustainTime is the length of the audio, times
              * noteParamSets[parameterSet].sustainTime *
              * length_of_sound_seconds * (1 -
@@ -385,7 +386,7 @@ static void NoteSchedEvent_happen(MMEvent *event)
                             noteParamSets[n].numRepeats,
                             0,
                             nse->amplitude_scalar,
-                            noteParamSets[n].startPoint,
+                            0,
                             noteParamSets[n].pitches[0]
                                 + noteParamSets[n].fine_pitches[0],
                             nse->pitch_offset,

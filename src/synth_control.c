@@ -277,12 +277,12 @@ void synth_control_set_tempo_scale_norm(float param)
     synth_control_update_tempo_scale(tempoBPM_scale_table[_tmp]);
 }
 
+static void update_fade_rates(int note_param_idx);
+
 void synth_control_set_numRepeats(int numRepeats_param, int note_params_idx)
 {
     noteParamSets[note_params_idx].numRepeats = numRepeats_param;
-    synth_control_set_fade(noteParamSets[note_params_idx].ampLastEcho,
-                           noteParamSets[note_params_idx].numRepeats,
-                          note_params_idx); 
+    update_fade_rates(note_params_idx);
 }
 
 void synth_control_set_numRepeats_curParams(int numRepeats_param)
@@ -966,20 +966,28 @@ void synth_control_set_fade_curParams(float gain_param, int num_repeats)
             synth_control_get_editingWhichParams());
 }
 
+void synth_control_set_fade_rate(float rate, int note_params_idx)
+{
+    noteParamSets[note_params_idx].fadeRate = rate;
+}
+
+static void
+update_fade_rates(int note_params_idx)
+{
+    int numRepeats = noteParamSets[note_params_idx].numRepeats;
+    float amp_last_echo = noteParamSets[note_params_idx].ampLastEcho,
+          fade_rate = numRepeats == 0 ? 1 : powf(amp_last_echo,1./numRepeats),
+          initial_fade = fade_rate <= 1 ? 1. : 1./amp_last_echo;
+    noteParamSets[note_params_idx].initialFade = initial_fade;
+    noteParamSets[note_params_idx].fadeRate = fade_rate;
+}
+    
+
 void synth_control_set_ampLastEcho(float gain_param, int note_params_idx)
 {
-    if (gain_param <= 0.5) {
-        gain_param *= 2.;
-        gain_param = (1. - SYNTH_CONTROL_ECHO_MIN) * gain_param
-            + SYNTH_CONTROL_ECHO_MIN;
-    } else {
-        gain_param = (gain_param - 0.5) * 2.;
-        gain_param =  (SYNTH_CONTROL_ECHO_MAX - 1.) * gain_param + 1.;
-    }
-    noteParamSets[note_params_idx].ampLastEcho = gain_param;
-    synth_control_set_fade(noteParamSets[note_params_idx].ampLastEcho,
-                           noteParamSets[note_params_idx].numRepeats,
-                           note_params_idx);
+    float amp_last_echo = powf(10,(gain_param*100.f - 60.f)/20.f);
+    noteParamSets[note_params_idx].ampLastEcho = amp_last_echo;
+    update_fade_rates(note_params_idx);
 }
 
 void synth_control_set_ampLastEcho_curParams(float gain_param)
@@ -1043,6 +1051,7 @@ void synth_control_reset_param_sets(NoteParamSet *param_sets, int size)
     param_sets[0].offsetBeats = SYNTH_CONTROL_DEFAULT_OFFSETBEATS;
     param_sets[0].intermittency = SYNTH_CONTROL_DEFAULT_INTERMITTENCY;
     param_sets[0].fadeRate      = SYNTH_CONTROL_DEFAULT_FADERATE;
+    param_sets[0].initialFade      = SYNTH_CONTROL_DEFAULT_INITIALFADE;
     param_sets[0].ampLastEcho   = SYNTH_CONTROL_DEFAULT_AMPLASTECHO;
     param_sets[0].positionStride = SYNTH_CONTROL_DEFAULT_POSITIONSTRIDE;
     uint32_t _n;
@@ -1065,6 +1074,7 @@ void synth_control_reset_param_sets(NoteParamSet *param_sets, int size)
         param_sets[size].offsetBeats = SYNTH_CONTROL_DEFAULT_OFFSETBEATS;
         param_sets[size].intermittency = SYNTH_CONTROL_DEFAULT_INTERMITTENCY;
         param_sets[size].fadeRate      = SYNTH_CONTROL_DEFAULT_FADERATE_AUXNOTE;
+        param_sets[size].initialFade      = SYNTH_CONTROL_DEFAULT_INITIALFADE;
         param_sets[size].ampLastEcho   = SYNTH_CONTROL_DEFAULT_AMPLASTECHO_AUXNOTE;
         param_sets[size].positionStride = SYNTH_CONTROL_DEFAULT_POSITIONSTRIDE;
         for (_n = 0; _n < SYNTH_CONTROL_PITCH_TABLE_SIZE; _n++) {

@@ -95,11 +95,16 @@ typedef struct __NoteParamSet {
     MMSample ampLastEcho; /* The amplitude of the last echo, which is used to
                              calculate the fade rate based on the number of
                              repeats */
+    /* The initial amplitude scaling value. 1 if fadeRate <= 1,
+    power(1/fadeRate,NUM_REPEATS) if fadeRate > 1 */
+    MMSample initialFade;
     MMSample fadeRate;
     /* If stride enabled, how much the position head is advanced each repeat */
     MMSample positionStride; 
     /* How much the position head is advanced each start of a group of repeats */
     MMSample noteStride;
+    /* How far we've advanced so far, this value is added to startPoint */
+    MMSample noteStrideAcc;
     MMSample swing[SYNTH_CONTROL_SWING_TABLE_SIZE];
 } NoteParamSet;
 
@@ -192,6 +197,7 @@ typedef struct __NoteParamSet {
 #define SYNTH_CONTROL_ABS_MAX_TEMPO_BPM (60. / (float)(audio_hw_get_block_size(NULL) \
                                         / (float)audio_hw_get_sample_rate(NULL)))
 #define SYNTH_CONTROL_DEFAULT_SWING 1. 
+#define SYNTH_CONTROL_DEFAULT_INITIALFADE 1.
 
 typedef uint32_t SynthControlEditingWhichParamsIndex;
 /* The number of sets of note parameters */

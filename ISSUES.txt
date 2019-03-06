@@ -17,3 +17,10 @@ Wed Feb  6 15:39:52 EST 2019
     - normal stride is now beat stride
 - tempo should be logarithmic, fine control fills in gaps precisely
 - try out limiter
+
+Wed Mar  6 13:00:39 EST 2019
+- len should maybe adapt according to the playback speed (ah but what pitch to use?)
+    - maybe just the len of the first note (N1)
+- abs only changes at the beginning of a note group! it should change at each repeat
+- maybe OFFSET should be multiplied by the number of skips?
+- we don't need to clip FADE to 1 because we have the limiter now

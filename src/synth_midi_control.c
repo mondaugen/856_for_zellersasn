@@ -189,12 +189,8 @@ void synth_midi_cc_stride_reset(void *data, MIDIMsg *msg)
 	#endif
     synth_midi_cc_stride_reset_t *_params;
     _params = (synth_midi_cc_stride_reset_t*)data;
-    SynthControlPosMode _posMode = (msg->data[2] > 0) 
-        ? SynthControlPosMode_STRIDE
-        : SynthControlPosMode_ABSOLUTE;
-    synth_control_set_posMode_onChange(_posMode,
-            &_params->last_state,
-            _params->note);
+    /* map to the middle */
+    synth_control_set_positionStride(0.5, _params->note);
 }
 
 void synth_midi_cc_stride_reset_t_init(
