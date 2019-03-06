@@ -210,7 +210,7 @@ void synth_midi_cc_stride_reset_t_init(
         MIDI_CC_CB_Router_addCB(&router->cbRouters[midi_channel],
                 /* cc number */
                 n * SYNTH_MIDI_NUM_NOTE_PARAMS 
-                    + synth_midi_cc_type_t_STRIDE_STATE,
+                    + synth_midi_cc_type_t_STRIDE_RESET,
                 synth_midi_cc_stride_reset,
                 &controls[n]);
     }

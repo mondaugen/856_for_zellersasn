@@ -30,7 +30,7 @@ typedef enum {
     synth_midi_cc_type_t_FBK_RATE,
     synth_midi_cc_type_t_EVENT_DELTA,
     synth_midi_cc_type_t_NUM_REPS,
-    synth_midi_cc_type_t_STRIDE_STATE,
+    synth_midi_cc_type_t_STRIDE_RESET,
     synth_midi_cc_type_t_INTERM,
     synth_midi_cc_type_t_SWING,
     synth_midi_cc_type_t_TEMPO_COARSE 
