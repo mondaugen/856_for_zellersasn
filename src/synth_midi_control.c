@@ -177,18 +177,18 @@ void synth_midi_cc_num_reps_control(void *data, MIDIMsg *msg)
             *note);
 }
 
-typedef struct __synth_midi_cc_stride_state_control {
+typedef struct __synth_midi_cc_stride_reset {
     int note;
     SynthControlPosMode last_state;
-} synth_midi_cc_stride_state_control_t;
+} synth_midi_cc_stride_reset_t;
 
-void synth_midi_cc_stride_state_control(void *data, MIDIMsg *msg)
+void synth_midi_cc_stride_reset(void *data, MIDIMsg *msg)
 {
     #ifdef DEBUG
-	synth_midi_check_msg(msg,synth_midi_cc_stride_state_control);
+	synth_midi_check_msg(msg,synth_midi_cc_stride_reset);
 	#endif
-    synth_midi_cc_stride_state_control_t *_params;
-    _params = (synth_midi_cc_stride_state_control_t*)data;
+    synth_midi_cc_stride_reset_t *_params;
+    _params = (synth_midi_cc_stride_reset_t*)data;
     SynthControlPosMode _posMode = (msg->data[2] > 0) 
         ? SynthControlPosMode_STRIDE
         : SynthControlPosMode_ABSOLUTE;
@@ -197,10 +197,10 @@ void synth_midi_cc_stride_state_control(void *data, MIDIMsg *msg)
             _params->note);
 }
 
-void synth_midi_cc_stride_state_control_t_init(
+void synth_midi_cc_stride_reset_t_init(
         MIDI_Router_Standard *router,
         int midi_channel,
-        synth_midi_cc_stride_state_control_t *controls,
+        synth_midi_cc_stride_reset_t *controls,
         int num_params)
 {
     int n;
@@ -211,7 +211,7 @@ void synth_midi_cc_stride_state_control_t_init(
                 /* cc number */
                 n * SYNTH_MIDI_NUM_NOTE_PARAMS 
                     + synth_midi_cc_type_t_STRIDE_STATE,
-                synth_midi_cc_stride_state_control,
+                synth_midi_cc_stride_reset,
                 &controls[n]);
     }
 }
@@ -444,9 +444,9 @@ void synth_midi_control_setup(int midi_channel)
             SYNTH_CONTROL_PITCH_TABLE_SIZE,
             midi_cc_pitch_funcs,
             midi_cc_pitch_types);
-    static synth_midi_cc_stride_state_control_t
+    static synth_midi_cc_stride_reset_t
         stride_state_params[NUM_NOTE_PARAM_SETS];
-    synth_midi_cc_stride_state_control_t_init(
+    synth_midi_cc_stride_reset_t_init(
             &midiRouter,
             midi_channel,
             stride_state_params,
@@ -549,7 +549,7 @@ void (*midi_note_param_funs[])(void*,MIDIMsg*) = {
     synth_midi_cc_fbk_rate_control,
     synth_midi_cc_event_delta_control,
     synth_midi_cc_num_reps_control,
-    synth_midi_cc_stride_state_control,
+    synth_midi_cc_stride_reset,
     synth_midi_cc_interm_control,
     synth_midi_cc_swing_control,
     synth_midi_cc_pitch_fine_control,
@@ -567,7 +567,7 @@ void (*midi_note_param_funs[])(void*,MIDIMsg*) = {
     synth_midi_cc_fbk_rate_control,
     synth_midi_cc_event_delta_control,
     synth_midi_cc_num_reps_control,
-    synth_midi_cc_stride_state_control,
+    synth_midi_cc_stride_reset,
     synth_midi_cc_interm_control,
     synth_midi_cc_swing_control,
     synth_midi_cc_pitch_fine_control,
@@ -585,7 +585,7 @@ void (*midi_note_param_funs[])(void*,MIDIMsg*) = {
     synth_midi_cc_fbk_rate_control,
     synth_midi_cc_event_delta_control,
     synth_midi_cc_num_reps_control,
-    synth_midi_cc_stride_state_control,
+    synth_midi_cc_stride_reset,
     synth_midi_cc_interm_control,
     synth_midi_cc_swing_control,
     synth_midi_cc_tempo_coarse_control,

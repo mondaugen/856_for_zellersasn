@@ -251,7 +251,6 @@ static void NoteOnEvent_happen(MMEvent *event)
          * 0 */
         MMSample _next_pitch;
         int _next_repeat_idx, _cur_param_set, _next_pitch_idx, _next_swing_idx;
-        SynthControlPosMode _posMode;
         _cur_param_set = noe->parameterSet;
         _next_repeat_idx = noe->repeatIndex + 1;
         _next_swing_idx = (noe->swing_idx + 1) % SYNTH_CONTROL_SWING_TABLE_SIZE;
@@ -271,7 +270,6 @@ static void NoteOnEvent_happen(MMEvent *event)
                 _next_pitch_idx = _next_repeat_idx % SYNTH_CONTROL_PITCH_TABLE_SIZE;
                 break;
         }
-        _posMode = noteParamSets[_cur_param_set].posMode;
         if (noe->numRepeats > 0) {
             schedule_noteOn_event(
                     (noteParamSets[noe->parameterSet].eventDeltaBeats

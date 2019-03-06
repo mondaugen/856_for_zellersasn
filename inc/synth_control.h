@@ -96,8 +96,10 @@ typedef struct __NoteParamSet {
                              calculate the fade rate based on the number of
                              repeats */
     MMSample fadeRate;
-    MMSample positionStride; /* If stride enabled, how much the position head is advanced each playback */
-    SynthControlPosMode posMode; /* Whether there is stride or the position stays absolute */
+    /* If stride enabled, how much the position head is advanced each repeat */
+    MMSample positionStride; 
+    /* How much the position head is advanced each start of a group of repeats */
+    MMSample noteStride;
     MMSample swing[SYNTH_CONTROL_SWING_TABLE_SIZE];
 } NoteParamSet;
 
@@ -236,8 +238,7 @@ void synth_control_set_recMode(SynthControlRecMode recMode_param);
 void synth_control_set_recMode_onChange(SynthControlRecMode recMode_param,
                                SynthControlRecMode *last_recMode_param);
 SynthControlRecMode synth_control_get_recMode(void);
-void synth_control_set_posMode(SynthControlPosMode posMode_param,
-                               int which_params);
+void synth_control_set_posMode(SynthControlPosMode posMode_param);
 SynthControlPosMode synth_control_get_posMode_curParams(void);
 void synth_control_set_gainMode(SynthControlGainMode gainMode_param);
 SynthControlGainMode synth_control_get_gainMode(void);
@@ -270,8 +271,7 @@ void synth_control_reset_noteOnEventCounts(void);
 void synth_control_set_posMode_onChange_curParams(SynthControlPosMode posMode_param,
                                         SynthControlPosMode *last_posMode_param);
 void synth_control_set_posMode_onChange(SynthControlPosMode posMode_param,
-                                        SynthControlPosMode *last_posMode_param,
-                                        int which_params);
+                                        SynthControlPosMode *last_posMode_param);
 
 void synth_control_set_envelopeTime(float envelopeTime_param,
                                     int note_param_idx);

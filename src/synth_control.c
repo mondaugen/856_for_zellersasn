@@ -78,6 +78,9 @@ static void synth_control_reset_aux_note_all_params(void);
 
 static int expr_ctl_chosen = 0;
 
+/* This is actually now just used to indicate what we are controlling: STRIDE, ABS or UNI */
+SynthControlPosMode posMode = SYNTH_CONTROL_DEFAULT_POSMODE; 
+
 static int noteSched_scheduling_helper(NoteSchedEvent *nse)
 {
     if (recording_exists == 0) {
@@ -89,7 +92,6 @@ static int noteSched_scheduling_helper(NoteSchedEvent *nse)
     schedule_noteSched_event(0,nse);
     return 1;
 }
-
 
 void autorelease_on_done(MMEnvedSamplePlayer * esp)
 {
@@ -1043,7 +1045,6 @@ void synth_control_reset_param_sets(NoteParamSet *param_sets, int size)
     param_sets[0].fadeRate      = SYNTH_CONTROL_DEFAULT_FADERATE;
     param_sets[0].ampLastEcho   = SYNTH_CONTROL_DEFAULT_AMPLASTECHO;
     param_sets[0].positionStride = SYNTH_CONTROL_DEFAULT_POSITIONSTRIDE;
-    param_sets[0].posMode = SYNTH_CONTROL_DEFAULT_POSMODE;
     uint32_t _n;
     for (_n = 0; _n < SYNTH_CONTROL_PITCH_TABLE_SIZE; _n++) {
         param_sets[0].pitches[_n] = SYNTH_CONTROL_DEFAULT_PITCH;
@@ -1066,7 +1067,6 @@ void synth_control_reset_param_sets(NoteParamSet *param_sets, int size)
         param_sets[size].fadeRate      = SYNTH_CONTROL_DEFAULT_FADERATE_AUXNOTE;
         param_sets[size].ampLastEcho   = SYNTH_CONTROL_DEFAULT_AMPLASTECHO_AUXNOTE;
         param_sets[size].positionStride = SYNTH_CONTROL_DEFAULT_POSITIONSTRIDE;
-        param_sets[size].posMode = SYNTH_CONTROL_DEFAULT_POSMODE;
         for (_n = 0; _n < SYNTH_CONTROL_PITCH_TABLE_SIZE; _n++) {
             param_sets[size].pitches[_n] = SYNTH_CONTROL_DEFAULT_PITCH;
             param_sets[size].fine_pitches[_n] = SYNTH_CONTROL_DEFAULT_FINEPITCH;
@@ -1081,29 +1081,6 @@ void synth_control_reset_param_sets(NoteParamSet *param_sets, int size)
 static void synth_control_reset_aux_note_all_params(void)
 {
     synth_control_reset_param_sets(noteParamSets,NUM_NOTE_PARAM_SETS);
-    /*
-    int size;
-    for (size = 1; size < NUM_NOTE_PARAM_SETS; size++) {
-        noteParamSets[size].attackTime = SYNTH_CONTROL_DEFAULT_ATTACKTIME;     
-        noteParamSets[size].sustainTime  = SYNTH_CONTROL_DEFAULT_SUSTAINTIME; 
-        noteParamSets[size].releaseTime = SYNTH_CONTROL_DEFAULT_RELEASETIME; 
-        noteParamSets[size].eventDeltaBeats = SYNTH_CONTROL_DEFAULT_EVENTDELTABEATS;   
-        noteParamSets[size].amplitude = 0;
-        noteParamSets[size].startPoint = SYNTH_CONTROL_DEFAULT_STARTPOINT;
-        noteParamSets[size].numRepeats = SYNTH_CONTROL_DEFAULT_NUMREPEATS;
-        noteParamSets[size].offsetBeats = SYNTH_CONTROL_DEFAULT_OFFSETBEATS;
-        noteParamSets[size].intermittency = SYNTH_CONTROL_DEFAULT_INTERMITTENCY;
-        noteParamSets[size].fadeRate      = SYNTH_CONTROL_DEFAULT_FADERATE_AUXNOTE;
-        noteParamSets[size].ampLastEcho   = SYNTH_CONTROL_DEFAULT_AMPLASTECHO_AUXNOTE;
-        noteParamSets[size].positionStride = SYNTH_CONTROL_DEFAULT_POSITIONSTRIDE;
-        noteParamSets[size].posMode = SYNTH_CONTROL_DEFAULT_POSMODE;
-        int _n;
-        for (_n = 0; _n < SYNTH_CONTROL_PITCH_TABLE_SIZE; _n++) {
-            noteParamSets[size].pitches[_n] = SYNTH_CONTROL_DEFAULT_PITCH;
-            noteParamSets[size].fine_pitches[_n] = SYNTH_CONTROL_DEFAULT_FINEPITCH;
-        }
-    };
-    */
 }
 
 void synth_control_reset_global_params(void)
@@ -1198,17 +1175,15 @@ SynthControlRecMode synth_control_get_recMode(void)
     return recMode;
 }
 
-void synth_control_set_posMode(SynthControlPosMode posMode_param,
-                               int which_params)
+void synth_control_set_posMode(SynthControlPosMode posMode_param)
 {
-    noteParamSets[which_params].posMode = (SynthControlPosMode)posMode_param;
+    posMode = (SynthControlPosMode)posMode_param;
 }
 
 /* Only set if mode being set different from last mode set.
  * Second argument NULL pointer sets regardless. */
 void synth_control_set_posMode_onChange(SynthControlPosMode posMode_param,
-                                        SynthControlPosMode *last_posMode_param,
-                                        int which_params)
+                                        SynthControlPosMode *last_posMode_param)
 {
     if (last_posMode_param) {
         if (*last_posMode_param == posMode_param) {
@@ -1216,23 +1191,20 @@ void synth_control_set_posMode_onChange(SynthControlPosMode posMode_param,
         }
         *last_posMode_param = posMode_param;
     }
-    synth_control_set_posMode(posMode_param,which_params);
+    synth_control_set_posMode(posMode_param);
 }
 
 /* Only set if mode being set different from last mode set */
 void synth_control_set_posMode_onChange_curParams(SynthControlPosMode posMode_param,
                                         SynthControlPosMode *last_posMode_param)
 {
-    int _which_params = synth_control_get_editingWhichParams();
     synth_control_set_posMode_onChange(posMode_param,
-                                       last_posMode_param,
-                                       _which_params);
+                                       last_posMode_param);
 }
 
 SynthControlPosMode synth_control_get_posMode_curParams(void)
 {
-    int _which_params = synth_control_get_editingWhichParams();
-    return noteParamSets[_which_params].posMode;
+    return posMode;
 }
 
 void synth_control_set_gainMode(SynthControlGainMode gainMode_param)
