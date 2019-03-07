@@ -198,6 +198,8 @@ typedef struct __NoteParamSet {
                                         / (float)audio_hw_get_sample_rate(NULL)))
 #define SYNTH_CONTROL_DEFAULT_SWING 1. 
 #define SYNTH_CONTROL_DEFAULT_INITIALFADE 1.
+#define SYNTH_CONTROL_DEFAULT_NOTESTRIDE 0
+#define SYNTH_CONTROL_DEFAULT_NOTESTRIDEACC 0
 
 typedef uint32_t SynthControlEditingWhichParamsIndex;
 /* The number of sets of note parameters */
@@ -354,5 +356,7 @@ void synth_control_set_swing(float param,
                              int idx);
 void synth_control_set_swing_curParams(float param);
 void synth_control_expr_ctl_chosen_set(void);
+void synth_control_set_noteStride(float noteStride_param, int note_params_idx);
+void synth_control_set_noteStride_curParams(float noteStride_param);
 
 #endif /* SYNTH_CONTROL_H */

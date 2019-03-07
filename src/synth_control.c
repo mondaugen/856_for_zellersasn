@@ -81,6 +81,15 @@ static int expr_ctl_chosen = 0;
 /* This is actually now just used to indicate what we are controlling: STRIDE, ABS or UNI */
 SynthControlPosMode posMode = SYNTH_CONTROL_DEFAULT_POSMODE; 
 
+static void
+reset_noteStrideAcc(void)
+{
+    int n;
+    for (n = 0; n < NUM_NOTE_PARAM_SETS; n++) {
+        noteParamSets[n].noteStrideAcc = 0;
+    }
+}
+
 static int noteSched_scheduling_helper(NoteSchedEvent *nse)
 {
     if (recording_exists == 0) {
@@ -88,6 +97,8 @@ static int noteSched_scheduling_helper(NoteSchedEvent *nse)
         free(nse);
         return 0;
     }
+    /* Reset note stride accumulator. */
+    reset_noteStrideAcc();
     /* schedule the noteSchedEvent */
     schedule_noteSched_event(0,nse);
     return 1;
@@ -424,6 +435,19 @@ void synth_control_set_positionStride(float positionStride_param, int note_param
 void synth_control_set_positionStride_curParams(float positionStride_param)
 {
     synth_control_set_positionStride(positionStride_param,
+            synth_control_get_editingWhichParams());
+}
+
+void synth_control_set_noteStride(float noteStride_param, int note_params_idx)
+{
+    noteParamSets[note_params_idx].noteStride
+        = noteStride_param * SYNTH_CONTROL_POS_STRIDE_SCALE 
+            - SYNTH_CONTROL_POS_STRIDE_OFFSET;
+}
+
+void synth_control_set_noteStride_curParams(float noteStride_param)
+{
+    synth_control_set_noteStride(noteStride_param,
             synth_control_get_editingWhichParams());
 }
 
@@ -766,7 +790,11 @@ static void synth_control_reset_aux_note_gains(void)
 /* Calling this sets stride to 0 (no position advancement) */
 static void synth_control_reset_pos_stride(void)
 {
+    /* Reset note stride accumulator. */
+    reset_noteStrideAcc();
     synth_control_set_positionStride(0.5,
+            synth_control_get_editingWhichParams());
+    synth_control_set_noteStride(0.5,
             synth_control_get_editingWhichParams());
 }
 
@@ -1054,6 +1082,8 @@ void synth_control_reset_param_sets(NoteParamSet *param_sets, int size)
     param_sets[0].initialFade      = SYNTH_CONTROL_DEFAULT_INITIALFADE;
     param_sets[0].ampLastEcho   = SYNTH_CONTROL_DEFAULT_AMPLASTECHO;
     param_sets[0].positionStride = SYNTH_CONTROL_DEFAULT_POSITIONSTRIDE;
+    param_sets[0].noteStride = SYNTH_CONTROL_DEFAULT_NOTESTRIDE;
+    param_sets[0].noteStrideAcc = SYNTH_CONTROL_DEFAULT_NOTESTRIDEACC;
     uint32_t _n;
     for (_n = 0; _n < SYNTH_CONTROL_PITCH_TABLE_SIZE; _n++) {
         param_sets[0].pitches[_n] = SYNTH_CONTROL_DEFAULT_PITCH;
@@ -1077,6 +1107,8 @@ void synth_control_reset_param_sets(NoteParamSet *param_sets, int size)
         param_sets[size].initialFade      = SYNTH_CONTROL_DEFAULT_INITIALFADE;
         param_sets[size].ampLastEcho   = SYNTH_CONTROL_DEFAULT_AMPLASTECHO_AUXNOTE;
         param_sets[size].positionStride = SYNTH_CONTROL_DEFAULT_POSITIONSTRIDE;
+        param_sets[size].noteStride = SYNTH_CONTROL_DEFAULT_NOTESTRIDE;
+        param_sets[size].noteStrideAcc = SYNTH_CONTROL_DEFAULT_NOTESTRIDEACC;
         for (_n = 0; _n < SYNTH_CONTROL_PITCH_TABLE_SIZE; _n++) {
             param_sets[size].pitches[_n] = SYNTH_CONTROL_DEFAULT_PITCH;
             param_sets[size].fine_pitches[_n] = SYNTH_CONTROL_DEFAULT_FINEPITCH;

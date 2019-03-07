@@ -94,13 +94,17 @@ static void synth_adc_pos_curParams_control(adc_channel_t *chan,
             synth_control_set_startPoint_curParams(synth_adc_scale_thresh(chan->cur_val));
             break;
         case SynthControlPosMode_UNI:
-        case SynthControlPosMode_STRIDE:
             synth_control_set_positionStride_curParams(
+                    synth_adc_scale_thresh(chan->cur_val));
+            /* prevent pitches from resetting */
+            synth_control_set_uni_stuff_changed();
+            break;
+        case SynthControlPosMode_STRIDE:
+            synth_control_set_noteStride_curParams(
                     synth_adc_scale_thresh(chan->cur_val));
             break;
     }
 }
-
 
 static void synth_adc_eventDelta_curParams_control(adc_channel_t *chan,
                                          adc_channel_do_data_t *data)

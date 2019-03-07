@@ -386,7 +386,7 @@ static void NoteSchedEvent_happen(MMEvent *event)
                             noteParamSets[n].numRepeats,
                             0,
                             nse->amplitude_scalar,
-                            0,
+                            noteParamSets[n].noteStrideAcc,
                             noteParamSets[n].pitches[0]
                                 + noteParamSets[n].fine_pitches[0],
                             nse->pitch_offset,
@@ -397,6 +397,9 @@ static void NoteSchedEvent_happen(MMEvent *event)
                         noteParamSets[n].offsetBeats
                         * SCHED_BEAT_RES,
                         noe);
+                noteParamSets[n].noteStrideAcc = MM_fwrap(
+                    noteParamSets[n].noteStrideAcc + noteParamSets[n].noteStride,
+                    0,1);
             } else {
                 noteOnEventCount[n] += 1;
             }
