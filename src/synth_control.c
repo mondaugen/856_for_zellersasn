@@ -81,12 +81,18 @@ static int expr_ctl_chosen = 0;
 /* This is actually now just used to indicate what we are controlling: STRIDE, ABS or UNI */
 SynthControlPosMode posMode = SYNTH_CONTROL_DEFAULT_POSMODE; 
 
-static void
-reset_noteStrideAcc(void)
+void
+synth_control_reset_noteStrideAcc_note(int note)
+{
+    noteParamSets[note].noteStrideAcc = 0;
+}
+
+void
+synth_control_reset_noteStrideAcc(void)
 {
     int n;
     for (n = 0; n < NUM_NOTE_PARAM_SETS; n++) {
-        noteParamSets[n].noteStrideAcc = 0;
+        synth_control_reset_noteStrideAcc_note(n);
     }
 }
 
@@ -98,7 +104,7 @@ static int noteSched_scheduling_helper(NoteSchedEvent *nse)
         return 0;
     }
     /* Reset note stride accumulator. */
-    reset_noteStrideAcc();
+    synth_control_reset_noteStrideAcc();
     /* schedule the noteSchedEvent */
     schedule_noteSched_event(0,nse);
     return 1;
@@ -791,7 +797,7 @@ static void synth_control_reset_aux_note_gains(void)
 static void synth_control_reset_pos_stride(void)
 {
     /* Reset note stride accumulator. */
-    reset_noteStrideAcc();
+    synth_control_reset_noteStrideAcc();
     synth_control_set_positionStride(0.5,
             synth_control_get_editingWhichParams());
     synth_control_set_noteStride(0.5,

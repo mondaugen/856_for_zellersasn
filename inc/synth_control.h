@@ -358,5 +358,7 @@ void synth_control_set_swing_curParams(float param);
 void synth_control_expr_ctl_chosen_set(void);
 void synth_control_set_noteStride(float noteStride_param, int note_params_idx);
 void synth_control_set_noteStride_curParams(float noteStride_param);
+void synth_control_reset_noteStrideAcc_note(int note);
+void synth_control_reset_noteStrideAcc(void);
 
 #endif /* SYNTH_CONTROL_H */

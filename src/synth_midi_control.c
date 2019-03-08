@@ -1,198 +1,186 @@
-/* Copyright (c) 2016 Nicholas Esterer. All rights reserved. */
+#include <stdlib.h>
 
-#include "synth_midi_control.h" 
-#include "midi_util.h"
-
-#ifdef DEBUG 
-#include <assert.h> 
-static int synth_midi_check_index = 0;
-static void synth_midi_check_msg(MIDIMsg *msg,void (*fun)(void *,MIDIMsg *));
-#endif  
-
-static void synth_midi_note_param_indices_init(int *indices, size_t len)
-{
-    while (len--) {
-        indices[len] = len;
-    }
-}
-
-typedef struct __synth_midi_cc_pitch_control_t {
+typedef struct {
     int note;
     int pitch;
 } synth_midi_cc_pitch_control_t;
 
+synth_midi_cc_pitch_control_t *alloc_synth_midi_cc_pitch_control_t()
+{
+    return malloc(sizeof(synth_midi_cc_pitch_control_t));
+}
 
+//<td> N1 Pitch 1 control (fine) </td>
+//<td> Adjust pitch of 1st, 4th, ... notes in arpeggio from -50 cents to +50 cents (hundreths of a semitone). </td>
+//<td> N1 Pitch 2 control (fine) </td>
+//<td> Adjust pitch of 2nd, 5th, ... notes in arpeggio from -50 cents to +50 cents (hundreths of a semitone). </td>
+//<td> N1 Pitch 3 control (fine) </td>
+//<td> Adjust pitch of 3rd, 6th, ... notes in arpeggio from -50 cents to +50 cents (hundreths of a semitone). </td>
+/* note pitch */
 void synth_midi_cc_pitch_fine_control(void *data, MIDIMsg *msg)
 {
-    #ifdef DEBUG
-	synth_midi_check_msg(msg,synth_midi_cc_pitch_fine_control);
-	#endif
-    synth_midi_cc_pitch_control_t *params =
-        (synth_midi_cc_pitch_control_t*)data;
+    synth_midi_cc_pitch_control_t *params = data;
     synth_control_set_pitch_fine_quant(
         midi_util_map_midpoint_exact(msg->data[2],0,1),
         params->pitch,
         params->note);
 }
-
-static void synth_midi_cc_pitch_control_t_init(
-        MIDI_Router_Standard *router,
-        int midi_channel,
-        synth_midi_cc_pitch_control_t *controls,
-        size_t num_params,
-        size_t num_pitches,
-        void (**funcs)(void*,MIDIMsg*),
-        synth_midi_cc_type_t *types)
-{
-    size_t n, m;
-    for (n = 0; n < num_params; n++) {
-        for (m = 0; m < num_pitches; m++) {
-            void (**t_funcs)(void*,MIDIMsg*) = funcs;
-            synth_midi_cc_type_t * t_types = types;
-            controls[n*num_pitches + m].note = n;
-            controls[n*num_pitches + m].pitch = m;
-            while (*t_funcs != NULL) {
-                MIDI_CC_CB_Router_addCB(&router->cbRouters[midi_channel],
-                        /* cc number */
-                        n * SYNTH_MIDI_NUM_NOTE_PARAMS 
-                        + *t_types
-                        + m,
-                        *t_funcs,
-                        &controls[n*num_pitches + m]);
-                t_funcs++;
-                t_types++;
-            }
-        }
-    }
-}
-
+//<td> N1 Envelope control </td>
+//<td> Control the amplitude envelope of the notes just as the ENV knob does. </td>
+/* note */
 void synth_midi_cc_env_control(void *data, MIDIMsg *msg)
 {
-    #ifdef DEBUG
-	synth_midi_check_msg(msg,synth_midi_cc_env_control);
-	#endif
-    int *note = (int*)data;
+    int *note = data;
     synth_control_set_envelopeTime(
             (float)msg->data[2]/(float)MIDIMSG_DATA_BYTE_MAX,
             *note);
 }
 
+//<td> N1 Length control </td>
+//<td> Control the length of the notes just as the LEN knob does. </td>
+/* note */
 void synth_midi_cc_sus_control(void *data, MIDIMsg *msg)
 {
-    #ifdef DEBUG
-	synth_midi_check_msg(msg,synth_midi_cc_sus_control);
-	#endif
-    int *note = (int*)data;
+    int *note = data;
     synth_control_set_sustainTime(
             (float)msg->data[2]/(float)MIDIMSG_DATA_BYTE_MAX,
             *note);
 }
 
+//<td> N1 Pitch 1 control </td>
+//<td> Adjust pitch of 1st, 4th, ... notes in arpeggio according to the control
+//change value. 60 is no transposition, 48 is an octave below, 72 an octave
+//above, etc. Note that this is more range than is available on the physical
+//interface. </td>
+//<td> N1 Pitch 2 control </td>
+//<td> Adjust pitch of 2nd, 5th, ... notes in arpeggio according to the control
+//change value. 60 is no transposition, 48 is an octave below, 72 an octave
+//above, etc. Note that this is more range than is available on the physical
+//interface. </td>
+//<td> N1 Pitch 3 control </td>
+//<td> Adjust pitch of 3rd, 6th, ... notes in arpeggio according to the control
+//change value. 60 is no transposition, 48 is an octave below, 72 an octave
+//above, etc. Note that this is more range than is available on the physical
+//interface. </td>
+/* note pitch */
 void synth_midi_cc_pitch_control(void *data, MIDIMsg *msg)
 {
-    #ifdef DEBUG
-	synth_midi_check_msg(msg,synth_midi_cc_pitch_control);
-	#endif
-    synth_midi_cc_pitch_control_t *params =
-        (synth_midi_cc_pitch_control_t*)data;
+    synth_midi_cc_pitch_control_t *params = data;
     synth_control_set_pitch((float)msg->data[2],
             params->pitch,
             params->note);
 }
 
+//<td> N1 Gain control </td>
+//<td> Control the gain just as the GAIN knob does with the FADE/GAIN/FBK switch in the middle position. </td>
+/* note */
 void synth_midi_cc_gain_control(void *data, MIDIMsg *msg)
 {
-    #ifdef DEBUG
-	synth_midi_check_msg(msg,synth_midi_cc_gain_control);
-	#endif
-    int *note = (int*)data;
+    int *note = data;
     synth_control_set_wet(
             (float)msg->data[2]/(float)MIDIMSG_DATA_BYTE_MAX,
             *note);
 }
 
+
+//<td> N1 Position control </td>
+//<td> Adjust the position just as the POS knob does with the STRIDE/ABS/UNI switch in the middle position. </td>
+/* note */
 void synth_midi_cc_pos_control(void *data, MIDIMsg *msg)
 {
-    #ifdef DEBUG
-	synth_midi_check_msg(msg,synth_midi_cc_pos_control);
-	#endif
-    int *note = (int*)data;
+    int *note = data;
     synth_control_set_startPoint(
             (float)msg->data[2]/(float)MIDIMSG_DATA_BYTE_MAX,
             *note);
 }
 
+//<td> N1 Stride control </td>
+//<td> Adjust the position advancement just as the POS knob does with the STRIDE/ABS/UNI switch in the upward position. </td>
+/* note */
 void synth_midi_cc_stride_control(void *data, MIDIMsg *msg)
 {
-    #ifdef DEBUG
-	synth_midi_check_msg(msg,synth_midi_cc_stride_control);
-	#endif
-    int *note = (int*)data;
+    int *note = data;
     synth_control_set_positionStride(
             midi_util_map_midpoint_exact(msg->data[2],0,1),
             *note);
 }
 
+//<td> N1 Offset control </td>
+//<td> Adjust the playback offset just as the OFST knob does. </td>
+/* note */
 void synth_midi_cc_offset_control(void *data, MIDIMsg *msg)
 {
-    #ifdef DEBUG
-	synth_midi_check_msg(msg,synth_midi_cc_offset_control);
-	#endif
-    int *note = (int*)data;
+    int *note = data;
     synth_control_set_offset(
             (float)msg->data[2]/(float)MIDIMSG_DATA_BYTE_MAX,
             *note);
 }
 
+//<td> N1 Fade control </td>
+//<td> Adjust the fade just as the GAIN knob does with the FADE/GAIN/FBK switch in the upward position. </td>
+/* note */
 void synth_midi_cc_fbk_rate_control(void *data, MIDIMsg *msg)
 {
-    #ifdef DEBUG
-	synth_midi_check_msg(msg,synth_midi_cc_fbk_rate_control);
-	#endif
-    int *note = (int*)data;
+    int *note = data;
     synth_control_set_ampLastEcho(
             (float)msg->data[2]/(float)MIDIMSG_DATA_BYTE_MAX,
             *note);
 }
 
+//<td> N1 Free &#x394; control </td> <td> Adjust the time between notes just as
+//the &#x394; knob does with the FREE/QUANT/SKIP switch in the upward position.
+//* </td>
+/* note */
 void synth_midi_cc_event_delta_control(void *data, MIDIMsg *msg)
 {
-    #ifdef DEBUG
-	synth_midi_check_msg(msg,synth_midi_cc_event_delta_control);
-	#endif
-    int *note = (int*)data;
+    int *note = data;
     synth_control_set_eventDelta_free(
             (float)msg->data[2]/(float)MIDIMSG_DATA_BYTE_MAX,
             *note);
 }
 
+//<td> N1 Number of repeats control </td>
+//<td> Adjust the number of repeats (the number of notes in the arpeggio) just as the TMPO/REP knob does. * </td>
+/* note */
 void synth_midi_cc_num_reps_control(void *data, MIDIMsg *msg)
 {
-    #ifdef DEBUG
-	synth_midi_check_msg(msg,synth_midi_cc_num_reps_control);
-	#endif
-    int *note = (int*)data;
+    int *note = data;
     synth_control_set_numRepeats(
             (float)msg->data[2]/(float)MIDIMSG_DATA_BYTE_MAX * (float)SYNTH_CONTROL_MAX_NUM_REPEATS,
             *note);
 }
 
-typedef struct __synth_midi_cc_stride_reset {
-    int note;
-    SynthControlPosMode last_state;
-} synth_midi_cc_stride_reset_t;
-
+//<td> N1 Stride state </td>
+// If 0, reset the note stride accumulator
+// If 1, reset note stride
+// If 2, reset position stride
+// If >= 2, do everything
+/* note */
 void synth_midi_cc_stride_reset(void *data, MIDIMsg *msg)
 {
-    #ifdef DEBUG
-	synth_midi_check_msg(msg,synth_midi_cc_stride_reset);
-	#endif
-    synth_midi_cc_stride_reset_t *_params;
-    _params = (synth_midi_cc_stride_reset_t*)data;
+    int *note = data;
     /* map to the middle */
-    synth_control_set_positionStride(0.5, _params->note);
+    int datum = msg->data[2];
+    if (datum >= 2) { goto all; }
+    switch (datum) {
+all:
+    case 0:
+        synth_control_reset_noteStrideAcc_note(*note);
+        if (!(datum >= 2)) { break; }
+    case 1:
+        synth_control_set_noteStride(0.5, *note);
+        if (!(datum >= 2)) { break; }
+    case 2:
+        synth_control_set_positionStride(0.5, *note);
+        if (!(datum >= 2)) { break; }
+    }
 }
 
+/*
+TODO: Make this just return a struct containing everything the higher level
+functions need to know.
+Also this isn't needed this is just a note style function.
+*/
 void synth_midi_cc_stride_reset_t_init(
         MIDI_Router_Standard *router,
         int midi_channel,
@@ -212,80 +200,80 @@ void synth_midi_cc_stride_reset_t_init(
     }
 }
 
+//<td> N1 skip control </td>
+//<td> Control how often the arpeggio plays just like the &#x394; knob does with the FREE/QUANT/SKIP switch in the downward position. </td>
+/* note */
 void synth_midi_cc_interm_control(void *data, MIDIMsg *msg)
 {
-    #ifdef DEBUG
-	synth_midi_check_msg(msg,synth_midi_cc_interm_control);
-	#endif
-    int *note = (int*)data;
+    int *note = data;
     synth_control_set_intermittency(
             (float)msg->data[2]/(float)MIDIMSG_DATA_BYTE_MAX,
             *note);
 }
 
+//<td> N1 swing control </td>
+//<td> Control the swing factor for the time between repeats of notes.</td>
+/* note */
 void synth_midi_cc_swing_control(void *data, MIDIMsg *msg)
 {
-    #ifdef DEBUG
-	synth_midi_check_msg(msg,synth_midi_cc_swing_control);
-	#endif
-    int *note = (int*)data;
+    int *note = data;
     synth_control_set_swing((float)msg->data[2]/(float)MIDIMSG_DATA_BYTE_MAX,
                             *note);
 }
 
+//<td> Coarse tempo control </td>
+//<td> Control how often the sequence plays in beats per minute (BPM) from 11 BPM to 60 BPM. </td>
+/* global */
 void synth_midi_cc_tempo_coarse_control(void *data, MIDIMsg *msg)
 {
-    #ifdef DEBUG
-	synth_midi_check_msg(msg,synth_midi_cc_tempo_coarse_control);
-	#endif
     synth_control_set_tempo_coarse_norm(midi_util_map_midpoint_exact(msg->data[2],0,1));
 }
 
+//<td> Fine tempo control </td>
+//<td> Control how often the sequence plays by adding to the current tempo -10 to +10 BPM. </td>
+/* global */
 void synth_midi_cc_tempo_fine_control(void *data, MIDIMsg *msg)
 {
-    #ifdef DEBUG
-	synth_midi_check_msg(msg,synth_midi_cc_tempo_fine_control);
-	#endif
     synth_control_set_tempo_fine_norm(midi_util_map_midpoint_exact(msg->data[2],0,1));
 }
 
+//<td> Tempo scaling </td>
+//<td> Scale the tempo like the &#x394; knob with N1/N2/N3 in the upward position and FREE/QUANT/SKIP in the middle position. </td>
+/* global */
 void synth_midi_cc_tempo_scale_control(void *data, MIDIMsg *msg)
 {
-    #ifdef DEBUG
-	synth_midi_check_msg(msg,synth_midi_cc_tempo_scale_control);
-	#endif
     synth_control_set_tempo_scale_norm((float)msg->data[2] / (float)MIDIMSG_DATA_BYTE_MAX);
 }
 
+//<td> Tempo nudge </td>
+//<td> Slightly adjust the tempo like the TMPO/REP knob with N1/N2/N3 in the upward position and FREE/R=B/AREC in the middle position. </td>
+/* global */
 void synth_midi_cc_tempo_nudge_control(void *data, MIDIMsg *msg)
 {
-    #ifdef DEBUG
-	synth_midi_check_msg(msg,synth_midi_cc_tempo_nudge_control);
-	#endif
     synth_control_tempoNudge((float)msg->data[2] / (float)MIDIMSG_DATA_BYTE_MAX);
 }
 
+//<td> Preset store </td>
+//<td> Store the current settings in a specified register. The message value of 0 stores in the PRE1 register, a value of 1 stores in the PRE2 register and a value of 2 stores in the PRE3 register. If greater than 2, stores in the PRE3 register. </td>
+/* global */
 void synth_midi_cc_preset_store_control(void *data, MIDIMsg *msg)
 {
-    #ifdef DEBUG
-	synth_midi_check_msg(msg,synth_midi_cc_preset_store_control);
-	#endif
     sc_presets_store(msg->data[2]);
 }
 
+//<td> Preset recall </td>
+//<td> Recall the current settings from a specified register. The message value of 0 recalls from the PRE1 register, a value of 1 recalls from the PRE2 register and a value of 2 recalls from the PRE3 register.  If greater than 2, recalls from the PRE3 register. </td>
+/* global */
 void synth_midi_cc_preset_recall_control(void *data, MIDIMsg *msg)
 {
-    #ifdef DEBUG
-	synth_midi_check_msg(msg,synth_midi_cc_preset_recall_control);
-	#endif
     sc_presets_recall(msg->data[2]);
 }
 
+//<td> Record enable/disable </td>
+//<td> Start/stop recording. A message value of 0 stops recording. A message value greater than 0 starts or restarts recording depending on whether or not recording is already going on. </td>
+/* global */
 void synth_midi_cc_rec_control(void *data, MIDIMsg *msg)
 {
-    #ifdef DEBUG
-	synth_midi_check_msg(msg,synth_midi_cc_rec_control);
-	#endif
     if (msg->data[2] > 0) {
         synth_control_record_start();
     } else {
@@ -293,11 +281,11 @@ void synth_midi_cc_rec_control(void *data, MIDIMsg *msg)
     }
 }
 
+//<td> Play start </td>
+//<td> Start/stop playback. A message value of 0 disables all playback. A message value greater than 0 starts playback. If playback is already going on it will start a new set of notes along side the already playing set. </td>
+/* global */
 void synth_midi_cc_play_control(void *data, MIDIMsg *msg)
 {
-    #ifdef DEBUG
-	synth_midi_check_msg(msg,synth_midi_cc_play_control);
-	#endif
     if (msg->data[2] > 0) {
         synth_control_schedulerState_on();
     } else {
@@ -305,15 +293,12 @@ void synth_midi_cc_play_control(void *data, MIDIMsg *msg)
     }
 }
 
+//<td> Record mode </td>
+//<td> Sets the record mode just like the FREE/R=B/AREC switch. A message value of 0 sets the FREE record mode, a value of 1 sets the R=B mode and a value of 2 sets the AREC mode. A value greater than 2 sets the AREC mode. </td>
 typedef SynthControlRecMode synth_midi_cc_rec_mode_control_t;
-
 void synth_midi_cc_rec_mode_control(void *data, MIDIMsg *msg)
 {
-    #ifdef DEBUG
-	synth_midi_check_msg(msg,synth_midi_cc_rec_mode_control);
-	#endif
-    synth_midi_cc_rec_mode_control_t *last_recMode_param = 
-        (synth_midi_cc_rec_mode_control_t*)data;
+    synth_midi_cc_rec_mode_control_t *last_recMode_param = data;
     synth_control_set_recMode_onChange((SynthControlRecMode)msg->data[2],
                                        last_recMode_param);
 }
@@ -330,20 +315,16 @@ void synth_midi_cc_rec_mode_control_t_init(
             control);
 }
 
+//<td> Feedback state </td>
+//<td> Sets the feedback state just like the bottom position of the FADE/GAIN/FBK switch. A non-zero value turns feedback on, a zero value turns it off. </td>
+/* global */
 void synth_midi_cc_fbk_state_control(void *data, MIDIMsg *msg)
 {
-    #ifdef DEBUG
-	synth_midi_check_msg(msg,synth_midi_cc_fbk_state_control);
-	#endif
     synth_control_feedback_control(msg->data[2]);
 }
 
-/* Parameter set chosen by channel */
 void synth_midi_note_on_control(void *data, MIDIMsg *msg)
 {
-    #ifdef DEBUG
-	synth_midi_check_msg(msg,synth_midi_note_on_control);
-	#endif
     float pitch, amplitude;
     pitch = msg->data[1] - SYNTH_CONTROL_PITCH_UNISON;
     amplitude = (float)msg->data[2] / (float)MIDIMSG_DATA_BYTE_MAX;
@@ -353,252 +334,81 @@ void synth_midi_note_on_control(void *data, MIDIMsg *msg)
     synth_control_one_shot(pitch,amplitude);
 }
 
-static void synth_midi_cc_note_funcs_init(
+/*
+initializes a MIDI control function that doesn't need any extra parameters,
+so returns void
+increments cc number
+*/
+static void synth_midi_cc_global_func_init(
         MIDI_Router_Standard *router,
         int midi_channel,
-        void (**funcs)(void*,MIDIMsg*),
-        synth_midi_cc_type_t *types,
-        int *param_set_indices,
-        int num_param_sets)
+        void (*func)(void*,MIDIMsg*),
+        unsigned int *cc)
 {
-    int n;
-    while (*funcs != NULL) {
-        for (n = 0; n < num_param_sets; n++) {
-            MIDI_CC_CB_Router_addCB(&router->cbRouters[midi_channel],
-                    /* cc number */
-                    n * SYNTH_MIDI_NUM_NOTE_PARAMS 
-                        + *types,
-                    *funcs,
-                    &param_set_indices[n]);
-        }
-        funcs++;
-        types++;
-    }
-}
-
-static void synth_midi_cc_global_funcs_init(
-        MIDI_Router_Standard *router,
-        int midi_channel,
-        void (**funcs)(void*,MIDIMsg*),
-        synth_midi_cc_type_t *types)
-{
-    while (*funcs != NULL) {
-        MIDI_CC_CB_Router_addCB(&router->cbRouters[midi_channel],
-                /* cc number */
-                *types,
-                *funcs,
-                NULL);
-        funcs++;
-        types++;
-    }
-}
-
-static void synth_midi_note_on_init(
-        MIDI_Router_Standard *router,
-        int midi_channel,
-        void (*func)(void*,MIDIMsg*))
-{
-    MIDI_Router_addCB(&router->router,
-            MIDIMSG_NOTE_ON,
-            midi_channel,
+    MIDI_CC_CB_Router_addCB(&router->cbRouters[midi_channel],
+            /* cc number */
+            *cc,
             func,
             NULL);
+    *cc = *cc + 1;
 }
 
-static void synth_midi_syscom_test(void *data,
-                                   MIDIMsg *msg)
+/* using alloc will save a bunch of repeated stuff */
+static int *alloc_int() { return malloc(sizeof(int)); }
+
+/* initializes a function that takes a note as its parameter 
+increments cc number
+*/
+static void *
+synth_midi_cc_note_func_init(
+        MIDI_Router_Standard *router,
+        int midi_channel,
+        void (*func)(void*,MIDIMsg*),
+        unsigned int *cc,
+        int note)
 {
-    asm("");
+    int *pnote = alloc_int();
+    if (!pnote) { goto fail; }
+    MIDI_CC_CB_Router_addCB(&router->cbRouters[midi_channel],
+            /* cc number */
+            *cc,
+            func,
+            pnote);
+    *cc = *cc + 1;
+    return (void*)pnote;
+fail:
+    return NULL;
 }
 
-static void synth_midi_syscom_control(void *data,
-                                      MIDIMsg *msg)
+/*
+initializes a function that takes a note and pitch as its parameter 
+increments cc number
+*/
+static void *
+synth_midi_cc_note_pitch_func_init(
+        MIDI_Router_Standard *router,
+        int midi_channel,
+        void (*func)(void*,MIDIMsg*),
+        unsigned int *cc,
+        int note,
+        int pitch)
 {
-    scheduler_incTimeAndDoEvents_midiclock();
+    synth_midi_cc_pitch_control_t *p_note_pitch = alloc_synth_midi_cc_pitch_control_t();
+    if (!p_note_pitch) { goto fail; }
+    *p_note_pitch = (synth_midi_cc_pitch_control_t) {
+        .note = note,
+        .pitch = pitch
+    };
+    MIDI_CC_CB_Router_addCB(
+        &router->cbRouters[midi_channel],
+        /* cc number */
+        *cc,
+        func,
+        p_note_pitch);
+    *cc = *cc + 1;
+    return (void*)p_note_pitch;
+fail:
+    return NULL;
 }
 
-void synth_midi_control_setup(int midi_channel)
-{
-    /* could set custom channel here ... */
-    void (*midi_cc_pitch_funcs[])(void*,MIDIMsg*) = {
-        synth_midi_cc_pitch_control,
-        synth_midi_cc_pitch_fine_control,
-        NULL
-    };
-    synth_midi_cc_type_t midi_cc_pitch_types[] = {
-        synth_midi_cc_type_t_PITCH1,
-        synth_midi_cc_type_t_PITCH_FINE1
-    };
-    static synth_midi_cc_pitch_control_t 
-        pitch_params[NUM_NOTE_PARAM_SETS 
-            * SYNTH_CONTROL_PITCH_TABLE_SIZE];
-    synth_midi_cc_pitch_control_t_init(
-            &midiRouter,
-            midi_channel,
-            pitch_params,
-            NUM_NOTE_PARAM_SETS,
-            SYNTH_CONTROL_PITCH_TABLE_SIZE,
-            midi_cc_pitch_funcs,
-            midi_cc_pitch_types);
-    static synth_midi_cc_stride_reset_t
-        stride_state_params[NUM_NOTE_PARAM_SETS];
-    synth_midi_cc_stride_reset_t_init(
-            &midiRouter,
-            midi_channel,
-            stride_state_params,
-            NUM_NOTE_PARAM_SETS);
-    static synth_midi_cc_rec_mode_control_t
-        rec_mode_param;
-    synth_midi_cc_rec_mode_control_t_init(
-            &midiRouter,
-            midi_channel,
-            &rec_mode_param);
-    static int note_param_indices[NUM_NOTE_PARAM_SETS];
-    synth_midi_note_param_indices_init(note_param_indices,
-            NUM_NOTE_PARAM_SETS);
-    void (*midi_cc_note_funcs[])(void*,MIDIMsg*) = {
-            synth_midi_cc_env_control,
-            synth_midi_cc_sus_control,
-            synth_midi_cc_gain_control,
-            synth_midi_cc_pos_control,
-            synth_midi_cc_stride_control,
-            synth_midi_cc_offset_control,
-            synth_midi_cc_fbk_rate_control,
-            synth_midi_cc_event_delta_control,
-            synth_midi_cc_num_reps_control,
-            synth_midi_cc_interm_control,
-            synth_midi_cc_swing_control,
-            NULL
-    };
-    synth_midi_cc_type_t midi_cc_note_types[] = {
-            synth_midi_cc_type_t_ENV,
-            synth_midi_cc_type_t_SUS,
-            synth_midi_cc_type_t_GAIN,
-            synth_midi_cc_type_t_POS,
-            synth_midi_cc_type_t_STRIDE,
-            synth_midi_cc_type_t_OFFSET,
-            synth_midi_cc_type_t_FBK_RATE,
-            synth_midi_cc_type_t_EVENT_DELTA,
-            synth_midi_cc_type_t_NUM_REPS,
-            synth_midi_cc_type_t_INTERM,
-            synth_midi_cc_type_t_SWING,
-    };
-    synth_midi_cc_note_funcs_init(
-        &midiRouter,
-        midi_channel,
-        midi_cc_note_funcs,
-        midi_cc_note_types,
-        note_param_indices, 
-        NUM_NOTE_PARAM_SETS);
-    void (*midi_cc_funcs[])(void*,MIDIMsg*) = {
-        synth_midi_cc_tempo_coarse_control,
-        synth_midi_cc_tempo_fine_control,
-        synth_midi_cc_tempo_scale_control,
-        synth_midi_cc_tempo_nudge_control,
-        synth_midi_cc_preset_store_control,
-        synth_midi_cc_preset_recall_control,
-        synth_midi_cc_rec_control,
-        synth_midi_cc_play_control,
-        synth_midi_cc_fbk_state_control,
-        NULL
-    };
-    synth_midi_cc_type_t midi_cc_types[] = {
-        synth_midi_cc_type_t_TEMPO_COARSE,
-        synth_midi_cc_type_t_TEMPO_FINE,
-        synth_midi_cc_type_t_TEMPO_SCALE,
-        synth_midi_cc_type_t_TEMPO_NUDGE,
-        synth_midi_cc_type_t_PRESET_STORE,
-        synth_midi_cc_type_t_PRESET_RECALL,
-        synth_midi_cc_type_t_REC,
-        synth_midi_cc_type_t_PLAY,
-        synth_midi_cc_type_t_FBK_STATE
-    };
-    synth_midi_cc_global_funcs_init(
-        &midiRouter,
-        midi_channel,
-        midi_cc_funcs,
-        midi_cc_types);
-    synth_midi_note_on_init(
-        &midiRouter,
-        midi_channel,
-        synth_midi_note_on_control);
-
-    /* Add system common test function */
-    (void) MIDI_Router_addCB(&midiRouter.router, 
-            MIDIMSG_SYS_COMMON, midi_channel, synth_midi_syscom_control, NULL);
-}
-
-#ifdef DEBUG 
-void (*midi_note_param_funs[])(void*,MIDIMsg*) = {
-    synth_midi_cc_pitch_fine_control,
-    synth_midi_cc_pitch_fine_control,
-    synth_midi_cc_pitch_fine_control,
-    synth_midi_cc_env_control,
-    synth_midi_cc_sus_control,
-    synth_midi_cc_pitch_control,
-    synth_midi_cc_pitch_control,
-    synth_midi_cc_pitch_control,
-    synth_midi_cc_gain_control,
-    synth_midi_cc_pos_control,
-    synth_midi_cc_stride_control,
-    synth_midi_cc_offset_control,
-    synth_midi_cc_fbk_rate_control,
-    synth_midi_cc_event_delta_control,
-    synth_midi_cc_num_reps_control,
-    synth_midi_cc_stride_reset,
-    synth_midi_cc_interm_control,
-    synth_midi_cc_swing_control,
-    synth_midi_cc_pitch_fine_control,
-    synth_midi_cc_pitch_fine_control,
-    synth_midi_cc_pitch_fine_control,
-    synth_midi_cc_env_control,
-    synth_midi_cc_sus_control,
-    synth_midi_cc_pitch_control,
-    synth_midi_cc_pitch_control,
-    synth_midi_cc_pitch_control,
-    synth_midi_cc_gain_control,
-    synth_midi_cc_pos_control,
-    synth_midi_cc_stride_control,
-    synth_midi_cc_offset_control,
-    synth_midi_cc_fbk_rate_control,
-    synth_midi_cc_event_delta_control,
-    synth_midi_cc_num_reps_control,
-    synth_midi_cc_stride_reset,
-    synth_midi_cc_interm_control,
-    synth_midi_cc_swing_control,
-    synth_midi_cc_pitch_fine_control,
-    synth_midi_cc_pitch_fine_control,
-    synth_midi_cc_pitch_fine_control,
-    synth_midi_cc_env_control,
-    synth_midi_cc_sus_control,
-    synth_midi_cc_pitch_control,
-    synth_midi_cc_pitch_control,
-    synth_midi_cc_pitch_control,
-    synth_midi_cc_gain_control,
-    synth_midi_cc_pos_control,
-    synth_midi_cc_stride_control,
-    synth_midi_cc_offset_control,
-    synth_midi_cc_fbk_rate_control,
-    synth_midi_cc_event_delta_control,
-    synth_midi_cc_num_reps_control,
-    synth_midi_cc_stride_reset,
-    synth_midi_cc_interm_control,
-    synth_midi_cc_swing_control,
-    synth_midi_cc_tempo_coarse_control,
-    synth_midi_cc_tempo_fine_control,
-    synth_midi_cc_tempo_scale_control,
-    synth_midi_cc_tempo_nudge_control,
-    synth_midi_cc_preset_store_control,
-    synth_midi_cc_preset_recall_control,
-    synth_midi_cc_rec_control,
-    synth_midi_cc_play_control,
-    synth_midi_cc_rec_mode_control,
-    synth_midi_cc_fbk_state_control
-};
-
-static void synth_midi_check_msg(MIDIMsg *msg,void (*fun)(void *,MIDIMsg *))
-{
-//    assert(midi_note_param_funs[synth_midi_check_index] == fun);
-    synth_midi_check_index += 1;
-}
-#endif
+/* TODO the remaining few functions */
