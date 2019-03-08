@@ -712,8 +712,13 @@ channel 1, no LEDs will be illuminated.
 </tr>
 <tr>
 <td> 15 </td>
-<td> N1 Stride state </td>
-<td> If non-zero (1-127), enables playback offset advancement, otherwise if 0, disable playback offset advancement. This cannot be in conflict with the STIDE/ABS/UNI switch. That means you cannot control this parameter over MIDI when the note whose parameters you are adjusting is selected with the N1/N2/N3 switch, in this case the N1 note. </td>
+<td> N1 Stride reset </td>
+<td>
+If 0, reset the note stride accumulator. This means the next playback will start from where the POS setting was set to.
+If 1, reset note stride. This means the position of start of playback will not advance every time a note is played (i.e., every beat).
+If 2, reset repeats stride. This means the position of start of playback will not advance every repeat.
+If >= 2, do the above 3 things. This is provided for convenience.
+</td>
 </tr>
 <tr>
 <td> 16 </td>
