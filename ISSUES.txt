@@ -32,3 +32,9 @@ Wed Mar  6 13:00:39 EST 2019
 Thu Mar  7 14:11:13 EST 2019
 - recalling presets when there are none make the pedal explode basically
     -> this has been fixed, you just need to reset presets, or erase entire flash
+
+
+Fri Mar  8 15:45:24 EST 2019
+- Somehow, the bad value of MIDI channel -1 was stored in the MIDI channel. This shouldn't happen. What should happen is the flash should be seen as uninitialized, then get intialized, then the MIDI channel in the intialized flash (0) should be stored.
+- There's still sort of a blow up when you move fade from a value > 1 and back to 1
+- Shouldn't the fade rate be 1 when the knob is in the middle?

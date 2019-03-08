@@ -360,5 +360,6 @@ void synth_control_set_noteStride(float noteStride_param, int note_params_idx);
 void synth_control_set_noteStride_curParams(float noteStride_param);
 void synth_control_reset_noteStrideAcc_note(int note);
 void synth_control_reset_noteStrideAcc(void);
+void synth_control_set_intermittency_idx(unsigned int idx, int note_params_idx);
 
 #endif /* SYNTH_CONTROL_H */

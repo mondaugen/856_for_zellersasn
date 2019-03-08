@@ -54,6 +54,15 @@ void sc_presets_init(int reset_request, int *midi_channel)
         }
     } else {
         *midi_channel = scstorage.midi_channel;
+        /* If for some reason the stored midi channel was invalid, correct it to
+        be 0 and store that midi channel */
+        if ((*midi_channel < 0) || (*midi_channel >= 16)) {
+            *midi_channel = 0;
+            scstorage.midi_channel = *midi_channel;
+            /* Store new midi_channel */
+            presets_lowlevel_write(scpresets_handle,(void*)&scstorage,
+                    sizeof(scstorage),NULL);
+        }
     }
     /* If both footswitches down on startup, set presets to default values. This
      * doesn't overwrite what is in flash. That will only happen if the user

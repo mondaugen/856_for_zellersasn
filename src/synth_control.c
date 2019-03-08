@@ -501,10 +501,9 @@ void synth_control_reset_noteOnEventCounts(void)
     }
 }
 
-void synth_control_set_intermittency(float intermittency_param, int note_params_idx)
+void synth_control_set_intermittency_idx(unsigned int idx, int note_params_idx)
 {
-    uint32_t _idx = (uint32_t)((float)SYNTH_CONTROL_INTERMITTENCY_TABLE_LENGTH 
-            * intermittency_param);
+    uint32_t _idx = idx;
     if (_idx >= SYNTH_CONTROL_INTERMITTENCY_TABLE_LENGTH) {
         _idx = SYNTH_CONTROL_INTERMITTENCY_TABLE_LENGTH - 1;
     }
@@ -515,6 +514,13 @@ void synth_control_set_intermittency(float intermittency_param, int note_params_
     /* Reset all events' event count so that all sequences has same phase, no
      * matter when intermittency was set */
     synth_control_reset_noteOnEventCounts();
+}
+
+void synth_control_set_intermittency(float intermittency_param, int note_params_idx)
+{
+    uint32_t _idx = (uint32_t)((float)SYNTH_CONTROL_INTERMITTENCY_TABLE_LENGTH 
+            * intermittency_param);
+    synth_control_set_intermittency_idx(_idx,note_params_idx);
 }
 
 void synth_control_set_intermittency_curParams(float intermittency_param)
@@ -542,15 +548,8 @@ void synth_control_eventDeltaBeats_control(void *data_, float eventDeltaBeats_pa
 
 void synth_control_set_offset(float offset_param, int note_params_idx)
 {
-    if (note_params_idx == 0) {
-        noteParamSets[note_params_idx].offsetBeats
-            = offset_param;
-    } else {
-        /* The offset is relative to the total event delta of the note event
-         * with parameterSet 0 */
-        noteParamSets[note_params_idx].offsetBeats
-            = noteParamSets[0].eventDeltaBeats * offset_param;
-    }
+    noteParamSets[note_params_idx].offsetBeats
+        = offset_param;
 }
 
 void synth_control_set_offset_curParams(float offset_param)

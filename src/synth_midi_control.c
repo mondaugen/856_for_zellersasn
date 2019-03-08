@@ -160,10 +160,11 @@ synth_midi_cc_event_delta_control(void *data, MIDIMsg *msg)
 static void
 synth_midi_cc_num_reps_control(void *data, MIDIMsg *msg)
 {
-    int *note = data;
-    synth_control_set_numRepeats(
-            (float)msg->data[2]/(float)MIDIMSG_DATA_BYTE_MAX * (float)SYNTH_CONTROL_MAX_NUM_REPEATS,
-            *note);
+    int *note = data,
+         nreps = msg->data[2];
+    if (nreps < 0) { nreps = 0; }
+    if (nreps > SYNTH_CONTROL_MAX_NUM_REPEATS) { nreps = SYNTH_CONTROL_MAX_NUM_REPEATS; }
+    synth_control_set_numRepeats(nreps, *note);
 }
 
 //<td> N1 Stride state </td>
@@ -199,10 +200,9 @@ all:
 static void
 synth_midi_cc_interm_control(void *data, MIDIMsg *msg)
 {
-    int *note = data;
-    synth_control_set_intermittency(
-            (float)msg->data[2]/(float)MIDIMSG_DATA_BYTE_MAX,
-            *note);
+    int *note = data,
+        i = msg->data[2];
+    synth_control_set_intermittency_idx(i, *note);
 }
 
 //<td> N1 swing control </td>
@@ -432,6 +432,7 @@ synth_midi_cc_note_func_init(
 {
     int *pnote = alloc_int();
     if (!pnote) { goto fail; }
+    *pnote = note;
     MIDI_CC_CB_Router_addCB(&router->cbRouters[midi_channel],
             /* cc number */
             *cc,
@@ -474,9 +475,16 @@ fail:
     return NULL;
 }
 
+static int midi_channel_was_oob = 0;
+
 void
 synth_midi_control_setup(int midi_channel)
 {
+    /* This shouldn't happen but if midi_channel is out of range, we put it in range */
+    if ((midi_channel < 0) || (midi_channel >= 16)) {
+        midi_channel = 0;
+        midi_channel_was_oob = 1;
+    }
     /* note: midiRouter from inc/midi_setup.h */
     static unsigned int cc = 0, midi_controls_end;
     const void *midi_cc_controls[] = {
