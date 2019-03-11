@@ -179,7 +179,7 @@ synth_midi_cc_stride_reset(void *data, MIDIMsg *msg)
     int *note = data;
     /* map to the middle */
     int datum = msg->data[2];
-    if (datum >= 2) { goto all; }
+    if (datum > 2) { goto all; }
     switch (datum) {
 all:
     case 0:
@@ -306,20 +306,13 @@ synth_midi_cc_play_control(void *data, MIDIMsg *msg)
 
 //<td> Record mode </td>
 //<td> Sets the record mode just like the FREE/R=B/AREC switch. A message value of 0 sets the FREE record mode, a value of 1 sets the R=B mode and a value of 2 sets the AREC mode. A value greater than 2 sets the AREC mode. </td>
-typedef SynthControlRecMode synth_midi_cc_rec_mode_control_t;
-
-static synth_midi_cc_rec_mode_control_t *
-synth_midi_cc_rec_mode_control_t_alloc(void)
-{
-    return malloc(sizeof(synth_midi_cc_rec_mode_control_t));
-}
 
 static void
 synth_midi_cc_rec_mode_control(void *data, MIDIMsg *msg)
 {
-    synth_midi_cc_rec_mode_control_t *last_recMode_param = data;
+    /* The last_recMode_param is NULL because we want to force setting this recording mode. */
     synth_control_set_recMode_onChange((SynthControlRecMode)msg->data[2],
-                                       last_recMode_param);
+                                       NULL);
 }
 
 static void *
@@ -328,17 +321,13 @@ synth_midi_cc_rec_mode_control_t_init(
         int midi_channel,
         unsigned int *cc)
 {
-    synth_midi_cc_rec_mode_control_t *control = synth_midi_cc_rec_mode_control_t_alloc();
-    if (!control) { goto fail; }
-    *control = SynthControlRecMode_START__;
+    static const char dummy;
     MIDI_CC_CB_Router_addCB(&router->cbRouters[midi_channel],
             *cc,
             synth_midi_cc_rec_mode_control,
-            control);
+            NULL);
     *cc = *cc + 1;
-    return (void*)control;
-fail:
-    return NULL;
+    return (void*)&dummy;
 }
 
 //<td> Feedback state </td>
@@ -487,6 +476,13 @@ synth_midi_control_setup(int midi_channel)
     }
     /* note: midiRouter from inc/midi_setup.h */
     static unsigned int cc = 0, midi_controls_end;
+    /*
+    The following functions don't currently have to be stored (we don't need to
+    free because the RAM is wiped whenever the 856 is turned off). But I do it
+    like this for clarity (we can clearly see in what order the MIDI CC
+    functions are) and with the possibility that the return values of the *init
+    functions could be used in the future maybe.
+    */
     const void *midi_cc_controls[] = {
         /* Note 1 group */
         // 0 
@@ -545,114 +541,114 @@ synth_midi_control_setup(int midi_channel)
         synth_midi_cc_note_func_init(&midiRouter, midi_channel, synth_midi_cc_swing_control, &cc, 0),
 
         /* Note 2 group */
-        // 0 
+        // 18 
         // N2 Pitch 1 control (fine) 
         synth_midi_cc_note_pitch_func_init(&midiRouter, midi_channel, synth_midi_cc_pitch_fine_control, &cc, 1, 0),
-        // 1 
+        // 19 
         // N2 Pitch 2 control (fine) 
         synth_midi_cc_note_pitch_func_init(&midiRouter, midi_channel, synth_midi_cc_pitch_fine_control, &cc, 1, 1),
-        // 2 
+        // 20
         // N2 Pitch 3 control (fine) 
         synth_midi_cc_note_pitch_func_init(&midiRouter, midi_channel, synth_midi_cc_pitch_fine_control, &cc, 1, 2),
-        // 3 
+        // 21 
         // N2 Envelope control 
         synth_midi_cc_note_func_init(&midiRouter, midi_channel, synth_midi_cc_env_control, &cc, 1),
-        // 4 
+        // 22 
         // N2 Length control 
         synth_midi_cc_note_func_init(&midiRouter, midi_channel, synth_midi_cc_sus_control, &cc, 1),
-        // 5 
+        // 23 
         // N2 Pitch 1 control 
         synth_midi_cc_note_pitch_func_init(&midiRouter, midi_channel, synth_midi_cc_pitch_control, &cc, 1,0),
-        // 6 
+        // 24 
         // N2 Pitch 2 control 
         synth_midi_cc_note_pitch_func_init(&midiRouter, midi_channel, synth_midi_cc_pitch_control, &cc, 1,1),
-        // 7 
+        // 25 
         // N2 Pitch 3 control 
         synth_midi_cc_note_pitch_func_init(&midiRouter, midi_channel, synth_midi_cc_pitch_control, &cc, 1,2),
-        // 8 
+        // 26 
         // N2 Gain control 
         synth_midi_cc_note_func_init(&midiRouter, midi_channel, synth_midi_cc_gain_control, &cc, 1),
-        // 9 
+        // 27 
         // N2 Position control 
         synth_midi_cc_note_func_init(&midiRouter, midi_channel, synth_midi_cc_pos_control, &cc, 1),
-        // 10 
+        // 28 
         // N2 Stride control 
         synth_midi_cc_note_func_init(&midiRouter, midi_channel, synth_midi_cc_stride_control, &cc, 1),
-        // 11 
+        // 29 
         // N2 Offset control 
         synth_midi_cc_note_func_init(&midiRouter, midi_channel, synth_midi_cc_offset_control, &cc, 1),
-        // 12 
+        // 30
         // N2 Fade control 
         synth_midi_cc_note_func_init(&midiRouter, midi_channel, synth_midi_cc_fbk_rate_control, &cc, 1),
-        // 13 
+        // 31 
         // N2 Free &#x394; control 
         synth_midi_cc_note_func_init(&midiRouter, midi_channel, synth_midi_cc_event_delta_control, &cc, 1),
-        // 14 
+        // 32 
         // N2 Number of repeats control 
         synth_midi_cc_note_func_init(&midiRouter, midi_channel, synth_midi_cc_num_reps_control, &cc, 1),
-        // 15 
+        // 33 
         // N2 Stride reset 
         synth_midi_cc_note_func_init(&midiRouter, midi_channel, synth_midi_cc_stride_reset, &cc, 1),
-        // 16 
+        // 34 
         // N2 skip control 
         synth_midi_cc_note_func_init(&midiRouter, midi_channel, synth_midi_cc_interm_control, &cc, 1),
-        // 17 
+        // 35 
         // N2 swing control 
         synth_midi_cc_note_func_init(&midiRouter, midi_channel, synth_midi_cc_swing_control, &cc, 1),
 
         /* Note 3 group */
-        // 0 
+        // 36 
         // N3 Pitch 1 control (fine) 
-        synth_midi_cc_note_pitch_func_init(&midiRouter, midi_channel, synth_midi_cc_pitch_fine_control, &cc, 1, 0),
-        // 1 
+        synth_midi_cc_note_pitch_func_init(&midiRouter, midi_channel, synth_midi_cc_pitch_fine_control, &cc, 2, 0),
+        // 37 
         // N3 Pitch 2 control (fine) 
-        synth_midi_cc_note_pitch_func_init(&midiRouter, midi_channel, synth_midi_cc_pitch_fine_control, &cc, 1, 1),
-        // 2 
+        synth_midi_cc_note_pitch_func_init(&midiRouter, midi_channel, synth_midi_cc_pitch_fine_control, &cc, 2, 1),
+        // 38 
         // N3 Pitch 3 control (fine) 
-        synth_midi_cc_note_pitch_func_init(&midiRouter, midi_channel, synth_midi_cc_pitch_fine_control, &cc, 1, 2),
-        // 3 
+        synth_midi_cc_note_pitch_func_init(&midiRouter, midi_channel, synth_midi_cc_pitch_fine_control, &cc, 2, 2),
+        // 39 
         // N3 Envelope control 
         synth_midi_cc_note_func_init(&midiRouter, midi_channel, synth_midi_cc_env_control, &cc, 2),
-        // 4 
+        // 40 
         // N3 Length control 
         synth_midi_cc_note_func_init(&midiRouter, midi_channel, synth_midi_cc_sus_control, &cc, 2),
-        // 5 
+        // 41 
         // N3 Pitch 1 control 
         synth_midi_cc_note_pitch_func_init(&midiRouter, midi_channel, synth_midi_cc_pitch_control, &cc, 2,0),
-        // 6 
+        // 42 
         // N3 Pitch 2 control 
         synth_midi_cc_note_pitch_func_init(&midiRouter, midi_channel, synth_midi_cc_pitch_control, &cc, 2,1),
-        // 7 
+        // 43 
         // N3 Pitch 3 control 
         synth_midi_cc_note_pitch_func_init(&midiRouter, midi_channel, synth_midi_cc_pitch_control, &cc, 2,2),
-        // 8 
+        // 44 
         // N3 Gain control 
         synth_midi_cc_note_func_init(&midiRouter, midi_channel, synth_midi_cc_gain_control, &cc, 2),
-        // 9 
+        // 45 
         // N3 Position control 
         synth_midi_cc_note_func_init(&midiRouter, midi_channel, synth_midi_cc_pos_control, &cc, 2),
-        // 10 
+        // 46 
         // N3 Stride control 
         synth_midi_cc_note_func_init(&midiRouter, midi_channel, synth_midi_cc_stride_control, &cc, 2),
-        // 11 
+        // 47 
         // N3 Offset control 
         synth_midi_cc_note_func_init(&midiRouter, midi_channel, synth_midi_cc_offset_control, &cc, 2),
-        // 12 
+        // 48 
         // N3 Fade control 
         synth_midi_cc_note_func_init(&midiRouter, midi_channel, synth_midi_cc_fbk_rate_control, &cc, 2),
-        // 13 
+        // 49 
         // N3 Free &#x394; control 
         synth_midi_cc_note_func_init(&midiRouter, midi_channel, synth_midi_cc_event_delta_control, &cc, 2),
-        // 14 
+        // 50 
         // N3 Number of repeats control 
         synth_midi_cc_note_func_init(&midiRouter, midi_channel, synth_midi_cc_num_reps_control, &cc, 2),
-        // 15 
+        // 51 
         // N3 Stride reset 
         synth_midi_cc_note_func_init(&midiRouter, midi_channel, synth_midi_cc_stride_reset, &cc, 2),
-        // 16 
+        // 52 
         // N3 skip control 
         synth_midi_cc_note_func_init(&midiRouter, midi_channel, synth_midi_cc_interm_control, &cc, 2),
-        // 17 
+        // 53 
         // N3 swing control 
         synth_midi_cc_note_func_init(&midiRouter, midi_channel, synth_midi_cc_swing_control, &cc, 2),
         // 54

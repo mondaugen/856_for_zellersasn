@@ -82,7 +82,7 @@ static int switch_control_get_tristate(switch_control_t *sc)
         /* Call sc->fun with NULL data, forces setting of current value */\
         synth_switch_control_ ## type ## _control((switch_control_t*)&_switch_control);\
         /* Now set sc-data to _last_state */\
-        ((switch_control_t*)&_switch_control)->data = (void*)_last_state;\
+        ((switch_control_t*)&_switch_control)->data = (void*)&_last_state;\
         /* Initialize last_state with current state on pin */\
         switch (switch_control_get_tristate((switch_control_t*)&_switch_control)) {\
             case 0:\

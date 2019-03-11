@@ -1227,8 +1227,16 @@ void synth_control_set_posMode(SynthControlPosMode posMode_param)
     posMode = (SynthControlPosMode)posMode_param;
 }
 
-/* Only set if mode being set different from last mode set.
- * Second argument NULL pointer sets regardless. */
+/*
+Only set if mode being set different from last mode set.
+Second argument NULL pointer sets regardless. 
+This style of setting was created when MIDI could also control the posMode so
+that setting a posMode different from the position of the physical switch would
+be possible (otherwise the next time the switches were checked, the posMode of
+the physical switch would be forced, making it impossible to choose posMode with
+MIDI). But now it is not possible to choose posMode with MIDI, so this style is
+deprecated, but kept because it works.
+*/
 void synth_control_set_posMode_onChange(SynthControlPosMode posMode_param,
                                         SynthControlPosMode *last_posMode_param)
 {

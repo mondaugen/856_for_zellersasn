@@ -908,7 +908,7 @@ Adjust the position advancement just as the POS knob does with the STRIDE/ABS/UN
 If 0, reset the note stride accumulator. This means the next playback will start from where the POS setting was set to.
 If 1, reset note stride. This means the position of start of playback will not advance every time a note is played (i.e., every beat).
 If 2, reset repeats stride. This means the position of start of playback will not advance every repeat.
-If >= 2, do the above 3 things. This is provided for convenience.
+If > 2, do the above 3 things. This is provided for convenience.
 </td>
 </tr>
 <tr>
@@ -970,6 +970,33 @@ If >= 2, do the above 3 things. This is provided for convenience.
 <td> 63 </td>
 <td> Feedback state </td>
 <td> Sets the feedback state just like the bottom position of the FADE/GAIN/FBK switch. A non-zero value turns feedback on, a zero value turns it off. </td>
+</tr>
+<tr>
+<td> 64 </td>
+<td> N1 stride control </td>
+<td>
+Sets the amount the playback position in the sample moves each time N1
+plays (every beat). Like the POS knob when STRIDE/ABS/UNI is the in STRIDE
+position and N1/N2/N3 is in N1 position.
+</td>
+</tr>
+<tr>
+<td> 65 </td>
+<td> N2 stride control </td>
+<td>
+Sets the amount the playback position in the sample moves each time N2
+plays (every beat). Like the POS knob when STRIDE/ABS/UNI is the in STRIDE
+position and N1/N2/N3 is in N2 position.
+</td>
+</tr>
+<tr>
+<td> 66 </td>
+<td> N3 stride control </td>
+<td>
+Sets the amount the playback position in the sample moves each time N3
+plays (every beat). Like the POS knob when STRIDE/ABS/UNI is the in STRIDE
+position and N1/N2/N3 is in N3 position.
+</td>
 </tr>
 </table>
 

@@ -38,3 +38,11 @@ Fri Mar  8 15:45:24 EST 2019
 - Somehow, the bad value of MIDI channel -1 was stored in the MIDI channel. This shouldn't happen. What should happen is the flash should be seen as uninitialized, then get intialized, then the MIDI channel in the intialized flash (0) should be stored.
 - There's still sort of a blow up when you move fade from a value > 1 and back to 1
 - Shouldn't the fade rate be 1 when the knob is in the middle?
+
+
+Mon Mar 11 11:51:21 EDT 2019
+- length control should be like 1/16 1/8 1/4 etc. no?
+- If you record with R=B or AREC and then change the tempo, it might be nice to be able to go back.
+- Was it always that recording in R=B w/o FBK doesn't zero N2 and N3?
+- MIDI Playback adds set of additional notes. It should be that it does that for a value of 2, but for a value of 1 it stops and restarts playback.
+- MIDI CC controlling record mode doesn't work.
