@@ -18,6 +18,9 @@ Wed Feb  6 15:39:52 EST 2019
     - incorporate into MIDI
     -> done
 - tempo should be logarithmic, fine control fills in gaps precisely
+    -> done, but precisely filling in the gaps is hard to make compatible with
+       MIDI while also having the panel have a different resolution, so we just
+       scale by +- 10% for fine tempo control.
 - try out limiter
     -> done
 
@@ -36,7 +39,11 @@ Thu Mar  7 14:11:13 EST 2019
 
 
 Fri Mar  8 15:45:24 EST 2019
-- Somehow, the bad value of MIDI channel -1 was stored in the MIDI channel. This shouldn't happen. What should happen is the flash should be seen as uninitialized, then get intialized, then the MIDI channel in the intialized flash (0) should be stored.
+- Somehow, the bad value of MIDI channel -1 was stored in the MIDI channel. This
+  shouldn't happen. What should happen is the flash should be seen as
+  uninitialized, then get intialized, then the MIDI channel in the intialized
+  flash (0) should be stored.
+    -> fixed, if this happens, channel 0 is stored to flash
 - There's still sort of a blow up when you move fade from a value > 1 and back to 1
 - Shouldn't the fade rate be 1 when the knob is in the middle?
 
