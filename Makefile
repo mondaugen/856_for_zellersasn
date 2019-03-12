@@ -93,14 +93,18 @@ constants/tables.c constants/tables.h : constants/tables.py
 $(CONST_OBJS) : constants/tables.c constants/tables.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
-inc/_gend_fwir_header.h :
+inc/_gend_fwir_header.h : $(LIMITER_IR_AF_PATH)/gen_fwir_header.py
 	PYTHONPATH=$(LIMITER_IR_AF_PATH) \
     N_D=$(N_D) \
     N_P=$(N_P) \
     BUFFER_SIZE=$(BUFFER_SIZE) \
     OUTPUT_FILE=$@ python3 $(LIMITER_IR_AF_PATH)/gen_fwir_header.py
 
-$(OBJS) : $(OBJSDIR)/%.o: %.c $(DEP) inc/_gend_fwir_header.h
+inc/_gend_tempo_map_table_header.h : scripts/gen_tempo_map.py
+	PYTHONPATH=scripts \
+    OUTFILE=$@ python3 scripts/gen_tempo_map.py
+
+$(OBJS) : $(OBJSDIR)/%.o: %.c $(DEP) inc/_gend_fwir_header.h inc/_gend_tempo_map_table_header.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
 $(BIN) : $(OBJS) $(CONST_OBJS) $(LIBDEP)

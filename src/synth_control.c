@@ -14,6 +14,7 @@
 #include <string.h> 
 #include "mm_common_calcs.h" 
 #include "leds.h" 
+#include "_gend_tempo_map_table_header.h"
 
 #ifdef DEBUG
  #include <assert.h>
@@ -37,11 +38,14 @@ int noteOnEventCount[NUM_NOTE_PARAM_SETS];
 
 /* Stuff that could be saved */
 NoteParamSet                noteParamSets[NUM_NOTE_PARAM_SETS];
-/* The tempo, calculated as (tempoBPM_coarse + tempoBPM_fine) * tempoBPM_scale
- * */
+/* The tempo before tempo scaling has been applied */
+static float                tempoBPM_prescale; 
+/* The tempo representing how often notes are scheduled, etc. */
 static float                tempoBPM; 
-static float                tempoBPM_coarse;
-static float                tempoBPM_fine;
+/* value in [0,1) representing the point in the coarse tempo range */
+static float                tempo_coarse_norm;
+/* value in [0,1) representing the point in the fine tempo range */
+static float                tempo_fine_norm;
 static float                tempoBPM_scale;
 static const float          tempoBPM_scale_table[] = 
                                 SYNTH_CONTROL_TEMPOBPM_SCALE_TABLE;
@@ -169,67 +173,36 @@ void synth_control_sustainTime_control(void *data_, float sustainTime_param)
     synth_control_set_sustainTime_curParams(sustainTime_param);
 }
 
+static void set_tempoBPM_scale(float tempo_scale)
+{
+    tempoBPM_scale = tempo_scale;
+}
+
+static void apply_tempo_scale(void)
+{
+    tempoBPM = tempoBPM_prescale / synth_control_get_tempoBPM_scale();
+}
+
+static void set_tempoBPM_prescale(float tempoBPM_param)
+{
+    tempoBPM_prescale = tempoBPM_param;
+}
+
 void synth_control_tempoNudge(float tempoNudge_param)
 {
     /* the tempo is calculated so that 1 buffer * K is played per 1 beat where K
      * is some scalar. The value is negated so if K < 1, the tempo is slower and
      * K > 1 the tempo is faster */
     MMSample K =  1.05 - tempoNudge_param * 0.1;
-    synth_control_update_tempo_coarse( 60. * (MMSample)audio_hw_get_sample_rate(NULL) 
-            / ((MMSample)((MMArray*)theSound->wavtab)->length * K));
+    float _tempoBPM = 60. * (MMSample)audio_hw_get_sample_rate(NULL) 
+            / ((MMSample)((MMArray*)theSound->wavtab)->length * K);
+    set_tempoBPM_prescale(_tempoBPM);
+    apply_tempo_scale();
 }
 
-static void synth_control_set_tempoBPM(float tempoBPM_param)
+static void set_tempo_scale(float tempo_scale)
 {
-    tempoBPM = tempoBPM_param;
-}
-
-void synth_control_set_tempo(float _tempoBPM_coarse,
-                             float _tempoBPM_fine,
-                             float _tempoBPM_scale)
-{
-    synth_control_set_tempoBPM(
-            (_tempoBPM_coarse + _tempoBPM_fine) / _tempoBPM_scale);
-}
-
-void synth_control_update_tempo(void)
-{
-    synth_control_set_tempo(synth_control_get_tempoBPM_coarse(),
-                            synth_control_get_tempoBPM_fine(),
-                            synth_control_get_tempoBPM_scale());
-}
-
-void synth_control_set_tempo_coarse(float _tempoBPM_coarse)
-{
-    tempoBPM_coarse = _tempoBPM_coarse;
-}
-
-void synth_control_set_tempo_fine(float _tempoBPM_fine)
-{
-    tempoBPM_fine = _tempoBPM_fine;
-}
-
-void synth_control_set_tempo_scale(float _tempoBPM_scale)
-{
-    tempoBPM_scale = _tempoBPM_scale;
-}
-
-void synth_control_update_tempo_coarse(float _tempoBPM_coarse)
-{
-    synth_control_set_tempo_coarse(_tempoBPM_coarse);
-    synth_control_update_tempo();
-}
-
-void synth_control_update_tempo_fine(float _tempoBPM_fine)
-{
-    synth_control_set_tempo_fine(_tempoBPM_fine);
-    synth_control_update_tempo();
-}
-
-void synth_control_update_tempo_scale(float _tempoBPM_scale)
-{
-    synth_control_set_tempo_scale(_tempoBPM_scale);
-    synth_control_update_tempo();
+    tempoBPM_scale=tempo_scale;
 }
 
 /* sets tempo and resets fine and scaling controls.
@@ -237,47 +210,42 @@ void synth_control_update_tempo_scale(float _tempoBPM_scale)
  * that is between the limits defined in this file's header and is a number. */
 void synth_control_set_tempoBPM_absolute(float _tempoBPM)
 {
-    synth_control_set_tempo_fine(SYNTH_CONTROL_DEFAULT_TEMPOBPM_FINE);
-    synth_control_set_tempo_scale(SYNTH_CONTROL_DEFAULT_TEMPOBPM_SCALE);
-    synth_control_update_tempo_coarse(_tempoBPM);
+    set_tempo_scale(SYNTH_CONTROL_DEFAULT_TEMPOBPM_SCALE);
+    set_tempoBPM_prescale(_tempoBPM);
+    apply_tempo_scale();
+}
+
+/*
+We would really like to have 2 different resolutions available for selecting the
+tempo: a lower resolution with the knob because it is hard to be more accurate,
+and a higher resolution with MIDI. But this is very difficult to manage (imagine
+you set the coarse tempo with MIDI and the fine tempo with the knob, you might
+have a tempo that is out of bounds). So instead we opt for a coarse tempo
+control using table lookup and simply scale the tempo value by +- 10% depending
+on the fine control. We keep the whole table though for the future (it is saved
+to flash).
+*/
+
+static void update_lookup_tempo(void)
+{
+    float fine_tempo_scale = tempo_fine_norm * .2 + 0.9,
+          tempo_bpm = tempo_map_table_lookup(tempo_coarse_norm,0.5) * fine_tempo_scale;
+    set_tempoBPM_prescale(tempo_bpm);
+    apply_tempo_scale();
 }
 
 /* Param should be in [0,1] */
 void synth_control_set_tempo_coarse_norm(float param)
 {
-    float _tmp;
-    _tmp = round(((SYNTH_CONTROL_TEMPOBPM_COARSE_MAX 
-                    - SYNTH_CONTROL_TEMPOBPM_COARSE_MIN)
-                / SYNTH_CONTROL_TEMPOBPM_COARSE_QUANT) 
-            * param)
-            * SYNTH_CONTROL_TEMPOBPM_COARSE_QUANT 
-            + SYNTH_CONTROL_TEMPOBPM_COARSE_MIN;
-    if (_tmp > SYNTH_CONTROL_TEMPOBPM_COARSE_MAX) {
-        _tmp = SYNTH_CONTROL_TEMPOBPM_COARSE_MAX;
-    }
-    if (_tmp < SYNTH_CONTROL_TEMPOBPM_COARSE_MIN) {
-       _tmp = SYNTH_CONTROL_TEMPOBPM_COARSE_MIN;
-    } 
-    synth_control_update_tempo_coarse(_tmp);
+    tempo_coarse_norm = param;
+    update_lookup_tempo();
 }
 
 /* Param should be in [0,1] */
 void synth_control_set_tempo_fine_norm(float param)
 {
-    float _tmp;
-    _tmp = round(((SYNTH_CONTROL_TEMPOBPM_FINE_MAX 
-                    - SYNTH_CONTROL_TEMPOBPM_FINE_MIN)
-                / SYNTH_CONTROL_TEMPOBPM_FINE_QUANT) 
-            * param)
-            * SYNTH_CONTROL_TEMPOBPM_FINE_QUANT 
-            + SYNTH_CONTROL_TEMPOBPM_FINE_MIN;
-    if (_tmp > SYNTH_CONTROL_TEMPOBPM_FINE_MAX) {
-        _tmp = SYNTH_CONTROL_TEMPOBPM_FINE_MAX;
-    }
-    if (_tmp < SYNTH_CONTROL_TEMPOBPM_FINE_MIN) {
-       _tmp = SYNTH_CONTROL_TEMPOBPM_FINE_MIN;
-    } 
-    synth_control_update_tempo_fine(_tmp);
+    tempo_fine_norm = param;
+    update_lookup_tempo();
 }
 
 /* Param should be in [0,1) */
@@ -291,7 +259,8 @@ void synth_control_set_tempo_scale_norm(float param)
     if (_tmp < 0) {
         _tmp = 0;
     }
-    synth_control_update_tempo_scale(tempoBPM_scale_table[_tmp]);
+    set_tempo_scale(tempoBPM_scale_table[_tmp]);
+    apply_tempo_scale();
 }
 
 static void update_fade_rates(int note_param_idx);
@@ -1134,8 +1103,7 @@ void synth_control_reset_global_params(void)
 {
     noteDeltaFromBuffer = 0;
     editingWhichParams  = 0;
-    tempoBPM_coarse     = SYNTH_CONTROL_DEFAULT_TEMPOBPM_COARSE;
-    tempoBPM_fine       = SYNTH_CONTROL_DEFAULT_TEMPOBPM_FINE;
+    tempoBPM     = SYNTH_CONTROL_DEFAULT_TEMPOBPM_COARSE;
     tempoBPM_scale      = SYNTH_CONTROL_DEFAULT_TEMPOBPM_SCALE;
     tempoBPM            = SYNTH_CONTROL_DEFAULT_TEMPOBPM;
     deltaButtonMode     = SynthControlDeltaButtonMode_EVENT_DELTA_FREE;
@@ -1312,19 +1280,13 @@ int synth_control_get_feedbackState(void)
     return feedbackState;
 }
 
+/*
+This is the tempo after scaling. This tempo represents how often the beat
+light flashes.
+*/
 float synth_control_get_tempoBPM(void)
 {
     return tempoBPM;
-}
-
-float synth_control_get_tempoBPM_coarse(void)
-{
-    return tempoBPM_coarse;
-}
-
-float synth_control_get_tempoBPM_fine(void)
-{
-    return tempoBPM_fine;
 }
 
 float synth_control_get_tempoBPM_scale(void)

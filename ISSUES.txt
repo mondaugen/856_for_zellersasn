@@ -16,6 +16,7 @@ Wed Feb  6 15:39:52 EST 2019
 - beat stride and repeat stride feature
     - normal stride is now beat stride
     - incorporate into MIDI
+    -> done
 - tempo should be logarithmic, fine control fills in gaps precisely
 - try out limiter
     -> done
@@ -46,3 +47,4 @@ Mon Mar 11 11:51:21 EDT 2019
 - Was it always that recording in R=B w/o FBK doesn't zero N2 and N3?
 - MIDI Playback adds set of additional notes. It should be that it does that for a value of 2, but for a value of 1 it stops and restarts playback.
 - MIDI CC controlling record mode doesn't work.
+    -> fixed
