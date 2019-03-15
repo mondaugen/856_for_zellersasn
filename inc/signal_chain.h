@@ -25,5 +25,7 @@ extern MMSigProc *fbOffNode;
 extern MMSigProc *fbOnNode;
 
 void signal_chain_setup(void);
+void fbk_signal_gate_pass(void);
+void fbk_signal_gate_block(void);
 
 #endif /* SIGNAL_CHAIN_H */

@@ -723,19 +723,12 @@ void synth_control_feedback_control(uint32_t feedback_param)
 {
     if (feedback_param > 0) {
         if ((feedbackState == 0)) {
-            /* Move fbBusSplitter to onNode */
-            MMSigProc_insertAfter(fbOnNode,&fbBusSplitter);
+            fbk_signal_gate_pass();
             feedbackState = 1;
         }
     } else {
-        if (feedbackState == 1) {
-            /* Move fbBusSplitter to offNode */
-            MMSigProc_remove(&fbBusSplitter);
-            /* Zero the feedback bus */
-            memset(fbBusSplitter.destBus->data,0,
-                    sizeof(MMSample)
-                    * fbBusSplitter.destBus->size
-                    * fbBusSplitter.destBus->channels);
+        if ((feedbackState == 1)) {
+            fbk_signal_gate_block();
             feedbackState = 0;
         }
     }

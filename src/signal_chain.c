@@ -8,6 +8,7 @@
 #include "limiter_ir_af.h"
 #include "_gend_fwir_header.h"
 #include "dc_notch_filter.h"
+#include "signal_gate.h"
 
 MMBus *inBus, *outBus, *fbBus;
 MMSigChain sigChain;
@@ -67,6 +68,38 @@ static void dc_blocker_setup(void)
         .buffer_size = BUFFER_SIZE
     };
     dc_blocker = dc_notch_filter_1_pole_new(&dc_blocker_init);
+}
+
+struct signal_gate *fbk_signal_gate = NULL;
+struct signal_gate_init fbk_signal_gate_init;
+
+static void fbk_signal_gate_fun(MMBus *bus, void *aux_)
+{
+    struct signal_gate *aux = aux_;
+    /* if aux is NULL or bus->channels != 1 the whole system is not working properly */
+    if ((aux != NULL) && (bus->channels == 1)) {
+        signal_gate_tick(aux,bus->data);
+    }
+}
+
+static void fbk_signal_gate_setup(void)
+{
+    fbk_signal_gate_init = (struct signal_gate_init) {
+        .buffer_size = BUFFER_SIZE,
+        /* Gives a nice little ramp */
+        .ramp_time = 1000
+    };
+    fbk_signal_gate = signal_gate_new(&fbk_signal_gate_init);
+}
+
+void fbk_signal_gate_pass(void)
+{
+    signal_gate_set_state(fbk_signal_gate,1);
+}
+
+void fbk_signal_gate_block(void)
+{
+    signal_gate_set_state(fbk_signal_gate,0);
 }
 
 static MMBusMerger fbBusMerger;
@@ -130,8 +163,6 @@ void signal_chain_setup(void)
      * bus splitter  will go after the last sampleplayer. When feedback is off,
      * it goes after the sig const and therefore only receives 0s */
     MMBusSplitter_init(&fbBusSplitter, outBus, fbBus);
-    /* Initially, 0s are written to the fbBus (it is not inserted into the
-     * signal chain) */
     /* Make a recorder */
     MMWavTabRecorder_init(&wtr);
     wtr.buffer = recordingSound->wavtab;
@@ -144,6 +175,13 @@ void signal_chain_setup(void)
      * this leaves the inBus unaffected by adding only 0s to it */
     MMBusMerger_init(&fbBusMerger, fbBus, inBus);
     MMSigProc_insertBefore(&wtr, &fbBusMerger);
+    /* Because we now use signal scaling to dictate whether or not signals are
+    being fed back, we move fbBusSplitter to onNode and leave it there
+    permanently*/
+    MMSigProc_insertAfter(fbOnNode,&fbBusSplitter);
+    fbk_signal_gate_setup();
+    MMBusProc *fbk_signal_gate_bus_proc = MMBusProc_new(fbBus,fbk_signal_gate_fun,fbk_signal_gate);
+    MMSigProc_insertAfter(&fbBusSplitter,fbk_signal_gate_bus_proc);
 #ifdef SIG_CHAIN_FILL_BUF_ONES
     MMSigConst_init(&fillOnesSigConst,inBus,1,MMSigConst_doSum_FALSE);
     MMSigProc_insertBefore(&wtr,&fillOnesSigConst);
