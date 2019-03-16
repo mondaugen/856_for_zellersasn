@@ -26,6 +26,12 @@
  * are scheduled 0xffffffff ticks apart. */
 #define SCHED_BEAT_RES (0x10000000ULL*6ULL) 
 
+struct __RecordStartEvent {
+    MMEvent head;
+};
+
+typedef struct __RecordStartEvent RecordStartEvent;
+
 struct __NoteOnEvent {
     MMEvent head;
     NoteOnEventListNode *parent;
@@ -75,6 +81,7 @@ MeasureLEDOffEventListNode measureLEDOffEventListHead;
 static void NoteOnEvent_happen(MMEvent *event);
 static void NoteSchedEvent_happen(MMEvent *event);
 static void MeasureLEDOffEvent_happen(MMEvent *event);
+static void RecordStartEvent_happen(MMEvent *event);
 
 static sched_advance_mode_t sched_advance_mode = sched_advance_mode_INTERNAL;
 
@@ -136,6 +143,14 @@ NoteOnEvent *NoteOnEvent_new(int active,
     ev->parent = NULL;
     /* Default pitch mode is to look at the bus. */
     ev->pitch_mode = SynthControlPitchMode_BUS;
+    return ev;
+}
+
+RecordStartEvent *RecordStartEvent_new(void)
+{
+    RecordStartEvent *ev = malloc(sizeof(RecordStartEvent));
+    if (!ev) { return NULL; }
+    ((MMEvent*)ev)->happen = RecordStartEvent_happen;
     return ev;
 }
 
@@ -424,7 +439,7 @@ static void NoteSchedEvent_happen(MMEvent *event)
              * scheduled by the user, if 1 it means the sequencer scheduled it.
              * It is also okay to stop recording, even if not currently
              * recording, in this case, the request is ignored (see
-             * synth_contol_record_stop_helper*/
+             * synth_contol_record_stop_helper) */
             if (scheduleRecording > 0) {
                 if (scheduleRecording == 2) {
                     scheduleRecording = 1;
@@ -432,6 +447,7 @@ static void NoteSchedEvent_happen(MMEvent *event)
                 } else if (scheduleRecording == 1) {
                     synth_control_record_stop_helper(scrsh_source_SCHEDULER);
                 }
+                /* Start recording next frame */
                 synth_control_record_start_helper();
             }
         }
@@ -450,6 +466,14 @@ static void MeasureLEDOffEvent_happen(MMEvent *event)
     free(((MeasureLEDOffEvent*)event)->parent);
     free(event);
 }
+
+static void RecordStartEvent_happen(MMEvent *event)
+{
+    RecordStartEvent *rse = (RecordStartEvent*)event;
+    synth_control_record_start_helper();
+    free(event);
+}
+
 
 void scheduler_incTimeAndDoEvents(void)
 {
