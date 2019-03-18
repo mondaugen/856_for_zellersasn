@@ -82,6 +82,7 @@ static void NoteOnEvent_happen(MMEvent *event);
 static void NoteSchedEvent_happen(MMEvent *event);
 static void MeasureLEDOffEvent_happen(MMEvent *event);
 static void RecordStartEvent_happen(MMEvent *event);
+static MMTime sched_time_one_frame(void);
 
 static sched_advance_mode_t sched_advance_mode = sched_advance_mode_INTERNAL;
 
@@ -254,6 +255,22 @@ void schedule_noteSched_event(uint64_t timeFromNow, NoteSchedEvent *ev)
     MMDLList_insertAfter((MMDLList*)&noteSchedEventListHead,(MMDLList*)ev->parent);
     MMSeq_scheduleEvent(sequence, (MMEvent*)ev,
             MMSeq_getCurrentTime(sequence) + timeFromNow);
+}
+
+void schedule_RecordStartEvent(
+    uint64_t timeFromNow,
+    RecordStartEvent *ev)
+{
+    if (!ev) { return; }
+    MMSeq_scheduleEvent(sequence,
+                        (MMEvent*)ev,
+                        MMSeq_getCurrentTime(sequence) + timeFromNow);
+}
+
+void schedule_RecordStartEvent_next_frame(RecordStartEvent *ev)
+{
+    /* Determine the amount of time of 1 frame */
+    schedule_RecordStartEvent(sched_time_one_frame(),ev);
 }
 
 static void NoteOnEvent_happen(MMEvent *event)
@@ -448,7 +465,8 @@ static void NoteSchedEvent_happen(MMEvent *event)
                     synth_control_record_stop_helper(scrsh_source_SCHEDULER);
                 }
                 /* Start recording next frame */
-                synth_control_record_start_helper();
+                RecordStartEvent *rse = RecordStartEvent_new();
+                schedule_RecordStartEvent_next_frame(rse);    
             }
         }
     }
@@ -469,11 +487,17 @@ static void MeasureLEDOffEvent_happen(MMEvent *event)
 
 static void RecordStartEvent_happen(MMEvent *event)
 {
-    RecordStartEvent *rse = (RecordStartEvent*)event;
     synth_control_record_start_helper();
     free(event);
 }
-
+ 
+static MMTime
+sched_time_one_frame(void)
+{
+    return (synth_control_get_tempoBPM() / 60.) 
+                / ((MMSample)audio_hw_get_sample_rate(NULL) 
+                    / (MMSample)audio_hw_get_block_size(NULL)) * SCHED_BEAT_RES;
+}
 
 void scheduler_incTimeAndDoEvents(void)
 {
@@ -481,9 +505,7 @@ void scheduler_incTimeAndDoEvents(void)
     assert(sequence);
 #endif
     if (scheduler_get_advance_mode() == sched_advance_mode_INTERNAL) {
-        MMSeq_incTime(sequence,(synth_control_get_tempoBPM() / 60.) 
-                / ((MMSample)audio_hw_get_sample_rate(NULL) 
-                    / (MMSample)audio_hw_get_block_size(NULL)) * SCHED_BEAT_RES);
+        MMSeq_incTime(sequence,sched_time_one_frame());
         MMSeq_doAllCurrentEvents(sequence);
     }
 }
