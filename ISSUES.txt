@@ -52,6 +52,10 @@ Mon Mar 11 11:51:21 EDT 2019
 - length control should be like 1/16 1/8 1/4 etc. no?
 - If you record with R=B or AREC and then change the tempo, it might be nice to be able to go back.
 - Was it always that recording in R=B w/o FBK doesn't zero N2 and N3?
+    -> yes, this is so you can apply the sequencing and stuff to newly recorded audio
 - MIDI Playback adds set of additional notes. It should be that it does that for a value of 2, but for a value of 1 it stops and restarts playback.
 - MIDI CC controlling record mode doesn't work.
     -> fixed
+
+Mon Mar 18 19:18:56 EDT 2019
+- Add 2 feedback modes, one where only N1 fed back and the other where all output fed back.
