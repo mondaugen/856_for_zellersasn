@@ -146,7 +146,7 @@ void signal_chain_setup(void)
     ((MMEnvedSamplePlayerInitStruct*)&tespinit)->tickType
         = MMEnvedSamplePlayerTickType_NOSUM;
     MMTrapEnvedSamplePlayer_init(&spsps[i],&tespinit);
-    /* insert in signal chain after sig const*/
+    /* insert in signal chain at the beginning */
     MMSigProc_insertAfter(&sigChain.sigProcs, &spsps[i]);
     /*
     The first spsps is the last one in the chain and so this is where you
@@ -159,29 +159,27 @@ void signal_chain_setup(void)
     /* We write to the feedback bus after limiting, so this is where it is
     placed after when feedback is on. */
     fbOnNode = (MMSigProc*)audio_limiter_bus_proc;
-    /* Send the contents of the outBus to the fbBus. When feedback is on, the
-     * bus splitter  will go after the last sampleplayer. When feedback is off,
-     * it goes after the sig const and therefore only receives 0s */
+    /* Send the contents of the outBus to the fbBus. */
     MMBusSplitter_init(&fbBusSplitter, outBus, fbBus);
+    /* Put the splitter after the last in the playback chain (the limiter) */
+    MMSigProc_insertAfter(fbOnNode,&fbBusSplitter);
+    /* Put a signal gate that optionally zeros the feedback bus */
+    fbk_signal_gate_setup();
+    MMBusProc *fbk_signal_gate_bus_proc = MMBusProc_new(fbBus,fbk_signal_gate_fun,fbk_signal_gate);
+    MMSigProc_insertAfter(&fbBusSplitter,fbk_signal_gate_bus_proc);
+    MMSigProc *fbBusEnd = (MMSigProc*)fbk_signal_gate_bus_proc;
+    /* Merge the contents of the fbBus with the inBus. When feedback is off,
+     * this leaves the inBus unaffected by adding only 0s to it */
+    MMBusMerger_init(&fbBusMerger, fbBus, inBus);
+    MMSigProc_insertAfter(fbBusEnd, &fbBusMerger);
     /* Make a recorder */
     MMWavTabRecorder_init(&wtr);
     wtr.buffer = recordingSound->wavtab;
     wtr.inputBus = inBus;
     wtr.currentIndex = 0;
     wtr.state = MMWavTabRecorderState_STOPPED;
-    /* Insert at the top of the signal chain */
-    MMSigProc_insertAfter(&sigChain.sigProcs,&wtr);
-    /* Merge the contents of the fbBus with the inBus. When feedback is off,
-     * this leaves the inBus unaffected by adding only 0s to it */
-    MMBusMerger_init(&fbBusMerger, fbBus, inBus);
-    MMSigProc_insertBefore(&wtr, &fbBusMerger);
-    /* Because we now use signal scaling to dictate whether or not signals are
-    being fed back, we move fbBusSplitter to onNode and leave it there
-    permanently*/
-    MMSigProc_insertAfter(fbOnNode,&fbBusSplitter);
-    fbk_signal_gate_setup();
-    MMBusProc *fbk_signal_gate_bus_proc = MMBusProc_new(fbBus,fbk_signal_gate_fun,fbk_signal_gate);
-    MMSigProc_insertAfter(&fbBusSplitter,fbk_signal_gate_bus_proc);
+    /* Insert after the bus merger */
+    MMSigProc_insertAfter(&fbBusMerger,&wtr);
 #ifdef SIG_CHAIN_FILL_BUF_ONES
     MMSigConst_init(&fillOnesSigConst,inBus,1,MMSigConst_doSum_FALSE);
     MMSigProc_insertBefore(&wtr,&fillOnesSigConst);
