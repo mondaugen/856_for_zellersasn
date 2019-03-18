@@ -9,14 +9,20 @@
 #include "_gend_fwir_header.h"
 #include "dc_notch_filter.h"
 #include "signal_gate.h"
+#include "mm_busmult.h"
+#include "mm_sigconst.h"
 
-MMBus *inBus, *outBus, *fbBus;
+MMBus *inBus, *outBus, *fbBus, *fbScaleBus;
 MMSigChain sigChain;
 MMTrapEnvedSamplePlayer spsps[NUM_NOTES];
 MMWavTabRecorder wtr;
 MMBusSplitter fbBusSplitter;
 /* Insert the fbBusSplitter after this node to turn it on */
 MMSigProc *fbOnNode;
+MMBusMult fbBusMult;
+MMSigConst fbScaleBusConst;
+/* The amount feedback is faded out */
+static const float fbScaleBusConst_val = .99;
 
 #ifdef SIG_CHAIN_FILL_BUF_ONES
 /* Instead of recording what comes in the input, just send 1s to the recorder. */
@@ -113,6 +119,8 @@ void signal_chain_setup(void)
     outBus = MMBus_new(audio_hw_get_block_size(NULL),1);
     /* A bus to feed the output back to the input so that it can be recorded */
     fbBus = MMBus_new(audio_hw_get_block_size(NULL),1);
+    /* A bus to hold a scalar for the feeback */
+    fbScaleBus = MMBus_new(audio_hw_get_block_size(NULL),1);
     /* Set the bus to contain all 0s initially */
     memset(fbBus->data,0,sizeof(MMSample)*fbBus->size*fbBus->channels);
     /* Initializes the signal chain that signal processors are put in to */
@@ -163,11 +171,18 @@ void signal_chain_setup(void)
     MMBusSplitter_init(&fbBusSplitter, outBus, fbBus);
     /* Put the splitter after the last in the playback chain (the limiter) */
     MMSigProc_insertAfter(fbOnNode,&fbBusSplitter);
+    /* Scale the contents of the feedback bus so they slowly fade out if feedback is left on forever */
+    MMBusMult_init(&fbBusMult,fbBus,fbScaleBus);
+    /* Initialize scalar */
+    MMSigConst_init(&fbScaleBusConst,fbScaleBus,fbScaleBusConst_val,MMSigConst_doSum_FALSE);
     /* Put a signal gate that optionally zeros the feedback bus */
     fbk_signal_gate_setup();
     MMBusProc *fbk_signal_gate_bus_proc = MMBusProc_new(fbBus,fbk_signal_gate_fun,fbk_signal_gate);
     MMSigProc_insertAfter(&fbBusSplitter,fbk_signal_gate_bus_proc);
-    MMSigProc *fbBusEnd = (MMSigProc*)fbk_signal_gate_bus_proc;
+    /* Put BusMult after gate  */
+    MMSigProc_insertAfter(fbk_signal_gate_bus_proc,&fbScaleBusConst);
+    MMSigProc_insertAfter(&fbScaleBusConst,&fbBusMult);
+    MMSigProc *fbBusEnd = (MMSigProc*)&fbBusMult;
     /* Merge the contents of the fbBus with the inBus. When feedback is off,
      * this leaves the inBus unaffected by adding only 0s to it */
     MMBusMerger_init(&fbBusMerger, fbBus, inBus);
