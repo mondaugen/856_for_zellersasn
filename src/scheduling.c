@@ -273,6 +273,19 @@ void schedule_RecordStartEvent_next_frame(RecordStartEvent *ev)
     schedule_RecordStartEvent(sched_time_one_frame(),ev);
 }
 
+static int short_attack_allowed(NoteOnEvent *noe)
+{
+    return (noe->parameterSet == 0)
+            && ((noteParamSets[noe->parameterSet].startPoint + noe->currentPosition) == 0);
+}
+
+static int short_release_allowed(NoteOnEvent *noe)
+{
+    return (noe->parameterSet == 0)
+            && ((noteParamSets[noe->parameterSet].startPoint + noe->currentPosition) == 0)
+            && (noteParamSets[noe->parameterSet].sustainTime == 1);
+}
+
 static void NoteOnEvent_happen(MMEvent *event)
 {
     NoteOnEvent *noe = (NoteOnEvent*)event;
@@ -333,17 +346,44 @@ static void NoteOnEvent_happen(MMEvent *event)
                 autorelease_on_done;
             MMTrapEnvedSamplePlayer_noteOnStruct no;
             no.note = voiceNum;
-//            no.amplitude =
-//                (noteParamSets[noe->parameterSet].amplitude
-//                    * noe->currentFade) > 1. ? 
-//                    1. :
-//                    (noteParamSets[noe->parameterSet].amplitude
-//                            * noe->currentFade);
             no.amplitude = noe->currentFade * noteParamSets[noe->parameterSet].initialFade;
             no.p_gain = &noteParamSets[noe->parameterSet].amplitude; 
             no.index = MM_fwrap(
                 noteParamSets[noe->parameterSet].startPoint + noe->currentPosition,
                 0,1) * MMArray_get_length(theSound->wavtab);
+            float attackTime = noteParamSets[noe->parameterSet].sustainTime
+                    * (MMSample)MMArray_get_length(theSound->wavtab)
+                    / (MMSample)audio_hw_get_sample_rate(NULL)
+                    * noteParamSets[noe->parameterSet].attackTime,
+                  releaseTime = noteParamSets[noe->parameterSet].sustainTime
+                    * (MMSample)MMArray_get_length(theSound->wavtab)
+                    / (MMSample)audio_hw_get_sample_rate(NULL)
+                    * noteParamSets[noe->parameterSet].releaseTime;
+            /* If this note belongs to N1, then it can have a very short attack
+            time if it likes. This so that continuously feeding back N1 won't
+            keep applying an envelope, which changes the audio unpleasantly. */
+            if (short_attack_allowed(noe)) {
+                no.attackTime = MIN(
+                    MAX(attackTime,
+                        0),
+                        SYNTH_CONTROL_MAX_ATTACK_TIME);
+            } else {
+                no.attackTime = MIN(
+                    MAX(attackTime,
+                        SYNTH_CONTROL_MIN_ATTACK_TIME),
+                        SYNTH_CONTROL_MAX_ATTACK_TIME);
+            }
+            if (short_release_allowed(noe)) {
+                no.releaseTime = MIN(
+                    MAX(releaseTime,
+                        0),
+                        SYNTH_CONTROL_MAX_RELEASE_TIME);
+            } else {
+                no.releaseTime = MIN(
+                    MAX(releaseTime,
+                        SYNTH_CONTROL_MIN_RELEASE_TIME),
+                        SYNTH_CONTROL_MAX_RELEASE_TIME);
+            }
             /* sustainTime is the length of the audio, times
              * noteParamSets[parameterSet].sustainTime *
              * length_of_sound_seconds * (1 -
@@ -353,31 +393,7 @@ static void NoteOnEvent_happen(MMEvent *event)
                 noteParamSets[noe->parameterSet].sustainTime
                 * (MMSample)MMArray_get_length(theSound->wavtab)
                 / (MMSample)audio_hw_get_sample_rate(NULL)
-                * (1.
-                        - noteParamSets[noe->parameterSet].attackTime
-                        - noteParamSets[noe->parameterSet].releaseTime);
-#ifdef SIG_CHAIN_FILL_BUF_ONES
-            no.attackTime = 0;
-            no.releaseTime = 0;
-#else
-            float attackTime = noteParamSets[noe->parameterSet].sustainTime
-                    * (MMSample)MMArray_get_length(theSound->wavtab)
-                    / (MMSample)audio_hw_get_sample_rate(NULL)
-                    * noteParamSets[noe->parameterSet].attackTime,
-                  releaseTime = noteParamSets[noe->parameterSet].sustainTime
-                    * (MMSample)MMArray_get_length(theSound->wavtab)
-                    / (MMSample)audio_hw_get_sample_rate(NULL)
-                    * noteParamSets[noe->parameterSet].releaseTime;
-            no.attackTime = MIN(
-                MAX(attackTime,
-                    SYNTH_CONTROL_MIN_ATTACK_TIME),
-                    SYNTH_CONTROL_MAX_ATTACK_TIME);
-                
-            no.releaseTime = MIN(
-                MAX(releaseTime,
-                    SYNTH_CONTROL_MIN_RELEASE_TIME),
-                    SYNTH_CONTROL_MAX_RELEASE_TIME);
-#endif
+                * (1. - no.attackTime - no.releaseTime);
             no.samples = theSound->wavtab;
             MMWavTab_inc_n_players(theSound->wavtab);
             if (noe->pitch_mode == SynthControlPitchMode_BUS) {
@@ -464,7 +480,8 @@ static void NoteSchedEvent_happen(MMEvent *event)
                 } else if (scheduleRecording == 1) {
                     synth_control_record_stop_helper(scrsh_source_SCHEDULER);
                 }
-                /* Start recording next frame */
+                //synth_control_record_start_helper();
+                ///* Start recording next frame */
                 RecordStartEvent *rse = RecordStartEvent_new();
                 schedule_RecordStartEvent_next_frame(rse);    
             }

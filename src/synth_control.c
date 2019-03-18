@@ -612,8 +612,11 @@ void synth_control_record_stop_helper(scrsh_source_t origin)
             noteParamSets[0].fine_pitches[0] = SYNTH_CONTROL_DEFAULT_FINEPITCH;
             noteParamSets[0].rate_busses[0] = SYNTH_CONTROL_DEFAULT_RATEBUSRATE;
             noteParamSets[0].amplitude = 1.;
-            for (n = 1; n < NUM_NOTE_PARAM_SETS; n++) {
-                noteParamSets[n].amplitude = 0;
+            /* Only turn down other notes if in R=B mode */
+            if (_recMode == SynthControlRecMode_REC_LEN_1_BEAT) {
+                for (n = 1; n < NUM_NOTE_PARAM_SETS; n++) {
+                    noteParamSets[n].amplitude = 0;
+                }
             }
             noteParamSets[0].sustainTime = 1.;
             noteParamSets[0].intermittency = 0;
