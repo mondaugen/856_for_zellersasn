@@ -606,7 +606,7 @@ void synth_control_record_stop_helper(scrsh_source_t origin)
             }
             synth_control_set_tempoBPM_absolute(_tmp);
         }
-        if (feedbackState == 1) {
+        if (feedbackState >= 1) {
             int n;
             noteParamSets[0].pitches[0] = SYNTH_CONTROL_DEFAULT_PITCH;
             noteParamSets[0].fine_pitches[0] = SYNTH_CONTROL_DEFAULT_FINEPITCH;
@@ -724,26 +724,26 @@ void synth_control_record_tog(void)
 
 void synth_control_feedback_control(uint32_t feedback_param)
 {
-    if (feedback_param > 0) {
-        if ((feedbackState == 0)) {
-            fbk_signal_gate_pass();
-            feedbackState = 1;
-        }
-    } else {
-        if ((feedbackState == 1)) {
+    switch (feedback_param) {
+        case 0:
             fbk_signal_gate_block();
             feedbackState = 0;
-        }
+            return;
+        case 1:
+            fbk_signal_gate_pass();
+            feedbackState = 1;
+            return;
+        case 2:
+            feedbackState = 2;
+            return;
     }
 }
 
 void synth_control_feedback_tog(void)
 {
-    if (feedbackState) {
-        synth_control_feedback_control(0);
-    } else {
-        synth_control_feedback_control(1);
-    }
+    int fbkstate = feedbackState;
+    fbkstate = (fbkstate + 1) % 3;
+    synth_control_feedback_control(fbkstate);
 }
 
 /* Calling this resets the gains of NOTE 2 and 3 to default (most likely 0, see
@@ -1105,7 +1105,7 @@ void synth_control_reset_global_params(void)
     deltaButtonMode     = SynthControlDeltaButtonMode_EVENT_DELTA_FREE;
     recMode             = SynthControlRecMode_NORMAL;
     gainMode            = SynthControlGainMode_WET;
-    feedbackState       = 0;
+    synth_control_feedback_control(0);
     scheduleRecording   = 0;
     schedulerState      = 0;
     editing_which_pitch = 0;
@@ -1270,7 +1270,7 @@ int synth_control_get_schedulerState(void)
     return schedulerState;
 }
 
-/* Returns 1 if feedback enable, 0 otherwise */
+/* Returns 1 if N1 feedback enable, 2 if N1,N2,N3 feedback enable, 0 otherwise */
 int synth_control_get_feedbackState(void)
 {
     return feedbackState;
