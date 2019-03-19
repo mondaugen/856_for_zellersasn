@@ -6,6 +6,7 @@
 #include "poly_management.h" 
 #include "signal_chain.h" 
 #include "mm_common_calcs.h" 
+#include "mm_envedsampleplayer_twobus.h"
 #include <math.h> 
 
 #ifndef MAX
@@ -344,6 +345,15 @@ static void NoteOnEvent_happen(MMEvent *event)
                     (void*)&voiceNum);
             ((MMEnvedSamplePlayer*)&spsps[(int)voiceNum])->onDone =
                 autorelease_on_done;
+            MMEnvedSamplePlayerTwoBus_set_out_bus(
+                    &spsps_2bus_wrappers[(int)voiceNum],
+                    NULL);
+            if ((noe->parameterSet == 0) && (synth_control_get_feedbackState() == 1)) {
+                MMEnvedSamplePlayerTwoBus_set_out_bus(
+                        &spsps_2bus_wrappers[(int)voiceNum],
+                        signal_chain_get_n1fbBus());
+            }
+                
             MMTrapEnvedSamplePlayer_noteOnStruct no;
             no.note = voiceNum;
             no.amplitude = noe->currentFade * noteParamSets[noe->parameterSet].initialFade;

@@ -726,14 +726,21 @@ void synth_control_feedback_control(uint32_t feedback_param)
 {
     switch (feedback_param) {
         case 0:
+            /* no feedback at all */
             fbk_signal_gate_block();
+            n1_fbk_signal_gate_block();
             feedbackState = 0;
             return;
         case 1:
-            fbk_signal_gate_pass();
+            /* Only feedback N1 */
+            n1_fbk_signal_gate_pass();
+            fbk_signal_gate_block();
             feedbackState = 1;
             return;
         case 2:
+            /* Feed back all notes */
+            fbk_signal_gate_pass();
+            n1_fbk_signal_gate_block();
             feedbackState = 2;
             return;
     }

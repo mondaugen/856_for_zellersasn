@@ -12,15 +12,18 @@
 #include "mm_busmult.h"
 #include "mm_sigconst.h"
 
-MMBus *inBus, *outBus, *fbBus, *fbScaleBus;
+MMBus *inBus, *outBus, *fbBus, *fbScaleBus, *n1fbBus;
 MMSigChain sigChain;
 MMTrapEnvedSamplePlayer spsps[NUM_NOTES];
+/* We wrap every spsps in one of these so that we can output to multiple busses */
+MMEnvedSamplePlayerTwoBus spsps_2bus_wrappers[NUM_NOTES];
 MMWavTabRecorder wtr;
 MMBusSplitter fbBusSplitter;
 /* Insert the fbBusSplitter after this node to turn it on */
 MMSigProc *fbOnNode;
-MMBusMult fbBusMult;
-MMSigConst fbScaleBusConst;
+MMBusMult fbBusMult, n1fbBusMult;
+MMSigConst fbScaleBusConst, n1fbBusConst;
+static MMBusMerger fbBusMerger, n1fbBusMerger;
 /* The amount feedback is faded out */
 static const float fbScaleBusConst_val = .99;
 
@@ -77,6 +80,7 @@ static void dc_blocker_setup(void)
 }
 
 struct signal_gate *fbk_signal_gate = NULL;
+struct signal_gate *n1_fbk_signal_gate = NULL;
 struct signal_gate_init fbk_signal_gate_init;
 
 static void fbk_signal_gate_fun(MMBus *bus, void *aux_)
@@ -96,6 +100,7 @@ static void fbk_signal_gate_setup(void)
         .ramp_time = 1000
     };
     fbk_signal_gate = signal_gate_new(&fbk_signal_gate_init);
+    n1_fbk_signal_gate = signal_gate_new(&fbk_signal_gate_init);
 }
 
 void fbk_signal_gate_pass(void)
@@ -108,8 +113,17 @@ void fbk_signal_gate_block(void)
     signal_gate_set_state(fbk_signal_gate,0);
 }
 
-static MMBusMerger fbBusMerger;
+void n1_fbk_signal_gate_pass(void)
+{
+    signal_gate_set_state(n1_fbk_signal_gate,1);
+}
 
+void n1_fbk_signal_gate_block(void)
+{
+    signal_gate_set_state(n1_fbk_signal_gate,0);
+}
+
+__attribute__((optimize("-O0")))
 void signal_chain_setup(void)
 {
     /* Allocate space for the busses */
@@ -121,6 +135,8 @@ void signal_chain_setup(void)
     fbBus = MMBus_new(audio_hw_get_block_size(NULL),1);
     /* A bus to hold a scalar for the feeback */
     fbScaleBus = MMBus_new(audio_hw_get_block_size(NULL),1);
+    /* A bus to feed back only the output of N1 */
+    n1fbBus = MMBus_new(audio_hw_get_block_size(NULL),1);
     /* Set the bus to contain all 0s initially */
     memset(fbBus->data,0,sizeof(MMSample)*fbBus->size*fbBus->channels);
     /* Initializes the signal chain that signal processors are put in to */
@@ -147,6 +163,10 @@ void signal_chain_setup(void)
     tespinit.tickPeriod = 1. / (MMSample)audio_hw_get_sample_rate(NULL);
     for (i = 0; i < (NUM_NOTES-1); i++) {
         MMTrapEnvedSamplePlayer_init(&spsps[i],&tespinit);
+        MMEnvedSamplePlayerTwoBusInitStruct esp2bi = {
+            .esp = (MMEnvedSamplePlayer*)&spsps[i]
+        };
+        MMEnvedSamplePlayerTwoBus_init(&spsps_2bus_wrappers[i],&esp2bi);
         /* insert in signal chain after sig const*/
         MMSigProc_insertAfter(&sigChain.sigProcs, &spsps[i]);
     }
@@ -154,8 +174,18 @@ void signal_chain_setup(void)
     ((MMEnvedSamplePlayerInitStruct*)&tespinit)->tickType
         = MMEnvedSamplePlayerTickType_NOSUM;
     MMTrapEnvedSamplePlayer_init(&spsps[i],&tespinit);
+    MMEnvedSamplePlayerTwoBusInitStruct esp2bi = {
+        .esp = (MMEnvedSamplePlayer*)&spsps[i]
+    };
+    MMEnvedSamplePlayerTwoBus_init(&spsps_2bus_wrappers[i],&esp2bi);
     /* insert in signal chain at the beginning */
     MMSigProc_insertAfter(&sigChain.sigProcs, &spsps[i]);
+    /*
+    The first thing to do is zero the n1fbBus so we put n1fbBusConst at the
+    beginning
+    */
+    MMSigConst_init(&n1fbBusConst,n1fbBus,0,MMSigConst_doSum_FALSE);
+    MMSigProc_insertAfter(&sigChain.sigProcs,&n1fbBusConst);
     /*
     The first spsps is the last one in the chain and so this is where you
     want to put the dc blocker and limiter
@@ -173,12 +203,16 @@ void signal_chain_setup(void)
     MMSigProc_insertAfter(fbOnNode,&fbBusSplitter);
     /* Scale the contents of the feedback bus so they slowly fade out if feedback is left on forever */
     MMBusMult_init(&fbBusMult,fbBus,fbScaleBus);
+    /* Scale the contents of the N1 feedback bus so they slowly fade out if feedback is left on forever */
+    MMBusMult_init(&n1fbBusMult,n1fbBus,fbScaleBus);
     /* Initialize scalar */
     MMSigConst_init(&fbScaleBusConst,fbScaleBus,fbScaleBusConst_val,MMSigConst_doSum_FALSE);
     /* Put a signal gate that optionally zeros the feedback bus */
     fbk_signal_gate_setup();
     MMBusProc *fbk_signal_gate_bus_proc = MMBusProc_new(fbBus,fbk_signal_gate_fun,fbk_signal_gate);
     MMSigProc_insertAfter(&fbBusSplitter,fbk_signal_gate_bus_proc);
+    MMBusProc *n1_fbk_signal_gate_bus_proc = MMBusProc_new(
+        n1fbBus,fbk_signal_gate_fun,n1_fbk_signal_gate);
     /* Put BusMult after gate  */
     MMSigProc_insertAfter(fbk_signal_gate_bus_proc,&fbScaleBusConst);
     MMSigProc_insertAfter(&fbScaleBusConst,&fbBusMult);
@@ -186,17 +220,28 @@ void signal_chain_setup(void)
     /* Merge the contents of the fbBus with the inBus. When feedback is off,
      * this leaves the inBus unaffected by adding only 0s to it */
     MMBusMerger_init(&fbBusMerger, fbBus, inBus);
+    MMBusMerger_init(&n1fbBusMerger, n1fbBus, inBus);
     MMSigProc_insertAfter(fbBusEnd, &fbBusMerger);
+    MMSigProc_insertAfter(&fbBusMerger,&n1fbBusMerger);
+    MMSigProc_insertBefore(&fbBusMerger,n1_fbk_signal_gate_bus_proc);
+    MMSigProc_insertBefore(n1_fbk_signal_gate_bus_proc,&n1fbBusMult);
     /* Make a recorder */
     MMWavTabRecorder_init(&wtr);
     wtr.buffer = recordingSound->wavtab;
     wtr.inputBus = inBus;
     wtr.currentIndex = 0;
     wtr.state = MMWavTabRecorderState_STOPPED;
-    /* Insert after the bus merger */
-    MMSigProc_insertAfter(&fbBusMerger,&wtr);
+    /* Insert at the end */
+    MMSigProc *sig_chain_end = (MMSigProc *)MMDLList_getTail((MMDLList*)&sigChain.sigProcs);
+    MMSigProc_insertAfter(sig_chain_end,&wtr);
 #ifdef SIG_CHAIN_FILL_BUF_ONES
     MMSigConst_init(&fillOnesSigConst,inBus,1,MMSigConst_doSum_FALSE);
     MMSigProc_insertBefore(&wtr,&fillOnesSigConst);
 #endif  
+}
+
+MMBus *
+signal_chain_get_n1fbBus(void)
+{
+    return n1fbBus;
 }
