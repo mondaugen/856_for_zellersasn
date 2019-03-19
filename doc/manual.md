@@ -1063,7 +1063,5 @@ control. After you let go of FBK, the expression pedal should now control that k
   rate is compensated.
 - Corrected erroneous description of envelope shapes, added plot describing the
   change in ramp time according to the position of the ENV knob.
-
-### v1.7
 - 2 feedback modes now available, one where only N1 fedback and one where all notes fed back
 
