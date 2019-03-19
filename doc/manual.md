@@ -977,7 +977,7 @@ If > 2, do the above 3 things. This is provided for convenience.
 <td> 63 </td>
 <td> Feedback state </td>
 <td>
-Sets the feedback state. Data byte of 0 Means off, 1 just N1 fed back, 2 all notes fed back,
+Sets the feedback state. Data byte of 0 means off, 1 just N1 fed back, 2 all notes fed back,
 otherwise does nothing.
 </td>
 </tr>
