@@ -990,7 +990,14 @@ update_fade_rates(int note_params_idx)
 
 void synth_control_set_ampLastEcho(float gain_param, int note_params_idx)
 {
-    float amp_last_echo = powf(10,(gain_param*100.f - 60.f)/20.f);
+    float amp_last_echo = 1;
+    if (gain_param > 0.5) {
+        amp_last_echo = powf(10,((gain_param-0.5)*2*40.)/20.f);
+    } else if (gain_param == 0.5) {
+        amp_last_echo = 1.;
+    } else {
+        amp_last_echo = powf(10,(2*gain_param*60.f - 60.f)/20.f);
+    }
     noteParamSets[note_params_idx].ampLastEcho = amp_last_echo;
     update_fade_rates(note_params_idx);
 }

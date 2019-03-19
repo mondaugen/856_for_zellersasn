@@ -59,3 +59,9 @@ Mon Mar 11 11:51:21 EDT 2019
 
 Mon Mar 18 19:18:56 EDT 2019
 - Add 2 feedback modes, one where only N1 fed back and the other where all output fed back.
+    --> done
+
+Tue Mar 19 18:23:21 EDT 2019
+- Something is wrong with the envelope because it still clicks even when the wavetable is windowed
+    - not sure if this was from test or not...
+- Sometimes there are still buffer underruns, need to optimize a bit more
