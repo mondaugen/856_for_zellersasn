@@ -606,14 +606,14 @@ void synth_control_record_stop_helper(scrsh_source_t origin)
             }
             synth_control_set_tempoBPM_absolute(_tmp);
         }
-        if (feedbackState >= 1) {
+        if (feedbackState >= 2) {
             int n;
             noteParamSets[0].pitches[0] = SYNTH_CONTROL_DEFAULT_PITCH;
             noteParamSets[0].fine_pitches[0] = SYNTH_CONTROL_DEFAULT_FINEPITCH;
             noteParamSets[0].rate_busses[0] = SYNTH_CONTROL_DEFAULT_RATEBUSRATE;
             noteParamSets[0].amplitude = 1.;
-            /* Only turn down other notes if in R=B mode */
-            if (_recMode == SynthControlRecMode_REC_LEN_1_BEAT) {
+            /* Only turn down other notes if in R=B mode and all notes fed back */
+            if ((feedbackState == 2) && (_recMode == SynthControlRecMode_REC_LEN_1_BEAT)) {
                 for (n = 1; n < NUM_NOTE_PARAM_SETS; n++) {
                     noteParamSets[n].amplitude = 0;
                 }

@@ -563,7 +563,6 @@ void DMA1_Stream7_IRQHandler(void)
 #endif
         DMA1->HIFCR |= DMA_HIFCR_CDMEIF7;
     }
-
 }
 
 static void i2s_correct_frame_error(void)

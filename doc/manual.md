@@ -184,7 +184,7 @@ how to choose the tempo).
 
 In R=B mode the length of your recording adjusts the tempo so that the notes of
 N1 are played with a delay equal to the length of your recording. This
-effectively creates a looping sensation. If the FBK light is on (see
+effectively creates a looping sensation. If the FBK light is flashing (see
 FADE/GAIN/FBK) then the gain of N2 and N3 is turned down so they do not play.
 This is so you can record what the 856 is playing and have it play like a loop
 without the sampling of the other notes making it sound chaotic. As a
@@ -199,6 +199,8 @@ length, while the loop is playing in R=B mode, switch to AREC mode, then press
 and release the REC button. Recording might not happen immediately but will
 start when the start of the loop happens then restart at the end of the loop. If
 you want to keep what is currently playing, press and release the REC button.
+Like FREE mode, if the FBK light is constant or flashing the gains of N2 and N3
+are still preserved.
 
 ### TMPO/REP
 
@@ -339,10 +341,12 @@ dramatic fade-in effect, the gain setting may need to be turned down (the GAIN
 knob turned counter-clockwise with the FADE/GAIN/FBK switch in the middle
 position) before dialing-in a fade-in effect.
 
-The FBK position can be clicked, which will enable feedback in the FREE and R=B
-modes. If FBK is on (the FBK light illuminated), when recording, the output of
-the pedal is also recorded. FBK
-can also be used to reset note parameters, see STRIDE/ABS/UNI.
+The FBK position can be clicked, which will cycle through feedback modes.
+If the FBK light is constantly illuminated, when recording, the output of
+N1 is also recorded.
+If the feedback light is flashing, the output of all notes is also recorded.
+If the feedback light is off, only the input to the pedal is recorded.
+FBK can also be used to reset note parameters, see STRIDE/ABS/UNI.
 
 #### Overdubbing
 
@@ -351,13 +355,13 @@ length of the first loop. This is how to do it: To keep it simple, we suggest
 stopping playback and turning down note 2 and 3 (you can try with this stuff
 later). See the documentation on the UNI switch for a quick way to do this.
 
-Switch to AREC mode and activate “feedback” by clicking the FBK switch. Then
-click record and play your first loop on your instrument. Click record again to
-stop recording. The loop will start but it will also be recording the next loop
-(remember, AREC is “automatic recording” mode). So, unless you are ready to add
-the next layer, press record again and because record and playback are both
-active, recording will stop but the first layer will continue looping (playback
-will remain on).
+Switch to AREC mode and activate feedback for N1 only by clicking the FBK switch
+until the FBK light is constant. Then click record and
+play your first loop on your instrument. Click record again to stop recording.
+The loop will start but it will also be recording the next loop (remember, AREC
+is “automatic recording” mode). So, unless you are ready to add the next layer,
+press record again and because record and playback are both active, recording
+will stop but the first layer will continue looping (playback will remain on).
 
 Okay, say you're ready to record the next layer. Now you can press record.
 Notice that recording doesn't start right away if you start it in the middle of
@@ -368,6 +372,9 @@ before clicking the record switch again as clicking record too early will
 discard the recording. This last feature is handy though if you make a mistake:
 you can click before the BEAT light comes on again and discard the recording
 you just made, but keep the previous layer(s).
+
+Note that if you keep FBK enabled and record additional loops the output can get
+very dense.
 
 ### GAIN
 
@@ -969,7 +976,10 @@ If > 2, do the above 3 things. This is provided for convenience.
 <tr>
 <td> 63 </td>
 <td> Feedback state </td>
-<td> Sets the feedback state just like the bottom position of the FADE/GAIN/FBK switch. A non-zero value turns feedback on, a zero value turns it off. </td>
+<td>
+Sets the feedback state. Data byte of 0 Means off, 1 just N1 fed back, 2 all notes fed back,
+otherwise does nothing.
+</td>
 </tr>
 <tr>
 <td> 64 </td>
@@ -1053,3 +1063,7 @@ control. After you let go of FBK, the expression pedal should now control that k
   rate is compensated.
 - Corrected erroneous description of envelope shapes, added plot describing the
   change in ramp time according to the position of the ENV knob.
+
+### v1.7
+- 2 feedback modes now available, one where only N1 fedback and one where all notes fed back
+

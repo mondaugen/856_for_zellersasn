@@ -331,7 +331,8 @@ synth_midi_cc_rec_mode_control_t_init(
 }
 
 //<td> Feedback state </td>
-//<td> Sets the feedback state just like the bottom position of the FADE/GAIN/FBK switch. A non-zero value turns feedback on, a zero value turns it off. </td>
+//<td> Sets the feedback state. Data byte of 0 Means off, 1 just N1 fedback, 2 all notes,
+//otherwise does nothing </td>
 /* global */
 static void
 synth_midi_cc_fbk_state_control(void *data, MIDIMsg *msg)
