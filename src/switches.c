@@ -22,9 +22,8 @@ static uint32_t (*sw_get_state_funcs[]) (void) = {
     sw7_btm_get_state,
     sw8_top_get_state,
     sw8_btm_get_state,
-#if defined(BOARD_V2)
+    /* On BOARD_V1, expsw_get_state always returns 0, so it's okay to call */
     expsw_get_state,
-#endif /* defined(BOARD_V2) */
     NULL
 };
 
@@ -342,12 +341,16 @@ uint32_t sw8_btm_get_state(void)
     return (SW8_BTM_PORT->IDR & (0x1 << SW8_BTM_PORT_PIN)) >> SW8_BTM_PORT_PIN;
 }
 
-#if defined(BOARD_V2)
+/* returns non-zero if expression pedal is plugged in */
 uint32_t expsw_get_state(void)
 {
+#if defined(BOARD_V2)
     return (EXPSW_PORT->IDR & (0x1 << EXPSW_PORT_PIN)) >> EXPSW_PORT_PIN;
-}
+#else
+    /* expression pedal can never be plugged in */
+    return 0;
 #endif /* defined(BOARD_V2) */
+}
 
 /* Fills an array of length NUM_SWITCHES with the switch states. The states are
  * in the same order as the order of the defines in switches.h. */

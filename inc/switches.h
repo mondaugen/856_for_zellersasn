@@ -219,9 +219,7 @@ uint32_t sw7_top_get_state(void);
 uint32_t sw7_btm_get_state(void);
 uint32_t sw8_top_get_state(void);
 uint32_t sw8_btm_get_state(void);
-#if defined(BOARD_V2)
 uint32_t expsw_get_state(void);
-#endif /* defined(BOARD_V2) */
 void get_switch_states(uint32_t *states);
 void reset_sw_toggle_states(void);
 
