@@ -55,7 +55,7 @@ VPATH				    += :test
 CC 						 = arm-none-eabi-gcc
 STRIP					 = arm-none-eabi-strip
 OCD 		   			 = sudo openocd -f $(OPENOCD_BOARD) -f $(OPENOCD_INTERFACE)
-PYTHON					 = python
+PYTHON					 = python2
 CONST_OBJS				 = objs/tables.o
 
 # Linker settings for simple tests and profiling

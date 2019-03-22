@@ -3,19 +3,21 @@
 
 rm -f /tmp/test_midi_play_off_nums.XXX
 
- arm-none-eabi-gdb --batch-silent \
-    -ex 'file ./main.elf' \
-    -ex 'set pagination off' \
-    -ex 'set logging file /tmp/test_midi_play_off_nums.XXX' \
-    -ex 'set logging on' \
-    -ex 'printf "%d\n", (int)synth_midi_cc_type_t_PLAY' \
-    -ex 'set logging off' \
-    -ex 'quit'
+# as amazing as this is, let's just write the CC and if it doesn't work, we check the CC
+# arm-none-eabi-gdb --batch-silent \
+#    -ex 'file ./main.elf' \
+#    -ex 'set pagination off' \
+#    -ex 'set logging file /tmp/test_midi_play_off_nums.XXX' \
+#    -ex 'set logging on' \
+#    -ex 'printf "%d\n", (int)synth_midi_cc_type_t_PLAY' \
+#    -ex 'set logging off' \
+#    -ex 'quit'
 
 MIDIDEV=hw:1,0,0
 
 MIDI_CHANNEL=0
-CC=$(cat /tmp/test_midi_play_off_nums.XXX)
+#CC=$(cat /tmp/test_midi_play_off_nums.XXX)
+CC=61
 
 if [ "${BOARD_VERSION}" == BOARD_V2 ]; then
     # flush old receive

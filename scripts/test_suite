@@ -203,7 +203,7 @@ sleep 1
 
 cat <<EOF
 
-Test MIDI (will send note of, playback on device should stop)
+Test MIDI (will send control change message to stop playback, playback on device should stop)
 
 EOF
 _user_action_prompt _test_midi

@@ -7,28 +7,13 @@
 #include "audio_hw.h" 
 #include <string.h>
 
-#if ((!defined(BOARD_V1)) & (!defined(BOARD_V2)))
- #error("Please define board version.")
-#endif  
-
-#if !defined(CODEC_WM8778) && !defined(CODEC_CS4270)
-#error "Must define codec type."
-#endif
-
-/* BOARD_V1 always does mix of digital and analog */
-#ifdef BOARD_V1
-#define CODEC_ANALOG_DIGITAL_MIX 
-#endif  
-
-
 #ifdef CODEC_DMA_TRIGGER_CORRECT_I2S_FRAME_ERROR
 #define  FRAME_ERROR_BLOCK_COUNT_TRIG 1000UL
 static uint32_t i2s_block_counter = 1;
 #endif  
 
-#define WM8778_CODEC_ADDR  ((uint8_t)0x36)
-#define CS4270_CODEC_ADDR  ((uint8_t)0x90) 
-#define CODEC_I2C_TIMEOUT  ((uint32_t)1000000) 
+#define WM8778_CODEC_ADDR  ((uint8_t)0x34)
+#define CODEC_I2C_TIMEOUT       ((uint32_t)1000000) 
 
 #ifdef CODEC_DMA_HARDFAULT_ON_I2S_ERR
 extern void HardFault_Handler(void);
@@ -54,23 +39,9 @@ static unsigned int rate = 0;
 
 static unsigned int i2s_frame_error_flag = 0;
 
-static unsigned int i2s_dma_buffer_underrun = 0;
-/* Assumes CODEC_DMA_BUF_LEN is a power of 2 */
-#define DMA_NDTR_SIZE_MASK ((uint32_t)((CODEC_DMA_BUF_LEN * 2) - 1))
-
-static uint16_t all_codec_reg[8];
-
 static void codec_i2c_setup(void);
 static void codec_config_via_i2c(void);
 static void i2s_correct_frame_error(void);
-static void codec_prog_reg_i2c(uint8_t addr,
-                               uint8_t reg_addr,
-                               uint16_t reg_val);
-#if defined(CODEC_CS4270)
-static void codec_read_reg_i2c(uint8_t addr,
-                               uint8_t reg_addr,
-                               uint16_t *reg_val);
-#endif 
 
 unsigned int audio_hw_get_sample_rate(void *data) {
     return rate;
@@ -150,10 +121,6 @@ static int i2s_peripherals_setup(uint32_t sr)
 {
     /* Turn on GPIO clock for I2S3 pins */
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN | RCC_AHB1ENR_GPIOCEN;
-
-    /* Enable port E clock */
-    RCC->AHB1ENR |= RCC_AHB1ENR_GPIOEEN;
-
     /* Configure GPIO */
     /* Configure PA15 to Alternate Function */
     GPIOA->MODER &= ~(0x3 << 30);
@@ -161,37 +128,12 @@ static int i2s_peripherals_setup(uint32_t sr)
     /* Configure PC7, PC10-12 to Alternate Function */
     GPIOC->MODER &= ~((0x3 << 20) | (0x3 << 22) | (0x3 << 24) | (0x3 << 14));
     GPIOC->MODER |= (0x2 << 20) | (0x2 << 22) | (0x2 << 24) | (0x2 << 14);
-
-#if defined(CODEC_CS4270)
-    /* Configure PC1, PE 2,3,4 to output */
-    GPIOE->MODER &= ~((0x3 << 4) | (0x3 << 6) | (0x3 << 8) | (0x3 << 10));
-    GPIOE->MODER |= ((0x1 << 4) | (0x1 << 6) | (0x1 << 8) | (0x1 << 10));
-#elif defined(CODEC_WM8778)
-    /* PE2 set to output */
-    GPIOE->MODER &= ~(0x3 << (2*2));
-    GPIOE->MODER |= 0x1 << (2*2);
-#endif  
-
     /* Set pins to high speed */
     GPIOA->OSPEEDR |= (0x3 << 30);
     GPIOC->OSPEEDR |= (0x3 << 20) | (0x3 << 22) | (0x3 << 24) | (0x3 << 14);
-
-#if defined(CODEC_CS4270)
-    GPIOE->OSPEEDR |= ((0x3 << 4) | (0x3 << 6) | (0x3 << 8) | (0x3 << 10));
-#elif defined(CODEC_WM8778)
-    GPIOE->OSPEEDR |= (0x3 << (2*2));
-#endif  
-
     /* Pins have no-pull up nor pull-down */
     GPIOA->PUPDR &= ~(0x3 << 30);
     GPIOC->PUPDR &= ~((0x3 << 20) | (0x3 << 22) | (0x3 << 24) | (0x3 << 14));
-
-#if defined(CODEC_CS4270)
-    GPIOE->PUPDR &= ~((0x3 << 4) | (0x3 << 6) | (0x3 << 8) | (0x3 << 10));
-#elif defined(CODEC_WM8778)
-    GPIOE->PUPDR &= ~(0x3 << (2*2));
-#endif  
-
     /* A15 Alternate function 6 */
     GPIOA->AFR[1] &= ~(0xf << 28);
     GPIOA->AFR[1] |= (0x6 << 28);
@@ -201,19 +143,6 @@ static int i2s_peripherals_setup(uint32_t sr)
     /* C10,12, Alternate function 6, C11 alternate function 5 */
     GPIOC->AFR[1] &= ~((0xf << 8) | (0xf << 12) | (0xf << 16));
     GPIOC->AFR[1] |= ((0x6 << 8) | (0x5 << 12) | (0x6 << 16));
-
-#if defined(CODEC_CS4270)
-/* Assert RESET by resetting pin PE5 which will be set once
- * codec is ready to be programmed
- */
-    GPIOE->ODR &= ~(0x1 << 5);
-    /* Reset AD0-2 pins */
-    GPIOE->ODR &= ~((0x1 << 2) | (0x1 << 3) | (0x1 << 4));
-#elif defined(CODEC_WM8778)
-    /* Set PE2 */
-    GPIOE->ODR |= (0x1 << 2);
-#endif  
-
     /* Turn on DMA1 clock */
     RCC->AHB1ENR |= RCC_AHB1ENR_DMA1EN;
     /* Reset DMA1 peripheral */
@@ -362,14 +291,12 @@ static int i2s_peripherals_setup(uint32_t sr)
      * (Phillips), DATLEN = 00 (16-bit), CHLEN = 0 (16-bit) I2SCFGR = 10 (Master
      * transmit) */
     SPI3->I2SCFGR = 0xa00;
-
     /* TXDMAEN = 1 (Transmit buffer empty DMA request enable), other bits off */
     SPI3->CR2 = SPI_CR2_TXDMAEN ;
     /* Set up duplex instance the same as SPI3, except configure as slave
      * receive and trigger interrupt when receive buffer full */
     /* same as above but I2SCFG = 01 (slave receive) */
     I2S3ext->I2SCFGR = 0x900;
-
     /* RXDMAEN = 1 (Receive buffer not empty DMA request enable), other bits off */
     I2S3ext->CR2 = SPI_CR2_RXDMAEN ;
     
@@ -382,11 +309,6 @@ static int i2s_peripherals_setup(uint32_t sr)
 
     return 0;
    
-}
-
-uint32_t i2s_dma_get_ndtr(void)
-{
-    return DMA1_Stream0->NDTR;
 }
 
 static void i2s_peripherals_disable(void)
@@ -466,18 +388,6 @@ static void i2s_audio_start()
 
     /* Wait for them to be enabled (to show they are ready) */
     while(!((DMA1_Stream7->CR & DMA_SxCR_EN) && (DMA1_Stream0->CR & DMA_SxCR_EN)));
-
-#if defined(CODEC_CS4270) 
-    /* Reset DAC, ADC power down bits to start sound */
-    codec_prog_reg_i2c(CS4270_CODEC_ADDR,0x02,0x00);
-    uint16_t reg=0xff;
-    codec_read_reg_i2c(CS4270_CODEC_ADDR,0x02,&reg);
-    while (reg != 0x00);
-    uint8_t n;
-    for (n=1;n<=8;n++) {
-        codec_read_reg_i2c(CS4270_CODEC_ADDR,n,&all_codec_reg[n-1]);
-    }
-#endif
 }
 
 audio_hw_err_t audio_hw_start(audio_hw_setup_t *params)
@@ -492,8 +402,7 @@ audio_hw_err_t audio_hw_start(audio_hw_setup_t *params)
 void DMA1_Stream0_IRQHandler(void)
 {
     NVIC_ClearPendingIRQ(DMA1_Stream0_IRQn);
-    uint32_t dma1_lisr = DMA1->LISR,
-             ndtr = i2s_dma_get_ndtr(); /* number of items left to transfer */
+    uint32_t dma1_lisr = DMA1->LISR;
     if (dma1_lisr & DMA_LISR_TEIF0) {
         /* Transfer error */
 #ifdef CODEC_DMA_HARDFAULT_ON_I2S_ERR
@@ -539,10 +448,6 @@ void DMA1_Stream0_IRQHandler(void)
         i2s_correct_frame_error();
     }
     audio_hw_io(&audiohwio);
-    ndtr = (ndtr - i2s_dma_get_ndtr()) & DMA_NDTR_SIZE_MASK;
-    if (ndtr > CODEC_DMA_BUF_LEN) {
-        i2s_dma_buffer_underrun = 1;
-    }
 }
 
 void DMA1_Stream7_IRQHandler(void)
@@ -563,6 +468,7 @@ void DMA1_Stream7_IRQHandler(void)
 #endif
         DMA1->HIFCR |= DMA_HIFCR_CDMEIF7;
     }
+
 }
 
 static void i2s_correct_frame_error(void)
@@ -570,12 +476,6 @@ static void i2s_correct_frame_error(void)
 #ifdef CODEC_DMA_TRIGGER_ON_I2S3_FRAME_ERR
         GPIOG->ODR |= 1 << 9;
 #endif
-
-#if defined(CODEC_CS4270)
-        /* Assert reset by pulling pin low */
-        GPIOE->ODR &= ~(0x1 << 5);
-#endif  
-        
         i2s_peripherals_disable();
 //        i2s_peripherals_reset();
         i2s_peripherals_setup(rate);
@@ -669,11 +569,7 @@ static void codec_prog_reg_i2c(uint8_t addr,
     /* Wait for ADDR bit to be set */
     while (!codec_i2c_check_flags(0x00020000));
     uint32_t byte1, byte2;
-#if defined(CODEC_WM8778)
     byte1 = (reg_addr << 1) | ((reg_val >> 8) & (0x1));
-#elif defined(CODEC_CS4270)
-    byte1 = reg_addr;
-#endif
     byte2 = (uint8_t)(reg_val & 0xff);
     /* Wait for I2C to finish transmitting */
     while(!codec_i2c_check_flags(0x00800000));
@@ -688,52 +584,6 @@ static void codec_prog_reg_i2c(uint8_t addr,
     /* Wait while I2C busy */
     while(codec_i2c_check_flags(0x00000002));
 }
-
-#if defined(CODEC_CS4270)
-static void codec_read_reg_i2c(uint8_t addr,
-                               uint8_t reg_addr,
-                               uint16_t *reg_val)
-{
-    /* Write 1 byte (register address) */
-    /* Send start condition */
-    I2C2->CR1 |= I2C_CR1_START;
-    /* Wait for start condition */
-    while (!codec_i2c_check_flags(0x00010001));
-    /* Send address */
-    I2C2->DR = addr;
-    /* Wait for ADDR bit to be set */
-    while (!codec_i2c_check_flags(0x00020000));
-    uint32_t byte1;
-    byte1 = reg_addr;
-    /* Wait for I2C to finish transmitting */
-    while(!codec_i2c_check_flags(0x00800000));
-    I2C2->DR = byte1;
-    /* Wait for I2C to finish transmitting */
-    while(!codec_i2c_check_flags(0x00800000));
-    /* Send stop bit */
-    I2C2->CR1 |= I2C_CR1_STOP;
-    /* Wait while I2C busy */
-    while(codec_i2c_check_flags(0x00000002));
-    // Enable acknowledge
-    I2C2->CR1 |= I2C_CR1_ACK;
-    /* Send start condition */
-    I2C2->CR1 |= I2C_CR1_START;
-    /* Wait for start condition */
-    while (!codec_i2c_check_flags(0x00010001));
-    /* Send address, set read bit */
-    I2C2->DR = addr | 0x1;
-    /* Wait for receive buffer not empty*/
-    while (!codec_i2c_check_flags(0x00400000));
-    /* Set ACK high */
-    I2C2->CR1 |= I2C_CR1_ACK;
-    /* Read in value */
-    *reg_val = (int16_t)(I2C2->DR);
-    /* Set ACK low */
-    I2C2->CR1 &= ~I2C_CR1_ACK;
-    /* Stop transmission */
-    I2C2->CR1 = (I2C2->CR1 | I2C_CR1_STOP);
-}
-#endif  
 
 static void codec_i2c_setup(void)
 {
@@ -792,70 +642,16 @@ static void codec_i2c_setup(void)
     I2C2->CR1 |= I2C_CR1_PE;
 }
 
-static void __attribute__((optimize("O0"))) codec_config_via_i2c(void) 
+static void codec_config_via_i2c(void)
 {
     /* Set ADC, DAC to I2S 16-bit */
-#if defined(CODEC_WM8778)
     codec_prog_reg_i2c(WM8778_CODEC_ADDR,0x17,0x0000);
     codec_prog_reg_i2c(WM8778_CODEC_ADDR,0xa,0x0002);
     codec_prog_reg_i2c(WM8778_CODEC_ADDR,0xb,0x0042);
     codec_prog_reg_i2c(WM8778_CODEC_ADDR,0x5,0x00ff);
-#elif defined(CODEC_CS4270)
-    /* Chip reset should be asserted, deassert to allow programming */
-    GPIOE->ODR |= (0x1 << 5);
-    ///* Set power down bit to confirm software control */
-    //codec_prog_reg_i2c(CS4270_CODEC_ADDR,0x02,0x01);
-    ///* Wait */
-    //int j = 1000000;
-    //while (j--);
-    uint16_t reg;
-    /* Reset power down bit, power down ADC, DAC */
-    codec_prog_reg_i2c(CS4270_CODEC_ADDR,0x02,0x23);
-    /* Read register contents */
-    codec_read_reg_i2c(CS4270_CODEC_ADDR,0x01,&reg);
-    /* Check correct value */
-    while ((reg & 0xf0) != 0xc0);
-    /* Set pop-suppression, slave mode */
-    codec_prog_reg_i2c(CS4270_CODEC_ADDR,0x03,0x31);
-    /* Set DAC, ADC to I2S mode */
-#if defined(CODEC_DIGITAL_LOOPBACK)
-    codec_prog_reg_i2c(CS4270_CODEC_ADDR,0x04,0x29);
-#else
-    codec_prog_reg_i2c(CS4270_CODEC_ADDR,0x04,0x09);
-#endif
-    /* Set single DAC volume */
-    codec_prog_reg_i2c(CS4270_CODEC_ADDR,0x05,0x80);
-    /* Set DAC volume to 0dB (no attenuation) */
-    codec_prog_reg_i2c(CS4270_CODEC_ADDR,0x07,0x00);
-    /* Read register contents */
-    /* Check correct values */
-    reg=0;codec_read_reg_i2c(CS4270_CODEC_ADDR,0x02,&reg);
-    while (reg != 0x23);
-    reg=0;codec_read_reg_i2c(CS4270_CODEC_ADDR,0x03,&reg);
-    while (reg != 0x31);
-    reg=0;codec_read_reg_i2c(CS4270_CODEC_ADDR,0x04,&reg);
-#if defined(CODEC_DIGITAL_LOOPBACK)
-    while (reg != 0x29);
-#else
-    while (reg != 0x09);
-#endif
-    reg=0;codec_read_reg_i2c(CS4270_CODEC_ADDR,0x05,&reg);
-    while (reg != 0x80);
-    reg=1;codec_read_reg_i2c(CS4270_CODEC_ADDR,0x07,&reg);
-    while (reg != 0x00);
-#else
-#error("Please define codec model.")
-#endif
-
-
-#ifdef CODEC_ANALOG_DIGITAL_MIX 
     /* Mix analog and digital output */
- #if defined(CODEC_WM8778) && (!defined(AUDIO_HW_TEST_THROUGHPUT)) && (!defined(AUDIO_HW_TEST_WET_DRY_MIX))
     codec_prog_reg_i2c(WM8778_CODEC_ADDR,0x16,0x5);
- #elif defined(CODEC_CS4270)
-    #warning("Analog passthrough not supported by software, hardware must be altered for this capability.")
- #endif  
-#endif  
+    /* invert MCLK */
     /* That's it */
 }
 
