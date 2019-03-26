@@ -7,17 +7,7 @@
 #include "audio_hw.h" 
 #include <string.h>
 
-#ifdef CODEC_DMA_TRIGGER_CORRECT_I2S_FRAME_ERROR
-#define  FRAME_ERROR_BLOCK_COUNT_TRIG 1000UL
-static uint32_t i2s_block_counter = 1;
-#endif  
-
-#define WM8778_CODEC_ADDR  ((uint8_t)0x34)
-#define CODEC_I2C_TIMEOUT       ((uint32_t)1000000) 
-
-#ifdef CODEC_DMA_HARDFAULT_ON_I2S_ERR
-extern void HardFault_Handler(void);
-#endif
+#define CODEC_I2C_TIMEOUT  ((uint32_t)1000000) 
 
 /* Where data to be transferred to CODEC reside */
 static int16_t codecDmaTxBuf[CODEC_DMA_BUF_LEN * 2]
@@ -39,9 +29,18 @@ static unsigned int rate = 0;
 
 static unsigned int i2s_frame_error_flag = 0;
 
+static unsigned int i2s_dma_buffer_underrun = 0;
+/* Assumes CODEC_DMA_BUF_LEN is a power of 2 */
+#define DMA_NDTR_SIZE_MASK ((uint32_t)((CODEC_DMA_BUF_LEN * 2) - 1))
+
 static void codec_i2c_setup(void);
-static void codec_config_via_i2c(void);
 static void i2s_correct_frame_error(void);
+extern void i2s_port_setup(uint32_t sr);
+extern void i2s_codec_start(void);
+extern uint32_t codec_format_reg_addr(uint8_t reg_addr, uint16_t reg_val);
+extern void codec_config_via_i2c(void);
+extern void i2s_gpio_disable(void);
+extern void i2s_codec_correct_frame_error(void);
 
 unsigned int audio_hw_get_sample_rate(void *data) {
     return rate;
@@ -117,32 +116,15 @@ static void __attribute__((optimize("O0"))) i2s_error_setup(void)
     NVIC_EnableIRQ(SPI3_IRQn);
 }
 
-static int i2s_peripherals_setup(uint32_t sr)
+/*
+So far the implementations for all the codecs have managed to use the same
+dma inialization code but in case not an overridden implementation will used if
+the linker finds it
+*/
+__attribute__((weak))
+void i2s_dma_setup(uint32_t sr)
 {
-    /* Turn on GPIO clock for I2S3 pins */
-    RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN | RCC_AHB1ENR_GPIOCEN;
-    /* Configure GPIO */
-    /* Configure PA15 to Alternate Function */
-    GPIOA->MODER &= ~(0x3 << 30);
-    GPIOA->MODER |= (0x2 << 30);
-    /* Configure PC7, PC10-12 to Alternate Function */
-    GPIOC->MODER &= ~((0x3 << 20) | (0x3 << 22) | (0x3 << 24) | (0x3 << 14));
-    GPIOC->MODER |= (0x2 << 20) | (0x2 << 22) | (0x2 << 24) | (0x2 << 14);
-    /* Set pins to high speed */
-    GPIOA->OSPEEDR |= (0x3 << 30);
-    GPIOC->OSPEEDR |= (0x3 << 20) | (0x3 << 22) | (0x3 << 24) | (0x3 << 14);
-    /* Pins have no-pull up nor pull-down */
-    GPIOA->PUPDR &= ~(0x3 << 30);
-    GPIOC->PUPDR &= ~((0x3 << 20) | (0x3 << 22) | (0x3 << 24) | (0x3 << 14));
-    /* A15 Alternate function 6 */
-    GPIOA->AFR[1] &= ~(0xf << 28);
-    GPIOA->AFR[1] |= (0x6 << 28);
-    /* C7 Alternate function 6 */
-    GPIOC->AFR[0] &= ~(0xf << 28);
-    GPIOC->AFR[0] |= (0x6 << 28);
-    /* C10,12, Alternate function 6, C11 alternate function 5 */
-    GPIOC->AFR[1] &= ~((0xf << 8) | (0xf << 12) | (0xf << 16));
-    GPIOC->AFR[1] |= ((0x6 << 8) | (0x5 << 12) | (0x6 << 16));
+
     /* Turn on DMA1 clock */
     RCC->AHB1ENR |= RCC_AHB1ENR_DMA1EN;
     /* Reset DMA1 peripheral */
@@ -282,26 +264,34 @@ static int i2s_peripherals_setup(uint32_t sr)
     RCC->APB1RSTR |= RCC_APB1RSTR_SPI3RST;
     RCC->APB1RSTR &= ~RCC_APB1RSTR_SPI3RST;
     /* set up clock dividers for desired sampling rate */
-    if (i2s_clock_setup(sr)) {
-        return -1;
-    }
+    i2s_clock_setup(sr);
     /* Store sample rate */
     rate = sr;
     /* CKPOL = 0, I2SMOD = 1, I2SEN = 0 (don't enable yet), I2SSTD = 00
      * (Phillips), DATLEN = 00 (16-bit), CHLEN = 0 (16-bit) I2SCFGR = 10 (Master
      * transmit) */
     SPI3->I2SCFGR = 0xa00;
+
     /* TXDMAEN = 1 (Transmit buffer empty DMA request enable), other bits off */
     SPI3->CR2 = SPI_CR2_TXDMAEN ;
     /* Set up duplex instance the same as SPI3, except configure as slave
      * receive and trigger interrupt when receive buffer full */
     /* same as above but I2SCFG = 01 (slave receive) */
     I2S3ext->I2SCFGR = 0x900;
+
     /* RXDMAEN = 1 (Receive buffer not empty DMA request enable), other bits off */
     I2S3ext->CR2 = SPI_CR2_RXDMAEN ;
     
     /* Enable I2S error interrupts */
     i2s_error_setup();
+
+}
+
+static int i2s_peripherals_setup(uint32_t sr)
+{
+    i2s_port_setup(sr);
+
+    i2s_dma_setup(sr);
 
     /* Enable the DMA peripherals */
     /* Set up I2C communication */
@@ -311,43 +301,46 @@ static int i2s_peripherals_setup(uint32_t sr)
    
 }
 
-static void i2s_peripherals_disable(void)
+uint32_t i2s_dma_get_ndtr(void)
+{
+    return DMA1_Stream0->NDTR;
+}
+
+__attribute__((weak))
+void i2s_dma_disable(void)
 {
     /* Disable DMA interrupts */
     NVIC_DisableIRQ(DMA1_Stream7_IRQn);
     NVIC_DisableIRQ(DMA1_Stream0_IRQn);
     /* Disable SPI3 interrupt */
     NVIC_DisableIRQ(SPI3_IRQn);
-
     /* Clear pending IRQs */
     NVIC_ClearPendingIRQ(DMA1_Stream7_IRQn);
     NVIC_ClearPendingIRQ(DMA1_Stream0_IRQn);
     NVIC_ClearPendingIRQ(SPI3_IRQn);
-
     /* Disable I2S peripherals */
     I2S3ext->I2SCFGR &= ~SPI_I2SCFGR_I2SE;
     SPI3->I2SCFGR &= ~SPI_I2SCFGR_I2SE;
-
     /* Disable I2S DMA streams */
     DMA1_Stream7->CR &= ~DMA_SxCR_EN;
     DMA1_Stream0->CR &= ~DMA_SxCR_EN;
-
     /* Disable I2S Pins */
     RCC->AHB1ENR &= ~(RCC_AHB1ENR_GPIOAEN | RCC_AHB1ENR_GPIOCEN);
+    RCC->AHB1ENR &= ~RCC_AHB1ENR_DMA1EN;
+    RCC->APB1ENR &= ~RCC_APB1ENR_SPI3EN;
+    while ((RCC->APB1ENR & (RCC_APB1ENR_SPI3EN)) || (RCC->AHB1ENR & (RCC_AHB1ENR_DMA1EN)));
+}
 
+static void i2s_peripherals_disable(void)
+{
+    i2s_dma_disable();
+    /* TODO when we know what else has been put in conditional links, we fix this too */ 
     /* Disable I2C stuff */
     RCC->APB1ENR &= ~RCC_APB1ENR_I2C2EN;
     RCC->AHB1ENR &= ~(RCC_AHB1ENR_GPIOBEN | RCC_AHB1ENR_GPIOCEN);
 
-    /* Disable DMA I2S and GPIO */
-    RCC->AHB1ENR &= ~RCC_AHB1ENR_DMA1EN;
-    RCC->APB1ENR &= ~RCC_APB1ENR_SPI3EN;
-    RCC->AHB1ENR &= ~(RCC_AHB1ENR_GPIOAEN | RCC_AHB1ENR_GPIOBEN | RCC_AHB1ENR_GPIOCEN);
-
-    /* Wait until disabled */
-    while ((RCC->APB1ENR & (RCC_APB1ENR_I2C2EN | RCC_APB1ENR_SPI3EN))
-            || (RCC->AHB1ENR & (RCC_AHB1ENR_GPIOAEN | RCC_AHB1ENR_GPIOCEN 
-                    | RCC_AHB1ENR_GPIOBEN | RCC_AHB1ENR_DMA1EN)));
+    /* Disable GPIO */
+    i2s_gpio_disable();
 }
 
 /* Pass a pointer to a uint32_t containing the desired sampling rate. */
@@ -364,15 +357,10 @@ audio_hw_err_t audio_hw_setup(audio_hw_setup_t *params)
      * audio_hw_start). */
 }
 
-static void i2s_audio_start()
+__attribute__((weak))
+void i2s_dma_start()
 {
-    codec_config_via_i2c();
-
-    /* clear possible Interrupt flags */
-//    DMA1->HIFCR |= 0x00000f40;
     DMA1_Stream7->CR |= DMA_SxCR_EN;
-    /* clear possible Interrupt flags */
-//    DMA1->LIFCR |= 0x0000003f;
     DMA1_Stream0->CR |= DMA_SxCR_EN;
 
     /* Enable DMA interrupts */
@@ -390,6 +378,13 @@ static void i2s_audio_start()
     while(!((DMA1_Stream7->CR & DMA_SxCR_EN) && (DMA1_Stream0->CR & DMA_SxCR_EN)));
 }
 
+static void i2s_audio_start()
+{
+    codec_config_via_i2c();
+    i2s_dma_start();
+    i2s_codec_start();
+}
+
 audio_hw_err_t audio_hw_start(audio_hw_setup_t *params)
 {
     audiohwio.length = audio_hw_get_block_size(NULL);
@@ -402,19 +397,14 @@ audio_hw_err_t audio_hw_start(audio_hw_setup_t *params)
 void DMA1_Stream0_IRQHandler(void)
 {
     NVIC_ClearPendingIRQ(DMA1_Stream0_IRQn);
-    uint32_t dma1_lisr = DMA1->LISR;
+    uint32_t dma1_lisr = DMA1->LISR,
+             ndtr = i2s_dma_get_ndtr(); /* number of items left to transfer */
     if (dma1_lisr & DMA_LISR_TEIF0) {
         /* Transfer error */
-#ifdef CODEC_DMA_HARDFAULT_ON_I2S_ERR
-        HardFault_Handler();
-#endif
         DMA1->LIFCR |= DMA_LIFCR_CTEIF0;
     }
     if (dma1_lisr & DMA_LISR_DMEIF0) {
         /* Direct mode error */
-#ifdef CODEC_DMA_HARDFAULT_ON_I2S_ERR
-        HardFault_Handler();
-#endif
         DMA1->LIFCR |= DMA_LIFCR_CDMEIF0;
     }
     /* If transfer complete on stream 0 (peripheral to memory), set current rx
@@ -435,19 +425,15 @@ void DMA1_Stream0_IRQHandler(void)
     }
     audiohwio.in = codecDmaRxPtr;
     audiohwio.out = codecDmaTxPtr;
-#ifdef CODEC_DMA_TRIGGER_CORRECT_I2S_FRAME_ERROR
-    if (i2s_block_counter == FRAME_ERROR_BLOCK_COUNT_TRIG) {
-        i2s_block_counter = 0;
-        i2s_correct_frame_error();
-    } else {
-        i2s_block_counter++;
-    }
-#endif  
     if (i2s_frame_error_flag) {
         i2s_frame_error_flag = 0;
         i2s_correct_frame_error();
     }
     audio_hw_io(&audiohwio);
+    ndtr = (ndtr - i2s_dma_get_ndtr()) & DMA_NDTR_SIZE_MASK;
+    if (ndtr > CODEC_DMA_BUF_LEN) {
+        i2s_dma_buffer_underrun = 1;
+    }
 }
 
 void DMA1_Stream7_IRQHandler(void)
@@ -456,33 +442,20 @@ void DMA1_Stream7_IRQHandler(void)
     uint32_t dma1_hisr = DMA1->LISR;
     if (dma1_hisr & DMA_HISR_TEIF7) {
         /* Transfer error */
-#ifdef CODEC_DMA_HARDFAULT_ON_I2S_ERR
-        HardFault_Handler();
-#endif
         DMA1->HIFCR |= DMA_HIFCR_CTEIF7;
     }
     if (dma1_hisr & DMA_HISR_DMEIF7) {
         /* Direct mode error */
-#ifdef CODEC_DMA_HARDFAULT_ON_I2S_ERR
-        HardFault_Handler();
-#endif
         DMA1->HIFCR |= DMA_HIFCR_CDMEIF7;
     }
-
 }
 
 static void i2s_correct_frame_error(void)
 {
-#ifdef CODEC_DMA_TRIGGER_ON_I2S3_FRAME_ERR
-        GPIOG->ODR |= 1 << 9;
-#endif
+        i2s_codec_correct_frame_error();
         i2s_peripherals_disable();
-//        i2s_peripherals_reset();
         i2s_peripherals_setup(rate);
         i2s_audio_start();
-#ifdef CODEC_DMA_TRIGGER_ON_I2S3_FRAME_ERR
-        GPIOG->ODR &= ~(1 << 9);
-#endif
 }
 
 void SPI3_IRQHandler (void)
@@ -490,49 +463,12 @@ void SPI3_IRQHandler (void)
     NVIC_ClearPendingIRQ(SPI3_IRQn);
     /* Disable SPI interrupts */
     NVIC_DisableIRQ(SPI3_IRQn);
-    uint32_t spi3_sr = SPI3->SR, i2s3ext_sr = I2S3ext->SR;
+    uint32_t i2s3ext_sr = I2S3ext->SR;
     static volatile uint32_t num_i2s3ext = 0;
-    if (spi3_sr & SPI_SR_OVR) {
-#ifdef CODEC_DMA_HARDFAULT_ON_I2S_ERR
-        HardFault_Handler();
-#endif
-    }
-    if (spi3_sr & SPI_SR_UDR) {
-#ifdef CODEC_DMA_HARDFAULT_ON_I2S_ERR
-        HardFault_Handler();
-#endif
-        /* ... */
-    }
-    /* Check frame error */
-    if (spi3_sr & 0x100) {
-#ifdef CODEC_DMA_HARDFAULT_ON_I2S_ERR
-        HardFault_Handler();
-#endif
-#ifdef CODEC_DMA_TRIGGER_ON_SPI3_FRAME_ERR
-        GPIOG->ODR |= 1 << 9;
-#endif
-        /* ... */
-    }
-    if (i2s3ext_sr & SPI_SR_OVR) {
-#ifdef CODEC_DMA_HARDFAULT_ON_I2S_ERR
-        HardFault_Handler();
-#endif
-        /* ... */
-    }
-    if (i2s3ext_sr & SPI_SR_OVR) {
-#ifdef CODEC_DMA_HARDFAULT_ON_I2S_ERR
-        HardFault_Handler();
-#endif
-        /* ... */
-    }
     /* Check frame error */
     if (i2s3ext_sr & 0x100) {
         num_i2s3ext++;
-#ifdef CODEC_DMA_HARDFAULT_ON_I2S_ERR
-        HardFault_Handler();
-#endif
         i2s_frame_error_flag = 1;
-//        i2s_correct_frame_error();
     }
     /* Enable SPI interrupts */
     NVIC_EnableIRQ(SPI3_IRQn);
@@ -556,7 +492,7 @@ static void codec_i2c_swrst(void)
     I2C2->CR1 &= ~I2C_CR1_SWRST;
 }
 
-static void codec_prog_reg_i2c(uint8_t addr,
+void codec_prog_reg_i2c(uint8_t addr,
                                uint8_t reg_addr,
                                uint16_t reg_val)
 {
@@ -569,7 +505,7 @@ static void codec_prog_reg_i2c(uint8_t addr,
     /* Wait for ADDR bit to be set */
     while (!codec_i2c_check_flags(0x00020000));
     uint32_t byte1, byte2;
-    byte1 = (reg_addr << 1) | ((reg_val >> 8) & (0x1));
+    byte1 = codec_format_reg_addr(reg_addr,reg_val);
     byte2 = (uint8_t)(reg_val & 0xff);
     /* Wait for I2C to finish transmitting */
     while(!codec_i2c_check_flags(0x00800000));
@@ -583,6 +519,50 @@ static void codec_prog_reg_i2c(uint8_t addr,
     I2C2->CR1 |= I2C_CR1_STOP;
     /* Wait while I2C busy */
     while(codec_i2c_check_flags(0x00000002));
+}
+
+void codec_read_reg_i2c(uint8_t addr,
+                               uint8_t reg_addr,
+                               uint16_t *reg_val)
+{
+    /* Write 1 byte (register address) */
+    /* Send start condition */
+    I2C2->CR1 |= I2C_CR1_START;
+    /* Wait for start condition */
+    while (!codec_i2c_check_flags(0x00010001));
+    /* Send address */
+    I2C2->DR = addr;
+    /* Wait for ADDR bit to be set */
+    while (!codec_i2c_check_flags(0x00020000));
+    uint32_t byte1;
+    byte1 = codec_format_reg_addr(reg_addr,*reg_val);
+    /* Wait for I2C to finish transmitting */
+    while(!codec_i2c_check_flags(0x00800000));
+    I2C2->DR = byte1;
+    /* Wait for I2C to finish transmitting */
+    while(!codec_i2c_check_flags(0x00800000));
+    /* Send stop bit */
+    I2C2->CR1 |= I2C_CR1_STOP;
+    /* Wait while I2C busy */
+    while(codec_i2c_check_flags(0x00000002));
+    // Enable acknowledge
+    I2C2->CR1 |= I2C_CR1_ACK;
+    /* Send start condition */
+    I2C2->CR1 |= I2C_CR1_START;
+    /* Wait for start condition */
+    while (!codec_i2c_check_flags(0x00010001));
+    /* Send address, set read bit */
+    I2C2->DR = addr | 0x1;
+    /* Wait for receive buffer not empty*/
+    while (!codec_i2c_check_flags(0x00400000));
+    /* Set ACK high */
+    I2C2->CR1 |= I2C_CR1_ACK;
+    /* Read in value */
+    *reg_val = (int16_t)(I2C2->DR);
+    /* Set ACK low */
+    I2C2->CR1 &= ~I2C_CR1_ACK;
+    /* Stop transmission */
+    I2C2->CR1 = (I2C2->CR1 | I2C_CR1_STOP);
 }
 
 static void codec_i2c_setup(void)
@@ -640,42 +620,4 @@ static void codec_i2c_setup(void)
 //    I2C2->CR1 |= I2C_CR1_ACK;
     /* Enable peripheral */
     I2C2->CR1 |= I2C_CR1_PE;
-}
-
-static void codec_config_via_i2c(void)
-{
-    /* Set ADC, DAC to I2S 16-bit */
-    codec_prog_reg_i2c(WM8778_CODEC_ADDR,0x17,0x0000);
-    codec_prog_reg_i2c(WM8778_CODEC_ADDR,0xa,0x0002);
-    codec_prog_reg_i2c(WM8778_CODEC_ADDR,0xb,0x0042);
-    codec_prog_reg_i2c(WM8778_CODEC_ADDR,0x5,0x00ff);
-    /* Mix analog and digital output */
-    codec_prog_reg_i2c(WM8778_CODEC_ADDR,0x16,0x5);
-    /* invert MCLK */
-    /* That's it */
-}
-
-/* This can't work yet. SPI2 DA pin not connected. */
-static void codec_spi_setup(void)
-{
-    /* Enable GPIOB, GPIOC, SPI Clock */
-    RCC->APB1ENR |= RCC_APB1ENR_SPI2EN;
-    RCC->AHB1ENR |= RCC_AHB1ENR_GPIOBEN | RCC_AHB1ENR_GPIOCEN;
-    /* Enable CE pin */
-    GPIOC->MODER &= ~(0x3 << (2 * 13));
-    /* Set to output */
-    GPIOC->MODER |= (0x1 << (2 * 13));
-    /* High speed (?) */
-    GPIOC->OSPEEDR &= ~(0x3 << (2* 13));
-    GPIOC->OSPEEDR |= (0x2 << (2* 13));
-    /* Enable SPI2 Pins, set to AF */
-    /* PB10,PB11 */
-    GPIOB->MODER &= ~((0x3 << (2* 10)) | (0x3 << (2*11)));
-    GPIOB->MODER |= ((0x2 << (2* 10)) | (0x2 << (2*11)));
-    /* High speed (?) */
-    GPIOB->OSPEEDR &= ~((0x3 << (2* 10)) | (0x3 << (2*11)));
-    GPIOB->OSPEEDR |= ((0x2 << (2* 10)) | (0x2 << (2*11)));
-    /* I2C Functions are alternate function 4 */
-    GPIOB->AFR[1] &= ~((0xf << (4*2)) | (0xf << (4*3)));
-    GPIOB->AFR[1] |= ((0x4 << (4*2)) | (0x4 << (4*3)));
 }

@@ -6,7 +6,7 @@ rm -f /tmp/adc_vals_addr
 # This is formatted addr size_one_item_bytes n_items
 arm-none-eabi-gdb --command scripts/get_adc_addrs.gdb
 
-if [ $BOARD_VERSION = BOARD_V1 ]
+if [[ $BOARD_VERSION = BOARD_V1 || $BOARD_VERSION = "BOARD_V1.1" ]]
 then
     # Append to this file the number of channels per ADC which will give the number
     # of entries before getting another reading of the same channel

@@ -34,6 +34,13 @@ typedef uint32_t audio_hw_setup_t;
 #define INT16_TO_FLOAT(x) ((float)x/(float)32768)
 #define FLOAT_TO_INT16(x) ((int16_t)(x * 32768))
 
+void codec_prog_reg_i2c(uint8_t addr,
+                               uint8_t reg_addr,
+                               uint16_t reg_val);
+void codec_read_reg_i2c(uint8_t addr,
+                               uint8_t reg_addr,
+                               uint16_t *reg_val);
+
 #include "audio_hw.h" 
 
 #endif /* I2S_LOWLEVEL_H */

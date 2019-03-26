@@ -9,14 +9,15 @@ set a2 [gets $f]
 puts $board_version
 set nchans1 0
 set nchans2 0
-if {[string compare $board_version "BOARD_V1"] == 0} {
+if {([string compare $board_version "BOARD_V1"] == 0) \
+    || ([string compare $board_version "BOARD_V1.1"] == 0)} {
     set nchans1 [gets $f]
     set nchans2 $nchans1
 } elseif {[string compare $board_version "BOARD_V2"] == 0} {
     set nchans1 [gets $f]
     set nchans2 [gets $f]
 } else {
-    puts "Must specify BOARD_VERSION as BOARD_V1 or BOARD_V2"
+    puts "Must specify BOARD_VERSION as BOARD_V1, BOARD_V1.1 or BOARD_V2"
 }
 puts "nchans1:"
 puts $nchans1

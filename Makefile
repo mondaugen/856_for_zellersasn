@@ -1,3 +1,22 @@
+# Defines conditional on board version
+CODEC=
+ifeq ($(BOARD_VERSION),BOARD_V1)
+CODEC=WM8778
+CFLAGS+=-DBOARD_V1
+endif
+ifeq ($(BOARD_VERSION),BOARD_V1.1)
+CODEC=WM8778
+CFLAGS+=-DCODEC_ANALOG_DIGITAL_MIX
+CFLAGS+=-DBOARD_V1
+endif
+ifeq ($(BOARD_VERSION),BOARD_V2)
+CODEC=CS4270
+CFLAGS+=-DBOARD_V2
+endif
+ifeq ($(CODEC),)
+$(error CODEC not set, did you not specify BOARD_VERSION correctly?)
+endif
+
 OPENOCD_INTERFACE		?= interface/stlink-v2.cfg
 OPENOCD_BOARD			?= /usr/local/share/openocd/scripts/board/stm32f429discovery.cfg#board/stm32f429discovery.cfg
 OPTIMIZE				 ?= -O0
@@ -12,6 +31,13 @@ LIMITER_IR_AF_PATH       = ../audio_limiter
 SRC					     = $(notdir $(wildcard $(MM_DSP_SCHABLONE_PATH)/src/*.c))
 SRC					    += $(notdir $(wildcard $(MMMIDI_PATH)/src/*.c))
 SRC					    += $(notdir $(wildcard src/*.c))
+HW_SRC=
+ifeq ($(CODEC),WM8778)
+HW_SRC+=hw/wm8778.c
+endif
+ifeq ($(CODEC),CS4270)
+HW_SRC+=hw/cs4270.c
+endif
 LIB						 = $(MM_DSP_PATH)/lib
 LIB						+= $(MM_PRIMITIVES_PATH)/lib
 LIB						+= $(NE_DATASTRUCTURES_PATH)/lib
@@ -57,6 +83,7 @@ STRIP					 = arm-none-eabi-strip
 OCD 		   			 = sudo openocd -f $(OPENOCD_BOARD) -f $(OPENOCD_INTERFACE)
 PYTHON					 = python2
 CONST_OBJS				 = objs/tables.o
+HW_OBJS                  = $(addprefix $(OBJSDIR)/,$(notdir $(addsuffix .o, $(basename $(HW_SRC)))))
 
 # Linker settings for simple tests and profiling
 PROF_LDFLAGS             = -L../CMSIS_5/CMSIS/Lib/GCC -larm_cortexM4lf_math -Tstm32f429.ld
@@ -104,10 +131,13 @@ inc/_gend_tempo_map_table_header.h : scripts/gen_tempo_map.py
 	PYTHONPATH=scripts \
     OUTFILE=$@ python3 scripts/gen_tempo_map.py
 
-$(OBJS) : $(OBJSDIR)/%.o: %.c $(DEP) inc/_gend_fwir_header.h inc/_gend_tempo_map_table_header.h
+$(HW_OBJS) : $(OBJSDIR)/%.o: hw/%.c
 	$(CC) -c $(CFLAGS) $< -o $@
 
-$(BIN) : $(OBJS) $(CONST_OBJS) $(LIBDEP)
+$(OBJS) : $(OBJSDIR)/%.o: %.c $(DEP) inc/_gend_fwir_header.h inc/_gend_tempo_map_table_header.h $(HW_OBJS)
+	$(CC) -c $(CFLAGS) $< -o $@
+
+$(BIN) : $(OBJS) $(CONST_OBJS) $(HW_OBJS) $(LIBDEP)
 	$(CC) $(filter %.o, $^) -o $@ $(CFLAGS) $(LDFLAGS)
 
 $(BIN_STRIPPED) : $(BIN)
@@ -116,8 +146,10 @@ $(BIN_STRIPPED) : $(BIN)
 $(TESTS) : $(TESTDIR)/%.o: %.c $(DEP)
 	$(CC) -c $(CFLAGS) $< -o $@
 
+ifeq ($(BOARD_VERSION),BOARD_V2)
 dfu_flash: $(BIN_STRIPPED)
 	sudo dfu-util -D $(BIN_STRIPPED) -s $(DFUSE_ADDR):leave -a 0
+endif
 
 flash: $(BIN)
 	$(OCD) -c init \
