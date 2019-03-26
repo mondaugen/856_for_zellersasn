@@ -1,7 +1,9 @@
 #include <stdint.h>
 #include "i2s_lowlevel.h"
 #include "stm32f4xx.h"
-#define WM8778_CODEC_ADDR  ((uint8_t)0x36)
+
+/* the address is 0x34 because the CE pin is pulled low (see i2s_lowlevel.c) */
+#define WM8778_CODEC_ADDR  ((uint8_t)0x34)
 
 void i2s_gpio_disable(void)
 {
