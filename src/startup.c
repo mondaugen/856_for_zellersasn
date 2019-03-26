@@ -553,7 +553,9 @@ __attribute__((section(".flash_comment_text")))
 char flash_comment_text[] = 
                             "856 for ZELLERSASN version "
                             ZELLERSASN_VERSION
-                            " Copyright (c) 2016-2017 Nicholas Esterer. "
+                            " Copyright (c) 2016-"
+                            ZELLERSASN_VERSION_YEAR
+                            " Nicholas Esterer. "
                             "All rights reserved. "
                             "Special thanks to Scott Monk "
                             "and all of Montreal Assembly. "

@@ -114,6 +114,9 @@ all: $(OBJSDIR) $(OBJS) $(BIN)
 $(OBJSDIR):
 	if [ ! -d "$(OBJSDIR)" ]; then mkdir $(OBJSDIR); fi
 
+inc/version.h : scripts/gen_version_header.sh
+	bash $< > $@
+
 constants/tables.c constants/tables.h : constants/tables.py
 	$(PYTHON) $<
 
@@ -134,7 +137,8 @@ inc/_gend_tempo_map_table_header.h : scripts/gen_tempo_map.py
 $(HW_OBJS) : $(OBJSDIR)/%.o: hw/%.c
 	$(CC) -c $(CFLAGS) $< -o $@
 
-$(OBJS) : $(OBJSDIR)/%.o: %.c $(DEP) inc/_gend_fwir_header.h inc/_gend_tempo_map_table_header.h $(HW_OBJS)
+$(OBJS) : $(OBJSDIR)/%.o: %.c $(DEP) inc/version.h \
+    inc/_gend_fwir_header.h inc/_gend_tempo_map_table_header.h $(HW_OBJS)
 	$(CC) -c $(CFLAGS) $< -o $@
 
 $(BIN) : $(OBJS) $(CONST_OBJS) $(HW_OBJS) $(LIBDEP)
@@ -146,10 +150,27 @@ $(BIN_STRIPPED) : $(BIN)
 $(TESTS) : $(TESTDIR)/%.o: %.c $(DEP)
 	$(CC) -c $(CFLAGS) $< -o $@
 
-ifeq ($(BOARD_VERSION),BOARD_V2)
+#ifeq ($(BOARD_VERSION),BOARD_V2)
+
 dfu_flash: $(BIN_STRIPPED)
 	sudo dfu-util -D $(BIN_STRIPPED) -s $(DFUSE_ADDR):leave -a 0
-endif
+
+#endif
+
+# NOTE: Board versions before V2 do not have DFU hardware and must be flashed
+# using scripts/flash_bin.sh and supplying the ADDRESS environment variable
+# equal to DFUSE_ADDR when using stripped binaries.
+# Versions with DFU hardware can simply use DFU util and specify the address
+# (like the dfu_flash recipe).
+# This makefile currently does not make DFUs that include the flashing address.
+binary_release: $(BIN_STRIPPED)
+	tag=$$(git tag --points-at HEAD); \
+	if [ -z $$tag ]; then \
+		echo "git commit must be tagged to do binary_release"; \
+	else \
+		binary_release_name=856_for_zellersasn_$${tag}_$(BOARD_VERSION).bin; \
+		cp $(BIN_STRIPPED) /tmp/$$binary_release_name; \
+    fi;
 
 flash: $(BIN)
 	$(OCD) -c init \
@@ -168,7 +189,7 @@ reset: $(BIN)
 	$(OCD) -c init -c "reset run" -c shutdown
 
 clean:
-	rm -f objs/*.o test/*.o inc/_gend_fwir_header.h
+	rm -f objs/*.o test/*.o inc/_gend_fwir_header.h inc/_gend_tempo_map_table_header.h inc/version.h
 
 
 tags:
