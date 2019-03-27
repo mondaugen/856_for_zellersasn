@@ -213,7 +213,7 @@ When N1 is selected, the knob's function changes depending on the position
 of FREE/A=B/AREC. When FREE/R=B/AREC is in FREE mode, the knob controls the
 tempo so that in fully counter-clockwise position, the there are 11 loops per
 minute (11 playings of N1) and in fully clockwise position, there are 60 loops
-per minute. This can be finely adjusted ±10 BPM with the &#x394; knob.
+per minute. This can be finely adjusted ±10% with the &#x394; knob.
 
 In R=B mode the knob slightly nudges the tempo: turning clockwise makes it
 slightly faster and counter-clockwise slightly slower.
@@ -230,8 +230,8 @@ is selected.
 #### FREE
 
 If N1 selected, &#x394; controls the tempo so that if &#x394; is fully
-counter-clockwise 10 beats per minute are subtracted from its rate and if
-clockwise 10 beats per minute are added to it. A sort of fine tempo adjustment.
+counter-clockwise the tempo is 10% slower and clockwise 10% faster. A sort of
+fine tempo adjustment.
 
 If N2 or N3 selected, &#x394; controls the amount of time between the repeats of
 the notes. &#x394; in fully clockwise position, the time between repeats is
@@ -277,11 +277,17 @@ counter-clockwise position, samples are taken from the beginning, if in the
 clockwise position, samples are taken from the end.
 
 If in the upward position, STRIDE, the POS knob controls the rate at which the
-sample selection is advanced through positions in the sample every time a repeat
-is played (so the REP knob has to be turned up to hear this effect). A
-counter-clockwise position of the POS knob advances backward and a clockwise
-position of the POS knob advances forward. The knob in the centre does not
-advance the start position of sampling.
+sample selection is advanced through positions in the sample every time a note
+is played. A counter-clockwise position of the POS knob advances backward and a
+clockwise position of the POS knob advances forward. The knob in the centre does
+not advance the start position of sampling.
+
+With UNI held down, adjusting POS controls the rate at which sample selection is
+advanced each repeat (so REP must be turned up to hear this effect). The repeat
+stride is separate from the note stride and the two strides are added together
+to determine the starting point.
+
+To reset the stride point, hold down UNI and press FBK once.
 
 #### UNI
 
@@ -336,10 +342,7 @@ In the middle position, the GAIN knob controls the loudness of the note set.
 
 In the top position, this controls the fading of repeated notes. If turned
 counter-clockwise, the repeated notes fade-out and if turned clockwise, the
-repeated notes fade-in. The gain is limited to 1. to avoid clipping, so to get a
-dramatic fade-in effect, the gain setting may need to be turned down (the GAIN
-knob turned counter-clockwise with the FADE/GAIN/FBK switch in the middle
-position) before dialing-in a fade-in effect.
+repeated notes fade-in.
 
 The FBK position can be clicked, which will cycle through feedback modes.
 If the FBK light is constantly illuminated, when recording, the output of
@@ -373,8 +376,8 @@ discard the recording. This last feature is handy though if you make a mistake:
 you can click before the BEAT light comes on again and discard the recording
 you just made, but keep the previous layer(s).
 
-Note that if you keep FBK enabled and record additional loops the output can get
-very dense.
+Note that if you keep FBK enabled and record additional loops the output can
+become very dense.
 
 ### GAIN
 
@@ -1022,22 +1025,23 @@ ignored.
 
 ### MIDI clock
 
-The 856 can be synchronized to external hardware by sending it a MIDI
-clock. To see if this is active, hold down the UNI switch. If the first
-LED is lit up it means the 856 is using internal scheduling, if the second LED
-is lit up, it means it is listening for a MIDI clock to control its scheduling.
-To toggle between the two modes click the PLAY footswitch while holding down the
-UNI switch. You should see the LED change to indicate what mode has been set.
-Note that in MIDI clock mode no playback will happen if no clock is being sent!
-The 856 expects 24 MIDI clock messages per quarter note, which is compatible with most
-hardware.
+The 856 can be synchronized to external hardware by sending it a MIDI clock. To
+see if this is active, hold down the UNI switch. If the first LED is lit up it
+means the 856 is using internal scheduling, if the second LED is lit up, it
+means it is listening for a MIDI clock to control its scheduling.  To toggle
+between the two modes click the PLAY footswitch while holding down the UNI
+switch. You should see the LED change to indicate what mode has been set.  Note
+that in MIDI clock mode no playback will happen if no clock is being sent!  The
+856 expects 24 MIDI clock messages per quarter note, which is compatible with
+most hardware. A quarter note is the amount of time between two flashings of the
+BEAT light on the 856.
 
 ### MIDI Through
 
 All the MIDI messages entering the unit via the MIDI in port are passed through
 to the MIDI through port.
 
-## The expression pedal
+## The expression pedal (only on BOARD_V2 or higher)
 
 It's easy to use an expression pedal with the 856. Simply plug one into the 1/4
 inch jack closest to the DC jack. Then to choose what knob to control with the

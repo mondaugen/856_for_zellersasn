@@ -1,0 +1,30 @@
+#! /bin/bash
+# Script for sending a control change message
+
+if [ -z ${MIDIDEV} ]
+then
+    MIDIDEV=hw:1,0,0
+fi
+
+if [ -z ${MIDI_CHANNEL} ]
+then
+    MIDI_CHANNEL=0
+fi
+
+if [[ -z "$1" ]]
+then
+    NOTE=60
+else
+    NOTE=$1
+fi
+
+if [[ -z "$2" ]]
+then
+    VELOCITY=100
+else
+    VELOCITY=$2
+fi
+
+
+amidi -p $MIDIDEV -S `printf "9%x %02x %02x" $MIDI_CHANNEL $NOTE $VELOCITY`  
+
