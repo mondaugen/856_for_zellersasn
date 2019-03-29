@@ -17,12 +17,6 @@
  #define CODEC_CS4270
 #endif
 
-/* BOARD_V1 always does mix of digital and analog */
-#ifdef BOARD_V1
-#define CODEC_ANALOG_DIGITAL_MIX 
-#endif  
-
-
 #ifdef CODEC_DMA_TRIGGER_CORRECT_I2S_FRAME_ERROR
 #define  FRAME_ERROR_BLOCK_COUNT_TRIG 1000UL
 static uint32_t i2s_block_counter = 1;
