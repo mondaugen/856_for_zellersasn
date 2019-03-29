@@ -12,4 +12,5 @@ plot(y,A,';Attack;',y,R,';Release;');
 title('Envelope time at ENV knob positions')
 ylabel('Ramp time as fraction of playback length as specified by LEN')
 xlabel('Position of ENV knob (0 = counter-clockwise, 1 = clockwise)')
-print -djpeg '/tmp/env_ramp.png'
+ylim([-0.1 0.6])
+print -dpng '/tmp/env_ramp.png'

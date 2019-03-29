@@ -1041,7 +1041,9 @@ BEAT light on the 856.
 All the MIDI messages entering the unit via the MIDI in port are passed through
 to the MIDI through port.
 
-## The expression pedal (only on BOARD_V2 or higher)
+## The expression pedal 
+
+(only on BOARD_V2 or higher)
 
 It's easy to use an expression pedal with the 856. Simply plug one into the 1/4
 inch jack closest to the DC jack. Then to choose what knob to control with the

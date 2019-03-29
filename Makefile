@@ -1,20 +1,22 @@
-# Defines conditional on board version
-CODEC=
-ifeq ($(BOARD_VERSION),BOARD_V1)
-CODEC=WM8778
-CFLAGS+=-DBOARD_V1
-endif
-ifeq ($(BOARD_VERSION),BOARD_V1.1)
-CODEC=WM8778
-CFLAGS+=-DCODEC_ANALOG_DIGITAL_MIX
-CFLAGS+=-DBOARD_V1
-endif
-ifeq ($(BOARD_VERSION),BOARD_V2)
-CODEC=CS4270
-CFLAGS+=-DBOARD_V2
-endif
-ifeq ($(CODEC),)
-$(error CODEC not set, did you not specify BOARD_VERSION correctly?)
+ifeq ($(filter /tmp/manual.zip /tmp/manual.html /tmp/env_ramp.png,$(MAKECMDGOALS)),)
+ # Defines conditional on board version
+ CODEC=
+ ifeq ($(BOARD_VERSION),BOARD_V1)
+ CODEC=WM8778
+ CFLAGS+=-DBOARD_V1
+ endif
+ ifeq ($(BOARD_VERSION),BOARD_V1.1)
+ CODEC=WM8778
+ CFLAGS+=-DCODEC_ANALOG_DIGITAL_MIX
+ CFLAGS+=-DBOARD_V1
+ endif
+ ifeq ($(BOARD_VERSION),BOARD_V2)
+ CODEC=CS4270
+ CFLAGS+=-DBOARD_V2
+ endif
+ ifeq ($(CODEC),)
+ $(error CODEC not set, did you not specify BOARD_VERSION correctly?)
+ endif
 endif
 
 OPENOCD_INTERFACE		?= interface/stlink-v2.cfg
@@ -215,3 +217,18 @@ flash_simple: test/bin/simple.bin
 	    -c "flash write_image erase $<" \
 		-c "reset run" \
 	    -c shutdown
+
+/tmp/env_ramp.png : scripts/smart_envelope_demo.m
+	octave --no-gui $<
+
+/tmp/manual.html : doc/manual.md  /tmp/env_ramp.png
+	markdown<$<>/tmp/manual.html
+
+/tmp/manual.zip: /tmp/manual.html
+	cd /tmp ; \
+	rm -rf manual ; \
+	mkdir manual ; \
+	cp manual.html manual/ ; \
+	cp env_ramp.png manual/ ; \
+	zip -r manual.zip manual ;
+    
