@@ -273,8 +273,10 @@ on.
 
 If in the central position, ABS, the POS knob controls absolutely where samples
 are taken from in the recording. If the POS knob is in the fully
-counter-clockwise position, samples are taken from the beginning, if in the
-clockwise position, samples are taken from the end.
+counter-clockwise position, samples are taken from the beginning, and as
+advanced clockwise, samples are taken from the end (playback wraps around to the
+beginning so in the far clockwise position, you are effectively starting
+playback at the beginning again).
 
 If in the upward position, STRIDE, the POS knob controls the rate at which the
 sample selection is advanced through positions in the sample every time a note
@@ -291,13 +293,14 @@ To reset the stride point, hold down UNI and press FBK once.
 
 #### UNI
 
-If the STRIDE/ABS/UNI switch clicked down without adjusting any other controls
+If the STRIDE/ABS/UNI switch is clicked down without adjusting any other controls
 while the switch is down, the pitches of the repeated notes (previously set via
-P1/P2/P3 and PITCH) are reset to unison, that is, their pitches are not altered.
+P1/P2/P3 and PITCH) are reset to unison, i.e., they are not transposed.
 
-If held down while adjusting the PITCH knob, the pitches of all repeats for the
-currently selected note set are adjusted simultaneously. This is useful if you
-would like to have repeated notes at a different pitch, but no arpeggio effect.
+If held down while adjusting the PITCH knob, the pitches of all the repeats for
+the currently selected note set are adjusted simultaneously. This is useful if
+you would like to have repeated notes at a different pitch, but no arpeggio
+effect.
 
 If held down while adjusting the &#x394; knob when N2 or N3 is selected,
 controls swing applied to the rhythm that separates the repeats. Putting the

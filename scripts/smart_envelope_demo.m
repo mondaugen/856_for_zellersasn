@@ -1,3 +1,6 @@
+if exist("clip") == 0
+    pkg load miscellaneous
+end
 Amin = 0.001; % Minimum attack time
 Amax = 0.5;   % Maximum attack time
 Rmin = 0.001; % Minimum release time
