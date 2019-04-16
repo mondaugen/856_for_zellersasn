@@ -70,5 +70,6 @@ Tue Mar 19 18:23:21 EDT 2019
 Fri Apr 12 09:00:16 EDT 2019
 - Indeed there's a click at the end of the envelope (ENV) when in the
   counter-clockwise area of the knob
+    - this is because we want no fade in / out when we are feeding back N1 and recording. This should be changed to check the state of feedback as well.
 - LEN should have coarse and fine (fine using UNI).
     - it's true that eventually we will want to change the length without changing the pitch, and holding UNI while changing PITCH changes all the pitches together...)
