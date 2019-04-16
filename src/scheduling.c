@@ -369,31 +369,14 @@ static void NoteOnEvent_happen(MMEvent *event)
                     * noteParamSets[noe->parameterSet].attackTime,
                   releaseTime = sustainTimeSeconds
                     * noteParamSets[noe->parameterSet].releaseTime;
-            /* If this note belongs to N1, then it can have a very short attack
-            time if it likes. This so that continuously feeding back N1 won't
-            keep applying an envelope, which changes the audio unpleasantly. */
-            if (short_attack_allowed(noe)) {
-                no.attackTime = MIN(
-                    MAX(attackTime,
-                        0),
-                        SYNTH_CONTROL_MAX_ATTACK_TIME);
-            } else {
-                no.attackTime = MIN(
-                    MAX(attackTime,
-                        SYNTH_CONTROL_MIN_ATTACK_TIME),
-                        SYNTH_CONTROL_MAX_ATTACK_TIME);
-            }
-            if (short_release_allowed(noe)) {
-                no.releaseTime = MIN(
-                    MAX(releaseTime,
-                        0),
-                        SYNTH_CONTROL_MAX_RELEASE_TIME);
-            } else {
-                no.releaseTime = MIN(
-                    MAX(releaseTime,
-                        SYNTH_CONTROL_MIN_RELEASE_TIME),
-                        SYNTH_CONTROL_MAX_RELEASE_TIME);
-            }
+            no.attackTime = MIN(
+                MAX(attackTime,
+                    SYNTH_CONTROL_MIN_ATTACK_TIME),
+                    SYNTH_CONTROL_MAX_ATTACK_TIME);
+            no.releaseTime = MIN(
+                MAX(releaseTime,
+                    SYNTH_CONTROL_MIN_RELEASE_TIME),
+                    SYNTH_CONTROL_MAX_RELEASE_TIME);
             /* So this value should also be in seconds dipshit */
             no.sustainTime = sustainTimeSeconds - no.attackTime - no.releaseTime;
             no.samples = theSound->wavtab;
