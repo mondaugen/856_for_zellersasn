@@ -361,13 +361,13 @@ static void NoteOnEvent_happen(MMEvent *event)
             no.index = MM_fwrap(
                 noteParamSets[noe->parameterSet].startPoint + noe->currentPosition,
                 0,1) * MMArray_get_length(theSound->wavtab);
-            float attackTime = noteParamSets[noe->parameterSet].sustainTime
+            /* These times are in seconds */
+            float sustainTimeSeconds = noteParamSets[noe->parameterSet].sustainTime
                     * (MMSample)MMArray_get_length(theSound->wavtab)
-                    / (MMSample)audio_hw_get_sample_rate(NULL)
+                    / (MMSample)audio_hw_get_sample_rate(NULL),
+                attackTime = sustainTimeSeconds
                     * noteParamSets[noe->parameterSet].attackTime,
-                  releaseTime = noteParamSets[noe->parameterSet].sustainTime
-                    * (MMSample)MMArray_get_length(theSound->wavtab)
-                    / (MMSample)audio_hw_get_sample_rate(NULL)
+                  releaseTime = sustainTimeSeconds
                     * noteParamSets[noe->parameterSet].releaseTime;
             /* If this note belongs to N1, then it can have a very short attack
             time if it likes. This so that continuously feeding back N1 won't
@@ -394,16 +394,8 @@ static void NoteOnEvent_happen(MMEvent *event)
                         SYNTH_CONTROL_MIN_RELEASE_TIME),
                         SYNTH_CONTROL_MAX_RELEASE_TIME);
             }
-            /* sustainTime is the length of the audio, times
-             * noteParamSets[parameterSet].sustainTime *
-             * length_of_sound_seconds * (1 -
-             * noteParamSets[parameterSet].attackTime -
-             * noteParamSets[parametersSet].releaseTime) */
-            no.sustainTime =
-                noteParamSets[noe->parameterSet].sustainTime
-                * (MMSample)MMArray_get_length(theSound->wavtab)
-                / (MMSample)audio_hw_get_sample_rate(NULL)
-                * (1. - no.attackTime - no.releaseTime);
+            /* So this value should also be in seconds dipshit */
+            no.sustainTime = sustainTimeSeconds - no.attackTime - no.releaseTime;
             no.samples = theSound->wavtab;
             MMWavTab_inc_n_players(theSound->wavtab);
             if (noe->pitch_mode == SynthControlPitchMode_BUS) {
