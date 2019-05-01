@@ -28,8 +28,8 @@ else
 fi
 
 OCD='sudo openocd \
-    -f /usr/local/share/openocd/scripts/board/stm32f429discovery.cfg \
-    -f '$OPENOCD_INTERFACE;
+    -f '$OPENOCD_BOARD' \
+    -f '$OPENOCD_INTERFACE
 
 # board_version set here because I can't seem to read environment variables from
 # within openocd scripting

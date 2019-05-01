@@ -6,6 +6,7 @@ signal handle SIGINT
 set f [open "/tmp/adc_vals_addr"]
 set a1 [gets $f]
 set a2 [gets $f]
+puts "board_version:"
 puts $board_version
 set nchans1 0
 set nchans2 0
@@ -21,6 +22,8 @@ if {([string compare $board_version "BOARD_V1"] == 0) \
 }
 puts "nchans1:"
 puts $nchans1
+puts "nchans2:"
+puts $nchans2
 
 close $f
 
