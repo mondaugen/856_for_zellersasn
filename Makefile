@@ -193,7 +193,6 @@ reset: $(BIN)
 clean:
 	rm -f objs/*.o test/*.o inc/_gend_fwir_header.h inc/_gend_tempo_map_table_header.h inc/version.h
 
-
 tags:
 	ctags -R . \
 		$(MM_DSP_SCHABLONE_PATH)\

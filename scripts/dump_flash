@@ -18,3 +18,8 @@ sudo openocd -f /usr/local/share/openocd/scripts/board/stm32f429discovery.cfg \
     -c "reset halt" \
     -c "dump_image ${OUTFILE} 0x0 0x200000" \
     -c shutdown
+
+#TODO: This also works, but you need to write with
+#openocd -f /usr/local/share/openocd/scripts/board/stm32f429discovery.cfg -f interface/stlink-v2.cfg -c init -c "reset halt" -c "flash write_image /home/sandman/Documents/archives/fw_images/856_repair_may_13_2019.bin 0x08000000" -c shutdown
+#
+#openocd -f /usr/local/share/openocd/scripts/board/stm32f429discovery.cfg -f interface/stlink-v2.cfg -c init -c reset halt -c "dump_image /home/sandman/Documents/archives/fw_images/856_repair_may_13_2019.bin 0x08000000 0x200000"
