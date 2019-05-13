@@ -1,5 +1,7 @@
 #!/bin/bash
 
+[ -z $OPENOCD_BOARD ] && OPENOCD_BOARD=/usr/local/share/openocd/scripts/board/stm32f429discovery.cfg
+
 rm -f /tmp/adc_vals_addr
 
 # Get addresses and sizes of memory regions where ADC values go
