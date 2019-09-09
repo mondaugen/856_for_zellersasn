@@ -368,7 +368,9 @@ static void
 synth_midi_syscom_control(void *data,
                           MIDIMsg *msg)
 {
-    scheduler_incTimeAndDoEvents_midiclock();
+    if (((*msg) & 0x0f) == 0x08) {
+        scheduler_incTimeAndDoEvents_midiclock();
+    }
 }
 
 static void
