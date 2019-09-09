@@ -24,12 +24,12 @@ OPENOCD_BOARD			?= /usr/local/share/openocd/scripts/board/stm32f429discovery.cfg
 OPTIMIZE				 ?= -O0
 BIN 					 = main.elf
 BIN_STRIPPED			 = main-stripped.bin
-MMMIDI_PATH				 = ../mmmidi
-MM_DSP_PATH				 = ../mm_dsp
-MM_PRIMITIVES_PATH		 = ../mm_primitives
-NE_DATASTRUCTURES_PATH   = ../ne_datastructures
-MM_DSP_SCHABLONE_PATH    = ../mm_dsp_schablone
-LIMITER_IR_AF_PATH       = ../audio_limiter
+MMMIDI_PATH				 = libs/mmmidi
+MM_DSP_PATH				 = libs/mm_dsp
+MM_PRIMITIVES_PATH		 = libs/mm_primitives
+NE_DATASTRUCTURES_PATH   = libs/ne_datastructures
+MM_DSP_SCHABLONE_PATH    = libs/mm_dsp_schablone
+LIMITER_IR_AF_PATH       = libs/audio_limiter
 SRC					     = $(notdir $(wildcard $(MM_DSP_SCHABLONE_PATH)/src/*.c))
 SRC					    += $(notdir $(wildcard $(MMMIDI_PATH)/src/*.c))
 SRC					    += $(notdir $(wildcard src/*.c))
@@ -44,7 +44,7 @@ LIB						 = $(MM_DSP_PATH)/lib
 LIB						+= $(MM_PRIMITIVES_PATH)/lib
 LIB						+= $(NE_DATASTRUCTURES_PATH)/lib
 LIB						+= $(LIMITER_IR_AF_PATH)
-CMSIS_INCLUDES           = ../CMSIS_5/CMSIS/Core/Include/ ../CMSIS_5/CMSIS/DSP/Include/
+CMSIS_INCLUDES           = libs/CMSIS_5/CMSIS/Core/Include/ libs/CMSIS_5/CMSIS/DSP/Include/
 INC 				     = $(MM_DSP_SCHABLONE_PATH)/inc
 INC					    += $(MMMIDI_PATH)/inc
 INC					    += $(MM_DSP_PATH)/inc
@@ -111,7 +111,29 @@ N_D=$(shell python -c 'print(int($(CODEC_SAMPLE_RATE)*$(N_D_seconds)))')
 # The address the DFU uploader uses to write the DFU file to the device.
 DFUSE_ADDR				 = 0x08000000
 
+.PHONY: all libs
+
 all: $(OBJSDIR) $(OBJS) $(BIN)
+
+libs: mm_dsp mm_primitives ne_datastructures audio_limiter
+
+#mmmidi:
+#	cd libs/mmmidi && $(MAKE)
+
+mm_dsp:
+	cd libs/mm_dsp && $(MAKE) -f arm_cm4.mk
+
+mm_primitives:
+	cd libs/mm_primitives && $(MAKE) -f arm_cm4.mk
+
+ne_datastructures:
+	cd libs/ne_datastructures && $(MAKE) -f arm_cm4.mk
+
+#mm_dsp_schablone:
+#	cd libs/mm_dsp_schablone && $(MAKE)
+
+audio_limiter:
+	cd libs/audio_limiter && $(MAKE) -f arm_cm4.mk
 
 $(OBJSDIR):
 	if [ ! -d "$(OBJSDIR)" ]; then mkdir $(OBJSDIR); fi
@@ -143,7 +165,7 @@ $(OBJS) : $(OBJSDIR)/%.o: %.c $(DEP) inc/version.h \
     inc/_gend_fwir_header.h inc/_gend_tempo_map_table_header.h $(HW_OBJS)
 	$(CC) -c $(CFLAGS) $< -o $@
 
-$(BIN) : $(OBJS) $(CONST_OBJS) $(HW_OBJS) $(LIBDEP)
+$(BIN) : $(OBJS) $(CONST_OBJS) $(HW_OBJS) libs
 	$(CC) $(filter %.o, $^) -o $@ $(CFLAGS) $(LDFLAGS)
 
 $(BIN_STRIPPED) : $(BIN)

@@ -1,0 +1,21 @@
+[submodule "libs/mm_dsp_schablone"]
+	path = libs/mm_dsp_schablone
+	url = git@github.com:mondaugen/mm_dsp_schablone.git
+[submodule "libs/mm_dsp"]
+	path = libs/mm_dsp
+	url = git@github.com:mondaugen/mm_dsp.git
+[submodule "libs/audio_limiter"]
+	path = libs/audio_limiter
+	url = git@github.com:mondaugen/audio_limiter.git
+[submodule "libs/mmmidi"]
+	path = libs/mmmidi
+	url = git@github.com:mondaugen/mmmidi.git
+[submodule "libs/mm_primitives"]
+	path = libs/mm_primitives
+	url = git@github.com:mondaugen/mm_primitives.git
+[submodule "libs/ne_datastructures"]
+	path = libs/ne_datastructures
+	url = git@github.com:mondaugen/ne_datastructures.git
+[submodule "libs/CMSIS_5"]
+	path = libs/CMSIS_5
+	url = git@github.com:ARM-Software/CMSIS_5.git
