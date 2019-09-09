@@ -1,33 +1,27 @@
-Requirements:
+Now all the external libraries are tracked using git-submodules.
+When you first clone this repository, you have to do:
 
-mmmidi v0.1
-mm_dsp v0.4
-mm_primitives v0.1
-ne_datastructures v0.1
-mm_dsp_schablone v0.1
-CMSIS v4.00
+git submodule init
+git submodule update
 
-Put directories of first 5 in directory above this one.
-Put CMSIS in directory ../../build
+The libraries will be cloned and checked out to the correct commits.
 
-Build all libraries except for CMSIS (doesn't need to be built).
-Do
+Now you can build. You have to specify the version of the board, e.g.,
 
-make
+BOARD_VERSION=BOARD_V2 make
 
-in this directory and it should build. Do
+and the firmware should be compiled and linked.
 
-make flash
+Use
+
+BOARD_VERSION=BOARD_V2 make flash
 
 to flash chips.
 
-Probably will have to pass defines like so:
-CFLAGS=-DBOARD_V2\ -DCODEC_WM8778\ -DAUDIO_HW_TEST_OUTPUT\ -DCODEC_ANALOG_DIGITAL_MIX make
+To make a DFU, run
 
-To make a DFU that will work, you have to strip the debugging symbols:
+BOARD_VERSION=BOARD_V2 make binary_release
 
-arm-none-eabi-strip -g -O binary main.elf -o /tmp/main-stripped.bin
-
-Flash DFU (on Linux) with
+Flash DFU (with dfu-util) with
 
 sudo dfu-util -D /tmp/main-stripped.bin -s 0x08000000 -a 0
