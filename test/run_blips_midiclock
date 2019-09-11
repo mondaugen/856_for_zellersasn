@@ -1,4 +1,19 @@
 #! /bin/bash -v
+# Notes:
+# use
+# $ jack_lsp -s blips_jack_server
+# to list the ports on the jack server, after running this script (keep it running in the background)
+# (use SERVER_NAME instead of blips_jack_server if you specified a different one)
+# if you don't see system:midi_playback_*
+# (* meaning anything) then try specifying
+# MIDI_TYPE=seq
+# If you can connect to the MIDI playback port, but you don't get any MIDI transmitted, do
+# $ jack_lsp -s blips_jack_server -A
+# to see which system:midi_playback_* is routed where. You want the one routed
+# to the capture port of your soundcard (you can use 'amidi -l' to see the name
+# of your soundcard)
+# To specify the one you want, do
+# $ JACK_MIDI_PLAYBACK_PORT=path:to/port bash test/run_blips_midiclock ...
 
 on_sigint() { 
     kill -n 9 $JACKD_PROC_ID;
@@ -7,10 +22,17 @@ on_sigint() {
     exit 0
 };
 
-SERVER_NAME=blips_jack_server;
+SERVER_NAME=blips_jack_server
+# Use this to specify an alsa device other than hw:1
+[ -z $ALSA_DEVICE ] && ALSA_DEVICE=hw:1
+# For some setups (e.g., when using M-Audio MIDISport), raw MIDI won't work,
+# need to specify MIDI_TYPE=seq
+[ -z $MIDI_TYPE ] && MIDI_TYPE=raw
+[ -z $JACK_MIDI_PLAYBACK_PORT ] && JACK_MIDI_PLAYBACK_PORT=system:midi_playback_1
+[ -z $PORT_SETUP_WAIT_TIME ] && PORT_SETUP_WAIT_TIME=5
 
 # Launch jackd audio server
-jackd -n ${SERVER_NAME} -dalsa -dhw:1 -X raw &
+jackd -n ${SERVER_NAME} -dalsa -d"$ALSA_DEVICE" -X "$MIDI_TYPE" &
 
 JACKD_PROC_ID=$!;
 
@@ -22,9 +44,12 @@ JACK_DEFAULT_SERVER=${SERVER_NAME} test/blips_midiclock &
 
 BLIPS_PROC_ID=$!;
 
+echo "Wait for ports to show up..."
+sleep "$PORT_SETUP_WAIT_TIME"
+
 # connect audio and midi to soundcard
-jack_connect -s ${SERVER_NAME} blips:midi_out system:midi_playback_1;
-jack_connect -s ${SERVER_NAME} blips:audio_out system:playback_2;
+jack_connect -s ${SERVER_NAME} blips:midi_out "$JACK_MIDI_PLAYBACK_PORT"
+jack_connect -s ${SERVER_NAME} blips:audio_out system:playback_2
 
 echo "Test running, press CTRL-C to exit.";
 trap on_sigint SIGINT;

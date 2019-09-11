@@ -177,7 +177,7 @@ $(TESTS) : $(TESTDIR)/%.o: %.c $(DEP)
 #ifeq ($(BOARD_VERSION),BOARD_V2)
 
 dfu_flash: $(BIN_STRIPPED)
-	sudo dfu-util -D $(BIN_STRIPPED) -s $(DFUSE_ADDR):leave -a 0
+	dfu-util -D $(BIN_STRIPPED) -s $(DFUSE_ADDR):leave -a 0
 
 #endif
 
