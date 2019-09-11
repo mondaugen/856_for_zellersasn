@@ -14,6 +14,13 @@
 # of your soundcard)
 # To specify the one you want, do
 # $ JACK_MIDI_PLAYBACK_PORT=path:to/port bash test/run_blips_midiclock ...
+#
+# If you cannot connect to the audio device, you might have to specify a different one, e.g., 
+# $ ALSA_DEVICE=hw:0 bash test/run_blips...
+# how to find this, I don't exactly know, but I think if you run
+# aplay -L
+# it will show the available MIDI devices, and the number after 'hw:' is the
+# number after DEV= (I think)
 
 on_sigint() { 
     kill -n 9 $JACKD_PROC_ID;

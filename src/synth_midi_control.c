@@ -3,7 +3,20 @@
 #include "midi_util.h"
 #include "scheduling.h"
 
+/* We store the callback with all the controls we register, so we can check
+automatically if it gets called. */
 typedef struct {
+    void (*func)(void*,MIDIMsg*);
+} synth_midi_control_params_t;
+
+static synth_midi_control_params_t *
+alloc_synth_midi_control_params_t()
+{
+    return malloc(sizeof(synth_midi_control_params_t));
+}
+
+typedef struct {
+    synth_midi_control_params_t super;
     int note;
     int pitch;
 } synth_midi_cc_pitch_control_t;
@@ -12,6 +25,17 @@ static synth_midi_cc_pitch_control_t *
 alloc_synth_midi_cc_pitch_control_t()
 {
     return malloc(sizeof(synth_midi_cc_pitch_control_t));
+}
+
+typedef struct {
+    synth_midi_control_params_t super;
+    int note;
+} synth_midi_cc_note_control_t;
+
+static synth_midi_cc_note_control_t *
+alloc_synth_midi_cc_note_control_t()
+{
+    return malloc(sizeof(synth_midi_cc_note_control_t));
 }
 
 //<td> N1 Pitch 1 control (fine) </td>
@@ -315,19 +339,23 @@ synth_midi_cc_rec_mode_control(void *data, MIDIMsg *msg)
                                        NULL);
 }
 
-static void *
+static synth_midi_control_params_t *
 synth_midi_cc_rec_mode_control_t_init(
         MIDI_Router_Standard *router,
         int midi_channel,
         unsigned int *cc)
 {
-    static const char dummy;
+    synth_midi_control_params_t *callback_storage = alloc_synth_midi_control_params_t();
+    *callback_storage = (synth_midi_control_params_t) { .func = synth_midi_cc_rec_mode_control };
+    if (!callback_storage) { goto fail; }
     MIDI_CC_CB_Router_addCB(&router->cbRouters[midi_channel],
             *cc,
             synth_midi_cc_rec_mode_control,
             NULL);
     *cc = *cc + 1;
-    return (void*)&dummy;
+    return callback_storage;
+fail:
+    return NULL;
 }
 
 //<td> Feedback state </td>
@@ -390,7 +418,7 @@ initializes a MIDI control function that doesn't need any extra parameters,
 so returns void
 increments cc number
 */
-static void *
+static synth_midi_control_params_t *
 synth_midi_cc_global_func_init(
         MIDI_Router_Standard *router,
         int midi_channel,
@@ -398,23 +426,25 @@ synth_midi_cc_global_func_init(
         unsigned int *cc)
 {
     /* returns dummy address to indicate it worked */
-    static const char dummy = 1;
+    synth_midi_control_params_t *callback_storage = alloc_synth_midi_control_params_t();
+    if (!callback_storage) { goto fail; }
+    *callback_storage = (synth_midi_control_params_t) { .func = func };
     MIDI_CC_CB_Router_addCB(&router->cbRouters[midi_channel],
             /* cc number */
             *cc,
             func,
             NULL);
     *cc = *cc + 1;
-    return (void*)&dummy;
+    return callback_storage;
+fail:
+    return NULL;
 }
 
-/* using alloc will save a bunch of repeated stuff */
-static int *alloc_int() { return malloc(sizeof(int)); }
 
 /* initializes a function that takes a note as its parameter 
 increments cc number
 */
-static void *
+static synth_midi_control_params_t *
 synth_midi_cc_note_func_init(
         MIDI_Router_Standard *router,
         int midi_channel,
@@ -422,16 +452,19 @@ synth_midi_cc_note_func_init(
         unsigned int *cc,
         int note)
 {
-    int *pnote = alloc_int();
-    if (!pnote) { goto fail; }
-    *pnote = note;
+    synth_midi_cc_note_control_t *note_ctl = alloc_synth_midi_cc_note_control_t();
+    if (!note_ctl) { goto fail; }
+    *note_ctl = (synth_midi_cc_note_control_t) {
+        .super = (synth_midi_control_params_t) { .func = func },
+        .note = note
+    };
     MIDI_CC_CB_Router_addCB(&router->cbRouters[midi_channel],
             /* cc number */
             *cc,
             func,
-            pnote);
+            &note_ctl->note);
     *cc = *cc + 1;
-    return (void*)pnote;
+    return (synth_midi_control_params_t*)note_ctl;
 fail:
     return NULL;
 }
@@ -440,7 +473,7 @@ fail:
 initializes a function that takes a note and pitch as its parameter 
 increments cc number
 */
-static void *
+static synth_midi_control_params_t *
 synth_midi_cc_note_pitch_func_init(
         MIDI_Router_Standard *router,
         int midi_channel,
@@ -452,6 +485,7 @@ synth_midi_cc_note_pitch_func_init(
     synth_midi_cc_pitch_control_t *p_note_pitch = alloc_synth_midi_cc_pitch_control_t();
     if (!p_note_pitch) { goto fail; }
     *p_note_pitch = (synth_midi_cc_pitch_control_t) {
+        .super = (synth_midi_control_params_t) { .func = func },
         .note = note,
         .pitch = pitch
     };
@@ -462,7 +496,7 @@ synth_midi_cc_note_pitch_func_init(
         func,
         p_note_pitch);
     *cc = *cc + 1;
-    return (void*)p_note_pitch;
+    return (synth_midi_control_params_t*)p_note_pitch;
 fail:
     return NULL;
 }
@@ -478,15 +512,10 @@ synth_midi_control_setup(int midi_channel)
         midi_channel_was_oob = 1;
     }
     /* note: midiRouter from inc/midi_setup.h */
-    static unsigned int cc = 0, midi_controls_end;
-    /*
-    The following functions don't currently have to be stored (we don't need to
-    free because the RAM is wiped whenever the 856 is turned off). But I do it
-    like this for clarity (we can clearly see in what order the MIDI CC
-    functions are) and with the possibility that the return values of the *init
-    functions could be used in the future maybe.
-    */
-    const void *midi_cc_controls[] = {
+    static unsigned int cc = 0;
+    static synth_midi_control_params_t midi_controls_end;
+    /* We store the callbacks and related information here for debugging purposes. */
+    const synth_midi_control_params_t *midi_cc_controls[] = {
         /* Note 1 group */
         // 0 
         // N1 Pitch 1 control (fine) 
