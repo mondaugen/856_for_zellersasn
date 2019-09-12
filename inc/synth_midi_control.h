@@ -16,4 +16,10 @@
 
 void synth_midi_control_setup(int midi_channel);
 
+/* For debugging */
+typedef struct synth_midi_control_params_t synth_midi_control_params_t;
+const synth_midi_control_params_t ** synth_midi_control_get_midi_cc_controls();
+synth_midi_control_params_t * synth_midi_control_get_p_midi_contols_end();
+
+
 #endif /* SYNTH_MIDI_CONTROL_H */

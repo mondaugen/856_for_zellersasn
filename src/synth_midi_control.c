@@ -5,9 +5,9 @@
 
 /* We store the callback with all the controls we register, so we can check
 automatically if it gets called. */
-typedef struct {
+struct synth_midi_control_params_t {
     void (*func)(void*,MIDIMsg*);
-} synth_midi_control_params_t;
+};
 
 static synth_midi_control_params_t *
 alloc_synth_midi_control_params_t()
@@ -502,6 +502,14 @@ fail:
 }
 
 static int midi_channel_was_oob = 0;
+static const synth_midi_control_params_t **p_midi_cc_controls;
+static synth_midi_control_params_t midi_controls_end;
+
+const synth_midi_control_params_t **
+synth_midi_control_get_midi_cc_controls() { return p_midi_cc_controls; }
+
+synth_midi_control_params_t *
+synth_midi_control_get_p_midi_contols_end() { return &midi_controls_end; }
 
 void
 synth_midi_control_setup(int midi_channel)
@@ -513,7 +521,6 @@ synth_midi_control_setup(int midi_channel)
     }
     /* note: midiRouter from inc/midi_setup.h */
     static unsigned int cc = 0;
-    static synth_midi_control_params_t midi_controls_end;
     /* We store the callbacks and related information here for debugging purposes. */
     const synth_midi_control_params_t *midi_cc_controls[] = {
         /* Note 1 group */
@@ -724,6 +731,7 @@ synth_midi_control_setup(int midi_channel)
         synth_midi_cc_note_func_init(&midiRouter, midi_channel, synth_midi_cc_note_stride_control, &cc, 2),
         &midi_controls_end
     };
+    p_midi_cc_controls = midi_cc_controls;
     synth_midi_note_on_init(&midiRouter, midi_channel);
     synth_midi_syscom_control_init(&midiRouter, midi_channel);
 }
