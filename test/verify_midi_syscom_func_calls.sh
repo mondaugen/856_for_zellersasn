@@ -1,8 +1,6 @@
 # This simply checks to see that only the scheduler increment is called when a
 # MIDI clock message is received and the other messages do nothing
 
-scripts/start_openocd&
-openocd_proc_id=$(ps aux|grep '\<openocd\>'|grep -v 'grep'|awk '{print $2}')
 
 STORE_FAILED_FILE=/tmp/verify_midi_func_call_FAILED
 [ -z $MIDIDEV ] && MIDIDEV=hw:1,0,0
@@ -44,6 +42,12 @@ cmds[15]='ff'
 passed=1
 for cmd in "${cmds[@]}"
 do
+    # TODO For some reason you have to restart openocd every time or else gdb
+    # gets stuck the second time you hit the synth_midi_control_setup breakpoint
+    scripts/start_openocd&
+    openocd_proc_id=$(ps aux|grep '\<openocd\>'|grep -v 'grep'|awk '{print $2}')
+    sleep 1
+
     echo "$cmd"
     rm -f "$STORE_FAILED_FILE"
     arm-none-eabi-gdb \
@@ -73,6 +77,8 @@ do
     fi
     kill -9 "$gdb_proc_id"
     sleep 1
+
+    kill -9 "$openocd_proc_id"
 done
 
 if [[ $passed == 0 ]]
@@ -82,4 +88,3 @@ else
     echo "PASSED"
 fi
 
-kill -9 "$openocd_proc_id"
