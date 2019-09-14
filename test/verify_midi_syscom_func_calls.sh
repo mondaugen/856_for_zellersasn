@@ -1,6 +1,7 @@
 # This simply checks to see that only the scheduler increment is called when a
 # MIDI clock message is received and the other messages do nothing
 
+echo "Testing if only the MIDI clock message is responded to and other system common messages ignored"
 
 STORE_FAILED_FILE=/tmp/verify_midi_func_call_FAILED
 [ -z $MIDIDEV ] && MIDIDEV=hw:1,0,0
@@ -50,9 +51,9 @@ do
 
     echo "$cmd"
     rm -f "$STORE_FAILED_FILE"
-    arm-none-eabi-gdb \
+    arm-none-eabi-gdb --silent \
     --command scripts/gdb-load-symbols.script \
-    --command test/verify_midi_syscom_func_calls.gdb &
+    --command test/verify_midi_syscom_func_calls.gdb > /dev/null &
     gdb_proc_id="$!"
     sleep 1
     amidi -p $MIDIDEV -S "$cmd"

@@ -10,7 +10,7 @@ while [[ $n -lt $N_CC_FUNS ]]
 do
     rm -f "$STORE_PASSED_FILE"
     touch "$STORE_PASSED_FILE"
-    arm-none-eabi-gdb \
+    arm-none-eabi-gdb --silent \
     --command scripts/gdb-load-symbols.script \
     --eval-command 'set $GDB_cc_index='$n \
     --command test/verify_midi_cc_func_call.gdb > /dev/null &

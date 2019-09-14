@@ -3,7 +3,7 @@ passed=1
 
 rm -f "$STORE_PASSED_FILE"
 touch "$STORE_PASSED_FILE"
-arm-none-eabi-gdb \
+arm-none-eabi-gdb --silent \
 --command scripts/gdb-load-symbols.script \
 --command test/verify_midi_note_func_call.gdb > /dev/null &
 gdb_proc_id="$!"
