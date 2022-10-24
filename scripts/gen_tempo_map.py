@@ -9,8 +9,13 @@ MIN_TEMPO_BPM=get_env('MIN_TEMPO_BPM',10,int)
 MAX_TEMPO_BPM=get_env('MAX_TEMPO_BPM',60,int)
 BASE=2
 # We have 2 controls: coarse tempo and fine tempo
-# We therefore make a table with N_POINTS*N_POINTS points. The coarse index jumps by N_POINTS and the fine index jumps by 1 point
-n2_points=N_POINTS**2
+# We therefore make a table with N_POINTS*N_POINTS points. The coarse index
+# jumps by N_POINTS and the fine index jumps by 1 point
+# We need an extra N_POINTS at the end in the case that the coarse index
+# provided below is 1, in that case (if fine is 0), the index will be
+# N_POINTS // 2 + (N_POINTS*N_POINTS). As fine varies from -0.5 to 0.5, the
+# highest index possible is actually N_POINTS // 2 + (N_POINTS*N_POINTS) + N_POINTS // 2 = (N_POINTS+1)*N_POINTS
+n2_points=(N_POINTS+1)*N_POINTS + 1
 tempo_scale=(np.power(BASE,np.arange(n2_points)/n2_points)-1)/(BASE-1)
 tempi=MIN_TEMPO_BPM+(MAX_TEMPO_BPM-MIN_TEMPO_BPM)*tempo_scale
 coarse_index_offset=N_POINTS//2
@@ -41,7 +46,7 @@ s=complete_array(tempi,s)
 
 s+="""
 /*
-coarse in [0,1), fine in [0,1) 
+coarse in [0,1], fine in [0,1] 
 */
 static float
 tempo_map_table_lookup(float coarse, float fine)

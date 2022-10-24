@@ -196,7 +196,7 @@ static void synth_adc_gain_curParams_control(adc_channel_t *chan,
 
 
 static void synth_adc_tempo_control(adc_channel_t *chan,
-                                   adc_channel_do_data_t *data)
+                                    adc_channel_do_data_t *data)
 {
     if (synth_control_get_editingWhichParams() == 0) {
         SynthControlRecMode _recMode = synth_control_get_recMode();

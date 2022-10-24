@@ -158,7 +158,7 @@ inc/_gend_tempo_map_table_header.h : scripts/gen_tempo_map.py
 	PYTHONPATH=scripts \
     OUTFILE=$@ python3 scripts/gen_tempo_map.py
 
-$(HW_OBJS) : $(OBJSDIR)/%.o: hw/%.c
+$(HW_OBJS) : $(OBJSDIR)/%.o: hw/%.c $(OBJSDIR)
 	$(CC) -c $(CFLAGS) $< -o $@
 
 $(OBJS) : $(OBJSDIR)/%.o: %.c $(DEP) inc/version.h \

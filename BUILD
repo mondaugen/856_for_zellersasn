@@ -6,7 +6,16 @@ git submodule update
 
 The libraries will be cloned and checked out to the correct commits.
 
-Now you can build. You have to specify the version of the board, e.g.,
+Parts of the build use Python3. To make sure you have the correct packages, do
+
+virtualenv venv
+source venv/bin/activate
+# now you should be in a Python virtual environment
+# install the required libraries
+python3 -m pip install -r requirements.txt
+
+Now you can build. Stay in the virtual environment while building. You have to
+specify the version of the board, e.g.,
 
 BOARD_VERSION=BOARD_V2 make
 

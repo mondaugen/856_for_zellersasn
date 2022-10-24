@@ -16,3 +16,4 @@ inc/_gend_fwir_header.h
 __pycache__
 inc/_gend_tempo_map_table_header.h
 inc/version.h
+venv
