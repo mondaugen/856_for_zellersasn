@@ -117,8 +117,13 @@ all: $(OBJSDIR) $(OBJS) $(BIN)
 
 libs: mm_dsp mm_primitives ne_datastructures audio_limiter
 
+# mmmidi and mm_dsp_schablone's source files are compiled by this project (so we
+# don't call their Makefiles)
 #mmmidi:
 #	cd libs/mmmidi && $(MAKE)
+
+#mm_dsp_schablone:
+#	cd libs/mm_dsp_schablone && $(MAKE)
 
 mm_dsp:
 	cd libs/mm_dsp && $(MAKE) -f arm_cm4.mk
@@ -128,9 +133,6 @@ mm_primitives:
 
 ne_datastructures:
 	cd libs/ne_datastructures && $(MAKE) -f arm_cm4.mk
-
-#mm_dsp_schablone:
-#	cd libs/mm_dsp_schablone && $(MAKE)
 
 audio_limiter:
 	cd libs/audio_limiter && $(MAKE) -f arm_cm4.mk
