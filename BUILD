@@ -1,4 +1,9 @@
-Now all the external libraries are tracked using git-submodules.
+# BUILDING
+
+Not all compilers work, probably because the code has unsafe areas.
+Please install gcc-arm-none-eabi-8-2019-q3-update (https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-rm/downloads/8-2019q3-update)
+
+All the external libraries are tracked using git-submodules.
 When you first clone this repository, you have to do:
 
 git submodule init
