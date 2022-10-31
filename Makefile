@@ -215,7 +215,7 @@ reset: $(BIN)
 	$(OCD) -c init -c "reset run" -c shutdown
 
 clean:
-	rm -f $(BIN) objs/*.o test/*.o inc/_gend_fwir_header.h inc/_gend_tempo_map_table_header.h inc/version.h
+	rm -f $(BIN) objs/*.o test/*.o inc/_gend_fwir_header.h inc/_gend_tempo_map_table_header.h inc/version.h $(filter-out ./libs/CMSIS_5/% ./venv/%,$(shell find . -name '*.a' -or -name '*.o'))
 
 tags:
 	ctags -R . \

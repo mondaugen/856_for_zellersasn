@@ -17,3 +17,4 @@ __pycache__
 inc/_gend_tempo_map_table_header.h
 inc/version.h
 venv
+.config.local

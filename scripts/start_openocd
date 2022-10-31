@@ -1,4 +1,6 @@
-#! /bin/bash
+#!/bin/bash
+# Note: depending on the discovery board version, you may need to use
+# interface/stlink-v2-1.cfg
 if [ -z ${OPENOCD_INTERFACE} ]
 then
     OPENOCD_INTERFACE=interface/stlink-v2.cfg
