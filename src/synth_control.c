@@ -248,6 +248,21 @@ void synth_control_set_tempo_fine_norm(float param)
     update_lookup_tempo();
 }
 
+void synth_control_reset_tempo_scale_norm(void)
+{
+    set_tempo_scale(SYNTH_CONTROL_DEFAULT_TEMPOBPM_SCALE);
+    apply_tempo_scale();
+}
+
+// initialized in synth_control_reset_global_params()
+static float last_tempoBPM_scale;
+
+void synth_control_apply_last_tempoBPM_scale(void)
+{
+    set_tempo_scale(last_tempoBPM_scale);
+    apply_tempo_scale();
+}
+
 /* Param should be in [0,1) */
 void synth_control_set_tempo_scale_norm(float param)
 {
@@ -259,8 +274,8 @@ void synth_control_set_tempo_scale_norm(float param)
     if (_tmp < 0) {
         _tmp = 0;
     }
-    set_tempo_scale(tempoBPM_scale_table[_tmp]);
-    apply_tempo_scale();
+    last_tempoBPM_scale = tempoBPM_scale_table[_tmp];
+    synth_control_apply_last_tempoBPM_scale();
 }
 
 static void update_fade_rates(int note_param_idx);
@@ -1113,9 +1128,7 @@ void synth_control_reset_global_params(void)
 {
     noteDeltaFromBuffer = 0;
     editingWhichParams  = 0;
-    tempoBPM     = SYNTH_CONTROL_DEFAULT_TEMPOBPM_COARSE;
     tempoBPM_scale      = SYNTH_CONTROL_DEFAULT_TEMPOBPM_SCALE;
-    tempoBPM            = SYNTH_CONTROL_DEFAULT_TEMPOBPM;
     deltaButtonMode     = SynthControlDeltaButtonMode_EVENT_DELTA_FREE;
     recMode             = SynthControlRecMode_NORMAL;
     gainMode            = SynthControlGainMode_WET;
@@ -1124,6 +1137,9 @@ void synth_control_reset_global_params(void)
     schedulerState      = 0;
     editing_which_pitch = 0;
     pitchMode           = SYNTH_CONTROL_DEFAULT_PITCHMODE;
+    synth_control_set_tempo_coarse_norm(0.5);
+    synth_control_set_tempo_fine_norm(0.5);
+    last_tempoBPM_scale = SYNTH_CONTROL_DEFAULT_TEMPOBPM_SCALE;
 }
 
 void synth_control_setup(void)
@@ -1151,7 +1167,14 @@ void synth_control_set_editingWhichParams(
 void synth_control_set_deltaButtonMode(SynthControlDeltaButtonMode 
         deltaButtonMode_param)
 {
+    // If deltaButtonMode_param isn't quant, we don't want tempo scaling anymore
     deltaButtonMode = deltaButtonMode_param;
+    if (deltaButtonMode != SynthControlDeltaButtonMode_EVENT_DELTA_QUANT) {
+        synth_control_reset_tempo_scale_norm();
+    } else {
+        // reapply the last quant setting
+        synth_control_apply_last_tempoBPM_scale();
+    }
 }
 
 SynthControlDeltaButtonMode synth_control_get_deltaButtonMode(void)
