@@ -1151,7 +1151,16 @@ void synth_control_set_editingWhichParams(
 void synth_control_set_deltaButtonMode(SynthControlDeltaButtonMode 
         deltaButtonMode_param)
 {
+    static SynthControlDeltaButtonMode last_deltaButtonMode;
     deltaButtonMode = deltaButtonMode_param;
+    // If we return to quant mode on Note 1, then we reset the quant
+    // This is a convenience for users
+    if ((deltaButtonMode == SynthControlDeltaButtonMode_EVENT_DELTA_QUANT) &&
+        (synth_control_get_editingWhichParams() == 0) &&
+        (last_deltaButtonMode != deltaButtonMode)) {
+        synth_control_set_tempo_scale_norm(0.5);
+    }
+    last_deltaButtonMode = deltaButtonMode;
 }
 
 SynthControlDeltaButtonMode synth_control_get_deltaButtonMode(void)
