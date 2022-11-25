@@ -1102,6 +1102,14 @@ control. After you let go of FBK, the expression pedal should now control that k
 
 ## Version information
 
+## v1.7
+- Fixed bug whereby turning TMPO/REP to the max would make the device stop
+  advancing time
+- Tempo scaling goes from 4 times slower to 4 times faster
+    - The choices are more conveniently distributed around the knob
+    - leaving QUANT and returning to it resets the tempo scaling 
+      (with the FREE/QUANT/SKIP switch)
+
 ### v1.6
 
 - Documentation on choosing the MIDI channel makes it clear what switches should be manipulated.
