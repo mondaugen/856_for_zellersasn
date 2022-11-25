@@ -1102,7 +1102,7 @@ control. After you let go of FBK, the expression pedal should now control that k
 
 ## Version information
 
-## v1.7
+### v1.7
 - Fixed bug whereby turning TMPO/REP to the max would make the device stop
   advancing time
 - Tempo scaling goes from 4 times slower to 4 times faster
