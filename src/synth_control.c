@@ -1113,8 +1113,8 @@ void synth_control_reset_global_params(void)
 {
     noteDeltaFromBuffer = 0;
     editingWhichParams  = 0;
-    tempoBPM     = SYNTH_CONTROL_DEFAULT_TEMPOBPM_COARSE;
     tempoBPM_scale      = SYNTH_CONTROL_DEFAULT_TEMPOBPM_SCALE;
+    tempoBPM_prescale   = SYNTH_CONTROL_DEFAULT_TEMPOBPM / SYNTH_CONTROL_DEFAULT_TEMPOBPM_SCALE;
     tempoBPM            = SYNTH_CONTROL_DEFAULT_TEMPOBPM;
     deltaButtonMode     = SynthControlDeltaButtonMode_EVENT_DELTA_FREE;
     recMode             = SynthControlRecMode_NORMAL;

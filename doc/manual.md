@@ -245,9 +245,12 @@ If N1 is selected, turning the &#x394; knob counter-clock wise from centre
 multiplies the tempo by 1/2, 1/3, or 1/4 (1/4 at the extreme counter-clockwise
 position, i.e., the notes play 4 times _less_ frequently). Turning the other way
 multiplies the tempo by 2, 3, or 4. (4 in the fully clockwise position). When
-the knob is in the middle no tempo scaling occurs. To reset the tempo scaling to
-1, you can also switch to FREE or SKIP and then back to QUANT. In other words,
-when QUANT is switched into, the tempo scaling is reset to 1.
+the knob is in the middle no tempo scaling occurs.
+
+To reset the tempo scaling to 1, you can also switch to FREE or SKIP and then
+back to QUANT while N1 is selected. In other words, when QUANT is switched into
+when N1 is selected, the tempo scaling is reset to
+1.
 
 If N2 or N3 are selected, &#x394; controls the time between repeats as fractions
 of the loop length. From counter-clockwise to clockwise position, the fractions
