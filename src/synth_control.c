@@ -251,7 +251,7 @@ void synth_control_set_tempo_fine_norm(float param)
 /* Param should be in [0,1) */
 void synth_control_set_tempo_scale_norm(float param)
 {
-    int _tmp = (int)round(SYNTH_CONTROL_TEMPOBPM_SCALE_TABLE_LENGTH
+    int _tmp = (int)floor(SYNTH_CONTROL_TEMPOBPM_SCALE_TABLE_LENGTH
                             * param);
     if (_tmp >= SYNTH_CONTROL_TEMPOBPM_SCALE_TABLE_LENGTH) {
         _tmp = SYNTH_CONTROL_TEMPOBPM_SCALE_TABLE_LENGTH - 1;

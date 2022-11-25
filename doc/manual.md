@@ -249,8 +249,7 @@ the knob is in the middle no tempo scaling occurs.
 
 To reset the tempo scaling to 1, you can also switch to FREE or SKIP and then
 back to QUANT while N1 is selected. In other words, when QUANT is switched into
-when N1 is selected, the tempo scaling is reset to
-1.
+when N1 is selected, the tempo scaling is reset to 1.
 
 If N2 or N3 are selected, &#x394; controls the time between repeats as fractions
 of the loop length. From counter-clockwise to clockwise position, the fractions
@@ -1020,6 +1019,47 @@ Sets the amount the playback position in the sample moves each time N3
 plays (every beat). Like the POS knob when STRIDE/ABS/UNI is the in STRIDE
 position and N1/N2/N3 is in N3 position.
 </td>
+</tr>
+</table>
+
+#### MIDI Tempo scaling control change ranges
+
+<table border=1>
+<tr>
+<td> CC range </td>
+<td> scale value (divisor) </td>
+</tr>
+<tr>
+<td> [ 0 15] </td>
+<td> 4. </td>
+</tr>
+<tr>
+<td> [16 31] </td>
+<td> 3. </td>
+</tr>
+<tr>
+<td> [32 47] </td>
+<td> 2. </td>
+</tr>
+<tr>
+<td> [48 63] </td>
+<td> 1. </td>
+</tr>
+<tr>
+<td> [64 79] </td>
+<td> 1. </td>
+</tr>
+<tr>
+<td> [80 95] </td>
+<td> 1./2. </td>
+</tr>
+<tr>
+<td> [ 96 111] </td>
+<td> 1./3. </td>
+</tr>
+<tr>
+<td> [112 127] </td>
+<td> 1./4. </td>
 </tr>
 </table>
 
