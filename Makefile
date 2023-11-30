@@ -83,7 +83,7 @@ VPATH				    += :test
 CC 						 = arm-none-eabi-gcc
 STRIP					 = arm-none-eabi-strip
 OCD 		   			 = openocd -f $(OPENOCD_BOARD) -f $(OPENOCD_INTERFACE)
-PYTHON					 = python2
+PYTHON					 = python3
 CONST_OBJS				 = objs/tables.o
 HW_OBJS                  = $(addprefix $(OBJSDIR)/,$(notdir $(addsuffix .o, $(basename $(HW_SRC)))))
 

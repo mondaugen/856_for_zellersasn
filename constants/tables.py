@@ -4,8 +4,8 @@ import os
 
 # Compute free delta time values
 DELTA_TIME_FREE_TAB_LEN=65
-dtf_pts=[x/float(DELTA_TIME_FREE_TAB_LEN-1) for x in
-        xrange(DELTA_TIME_FREE_TAB_LEN)]
+dtf_pts=[(x+1)/float(DELTA_TIME_FREE_TAB_LEN) for x in
+        range(DELTA_TIME_FREE_TAB_LEN)]
 dtf_vls=[(math.pow(2.,-6*(1.-x)) - math.pow(2.,-6))/(1. - math.pow(2.,-6.))
             for x in dtf_pts]
 
