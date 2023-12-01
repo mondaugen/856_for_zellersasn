@@ -19,6 +19,7 @@ ifeq ($(filter /tmp/manual.zip /tmp/manual.html /tmp/env_ramp.png,$(MAKECMDGOALS
  endif
 endif
 
+OPENOCD					?= openocd
 OPENOCD_INTERFACE		?= interface/stlink-v2.cfg
 OPENOCD_BOARD			?= /usr/local/share/openocd/scripts/board/stm32f429discovery.cfg#board/stm32f429discovery.cfg
 OPTIMIZE				 ?= -O0
@@ -82,7 +83,7 @@ TESTS					 = $(addprefix $(TESTDIR)/,\
 VPATH				    += :test
 CC 						 = arm-none-eabi-gcc
 STRIP					 = arm-none-eabi-strip
-OCD 		   			 = openocd -f $(OPENOCD_BOARD) -f $(OPENOCD_INTERFACE)
+OCD 		   			 = $(OPENOCD) $(OPENOCD_EXTRA) -f $(OPENOCD_BOARD) -f $(OPENOCD_INTERFACE)
 PYTHON					 = python3
 CONST_OBJS				 = objs/tables.o
 HW_OBJS                  = $(addprefix $(OBJSDIR)/,$(notdir $(addsuffix .o, $(basename $(HW_SRC)))))
